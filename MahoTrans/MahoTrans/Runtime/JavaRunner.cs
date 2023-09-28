@@ -121,7 +121,13 @@ public class JavaRunner
         var frame = thread.ActiveFrame!;
         ref var pointer = ref frame.Pointer;
         var code = frame.Method.LinkedCode;
-        var instr = code[frame.Pointer];
+#if DEBUG
+        if (pointer < 0 || pointer >= code.Length)
+        {
+            throw new JavaRuntimeError($"Instruction pointer was out of range ({pointer}) in {frame.Method}");
+        }
+#endif
+        var instr = code[pointer];
         var args = instr.Data;
         switch (instr.Opcode)
         {
