@@ -12,6 +12,7 @@ public class EventQueue : Thread
     [JavaIgnore] private Queue<Reference> _events = new();
     [JavaIgnore] private object _lock = new();
 
+    [JavaIgnore]
     public void Enqueue<T>(Action<T> setup) where T : Event
     {
         lock (_lock)

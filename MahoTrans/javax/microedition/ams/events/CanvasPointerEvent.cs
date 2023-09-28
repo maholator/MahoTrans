@@ -21,10 +21,8 @@ public abstract class CanvasPointerEvent : Event
         Y = y;
     }
 
-    protected abstract string callbackName { get; }
-
-    [JavaDescriptor("()V")]
-    public JavaMethodBody invoke(JavaClass cls)
+    [JavaIgnore]
+    public JavaMethodBody GenerateBridge(JavaClass cls, string callbackName)
     {
         return new JavaMethodBody(1, 1)
         {
