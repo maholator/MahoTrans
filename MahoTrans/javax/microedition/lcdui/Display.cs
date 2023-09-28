@@ -1,3 +1,5 @@
+using java.lang;
+using javax.microedition.ams.events;
 using javax.microedition.midlet;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -36,5 +38,10 @@ public class Display : Object
             Toolkit.Display.Current = null;
         else
             Toolkit.Display.Current = Heap.Resolve<Displayable>(d).Handle;
+    }
+
+    public void callSerially([JavaType(typeof(Runnable))] Reference r)
+    {
+        Heap.State.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
     }
 }
