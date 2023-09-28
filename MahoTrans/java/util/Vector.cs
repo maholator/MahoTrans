@@ -47,4 +47,12 @@ public class Vector : Object
     public void trimToSize()
     {
     }
+
+    [return: JavaType(typeof(Enumeration))]
+    public Reference elements()
+    {
+        var e = Heap.AllocateObject<VectorEnumerator>();
+        e.Vector = This;
+        return e.This;
+    }
 }
