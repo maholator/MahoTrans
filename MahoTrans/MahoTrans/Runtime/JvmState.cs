@@ -129,7 +129,7 @@ public class JvmState
     public void RunInContext(Action action)
     {
         if (Object.HeapAttached)
-            throw new JavaRuntimeError("THis thread already has attached context!");
+            throw new JavaRuntimeError("This thread already has attached context!");
 
         try
         {
@@ -140,6 +140,17 @@ public class JvmState
         {
             Object.DetachHeap();
         }
+    }
+
+    public void RunInContextIfNot(Action action)
+    {
+        if (Object.HeapAttached)
+        {
+            action();
+            return;
+        }
+
+        RunInContext(action);
     }
 
     public Method GetMethod(NameDescriptorClass descriptor, bool @static)
@@ -298,9 +309,13 @@ public class JvmState
         {
             if (_eventQueue != null)
                 return _eventQueue;
-            _eventQueue = new EventQueue();
-            _eventQueue.start();
-            return _eventQueue;
+            RunInContextIfNot(() =>
+            {
+                _eventQueue = Heap.AllocateObject<EventQueue>();
+                _eventQueue.Jvm = this;
+                _eventQueue.start();
+            });
+            return _eventQueue!;
         }
     }
 

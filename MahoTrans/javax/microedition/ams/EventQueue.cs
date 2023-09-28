@@ -12,15 +12,20 @@ public class EventQueue : Thread
     [JavaIgnore] private Queue<Reference> _events = new();
     [JavaIgnore] private object _lock = new();
 
+    /// <summary>
+    /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
+    /// </summary>
+    [JavaIgnore] public JvmState Jvm = null!;
+
     [JavaIgnore]
     public void Enqueue<T>(Action<T> setup) where T : Event
     {
         lock (_lock)
         {
-            var e = Heap.AllocateObject<T>();
+            var e = Jvm.Heap.AllocateObject<T>();
             setup.Invoke(e);
             _events.Enqueue(e.This);
-            Heap.State.Attach(JavaThread!.ThreadId);
+            Jvm.Attach(JavaThread.ThreadId);
         }
     }
 
@@ -31,7 +36,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
             {
                 // no more events
-                Heap.State.Detach(JavaThread);
+                Jvm.Detach(JavaThread);
                 // it will stay detached until Enqueue is called.
             }
             // if there are more events - do nothing

@@ -9,6 +9,7 @@ namespace MahoTrans.Runtime;
 public class JavaThread
 {
     private static int _roller = 1;
+
     /// <summary>
     /// Frames stack on this thread. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead.
     /// </summary>
@@ -140,6 +141,9 @@ public class JavaThread
 
     public static JavaThread CreateReal(Thread thread, JvmState state)
     {
+        if (thread.This.IsNull)
+            throw new JavaRuntimeError("Attempt to launch thread which is created not in java heap.");
+
         var method = state.GetVirtualMethod(state.GetVirtualPointer(new NameDescriptor("run", "()V")), thread.This);
 
         var f = new Frame(method.JavaBody);

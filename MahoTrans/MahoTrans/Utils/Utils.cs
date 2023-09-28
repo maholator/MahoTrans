@@ -23,4 +23,6 @@ public static class Utils
     /// <param name="t">Type to get name from.</param>
     /// <returns>Name where dots are replaced with slashes.</returns>
     public static string ToJavaName(this Type t) => t.FullName!.Replace('.', '/');
+
+    public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
 }

@@ -30,7 +30,7 @@ public abstract class CanvasPointerEvent : Event
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
-                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas).ToJavaName(),
+                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas).ToJavaDescriptor(),
                         typeof(CanvasPointerEvent).ToJavaName())).Split()),
                 new Instruction(JavaOpcode.invokevirtual,
                     cls.PushConstant(new NameDescriptor(callbackName, "(II)V")).Split())
