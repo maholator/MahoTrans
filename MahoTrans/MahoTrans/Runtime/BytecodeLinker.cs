@@ -330,11 +330,8 @@ public static class BytecodeLinker
                 }
                 case JavaOpcode.invokevirtual:
                 {
-                    var ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var nd = ndc.Descriptor;
-                    data = new VirtualPointer(jvm.GetVirtualPointer(nd), DescriptorUtils.ParseMethodArgsCount(nd.Descriptor));
+                    data = LinkVirtualCall(jvm, consts, args);
                     break;
-                    // same for interface
                 }
                 case JavaOpcode.invokespecial:
                 case JavaOpcode.invokestatic:
@@ -356,10 +353,7 @@ public static class BytecodeLinker
                 }
                 case JavaOpcode.invokeinterface:
                 {
-                    // same for virtual
-                    var ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var nd = ndc.Descriptor;
-                    data = new VirtualPointer(jvm.GetVirtualPointer(nd), DescriptorUtils.ParseMethodArgsCount(nd.Descriptor));
+                    data = LinkVirtualCall(jvm, consts, args);
                     break;
                 }
                 case JavaOpcode.invokedynamic:
@@ -419,6 +413,29 @@ public static class BytecodeLinker
         }
 
         return output;
+    }
+
+    private static object LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
+    {
+        object data;
+        var ndc = consts[Combine(args[0], args[1])];
+        NameDescriptor nd;
+        switch (ndc)
+        {
+            case NameDescriptor r:
+                nd = r;
+                break;
+            case NameDescriptorClass c:
+                nd = c.Descriptor;
+                break;
+            default:
+                throw new JavaLinkageException(
+                    $"Argument for virtual call was not a descriptor object but {ndc.GetType()}");
+        }
+
+        data = new VirtualPointer(jvm.GetVirtualPointer(nd),
+            DescriptorUtils.ParseMethodArgsCount(nd.Descriptor));
+        return data;
     }
 
     private static int Combine(byte indexByte1, byte indexByte2)
