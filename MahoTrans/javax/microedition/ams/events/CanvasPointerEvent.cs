@@ -24,16 +24,24 @@ public abstract class CanvasPointerEvent : Event
     [JavaIgnore]
     public JavaMethodBody GenerateBridge(JavaClass cls, string callbackName)
     {
-        return new JavaMethodBody(1, 1)
+        var thisName = typeof(CanvasPointerEvent).ToJavaName();
+        return new JavaMethodBody(3, 1)
         {
             RawCode = new Instruction[]
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
                     cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas).ToJavaDescriptor(),
-                        typeof(CanvasPointerEvent).ToJavaName())).Split()),
+                        thisName)).Split()),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.getfield,
+                    cls.PushConstant(new NameDescriptorClass("X", "I", thisName)).Split()),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.getfield,
+                    cls.PushConstant(new NameDescriptorClass("Y", "I", thisName)).Split()),
                 new Instruction(JavaOpcode.invokevirtual,
-                    cls.PushConstant(new NameDescriptor(callbackName, "(II)V")).Split())
+                    cls.PushConstant(new NameDescriptor(callbackName, "(II)V")).Split()),
+                new Instruction(JavaOpcode.@return)
             }
         };
     }
