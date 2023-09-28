@@ -438,7 +438,7 @@ public static class BytecodeLinker
         return data;
     }
 
-    private static int Combine(byte indexByte1, byte indexByte2)
+    public static int Combine(byte indexByte1, byte indexByte2)
     {
         var u = (ushort)((indexByte1 << 8) | indexByte2);
         var s = (short)u;

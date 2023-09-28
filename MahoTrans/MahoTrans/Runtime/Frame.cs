@@ -257,7 +257,7 @@ public class Frame
     #region Locals
 
     /// <summary>
-    /// Pops a value from stack, checks its type and stores into local variable.
+    /// Pops a value from stack and stores into local variable.
     /// </summary>
     /// <param name="index">Local index.</param>
     public void PopToLocal(int index)
@@ -266,6 +266,11 @@ public class Frame
         LocalVariables[index] = v;
     }
 
+    /// <summary>
+    /// Pushes value from local variables. No checks are performed.
+    /// </summary>
+    /// <param name="index">Index of local variable.</param>
+    /// <param name="size">True, if value is long or double.</param>
     public void PushFromLocal(int index, bool size) => PushUnchecked(LocalVariables[index], size);
 
     #endregion

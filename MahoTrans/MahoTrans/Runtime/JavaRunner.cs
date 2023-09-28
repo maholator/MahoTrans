@@ -1134,6 +1134,7 @@ public class JavaRunner
                     caller.Pointer++;
                     caller.PushInt(returnee);
                 }
+
                 break;
             }
             case JavaOpcode.lreturn:
@@ -1146,6 +1147,7 @@ public class JavaRunner
                     caller.Pointer++;
                     caller.PushLong(returnee);
                 }
+
                 break;
             }
             case JavaOpcode.freturn:
@@ -1158,6 +1160,7 @@ public class JavaRunner
                     caller.Pointer++;
                     caller.PushFloat(returnee);
                 }
+
                 break;
             }
             case JavaOpcode.dreturn:
@@ -1170,6 +1173,7 @@ public class JavaRunner
                     caller.Pointer++;
                     caller.PushDouble(returnee);
                 }
+
                 break;
             }
             case JavaOpcode.areturn:
@@ -1182,6 +1186,7 @@ public class JavaRunner
                     caller.Pointer++;
                     caller.PushReference(returnee);
                 }
+
                 break;
             }
             case JavaOpcode.@return:
@@ -1192,6 +1197,7 @@ public class JavaRunner
                 {
                     caller.Pointer++;
                 }
+
                 break;
             }
             case JavaOpcode.getstatic:
@@ -1319,56 +1325,55 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.wide:
-                //TODO wtf is going here?
-                throw new JavaRuntimeError("wide opcode");
-                /*
-                 var op = (JavaOpcode)args[0];
+                var aargs = (byte[])args;
+                var op = (JavaOpcode)aargs[0];
                 if (op == JavaOpcode.iinc)
                 {
-                    var i = (int)frame.LocalVariables[Combine(args[0], args[1])];
-                    i += Combine(args[2], args[3]);
-                    frame.LocalVariables[args[0]] = i;
+                    var index = BytecodeLinker.Combine(aargs[1], aargs[2]);
+                    var i = (int)frame.LocalVariables[index];
+                    i += BytecodeLinker.Combine(aargs[3], aargs[4]);
+                    frame.LocalVariables[index] = i;
                 }
                 else
                 {
-                    var i = Combine(args[0], args[1]);
+                    var i = BytecodeLinker.Combine(aargs[1], aargs[2]);
                     switch (op)
                     {
                         case JavaOpcode.aload:
-                            frame.PushFromLocal(i);
+                            frame.PushFromLocal(i, false);
                             break;
                         case JavaOpcode.iload:
-                            frame.PushFromLocal(i);
+                            frame.PushFromLocal(i, false);
                             break;
                         case JavaOpcode.lload:
-                            frame.PushFromLocal(i);
+                            frame.PushFromLocal(i, true);
                             break;
                         case JavaOpcode.fload:
-                            frame.PushFromLocal(i);
+                            frame.PushFromLocal(i, false);
                             break;
                         case JavaOpcode.dload:
-                            frame.PushFromLocal(i);
+                            frame.PushFromLocal(i, true);
                             break;
                         case JavaOpcode.astore:
-                            frame.PopToLocal<Reference>(i);
+                            frame.PopToLocal(i);
                             break;
                         case JavaOpcode.istore:
-                            frame.PopToLocal<int>(i);
+                            frame.PopToLocal(i);
                             break;
                         case JavaOpcode.lstore:
-                            frame.PopToLocal<long>(i);
+                            frame.PopToLocal(i);
                             break;
                         case JavaOpcode.fstore:
-                            frame.PopToLocal<float>(i);
+                            frame.PopToLocal(i);
                             break;
                         case JavaOpcode.dstore:
-                            frame.PopToLocal<double>(i);
+                            frame.PopToLocal(i);
                             break;
                         default:
                             throw new JavaRuntimeError($"Invalid wide opcode {op}");
                     }
                 }
-*/
+
                 pointer++;
                 break;
             case JavaOpcode.multianewarray:
