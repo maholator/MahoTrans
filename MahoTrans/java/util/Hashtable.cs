@@ -7,8 +7,7 @@ namespace java.util;
 
 public class Hashtable : Object
 {
-    [JavaIgnore] 
-    private Dictionary<Reference, Reference> _storage = new();
+    [JavaIgnore] private Dictionary<Reference, Reference> _storage = new();
 
     [InitMethod]
     public void Init()
@@ -48,5 +47,28 @@ public class Hashtable : Object
         if (_storage.Remove(key, out var p))
             return p;
         return Reference.Null;
+    }
+
+    public int size() => _storage.Count;
+    public bool isEmpty() => _storage.Count != 0;
+
+    public void rehash()
+    {
+    }
+
+    [return: JavaType(typeof(Enumeration))]
+    public Reference keys()
+    {
+        var e = Heap.AllocateObject<ArrayEnumerator>();
+        e.Value = _storage.Keys.ToArray();
+        return e.This;
+    }
+
+    [return: JavaType(typeof(Enumeration))]
+    public Reference elements()
+    {
+        var e = Heap.AllocateObject<ArrayEnumerator>();
+        e.Value = _storage.Values.ToArray();
+        return e.This;
     }
 }
