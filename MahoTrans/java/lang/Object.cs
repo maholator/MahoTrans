@@ -134,13 +134,8 @@ public class Object
         var mw = Waiters[^1];
         Waiters.RemoveAt(Waiters.Count - 1);
 
-        if (Heap.State.WaitingThreads.Remove(mw.MonitorOwner, out var th))
-        {
-            // waking the thread up
-            Heap.State.AliveThreads.Add(th);
-            // that's all, wait method contuation will do all further work.
+        if (Heap.State.Attach(mw.MonitorOwner))
             return;
-        }
 
         throw new JavaRuntimeError($"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
     }
@@ -152,13 +147,9 @@ public class Object
 
         foreach (var mw in Waiters)
         {
-            if (!Heap.State.WaitingThreads.Remove(mw.MonitorOwner, out var th))
-            {
+            if (!Heap.State.Attach(mw.MonitorOwner))
                 throw new JavaRuntimeError(
                     $"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
-            }
-
-            Heap.State.AliveThreads.Add(th);
         }
 
         Waiters.Clear();

@@ -216,8 +216,11 @@ public class JvmState
     /// Registers a thread in this JVM.
     /// </summary>
     /// <param name="thread">Thread, ready to run.</param>
-    public void RegisterThread(JavaThread thread)
+    public void RegisterThread(JavaThread? thread)
     {
+        if (thread is null)
+            throw new NullReferenceException("Attempt to register null thread.");
+
         Console.WriteLine("Thread registered!");
         AliveThreads.Add(thread);
     }
@@ -226,7 +229,9 @@ public class JvmState
     {
         lock (_threadPoolSwitchLock)
         {
-            AliveThreads.Remove(thread);
+            if (!AliveThreads.Remove(thread))
+                throw new JavaRuntimeError($"Attempt to detach {thread} which is not attached.");
+
             WaitingThreads.Add(thread.ThreadId, thread);
         }
     }
@@ -240,9 +245,9 @@ public class JvmState
     {
         lock (_threadPoolSwitchLock)
         {
-            if (Heap.State.WaitingThreads.Remove(id, out var th))
+            if (WaitingThreads.Remove(id, out var th))
             {
-                Heap.State.AliveThreads.Add(th);
+                AliveThreads.Add(th);
                 return true;
             }
 
