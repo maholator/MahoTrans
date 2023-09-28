@@ -13,4 +13,11 @@ public class Connector : Object
         Heap.Throw<IOException>();
         return default;
     }
+
+    [return: JavaType(typeof(Connection))]
+    public static Reference open([String] Reference name, int mode)
+    {
+        Heap.Throw<IOException>();
+        return default;
+    }
 }
