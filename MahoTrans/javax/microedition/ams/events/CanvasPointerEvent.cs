@@ -31,8 +31,7 @@ public abstract class CanvasPointerEvent : Event
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
-                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas).ToJavaDescriptor(),
-                        thisName)).Split()),
+                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas), thisName)).Split()),
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
                     cls.PushConstant(new NameDescriptorClass("X", "I", thisName)).Split()),

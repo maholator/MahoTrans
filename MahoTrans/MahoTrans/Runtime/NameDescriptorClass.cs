@@ -1,3 +1,5 @@
+using MahoTrans.Utils;
+
 namespace MahoTrans.Runtime;
 
 public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
@@ -5,9 +7,27 @@ public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
     public readonly NameDescriptor Descriptor;
     public readonly string ClassName;
 
+    /// <summary>
+    /// Constructs arbitrary reference to member.
+    /// </summary>
+    /// <param name="name">Name.</param>
+    /// <param name="descriptor">Java descriptor.</param>
+    /// <param name="className">Containing class name.</param>
     public NameDescriptorClass(string name, string descriptor, string className)
     {
         Descriptor = new NameDescriptor(name, descriptor);
+        ClassName = className;
+    }
+
+    /// <summary>
+    /// Constructs reference to a field.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <param name="className">Containing class name.</param>
+    public NameDescriptorClass(string name, Type type, string className)
+    {
+        Descriptor = new NameDescriptor(name, type.ToJavaDescriptor());
         ClassName = className;
     }
 
