@@ -40,7 +40,7 @@ public class Method
 
     public override string ToString()
     {
-        var s = $"{Descriptor}";
+        var s = $"{Class.Name}::{Descriptor}";
 
         if (IsNative)
             return $"{s} (native)";

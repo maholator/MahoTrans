@@ -272,6 +272,6 @@ public class Frame
 
     public override string ToString()
     {
-        return $"{Method.Method.Class}:{Method.Method.Descriptor}:{Pointer}";
+        return $"{Method}:{Pointer}";
     }
 }
