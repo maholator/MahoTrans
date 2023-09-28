@@ -184,27 +184,26 @@ public class JvmState
 
     public sbyte[]? GetResource(string name)
     {
+        Console.WriteLine($"Looking for resource {name}...");
         if (name.StartsWith('/'))
         {
-            if (_resources.TryGetValue(name.Substring(1), out var blob))
-            {
-                var copy = new sbyte[blob.Length];
-                for (int i = 0; i < blob.Length; i++)
-                {
-                    //TODO
-                    copy[i] = (sbyte)blob[i];
-                }
+            name = name.Substring(1);
+        }
 
-                return copy;
+        if (_resources.TryGetValue(name, out var blob))
+        {
+            var copy = new sbyte[blob.Length];
+            for (int i = 0; i < blob.Length; i++)
+            {
+                //TODO
+                copy[i] = (sbyte)blob[i];
             }
 
-            return null;
-        }
-        else
-        {
-            //TODO
+            Console.WriteLine($"Returning buffer of {blob.Length} bytes.");
+            return copy;
         }
 
+        Console.WriteLine("Returning null!");
         return null;
     }
 
