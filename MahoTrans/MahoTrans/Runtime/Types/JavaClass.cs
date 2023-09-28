@@ -70,10 +70,14 @@ public class JavaClass
     {
         if (this == type)
             return true;
+
+        var name = type.Name;
         JavaClass jc = this;
         while (true)
         {
             if (jc.Super == type)
+                return true;
+            if (jc.Interfaces.Contains(name))
                 return true;
             if (jc.Super.IsObject)
                 return false;
