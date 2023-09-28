@@ -1,0 +1,102 @@
+using MahoTrans;
+using MahoTrans.Native;
+using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
+
+namespace java.lang;
+
+public sealed class String : Object
+{
+    [JavaIgnore] public string Value = null!;
+
+    [InitMethod]
+    [JavaDescriptor("([B)V")]
+    public void InitBytes(Reference arr)
+    {
+        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned();
+        Value = buf.DecodeDefault();
+    }
+
+    public int length()
+    {
+        return Value.Length;
+    }
+
+    public bool startsWith([JavaType(typeof(String))] Reference s)
+    {
+        var other = Heap.ResolveString(s);
+        return Value.StartsWith(other);
+    }
+
+    public bool endsWith([JavaType(typeof(String))] Reference s)
+    {
+        var other = Heap.ResolveString(s);
+        return Value.EndsWith(other);
+    }
+
+    public char charAt(int i)
+    {
+        return Value[i];
+    }
+
+    [JavaDescriptor("(Ljava/lang/Object;)Ljava/lang/String;")]
+    public static JavaMethodBody valueOf(JavaClass @class)
+    {
+        return new JavaMethodBody
+        {
+            LocalsCount = 1,
+            StackSize = 1,
+            Code = new Instruction[]
+            {
+                new Instruction(0, JavaOpcode.aload_0),
+                new Instruction(1, JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
+                        .Split()),
+                new Instruction(4, JavaOpcode.areturn)
+            }
+        };
+    }
+
+    [return: String]
+    public static Reference valueOf(int v) => Heap.AllocateString(v.ToString());
+
+    [return: String]
+    public static Reference valueOf(long v) => Heap.AllocateString(v.ToString());
+
+    [JavaDescriptor("()[B")]
+    public Reference getBytes()
+    {
+        var data = Value.EncodeDefault().ToSigned();
+        return Heap.AllocateArray(data);
+    }
+
+    [return: JavaType(typeof(String))]
+    public Reference toString() => This;
+
+    public bool equals(Reference r)
+    {
+        var obj = Heap.ResolveObject(r);
+        if (obj is String s)
+        {
+            return s.Value == Value;
+        }
+
+        return false;
+    }
+
+    public int indexOf(int c) => Value.IndexOf((char)c);
+    public int indexOf(int c, int from) => Value.IndexOf((char)c, from);
+
+    [return: String]
+    public Reference substring(int from)
+    {
+        return Heap.AllocateString(Value.Substring(from));
+    }
+
+    [return: String]
+    public Reference substring(int from, int to)
+    {
+        return Heap.AllocateString(Value.Substring(from, to - from));
+    }
+}

@@ -1,0 +1,53 @@
+using MahoTrans.Native;
+using MahoTrans.Runtime;
+using Object = java.lang.Object;
+
+namespace javax.microedition.lcdui;
+
+public class Font : Object
+{
+    [JavaIgnore] public FontFace Face;
+
+    [JavaIgnore] public FontStyle Style;
+
+    [JavaIgnore] public FontSize Size;
+
+    [JavaIgnore] public int Height;
+
+    [return: JavaType(typeof(Font))]
+    public static Reference getFont(int face, int style, int size)
+    {
+        //TODO checks
+        var font = Heap.AllocateObject<Font>();
+        font.Face = (FontFace)face;
+        font.Style = (FontStyle)style;
+        font.Size = (FontSize)size;
+        font.Height = Toolkit.Display.GetFontHeight(font.Size);
+        return font.This;
+    }
+
+    [return: JavaType(typeof(Font))]
+    public static Reference getDefaultFont()
+    {
+        var font = Heap.AllocateObject<Font>();
+        font.Face = 0;
+        font.Style = 0;
+        font.Size = FontSize.Medium;
+        font.Height = Toolkit.Display.GetFontHeight(font.Size);
+        return font.This;
+    }
+
+    public int getHeight() => Height;
+
+    public int getSize() => (int)Size;
+
+    public int stringWidth([String] Reference str)
+    {
+        return Toolkit.Display.GetCharsWidth(Face, Style, Height, Heap.ResolveString(str));
+    }
+
+    public int charWidth(char c)
+    {
+        return Toolkit.Display.GetCharWidth(Face, Style, Height, c);
+    }
+}
