@@ -19,14 +19,14 @@ public class JvmState
     /// List of all threads, attached to scheduler. Anyone can append threads here at any time.
     /// Threads must be removed only by themselves during execution, else behaviour is undefined.
     /// </summary>
-    public readonly List<JavaThread> AliveThreads = new();
+    public readonly List<JavaThread> AliveThreads = new(256);
 
     /// <summary>
     /// Threads which are detached from scheduler. For example, waiting for object notify or timeout.
     /// </summary>
     public readonly Dictionary<int, JavaThread> WaitingThreads = new();
 
-    private readonly object _threadPoolSwitchLock = new();
+    private readonly object _threadPoolLock = new();
 
     private readonly Dictionary<string, byte[]> _resources = new();
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
@@ -222,12 +222,15 @@ public class JvmState
             throw new NullReferenceException("Attempt to register null thread.");
 
         Console.WriteLine("Thread registered!");
-        AliveThreads.Add(thread);
+        lock (_threadPoolLock)
+        {
+            AliveThreads.Insert(AliveThreads.Count, thread);
+        }
     }
 
     public void Detach(JavaThread thread)
     {
-        lock (_threadPoolSwitchLock)
+        lock (_threadPoolLock)
         {
             if (!AliveThreads.Remove(thread))
                 throw new JavaRuntimeError($"Attempt to detach {thread} which is not attached.");
@@ -243,11 +246,11 @@ public class JvmState
     /// <returns>False, if thread was not in waiting pool. Thread state is undefined in such state.</returns>
     public bool Attach(int id)
     {
-        lock (_threadPoolSwitchLock)
+        lock (_threadPoolLock)
         {
             if (WaitingThreads.Remove(id, out var th))
             {
-                AliveThreads.Add(th);
+                AliveThreads.Insert(AliveThreads.Count, th);
                 return true;
             }
 
@@ -266,39 +269,25 @@ public class JvmState
         {
             _running = true;
             var count = AliveThreads.Count;
-            while (_running)
+            while (_running && count > 0)
             {
-                var allAlive = true;
-
                 for (int i = count - 1; i >= 0; i--)
                 {
                     var thread = AliveThreads[i];
-                    if (thread.ActiveFrame != null)
-                        JavaRunner.Step(thread, this);
-                    else
-                        allAlive = false;
-                }
+                    if (thread == null!)
+                    {
+                        Console.WriteLine(
+                            $"Null thread in the list at {i}! Cached count is {count}, real is {AliveThreads.Count}");
+                        continue;
+                    }
 
-                var newCount = AliveThreads.Count;
-                if (allAlive || count != newCount)
-                {
-                    // new thread launched or nobody ended yet
-                    // going one more cycle
-                    count = newCount;
-                    continue;
-                }
-
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (AliveThreads[i].ActiveFrame == null)
+                    if (thread.ActiveFrame == null)
                         AliveThreads.RemoveAt(i);
+                    else
+                        JavaRunner.Step(thread, this);
                 }
 
-                newCount = AliveThreads.Count;
-                if (newCount == 0)
-                    return;
-
-                count = newCount;
+                count = AliveThreads.Count;
             }
         });
     }
@@ -316,6 +305,7 @@ public class JvmState
                 return _eventQueue;
             RunInContextIfNot(() =>
             {
+                Console.WriteLine("Starting queue processor...");
                 _eventQueue = Heap.AllocateObject<EventQueue>();
                 _eventQueue.Jvm = this;
                 _eventQueue.start();
