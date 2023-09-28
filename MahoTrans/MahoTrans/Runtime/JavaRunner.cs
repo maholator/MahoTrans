@@ -1128,40 +1128,70 @@ public class JavaRunner
             {
                 var returnee = frame.PopInt();
                 thread.Pop();
-                thread.ActiveFrame.PushInt(returnee);
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushInt(returnee);
+                }
                 break;
             }
             case JavaOpcode.lreturn:
             {
                 var returnee = frame.PopLong();
                 thread.Pop();
-                thread.ActiveFrame.PushLong(returnee);
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushLong(returnee);
+                }
                 break;
             }
             case JavaOpcode.freturn:
             {
                 var returnee = frame.PopFloat();
                 thread.Pop();
-                thread.ActiveFrame.PushFloat(returnee);
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushFloat(returnee);
+                }
                 break;
             }
             case JavaOpcode.dreturn:
             {
                 var returnee = frame.PopDouble();
                 thread.Pop();
-                thread.ActiveFrame.PushDouble(returnee);
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushDouble(returnee);
+                }
                 break;
             }
             case JavaOpcode.areturn:
             {
                 var returnee = frame.PopReference();
                 thread.Pop();
-                thread.ActiveFrame.PushReference(returnee);
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushReference(returnee);
+                }
                 break;
             }
             case JavaOpcode.@return:
             {
                 thread.Pop();
+                var caller = thread.ActiveFrame;
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                }
                 break;
             }
             case JavaOpcode.getstatic:
@@ -1176,19 +1206,15 @@ public class JavaRunner
             }
             case JavaOpcode.invokevirtual:
                 CallVirtual(args, frame, thread, state);
-                pointer++;
                 break;
             case JavaOpcode.invokespecial:
                 CallMethod((Method)args, false, frame, thread, state);
-                pointer++;
                 break;
             case JavaOpcode.invokestatic:
                 CallMethod((Method)args, true, frame, thread, state);
-                pointer++;
                 break;
             case JavaOpcode.invokeinterface:
                 CallVirtual(args, frame, thread, state);
-                pointer++;
                 break;
             case JavaOpcode.invokedynamic:
                 throw new JavaRuntimeError("Dynamic invoke is not supported");
@@ -1643,6 +1669,8 @@ public class JavaRunner
         if (m.Bridge != null)
         {
             m.Bridge(frame);
+            // we are done with the call, so going to next instruction
+            frame.Pointer++;
             return;
         }
 
