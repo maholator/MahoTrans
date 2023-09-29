@@ -162,6 +162,11 @@ public class Object
         return Heap.AllocateString($"Object {JavaClass} @ {GetHashCode()}");
     }
 
+    public bool equals(Reference r)
+    {
+        return r == This;
+    }
+
     [return: JavaType(typeof(Class))]
     public Reference getClass()
     {
