@@ -20,9 +20,37 @@ public class StringBuffer : Object
     }
 
     [return: JavaType(typeof(StringBuffer))]
+    public Reference append(bool z)
+    {
+        _buffer.AddRange(z ? "true" : "false");
+        return This;
+    }
+
+    [return: JavaType(typeof(StringBuffer))]
+    public Reference append(char c)
+    {
+        _buffer.Add(c);
+        return This;
+    }
+
+    [return: JavaType(typeof(StringBuffer))]
     public Reference append([String] Reference s)
     {
         _buffer.AddRange(Heap.ResolveString(s));
+        return This;
+    }
+
+    [return: JavaType(typeof(StringBuffer))]
+    public Reference append(double d)
+    {
+        _buffer.AddRange(d.ToString());
+        return This;
+    }
+
+    [return: JavaType(typeof(StringBuffer))]
+    public Reference append(float f)
+    {
+        _buffer.AddRange(f.ToString());
         return This;
     }
 
@@ -39,12 +67,8 @@ public class StringBuffer : Object
         _buffer.AddRange(l.ToString());
         return This;
     }
-    [return: JavaType(typeof(StringBuffer))]
-    public Reference append(char c)
-    {
-        _buffer.Add(c);
-        return This;
-    }
+
+    public int length() => _buffer.Count;
 
     [return: String]
     public Reference toString()
