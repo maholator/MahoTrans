@@ -252,7 +252,7 @@ public static class BytecodeLinker
 
                     int count = (high - low + 1);
                     int[] d = new int[3 + count];
-                    d[0] = def;
+                    d[0] = offsets[def + instruction.Offset];
                     d[1] = low;
                     d[2] = high;
 
@@ -278,7 +278,7 @@ public static class BytecodeLinker
                     i += 4; //count
 
                     int[] d = new int[2 + count * 2];
-                    d[0] = def;
+                    d[0] = offsets[def + instruction.Offset];
                     d[1] = count;
                     for (int j = 0; j < count; j++)
                     {
