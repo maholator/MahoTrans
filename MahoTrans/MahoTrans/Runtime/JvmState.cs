@@ -296,6 +296,32 @@ public class JvmState
         _running = false;
     }
 
+    /// <summary>
+    /// Same as <see cref="Execute"/>, but only one operation for each thread. Use to go step-by-step.
+    /// </summary>
+    public void SpinOnce()
+    {
+        RunInContext(() =>
+        {
+            var count = AliveThreads.Count;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                var thread = AliveThreads[i];
+                if (thread == null!)
+                {
+                    Console.WriteLine(
+                        $"Null thread in the list at {i}! Cached count is {count}, real is {AliveThreads.Count}");
+                    continue;
+                }
+
+                if (thread.ActiveFrame == null)
+                    AliveThreads.RemoveAt(i);
+                else
+                    JavaRunner.Step(thread, this);
+            }
+        });
+    }
+
     public EventQueue EventQueue
     {
         get
