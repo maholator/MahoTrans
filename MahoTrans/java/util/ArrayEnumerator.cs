@@ -1,3 +1,4 @@
+using MahoTrans.Native;
 using MahoTrans.Runtime;
 using Object = java.lang.Object;
 
@@ -5,7 +6,7 @@ namespace java.util;
 
 public class ArrayEnumerator : Object, Enumeration
 {
-    public Reference[] Value;
+    [JavaIgnore] public Reference[] Value;
     public int index;
 
     public bool hasMoreElements()
