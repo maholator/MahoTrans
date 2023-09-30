@@ -1,3 +1,4 @@
+using java.lang;
 using java.util;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -88,16 +89,37 @@ public class RecordStore : Object
         return Toolkit.RecordStore.GetCount(Heap.ResolveString(storeName));
     }
 
-    void getRecord(int id)
+    [return: JavaType("[B")]
+    public Reference getRecord(int recordId)
     {
+        CheckNotClosed();
+        var buf = Toolkit.RecordStore.GetRecord(Heap.ResolveString(storeName), recordId);
+        if (buf == null)
+            Heap.Throw<InvalidRecordIDException>();
+        return Heap.AllocateArray(buf);
     }
 
-    void getRecord()
+    public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
     {
+        CheckNotClosed();
+        var arr = Heap.ResolveArray<sbyte>(buf);
+        var r = Toolkit.RecordStore.GetRecord(Heap.ResolveString(storeName), recordId);
+        if (r == null)
+            Heap.Throw<InvalidRecordIDException>();
+        if (r.Length + offset > arr.Length)
+            Heap.Throw<ArrayIndexOutOfBoundsException>();
+        r.CopyTo(arr, offset);
+        return r.Length;
     }
 
-    void getRecordSize()
+    public int getRecordSize(int recordId)
     {
+        CheckNotClosed();
+        var size = Toolkit.RecordStore.GetSize(Heap.ResolveString(storeName), recordId);
+        if (size.HasValue)
+            return size.Value;
+        Heap.Throw<InvalidRecordIDException>();
+        return 0;
     }
 
     public int getSize()

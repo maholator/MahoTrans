@@ -18,15 +18,17 @@ public interface IRecordStore
 
     bool DeleteStore(string name);
 
-    int AddRecord(string name, byte[] data, int offset, int count);
+    int AddRecord(string name, sbyte[] data, int offset, int count);
 
     void DeleteRecord(string name, int id);
 
     int GetSize(string name);
 
-    byte[]? GetRecord(string name, int id);
+    int? GetSize(string name, int id);
 
-    void SetRecord(string name, int id, byte[] data, int offset, int count);
+    sbyte[]? GetRecord(string name, int id);
+
+    void SetRecord(string name, int id, sbyte[] data, int offset, int count);
 
     int GetNextId(string name);
 
