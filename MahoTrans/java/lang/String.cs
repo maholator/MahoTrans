@@ -40,30 +40,6 @@ public sealed class String : Object
         return Value[i];
     }
 
-    [JavaDescriptor("(Ljava/lang/Object;)Ljava/lang/String;")]
-    public static JavaMethodBody valueOf(JavaClass @class)
-    {
-        return new JavaMethodBody
-        {
-            LocalsCount = 1,
-            StackSize = 1,
-            Code = new Instruction[]
-            {
-                new Instruction(0, JavaOpcode.aload_0),
-                new Instruction(1, JavaOpcode.invokevirtual,
-                    @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
-                        .Split()),
-                new Instruction(4, JavaOpcode.areturn)
-            }
-        };
-    }
-
-    [return: String]
-    public static Reference valueOf(int v) => Heap.AllocateString(v.ToString());
-
-    [return: String]
-    public static Reference valueOf(long v) => Heap.AllocateString(v.ToString());
-
     [JavaDescriptor("()[B")]
     public Reference getBytes()
     {
@@ -86,6 +62,7 @@ public sealed class String : Object
     }
 
     public int indexOf(int c) => Value.IndexOf((char)c);
+
     public int indexOf(int c, int from) => Value.IndexOf((char)c, from);
 
     [return: String]
@@ -99,4 +76,53 @@ public sealed class String : Object
     {
         return Heap.AllocateString(Value.Substring(from, to - from));
     }
+
+    #region valueOf
+
+    [return: String]
+    public static Reference valueOf(bool v) => Heap.AllocateString(v ? "true" : "false");
+
+    [return: String]
+    public static Reference valueOf(char v) => Heap.AllocateString(v.ToString());
+
+    [return: String]
+    public static Reference valueOf([JavaType("[C")] Reference charArr) =>
+        Heap.AllocateString(new string(Heap.ResolveArray<char>(charArr)));
+
+    [return: String]
+    public static Reference valueOf([JavaType("[C")] Reference charArr, int from, int count) =>
+        Heap.AllocateString(new string(Heap.ResolveArray<char>(charArr), from, count));
+
+
+    [return: String]
+    public static Reference valueOf(double v) => Heap.AllocateString(v.ToString());
+
+    [return: String]
+    public static Reference valueOf(float v) => Heap.AllocateString(v.ToString());
+
+    [return: String]
+    public static Reference valueOf(int v) => Heap.AllocateString(v.ToString());
+
+    [return: String]
+    public static Reference valueOf(long v) => Heap.AllocateString(v.ToString());
+
+    [JavaDescriptor("(Ljava/lang/Object;)Ljava/lang/String;")]
+    public static JavaMethodBody valueOf(JavaClass @class)
+    {
+        return new JavaMethodBody
+        {
+            LocalsCount = 1,
+            StackSize = 1,
+            Code = new Instruction[]
+            {
+                new Instruction(0, JavaOpcode.aload_0),
+                new Instruction(1, JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
+                        .Split()),
+                new Instruction(4, JavaOpcode.areturn)
+            }
+        };
+    }
+
+    #endregion
 }
