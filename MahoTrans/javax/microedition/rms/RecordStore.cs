@@ -1,3 +1,4 @@
+using java.util;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkit;
@@ -20,8 +21,24 @@ public class RecordStore : Object
     {
     }
 
-    void addRecordListener()
+    public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
+        Vector vector;
+        if (listeners.IsNull)
+        {
+            vector = Heap.AllocateObject<Vector>();
+            vector.Init();
+            listeners = vector.This;
+        }
+        else
+        {
+            vector = Heap.Resolve<Vector>(listeners);
+        }
+
+        if (!vector.contains(listener))
+        {
+            vector.addElement(listener);
+        }
     }
 
     void closeRecordStore()
@@ -88,8 +105,12 @@ public class RecordStore : Object
     {
     }
 
-    void removeRecordListener()
+    public void removeRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
+        if (listeners.IsNull)
+            return;
+        var vector = Heap.Resolve<Vector>(listener);
+        vector.removeElement(listener);
     }
 
     void setMode()
