@@ -5,6 +5,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.rms;
@@ -19,8 +20,43 @@ public class RecordStore : Object
 
     [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
 
-    void addRecord()
+    [JavaDescriptor("([BII)V")]
+    public JavaMethodBody addRecord(JavaClass cls)
     {
+        var impl = cls.PushConstant(new NameDescriptorClass(nameof(AddRecordInternal), "(I[BII)V",
+            typeof(RecordStore).ToJavaName()));
+        var code = new Instruction[]
+        {
+            // calling actual method
+            new Instruction(JavaOpcode.aload_1),
+            new Instruction(JavaOpcode.iload_2),
+            new Instruction(JavaOpcode.iload_3),
+            new Instruction(JavaOpcode.invokespecial, impl.Split()),
+            // ID will be here at the stack root
+            // it didn't fail? Now events:
+            new Instruction(JavaOpcode.iload_1),
+            new Instruction(JavaOpcode.istore, new byte[] { 5 }),
+        };
+        return new JavaMethodBody(4, 9)
+        {
+            RawCode = code
+                .Concat(GenerateListenersCalls(cls, "recordAdded"))
+                .Append(new Instruction(JavaOpcode.ireturn))
+                .ToArray()
+        };
+    }
+
+    public int AddRecordInternal([JavaType("[B")] Reference data, int offset, int count)
+    {
+        CheckNotClosed();
+        var name = Heap.ResolveString(storeName);
+        if (count == 0)
+        {
+            return Toolkit.RecordStore.AddRecord(name, Array.Empty<sbyte>(), 0, 0);
+        }
+
+        var arr = Heap.ResolveArray<sbyte>(data);
+        return Toolkit.RecordStore.AddRecord(name, arr, offset, count);
     }
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
@@ -62,8 +98,9 @@ public class RecordStore : Object
     {
     }
 
-    void enumerateRecords()
+    public void enumerateRecords()
     {
+        throw new NotImplementedException();
     }
 
     public long getLastModified()
@@ -193,12 +230,42 @@ public class RecordStore : Object
         vector.removeElement(listener);
     }
 
-    void setMode()
+    public void setMode(int authmode, bool writeable)
     {
+        //TODO
     }
 
-    void setRecord()
+    [JavaDescriptor("(I[BII)V")]
+    public JavaMethodBody setRecord(JavaClass cls)
     {
+        var impl = cls.PushConstant(new NameDescriptorClass(nameof(SetRecordInternal), "(I[BII)V",
+            typeof(RecordStore).ToJavaName()));
+        var code = new Instruction[]
+        {
+            // calling actual method
+            new Instruction(JavaOpcode.iload_1),
+            new Instruction(JavaOpcode.aload_2),
+            new Instruction(JavaOpcode.iload_3),
+            new Instruction(JavaOpcode.iload, new byte[] { 4 }),
+            new Instruction(JavaOpcode.invokespecial, impl.Split()),
+            // it didn't fail? Now events:
+            new Instruction(JavaOpcode.iload_1),
+            new Instruction(JavaOpcode.istore, new byte[] { 5 }),
+        };
+        return new JavaMethodBody(3, 9)
+        {
+            RawCode = code
+                .Concat(GenerateListenersCalls(cls, "recordChanged"))
+                .Append(new Instruction(JavaOpcode.@return))
+                .ToArray()
+        };
+    }
+
+    public void SetRecordInternal(int recordId, [JavaType("[B")] Reference newData, int offset, int count)
+    {
+        CheckNotClosed();
+        var arr = Heap.ResolveArray<sbyte>(newData);
+        Toolkit.RecordStore.SetRecord(Heap.ResolveString(storeName), recordId, arr, offset, count);
     }
 
     #region Utils
