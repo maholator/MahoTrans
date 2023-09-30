@@ -6,7 +6,7 @@ namespace java.lang;
 [JavaIgnore]
 public class Array<T> : Array where T : struct
 {
-    [JavaIgnore] public T[] Value;
+    [JavaIgnore] public T[] Value = null!;
 
     public override ClrArray BaseValue => Value;
 }
