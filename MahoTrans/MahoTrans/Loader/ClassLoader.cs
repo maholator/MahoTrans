@@ -154,9 +154,15 @@ public static class ClassLoader
                     consts[i] = consts[strRef.Index];
                     break;
                 case NameTypeReference ntRef:
-                    consts[i] = new NameDescriptor(consts[ntRef.NameIndex] as string,
-                        consts[ntRef.DescrIndex] as string);
+                {
+                    var name = consts[ntRef.NameIndex] as string ??
+                               throw new JavaLinkageException("Name part of descriptor was not a string");
+                    var d = consts[ntRef.DescriptorIndex] as string ??
+                            throw new JavaLinkageException("Descriptor part of descriptor was not a string");
+                    consts[i] = new NameDescriptor(name,
+                        d);
                     break;
+                }
             }
         }
 
@@ -171,8 +177,16 @@ public static class ClassLoader
             }
             else if (@const is MemberReference mr)
             {
-                var nt = (NameDescriptor)consts[mr.NameTypeIndex];
-                linkedConsts[i] = new NameDescriptorClass(nt, (string)consts[mr.ClassIndex]);
+                var ntb = consts[mr.NameTypeIndex];
+                if (ntb is not NameDescriptor nt)
+                {
+                    throw new JavaLinkageException($"ND part for NDC was not a ND (constant #{mr.NameTypeIndex})");
+                }
+
+                var cls = consts[mr.ClassIndex] as string ??
+                          throw new JavaLinkageException(
+                              $"Class name part for NDC was not a string (constant #{mr.ClassIndex})");
+                linkedConsts[i] = new NameDescriptorClass(nt, cls);
             }
             else
             {
@@ -186,8 +200,12 @@ public static class ClassLoader
     private static void ReadInfo(JavaClass rc, BeBinaryReader reader)
     {
         rc.Flags = (ClassFlags)reader.ReadInt16();
-        rc.Name = rc.Constants[reader.ReadInt16()] as string;
-        rc.SuperName = rc.Constants[reader.ReadInt16()] as string;
+        var clsNameIndex = reader.ReadInt16();
+        rc.Name = rc.Constants[clsNameIndex] as string ??
+                  throw new JavaLinkageException($"Class name was not a string (constant #{clsNameIndex})");
+        var clsSuper = reader.ReadInt16();
+        rc.SuperName = rc.Constants[clsSuper] as string ??
+                       throw new JavaLinkageException($"Class super was not a string (constant #{clsSuper})");
     }
 
     private static void ReadInterfaces(JavaClass rc, BeBinaryReader reader)
@@ -196,7 +214,9 @@ public static class ClassLoader
         var a = new string[count];
         for (int i = 0; i < count; i++)
         {
-            a[i] = rc.Constants[reader.ReadInt16()] as string;
+            var ii = reader.ReadInt16();
+            a[i] = rc.Constants[ii] as string ??
+                   throw new JavaLinkageException($"Interface name was not a string (constant #{ii})");
         }
 
         rc.Interfaces = a;
@@ -209,13 +229,12 @@ public static class ClassLoader
         for (int i = 0; i < count; i++)
         {
             var flags = (FieldFlags)reader.ReadInt16();
-            var name = rc.Constants[reader.ReadInt16()] as string;
-            var descr = rc.Constants[reader.ReadInt16()] as string;
+            var nd = ReadMemberND(reader, rc.Constants);
             var attrsCount = reader.ReadInt16();
             var attrs = new JavaAttribute[attrsCount];
             for (int j = 0; j < attrsCount; j++)
             {
-                string attrType = rc.Constants[reader.ReadInt16()] as string;
+                string attrType = ReadAttributeName(reader, rc.Constants);
                 int len = reader.ReadInt32();
                 attrs[j] = new JavaAttribute(attrType)
                 {
@@ -223,7 +242,7 @@ public static class ClassLoader
                 };
             }
 
-            a[i] = new Field(new NameDescriptor(name, descr), flags)
+            a[i] = new Field(nd, flags)
             {
                 Attributes = attrs
             };
@@ -239,15 +258,14 @@ public static class ClassLoader
         for (int i = 0; i < count; i++)
         {
             var flags = (MethodFlags)reader.ReadInt16();
-            var name = rc.Constants[reader.ReadInt16()] as string;
-            var descr = rc.Constants[reader.ReadInt16()] as string;
-            Method m = new(new NameDescriptor(name, descr), flags, rc);
+            var nd = ReadMemberND(reader, rc.Constants);
+            Method m = new(nd, flags, rc);
             int attrsCount = reader.ReadInt16();
             List<JavaAttribute> attrs = new(attrsCount);
 
             for (int j = 0; j < attrsCount; j++)
             {
-                string attrType = rc.Constants[reader.ReadInt16()] as string;
+                string attrType = ReadAttributeName(reader, rc.Constants);
                 int len = reader.ReadInt32();
                 byte[] data = reader.ReadBytes(len);
                 if (attrType.Equals("Code"))
@@ -271,6 +289,32 @@ public static class ClassLoader
         rc.Methods = a.ToDictionary(x => x.Descriptor, x => x);
     }
 
+    private static string ReadAttributeName(BeBinaryReader stream, object[] consts)
+    {
+        var attrNameIndex = stream.ReadInt16();
+        if (consts[attrNameIndex] is string attrType)
+            return attrType;
+        throw new JavaLinkageException($"Attribute name was not a string (constant #{attrNameIndex})");
+    }
+
+    private static NameDescriptor ReadMemberND(BeBinaryReader stream, object[] consts)
+    {
+        var nameIndex = stream.ReadInt16();
+        var descriptorIndex = stream.ReadInt16();
+
+        if (consts[nameIndex] is not string name)
+        {
+            throw new JavaLinkageException($"Member name was not a string (constant #{nameIndex})");
+        }
+
+        if (consts[descriptorIndex] is not string descriptor)
+        {
+            throw new JavaLinkageException($"Member descriptor was not a string (constant #{descriptorIndex})");
+        }
+
+        return new NameDescriptor(name, descriptor);
+    }
+
     private static string ReadUtf(BeBinaryReader stream)
     {
         int len = stream.ReadInt16();
@@ -278,9 +322,8 @@ public static class ClassLoader
         return data.DecodeJavaUnicode();
     }
 
-    
 
-    private static JavaMethodBody ReadCode(byte[] data, object?[] consts)
+    private static JavaMethodBody ReadCode(byte[] data, object[] consts)
     {
         using (MemoryStream ms = new MemoryStream(data, false))
         {
@@ -301,7 +344,7 @@ public static class ClassLoader
                 var attrs = new JavaAttribute[attrLen];
                 for (int i = 0; i < attrLen; i++)
                 {
-                    string attrType = consts[r.ReadInt16()] as string;
+                    string attrType = ReadAttributeName(r, consts);
                     int alen = r.ReadInt32();
                     attrs[i] = new JavaAttribute(attrType)
                     {
@@ -410,12 +453,12 @@ public static class ClassLoader
     private class NameTypeReference
     {
         public readonly short NameIndex;
-        public readonly short DescrIndex;
+        public readonly short DescriptorIndex;
 
         public NameTypeReference(BeBinaryReader stream)
         {
             NameIndex = stream.ReadInt16();
-            DescrIndex = stream.ReadInt16();
+            DescriptorIndex = stream.ReadInt16();
         }
     }
 
