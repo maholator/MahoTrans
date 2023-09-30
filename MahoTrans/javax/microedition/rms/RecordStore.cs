@@ -1,7 +1,6 @@
 using java.util;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkit;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -64,20 +63,29 @@ public class RecordStore : Object
     {
     }
 
-    void getLastModified()
+    public long getLastModified()
     {
+        CheckNotClosed();
+        return modifiedAt;
     }
 
-    void getName()
+    [return: String]
+    public Reference getName()
     {
+        CheckNotClosed();
+        return storeName;
     }
 
-    void getNextRecordID()
+    public int getNextRecordID()
     {
+        CheckNotClosed();
+        return Toolkit.RecordStore.GetNextId(Heap.ResolveString(storeName));
     }
 
-    void getNumRecords()
+    public int getNumRecords()
     {
+        CheckNotClosed();
+        return Toolkit.RecordStore.GetCount(Heap.ResolveString(storeName));
     }
 
     void getRecord(int id)
@@ -92,12 +100,15 @@ public class RecordStore : Object
     {
     }
 
-    void getSize()
+    public int getSize()
     {
+        CheckNotClosed();
+        return Toolkit.RecordStore.GetSize(Heap.ResolveString(storeName));
     }
 
-    void getSizeAvailable()
+    public int getSizeAvailable()
     {
+        throw new NotImplementedException();
     }
 
     public int getVersion() => version;
@@ -105,7 +116,10 @@ public class RecordStore : Object
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference listRecordStores()
     {
-        return Toolkit.RecordStore.ListStores().ToHeap(Heap);
+        var stores = Toolkit.RecordStore.ListStores();
+        if (stores.Length == 0)
+            return Reference.Null;
+        return stores.ToHeap(Heap);
     }
 
     [return: JavaType(typeof(RecordStore))]

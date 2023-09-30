@@ -7,7 +7,7 @@ public interface IRecordStore
     string[] ListStores();
 
     /// <summary>
-    /// Checks can the store be opened. Marks that this store is opened.
+    /// Checks can the store be opened.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="createIfNotExists"></param>
@@ -24,9 +24,11 @@ public interface IRecordStore
 
     int GetSize(string name);
 
-    int GetSize(string name, int id);
-
-    byte[] GetRecord(string name, int id);
+    byte[]? GetRecord(string name, int id);
 
     void SetRecord(string name, int id, byte[] data, int offset, int count);
+
+    int GetNextId(string name);
+
+    int GetCount(string name);
 }
