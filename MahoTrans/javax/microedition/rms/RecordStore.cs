@@ -41,8 +41,15 @@ public class RecordStore : Object
         }
     }
 
-    void closeRecordStore()
+    public void closeRecordStore()
     {
+        CheckNotClosed();
+        openCount--;
+        Toolkit.RecordStore.CloseStore(Heap.ResolveString(storeName));
+        if (openCount == 0)
+        {
+            listeners = Reference.Null;
+        }
     }
 
     void deleteRecord()
@@ -155,4 +162,14 @@ public class RecordStore : Object
     void setRecord()
     {
     }
+
+    #region Utils
+
+    private void CheckNotClosed()
+    {
+        if (openCount == 0)
+            Heap.Throw<RecordStoreNotOpenException>();
+    }
+
+    #endregion
 }
