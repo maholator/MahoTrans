@@ -279,4 +279,9 @@ public class Frame
     {
         return $"{Method}:{Pointer}";
     }
+
+    public long[] DumpStack()
+    {
+        return _stack.Take(StackTop).ToArray();
+    }
 }
