@@ -1,4 +1,5 @@
 using System.Text;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.Utils;
 
@@ -52,4 +53,15 @@ public static class JavaConversions
     public static string DecodeUTF8(this byte[] data) => Encoding.UTF8.GetString(data);
 
     public static byte[] EncodeUTF8(this string data) => Encoding.UTF8.GetBytes(data);
+
+    public static Reference ToHeap(this string[] list, JavaHeap heap)
+    {
+        Reference[] r = new Reference[list.Length];
+        for (int i = 0; i < r.Length; i++)
+        {
+            r[i] = heap.AllocateString(list[i]);
+        }
+
+        return heap.AllocateArray(r);
+    }
 }
