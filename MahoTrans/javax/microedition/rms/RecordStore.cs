@@ -93,7 +93,7 @@ public class RecordStore : Object
     {
     }
 
-    int getVersion() => version;
+    public int getVersion() => version;
 
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference listRecordStores()
