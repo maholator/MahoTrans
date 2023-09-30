@@ -1,7 +1,9 @@
 using java.lang;
 using java.util;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -205,6 +207,68 @@ public class RecordStore : Object
     {
         if (openCount == 0)
             Heap.Throw<RecordStoreNotOpenException>();
+    }
+
+    /// <summary>
+    /// Generates code for calling listeners. Embed this directly to record operation.
+    /// This expects store object at slot 0 and record index at slot 5.
+    /// Slot 6, 7 and 8 will be used - do not touch them.
+    /// </summary>
+    /// <param name="cls">Class from bytecode generator.</param>
+    /// <param name="eventName">Event to invoke.</param>
+    /// <returns>Code fragment.</returns>
+    /// <remarks>
+    /// <list type="bullet">
+    /// <listheader>Locals:</listheader>
+    /// <item>0 - this</item>
+    /// <item>1 - free</item>
+    /// <item>2 - free</item>
+    /// <item>3 - free</item>
+    /// <item>4 - free</item>
+    /// <item>5 - record ID</item>
+    /// <item>6 - used (vector)</item>
+    /// <item>7 - used (vector size)</item>
+    /// <item>8 - used (index)</item>
+    /// </list>
+    /// This must enter with <b>empty</b> stack. This fragment does not return. Stack will be left empty.
+    /// </remarks>
+    private Instruction[] GenerateListenersCalls(JavaClass cls, string eventName)
+    {
+        var lf = cls.PushConstant(new NameDescriptorClass(nameof(listeners), typeof(Vector), typeof(RecordStore)));
+        var vs = cls.PushConstant(new NameDescriptor(nameof(Vector.size), "()I"));
+        var vg = cls.PushConstant(new NameDescriptor(nameof(Vector.elementAt), "(I)Ljava/lang/Object;"));
+        var ev = cls.PushConstant(new NameDescriptor(eventName, $"({typeof(RecordStore).ToJavaDescriptor()}I)V"));
+        return new Instruction[]
+        {
+            // stack is empty
+            new Instruction(JavaOpcode.aload_0),
+            new Instruction(JavaOpcode.getfield, lf.Split()),
+            new Instruction(JavaOpcode.dup),
+            // vector > vector
+            new Instruction(JavaOpcode.invokevirtual, vs.Split()),
+            new Instruction(JavaOpcode.istore, new byte[] { 7 }), // size = vector.size()
+            new Instruction(JavaOpcode.astore, new byte[] { 6 }), // vector = vector
+            new Instruction(JavaOpcode.iconst_0),
+            new Instruction(JavaOpcode.astore, new byte[] { 8 }), // i = 0
+            // stack is empty
+            new Instruction(JavaOpcode.@goto, 19.Split()), // while (i<size)
+            // loop begin
+            new Instruction(JavaOpcode.aload, new byte[] { 6 }),
+            new Instruction(JavaOpcode.iload, new byte[] { 8 }),
+            // vector > index
+            new Instruction(JavaOpcode.invokevirtual, vg.Split()), // vector.elemAt(i)
+            new Instruction(JavaOpcode.aload_0),
+            new Instruction(JavaOpcode.iload, new byte[] { 5 }),
+            // listener > store > id
+            new Instruction(JavaOpcode.invokevirtual, ev.Split()), // event call
+            new Instruction(JavaOpcode.iinc, new byte[] { 8, 1 }), // i++
+            // loop condition
+            new Instruction(JavaOpcode.iload, new byte[] { 8 }),
+            new Instruction(JavaOpcode.iload, new byte[] { 7 }),
+            // i > size
+            new Instruction(JavaOpcode.if_icmplt, (-20).Split()),
+            // loop end
+        };
     }
 
     #endregion
