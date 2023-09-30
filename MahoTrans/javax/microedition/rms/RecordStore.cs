@@ -1,13 +1,19 @@
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkit;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace javax.microedition.rms;
 
 public class RecordStore : Object
 {
-    [JavaIgnore] private string storeName;
+    private Reference storeName;
+    private int openCount;
+    private Reference listeners;
+    private int version;
+    private long modifiedAt;
+
     [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
 
     void addRecord()
@@ -70,12 +76,12 @@ public class RecordStore : Object
     {
     }
 
-    void getVersion()
-    {
-    }
+    int getVersion() => version;
 
-    static void listRecordStores()
+    [return: JavaType("[Ljava/lang/String;")]
+    public static Reference listRecordStores()
     {
+        return Toolkit.RecordStore.ListStores().ToHeap(Heap);
     }
 
     static void openRecordStore()
