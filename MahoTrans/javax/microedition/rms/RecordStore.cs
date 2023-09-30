@@ -101,8 +101,43 @@ public class RecordStore : Object
         return Toolkit.RecordStore.ListStores().ToHeap(Heap);
     }
 
-    static void openRecordStore()
+    [return: JavaType(typeof(RecordStore))]
+    public static Reference openRecordStore([String] Reference name, bool create)
     {
+        return openRecordStore(name, create, 0, false);
+    }
+
+    [return: JavaType(typeof(RecordStore))]
+    public static Reference openRecordStore([String] Reference name, bool create, int authMode, bool writable)
+    {
+        var nameStr = Heap.ResolveString(name);
+        if (openedStores.TryGetValue(nameStr, out var opened))
+        {
+            var store = Heap.Resolve<RecordStore>(opened);
+            store.openCount++;
+            return opened;
+        }
+
+        if (Toolkit.RecordStore.OpenStore(nameStr, create))
+        {
+            var store = Heap.AllocateObject<RecordStore>();
+            store.openCount = 1;
+            store.storeName = name;
+            openedStores.Add(nameStr, store.This);
+            return store.This;
+        }
+
+        Heap.Throw<RecordStoreNotFoundException>();
+        return Reference.Null;
+    }
+
+    [return: JavaType(typeof(RecordStore))]
+    public static Reference openRecordStore([String] Reference name, [String] Reference vendorName,
+        [String] Reference midletName)
+    {
+        //TODO
+        Heap.Throw<RecordStoreException>();
+        return Reference.Null;
     }
 
     public void removeRecordListener([JavaType(typeof(RecordListener))] Reference listener)
@@ -119,18 +154,5 @@ public class RecordStore : Object
 
     void setRecord()
     {
-    }
-
-    [return: JavaType(typeof(RecordStore))]
-    public static Reference openRecordStore([String] Reference name, bool create)
-    {
-        return Reference.Null;
-        /*
-                var item = Toolkit.RecordStore.Open(Heap.ResolveString(name), create);
-                if (item == null)
-                    Heap.Throw<RecordStoreNotFoundException>();
-                var record = Heap.AllocateObject<RecordStore>();
-                record._entry = item;
-                return record.This;*/
     }
 }
