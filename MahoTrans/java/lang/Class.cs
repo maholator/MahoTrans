@@ -7,7 +7,10 @@ namespace java.lang;
 
 public class Class : Object
 {
-    [JavaIgnore] public JavaClass JavaClass = null!;
+    /// <summary>
+    /// JVM-side version of this object.
+    /// </summary>
+    [JavaIgnore] public JavaClass InternalClass = null!;
 
     [return: JavaType(typeof(Class))]
     public static Reference forName([String] Reference r)
@@ -16,14 +19,14 @@ public class Class : Object
         if (!Heap.State.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
             Heap.Throw<ClassNotFoundException>();
         var cls = Heap.AllocateObject<Class>();
-        cls.JavaClass = jc!;
+        cls.InternalClass = jc!;
         return cls.This;
     }
 
     [return: String]
     public Reference getName()
     {
-        var name = JavaClass.Name.Replace('/', '.');
+        var name = InternalClass.Name.Replace('/', '.');
         return Heap.AllocateString(name);
     }
 

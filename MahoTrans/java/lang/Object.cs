@@ -10,7 +10,12 @@ namespace java.lang;
 public class Object
 {
     [JavaIgnore] public int HeapAddress;
+
+    /// <summary>
+    /// Reference to java class, which this object is instance of.
+    /// </summary>
     [JavaIgnore] public JavaClass JavaClass = null!;
+
     [JavaIgnore] [ThreadStatic] private static JavaHeap? _heap;
     [JavaIgnore] public int MonitorOwner;
     [JavaIgnore] public uint MonitorReEnterCount;
@@ -171,7 +176,7 @@ public class Object
     public Reference getClass()
     {
         var cls = Heap.AllocateObject<Class>();
-        cls.JavaClass = JavaClass;
+        cls.InternalClass = JavaClass;
         return cls.This;
     }
 }
