@@ -38,6 +38,11 @@ public class JavaRunner
         var frame = thread.ActiveFrame!;
         var t = state.Heap.Resolve<Throwable>(ex.Throwable);
         Console.WriteLine($"Catching {t.JavaClass.Name}");
+        Console.WriteLine("Call stack:");
+        for (int i = thread.ActiveFrameIndex; i >= 0; i--)
+        {
+            Console.WriteLine(thread.CallStack[i]);
+        }
 
         if (HandleException(frame, frame.Pointer, t, state))
         {
