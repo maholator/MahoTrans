@@ -61,17 +61,7 @@ public class RecordStore : Object
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
-        Vector vector;
-        if (listeners.IsNull)
-        {
-            vector = Heap.AllocateObject<Vector>();
-            vector.Init();
-            listeners = vector.This;
-        }
-        else
-        {
-            vector = Heap.Resolve<Vector>(listeners);
-        }
+        Vector vector = Heap.Resolve<Vector>(listeners);
 
         if (!vector.contains(listener))
         {
@@ -86,7 +76,7 @@ public class RecordStore : Object
         Toolkit.RecordStore.CloseStore(Heap.ResolveString(storeName));
         if (openCount == 0)
         {
-            listeners = Reference.Null;
+            Heap.Resolve<Vector>(listeners).removeAllElements();
         }
     }
 
@@ -205,6 +195,9 @@ public class RecordStore : Object
             var store = Heap.AllocateObject<RecordStore>();
             store.openCount = 1;
             store.storeName = name;
+            var vec = Heap.AllocateObject<Vector>();
+            vec.Init();
+            store.listeners = vec.This;
             openedStores.Add(nameStr, store.This);
             return store.This;
         }
