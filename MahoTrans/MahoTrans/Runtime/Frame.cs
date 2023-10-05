@@ -5,12 +5,12 @@ public class Frame
     public JavaMethodBody Method;
     public int Pointer;
     public long[] LocalVariables;
-    private long[] _stack;
+    public long[] Stack;
 
     /// <summary>
-    /// True means that entry is double-sized.
+    /// Types of values on stack
     /// </summary>
-    public bool[] StackSizes;
+    public PrimitiveType[] StackTypes;
 
     public int StackTop;
 
@@ -18,8 +18,8 @@ public class Frame
     {
         Method = method;
         LocalVariables = new long[method.LocalsCount];
-        _stack = new long[method.StackSize];
-        StackSizes = new bool[method.StackSize];
+        Stack = new long[method.StackSize];
+        StackTypes = new PrimitiveType[method.StackSize];
     }
 
     public void Reinitialize(JavaMethodBody method)
@@ -29,8 +29,8 @@ public class Frame
         if (Method != method)
         {
             Method = method;
-            _stack = new long[method.StackSize];
-            StackSizes = new bool[method.StackSize];
+            Stack = new long[method.StackSize];
+            StackTypes = new PrimitiveType[method.StackSize];
             LocalVariables = new long[method.LocalsCount];
         }
     }
@@ -44,22 +44,27 @@ public class Frame
     /// </summary>
     /// <param name="value">Value to push.</param>
     /// <param name="size">True if value is long or double.</param>
-    public void PushUnchecked(long value, bool size)
+    public void PushUnchecked(long value, PrimitiveType type)
     {
-        _stack[StackTop] = value;
-        StackSizes[StackTop] = size;
+        Stack[StackTop] = value;
+        StackTypes[StackTop] = type;
         StackTop++;
     }
 
     public long Pop()
     {
         StackTop--;
-        return _stack[StackTop];
+        return Stack[StackTop];
     }
 
     public bool IsDoubleSizedPopped()
     {
-        return StackSizes[StackTop];
+        return (StackTypes[StackTop] & PrimitiveType.IsDouble) != 0;
+    }
+
+    public PrimitiveType GetPoppedType()
+    {
+        return StackTypes[StackTop];
     }
 
     #endregion
@@ -129,23 +134,23 @@ public class Frame
 
     #region Type-specific pushes
 
-    public void PushInt(int value) => PushUnchecked(value, false);
+    public void PushInt(int value) => PushUnchecked(value, PrimitiveType.Int);
 
-    public void PushLong(long value) => PushUnchecked(value, true);
+    public void PushLong(long value) => PushUnchecked(value, PrimitiveType.Long);
 
-    public void PushFloat(float value) => PushUnchecked(BitConverter.SingleToInt32Bits(value), false);
+    public void PushFloat(float value) => PushUnchecked(BitConverter.SingleToInt32Bits(value), PrimitiveType.Float);
 
-    public void PushDouble(double value) => PushUnchecked(BitConverter.DoubleToInt64Bits(value), true);
+    public void PushDouble(double value) => PushUnchecked(BitConverter.DoubleToInt64Bits(value), PrimitiveType.Double);
 
-    public void PushBool(bool value) => PushUnchecked(value ? 1L : 0L, false);
+    public void PushBool(bool value) => PushUnchecked(value ? 1L : 0L, PrimitiveType.Int);
 
-    public void PushByte(sbyte value) => PushUnchecked(value, false);
+    public void PushByte(sbyte value) => PushUnchecked(value, PrimitiveType.Int);
 
-    public void PushShort(short value) => PushUnchecked(value, false);
+    public void PushShort(short value) => PushUnchecked(value, PrimitiveType.Int);
 
-    public void PushChar(char value) => PushUnchecked(value, false);
+    public void PushChar(char value) => PushUnchecked(value, PrimitiveType.Int);
 
-    public void PushReference(Reference value) => PushUnchecked(value, false);
+    public void PushReference(Reference value) => PushUnchecked(value, PrimitiveType.Reference);
 
     #endregion
 
@@ -179,70 +184,70 @@ public class Frame
 
     public long PopUnknownFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return v;
     }
 
     public int PopIntFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return (int)v;
     }
 
     public long PopLongFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return v;
     }
 
     public float PopFloatFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return BitConverter.Int32BitsToSingle((int)v);
     }
 
     public double PopDoubleFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return BitConverter.Int64BitsToDouble(v);
     }
 
     public bool PopBoolFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return v != 0;
     }
 
     public sbyte PopByteFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return (sbyte)v;
     }
 
     public short PopShortFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return (short)v;
     }
 
     public char PopCharFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return (char)v;
     }
 
     public Reference PopReferenceFrom()
     {
-        var v = _stack[_from];
+        var v = Stack[_from];
         _from++;
         return v;
     }
@@ -270,18 +275,13 @@ public class Frame
     /// Pushes value from local variables. No checks are performed.
     /// </summary>
     /// <param name="index">Index of local variable.</param>
-    /// <param name="size">True, if value is long or double.</param>
-    public void PushFromLocal(int index, bool size) => PushUnchecked(LocalVariables[index], size);
+    /// <param name="type">Type of the value.</param>
+    public void PushFromLocal(int index, PrimitiveType type) => PushUnchecked(LocalVariables[index], type);
 
     #endregion
 
     public override string ToString()
     {
         return $"{Method}:{Pointer}";
-    }
-
-    public long[] DumpStack()
-    {
-        return _stack.Take(StackTop).ToArray();
     }
 }
