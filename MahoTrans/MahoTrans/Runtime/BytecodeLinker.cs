@@ -231,8 +231,19 @@ public static class BytecodeLinker
                 case JavaOpcode.if_acmpeq:
                 case JavaOpcode.if_acmpne:
                 case JavaOpcode.@goto:
-                    data = offsets[Combine(args[0], args[1]) + instruction.Offset];
+                {
+                    var ros = Combine(args[0], args[1]);
+                    var os = ros + instruction.Offset;
+                    if (offsets.TryGetValue(os, out var opcodeNum))
+                        data = opcodeNum;
+                    else
+                    {
+                        throw new JavaLinkageException(
+                            $"There is no opcode at offset {os} (relative {ros}).\nAvailable offsets:\n{string.Join('\n', offsets.Select(x => $"{x.Value}: {x.Key}"))}");
+                    }
+
                     break;
+                }
                 case JavaOpcode.jsr:
                 case JavaOpcode.ret:
                     data = null!;
