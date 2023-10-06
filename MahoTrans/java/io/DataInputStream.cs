@@ -11,7 +11,11 @@ public class DataInputStream : InputStream
     [JavaType(typeof(InputStream))] public Reference @in;
 
     [JavaIgnore] private readonly NameDescriptorClass _streamDescriptor =
-        new("in", "Ljava/io/InputStream;", "java/io/DataInputStream");
+        new("in", "Ljava/io/InputStream;", dis);
+
+    [JavaIgnore] private readonly NameDescriptorClass readByteNdc = new(nameof(readUnsignedByte), "()I", dis);
+
+    [JavaIgnore] private const string dis = "java/io/DataInputStream";
 
     [JavaIgnore] private const string input_stream = "java/io/InputStream";
 
@@ -40,17 +44,47 @@ public class DataInputStream : InputStream
         };
     }
 
+    [JavaDescriptor("([B)V")]
+    public JavaMethodBody readFully(JavaClass cls)
+    {
+        byte[] streamRead = cls.PushConstant(readByteNdc).Split();
+        return new JavaMethodBody(3, 4)
+        {
+            // locals: this, arr, i, len
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.iconst_0),
+                new(JavaOpcode.istore_2),
+                new(JavaOpcode.aload_1),
+                new(JavaOpcode.arraylength),
+                new(JavaOpcode.istore_3),
+                new(JavaOpcode.@goto, 14.Split()),
+                // loop begin
+                new(JavaOpcode.aload_1),
+                new(JavaOpcode.iload_2),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.invokevirtual, streamRead),
+                new(JavaOpcode.i2b),
+                new(JavaOpcode.bastore),
+                new(JavaOpcode.iinc, new byte[] { 2, 1 }),
+                // loop end
+                new(JavaOpcode.iload_2),
+                new(JavaOpcode.iload_3),
+                new(JavaOpcode.if_icmplt, (-13).Split()),
+                new(JavaOpcode.@return),
+            }
+        };
+    }
+
     [JavaDescriptor("()S")]
     public JavaMethodBody readShort(JavaClass @class)
     {
-        //TODO check stream end
-        byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
+        byte[] streamRead = @class.PushConstant(readByteNdc).Split();
         return new JavaMethodBody(3, 2)
         {
             RawCode = new Instruction[]
             {
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
                 new(JavaOpcode.dup),
                 new(JavaOpcode.invokevirtual, streamRead),
                 new(JavaOpcode.bipush, new byte[] { 8 }),
@@ -68,14 +102,12 @@ public class DataInputStream : InputStream
     [JavaDescriptor("()I")]
     public JavaMethodBody readUnsignedShort(JavaClass @class)
     {
-        //TODO check stream end
-        byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
+        byte[] streamRead = @class.PushConstant(readByteNdc).Split();
         return new JavaMethodBody(3, 2)
         {
             RawCode = new Instruction[]
             {
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
                 new(JavaOpcode.dup),
                 new(JavaOpcode.invokevirtual, streamRead),
                 new(JavaOpcode.bipush, new byte[] { 8 }),
@@ -92,14 +124,12 @@ public class DataInputStream : InputStream
     [JavaDescriptor("()I")]
     public JavaMethodBody readInt(JavaClass @class)
     {
-        //TODO check stream end
-        byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
+        byte[] streamRead = @class.PushConstant(readByteNdc).Split();
         return new JavaMethodBody(5, 2)
         {
             RawCode = new Instruction[]
             {
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
                 new(JavaOpcode.dup),
                 new(JavaOpcode.dup),
                 new(JavaOpcode.dup),
@@ -135,24 +165,27 @@ public class DataInputStream : InputStream
     [JavaDescriptor("()B")]
     public JavaMethodBody readByte(JavaClass @class)
     {
-        //TODO check stream end
-        byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
+        byte[] streamRead = @class.PushConstant(readByteNdc).Split();
         return new JavaMethodBody(3, 2)
         {
             RawCode = new Instruction[]
             {
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
                 new(JavaOpcode.invokevirtual, streamRead),
+                new(JavaOpcode.i2b),
                 new(JavaOpcode.ireturn)
             }
         };
     }
 
+    /// <summary>
+    /// Reads one byte from <see cref="@in"/>. Performs EOF check. Always read using this method.
+    /// </summary>
+    /// <param name="class"></param>
+    /// <returns></returns>
     [JavaDescriptor("()I")]
     public JavaMethodBody readUnsignedByte(JavaClass @class)
     {
-        //TODO check stream end
         byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
         return new JavaMethodBody(3, 2)
         {
@@ -161,7 +194,15 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.aload_0),
                 new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
                 new(JavaOpcode.invokevirtual, streamRead),
-                new(JavaOpcode.ireturn)
+                new(JavaOpcode.dup),
+                new(JavaOpcode.iflt, 4.Split()),
+                new(JavaOpcode.ireturn),
+                new(JavaOpcode.pop),
+                new(JavaOpcode.newobject, @class.PushConstant("java/io/EOFException").Split()),
+                new(JavaOpcode.dup),
+                new(JavaOpcode.invokespecial,
+                    @class.PushConstant(new NameDescriptorClass("<init>", "()V", "java/io/EOFException")).Split()),
+                new(JavaOpcode.athrow)
             }
         };
     }
@@ -171,41 +212,31 @@ public class DataInputStream : InputStream
     {
         //TODO check stream end
         byte[] unsignedRead = @class
-            .PushConstant(new NameDescriptorClass(nameof(readUnsignedShort), "()I", "java/io/DataInputStream")).Split();
-        return new JavaMethodBody(4, 3)
+            .PushConstant(new NameDescriptorClass(nameof(readUnsignedShort), "()I", dis)).Split();
+        return new JavaMethodBody(4, 2)
         {
-            // locals: this, count, buffer
+            // locals: this, buffer
             RawCode = new Instruction[]
             {
-                // stack: (nothing)
                 new(JavaOpcode.aload_0),
                 // stack: this
                 new(JavaOpcode.dup),
                 // stack: this, this
                 new(JavaOpcode.invokevirtual, unsignedRead),
                 // stack: this, count
-                new(JavaOpcode.dup),
-                new(JavaOpcode.istore_1),
-                // stack: this, count.
                 new(JavaOpcode.newarray, new[] { (byte)ArrayType.T_BYTE }),
                 // stack: this, arr.
                 new(JavaOpcode.dup),
-                new(JavaOpcode.astore_2),
+                new(JavaOpcode.astore_1),
                 // stack: this, arr.
-                new(JavaOpcode.iconst_0),
-                new(JavaOpcode.iload_1),
-                // stack: this, arr, from, len.
                 new(JavaOpcode.invokevirtual,
-                    @class.PushConstant(new NameDescriptorClass("read", "([BII)I", input_stream)).Split()),
-                // stack: read count
-                new(JavaOpcode.pop), //TODO check stream end
-                // stack: (nothing)
-                new(JavaOpcode.aload_0),
-                new(JavaOpcode.aload_2),
-                // stack: this, arr
-                new(JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass(nameof(readFully), "([B)V", dis)).Split()),
+                // stack: -
+                new(JavaOpcode.aload_1),
+                // stack: arr
+                new(JavaOpcode.invokestatic,
                     @class.PushConstant(new NameDescriptorClass(nameof(decodeUTF), "([B)Ljava/lang/String;",
-                        input_stream)).Split()),
+                        dis)).Split()),
                 new(JavaOpcode.areturn)
             }
         };
