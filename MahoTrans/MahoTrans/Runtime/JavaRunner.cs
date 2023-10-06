@@ -1619,7 +1619,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<char>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushChar(array[index]);
     }
 
@@ -1629,7 +1629,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<short>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushShort(array[index]);
     }
 
@@ -1639,7 +1639,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<Reference>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushReference(array[index]);
     }
 
@@ -1649,7 +1649,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<double>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushDouble(array[index]);
     }
 
@@ -1659,7 +1659,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<float>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushFloat(array[index]);
     }
 
@@ -1669,7 +1669,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<long>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushLong(array[index]);
     }
 
@@ -1679,7 +1679,7 @@ public class JavaRunner
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<Array<int>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<RuntimeException>(); //TODO
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushInt(array[index]);
     }
 
@@ -1688,6 +1688,8 @@ public class JavaRunner
         var index = frame.PopInt();
         var reference = frame.PopReference();
         var array = state.Heap.Resolve<java.lang.Array>(reference);
+        if (index < 0 || index >= array.BaseValue.Length)
+            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)
             frame.PushBool(b.Value[index]);
         else if (array is Array<sbyte> s)
