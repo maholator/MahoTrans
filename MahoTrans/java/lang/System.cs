@@ -31,6 +31,12 @@ public class System : Object
 
     public static void gc()
     {
-        
+    }
+
+    public static void arraycopy(Reference src, int src_position, Reference dst, int dst_position, int length)
+    {
+        var arr1 = Heap.Resolve<Array>(src).BaseValue;
+        var arr2 = Heap.Resolve<Array>(dst).BaseValue;
+        global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
     }
 }
