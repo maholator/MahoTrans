@@ -405,8 +405,13 @@ public static class BytecodeLinker
                     data = args; // let's parse this in runtime
                     break;
                 case JavaOpcode.multianewarray:
-                    data = null!;
+                {
+                    var dims = args[2];
+                    var type = (string)consts[Combine(args[0], args[1])];
+                    // no class because this may contain [[I and so on.
+                    data = new MultiArrayInitializer(dims, type);
                     break;
+                }
                 case JavaOpcode.ifnull:
                 case JavaOpcode.ifnonnull:
                     data = offsets[Combine(args[0], args[1]) + instruction.Offset];

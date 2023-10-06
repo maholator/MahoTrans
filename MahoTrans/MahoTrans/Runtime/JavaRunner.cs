@@ -1392,7 +1392,19 @@ public class JavaRunner
                 pointer++;
                 break;
             case JavaOpcode.multianewarray:
-                throw new NotImplementedException("no multiarr opcode");
+            {
+                var d = (MultiArrayInitializer)args;
+                var dims = d.dimensions;
+                int[] count = new int[dims];
+                for (int i = 0; i < count.Length; i++)
+                {
+                    count[i] = frame.PopInt();
+                }
+
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, state));
+                pointer++;
+                break;
+            }
             case JavaOpcode.ifnull:
                 pointer = frame.PopReference().IsNull ? (int)args : pointer + 1;
                 break;
@@ -1408,6 +1420,22 @@ public class JavaRunner
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state)
+    {
+        var r = state.Heap.AllocateArray<Reference>(count[dimensionsLeft]);
+
+        if (dimensionsLeft == 0)
+            return r;
+
+        var arr = state.Heap.ResolveArray<Reference>(r);
+        for (int i = 0; i < arr.Length; i++)
+        {
+            arr[i] = CreateMultiSubArray(dimensionsLeft - 1, count, state);
+        }
+
+        return r;
     }
 
     /// <summary>
