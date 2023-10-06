@@ -26,6 +26,7 @@ public class Frame
     {
         StackTop = 0;
         Pointer = 0;
+
         if (Method != method)
         {
             Method = method;
@@ -65,6 +66,19 @@ public class Frame
     public PrimitiveType GetPoppedType()
     {
         return StackTypes[StackTop];
+    }
+
+    /// <summary>
+    /// For debugger. Checks, is operand on stack double sized.
+    /// </summary>
+    /// <param name="offset">Zero to check just popped operand. One to check actual stack top. Two and more to check deeper values.</param>
+    /// <returns>Is the operand double sized.</returns>
+    /// <remarks>
+    /// For example, there are values "53", "52" and "51" on stack. To check 52's size, pass 2. To check 53's, pass 3.
+    /// </remarks>
+    public bool IsDoubleSizeAt(int offset)
+    {
+        return (StackTypes[StackTop - offset] & PrimitiveType.IsDouble) != 0;
     }
 
     #endregion
