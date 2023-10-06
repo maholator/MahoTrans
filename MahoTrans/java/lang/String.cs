@@ -47,6 +47,14 @@ public sealed class String : Object
         return Heap.AllocateArray(data);
     }
 
+    [JavaDescriptor("(Ljava/lang/String;)[B")]
+    public Reference getBytes(Reference enc)
+    {
+        //TODO
+        var data = Value.EncodeUTF8().ToSigned();
+        return Heap.AllocateArray(data);
+    }
+
     [return: JavaType(typeof(String))]
     public Reference toString() => This;
 
@@ -56,6 +64,7 @@ public sealed class String : Object
             return false;
 
         var obj = Heap.ResolveObject(r);
+
         if (obj is String s)
         {
             return s.Value == Value;
@@ -95,7 +104,6 @@ public sealed class String : Object
     [return: String]
     public static Reference valueOf([JavaType("[C")] Reference charArr, int from, int count) =>
         Heap.AllocateString(new string(Heap.ResolveArray<char>(charArr), from, count));
-
 
     [return: String]
     public static Reference valueOf(double v) => Heap.AllocateString(v.ToString());
