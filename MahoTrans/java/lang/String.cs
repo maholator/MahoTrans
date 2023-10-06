@@ -52,6 +52,9 @@ public sealed class String : Object
 
     public bool equals(Reference r)
     {
+        if (r.IsNull)
+            return false;
+
         var obj = Heap.ResolveObject(r);
         if (obj is String s)
         {
