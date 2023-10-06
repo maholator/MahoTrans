@@ -14,20 +14,22 @@ public class RecordStore : Object
 {
     private Reference storeName;
     private int openCount;
-    private Reference listeners;
+    [JavaType(typeof(Vector))]
+    public Reference listeners;
     private int version;
     private long modifiedAt;
 
     [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
 
-    [JavaDescriptor("([BII)V")]
+    [JavaDescriptor("([BII)I")]
     public JavaMethodBody addRecord(JavaClass cls)
     {
-        var impl = cls.PushConstant(new NameDescriptorClass(nameof(AddRecordInternal), "(I[BII)V",
+        var impl = cls.PushConstant(new NameDescriptorClass(nameof(AddRecordInternal), "([BII)I",
             typeof(RecordStore).ToJavaName()));
         var code = new Instruction[]
         {
             // calling actual method
+            new Instruction(JavaOpcode.aload_0),
             new Instruction(JavaOpcode.aload_1),
             new Instruction(JavaOpcode.iload_2),
             new Instruction(JavaOpcode.iload_3),
@@ -37,7 +39,7 @@ public class RecordStore : Object
             new Instruction(JavaOpcode.iload_1),
             new Instruction(JavaOpcode.istore, new byte[] { 5 }),
         };
-        return new JavaMethodBody(4, 9)
+        return new JavaMethodBody(5, 9)
         {
             RawCode = code
                 .Concat(GenerateListenersCalls(cls, "recordAdded"))
@@ -236,6 +238,7 @@ public class RecordStore : Object
         var code = new Instruction[]
         {
             // calling actual method
+            new Instruction(JavaOpcode.aload_0),
             new Instruction(JavaOpcode.iload_1),
             new Instruction(JavaOpcode.aload_2),
             new Instruction(JavaOpcode.iload_3),
@@ -245,7 +248,7 @@ public class RecordStore : Object
             new Instruction(JavaOpcode.iload_1),
             new Instruction(JavaOpcode.istore, new byte[] { 5 }),
         };
-        return new JavaMethodBody(3, 9)
+        return new JavaMethodBody(5, 9)
         {
             RawCode = code
                 .Concat(GenerateListenersCalls(cls, "recordChanged"))
