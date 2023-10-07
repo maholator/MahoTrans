@@ -26,7 +26,7 @@ public class DataInputStream : InputStream
     }
 
     [JavaDescriptor("([BII)I")]
-    public JavaMethodBody read(JavaClass @class)
+    public JavaMethodBody read___buf(JavaClass @class)
     {
         return new JavaMethodBody(4, 4)
         {
@@ -121,6 +121,23 @@ public class DataInputStream : InputStream
         };
     }
 
+    [JavaDescriptor("()C")]
+    public JavaMethodBody readChar(JavaClass @class)
+    {
+        byte[] streamRead = @class.PushConstant(new NameDescriptorClass(nameof(readUnsignedShort), "()I", dis)).Split();
+        return new JavaMethodBody(3, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.dup),
+                new(JavaOpcode.invokevirtual, streamRead),
+                new(JavaOpcode.i2c),
+                new(JavaOpcode.ireturn)
+            }
+        };
+    }
+
     [JavaDescriptor("()I")]
     public JavaMethodBody readInt(JavaClass @class)
     {
@@ -178,6 +195,21 @@ public class DataInputStream : InputStream
         };
     }
 
+    [JavaDescriptor("()Z")]
+    public JavaMethodBody readBoolean(JavaClass @class)
+    {
+        byte[] streamRead = @class.PushConstant(readByteNdc).Split();
+        return new JavaMethodBody(3, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.invokevirtual, streamRead),
+                new(JavaOpcode.ireturn)
+            }
+        };
+    }
+
     /// <summary>
     /// Reads one byte from <see cref="@in"/>. Performs EOF check. Always read using this method.
     /// </summary>
@@ -203,6 +235,22 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.invokespecial,
                     @class.PushConstant(new NameDescriptorClass("<init>", "()V", "java/io/EOFException")).Split()),
                 new(JavaOpcode.athrow)
+            }
+        };
+    }
+
+    [JavaDescriptor("()I")]
+    public JavaMethodBody read___one(JavaClass @class)
+    {
+        byte[] streamRead = @class.PushConstant(new NameDescriptorClass("read", "()I", input_stream)).Split();
+        return new JavaMethodBody(1, 1)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                new(JavaOpcode.invokevirtual, streamRead),
+                new(JavaOpcode.ireturn),
             }
         };
     }
