@@ -20,6 +20,18 @@ public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
     }
 
     /// <summary>
+    /// Constructs arbitrary reference to member.
+    /// </summary>
+    /// <param name="name">Name.</param>
+    /// <param name="descriptor">Java descriptor.</param>
+    /// <param name="class">Containing class.</param>
+    public NameDescriptorClass(string name, string descriptor, Type @class)
+    {
+        Descriptor = new NameDescriptor(name, descriptor);
+        ClassName = @class.ToJavaName();
+    }
+
+    /// <summary>
     /// Constructs reference to a field.
     /// </summary>
     /// <param name="name">Name of the field.</param>
