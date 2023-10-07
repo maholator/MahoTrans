@@ -373,7 +373,9 @@ public static class BytecodeLinker
                 case JavaOpcode.newobject:
                 {
                     var type = (string)consts[Combine(args[0], args[1])];
-                    data = jvm.Classes[type];
+                    if (!jvm.Classes.TryGetValue(type, out var cls1))
+                        throw new JavaLinkageException($"Class \"{type}\" is not registered");
+                    data = cls1;
                     break;
                 }
                 case JavaOpcode.newarray:
