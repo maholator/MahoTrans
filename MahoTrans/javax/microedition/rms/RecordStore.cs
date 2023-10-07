@@ -86,8 +86,18 @@ public class RecordStore : Object
     {
     }
 
-    void deleteRecordStore()
+    public static void deleteRecordStore([String] Reference str)
     {
+        var name = Heap.ResolveString(str);
+        if (openedStores.TryGetValue(name, out var storeRef))
+        {
+            var store = Heap.Resolve<RecordStore>(storeRef);
+            if (store.openCount > 0)
+                Heap.Throw<RecordStoreException>();
+        }
+
+        if (!Toolkit.RecordStore.DeleteStore(name))
+            Heap.Throw<RecordStoreNotFoundException>();
     }
 
     public void enumerateRecords()
