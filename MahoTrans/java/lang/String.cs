@@ -77,6 +77,12 @@ public sealed class String : Object
 
     public int indexOf(int c, int from) => Value.IndexOf((char)c, from);
 
+    public int indexOf([String] Reference strr, int from)
+    {
+        var str = Heap.ResolveString(strr);
+        return Value.IndexOf(str, from, StringComparison.Ordinal);
+    }
+
     [return: String]
     public Reference substring(int from)
     {
