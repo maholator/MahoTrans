@@ -1401,7 +1401,21 @@ public class JavaRunner
                     count[i] = frame.PopInt();
                 }
 
-                frame.PushReference(CreateMultiSubArray(dims - 1, count, state));
+                var underlyingType = d.type.Split('[', StringSplitOptions.RemoveEmptyEntries).Single();
+                ArrayType? arrayType = underlyingType switch
+                {
+                    "I" => ArrayType.T_INT,
+                    "J" => ArrayType.T_LONG,
+                    "C" => ArrayType.T_CHAR,
+                    "S" => ArrayType.T_SHORT,
+                    "Z" => ArrayType.T_BOOLEAN,
+                    "B" => ArrayType.T_BYTE,
+                    "F" => ArrayType.T_FLOAT,
+                    "D" => ArrayType.T_DOUBLE,
+                    _ => null
+                };
+
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType));
                 pointer++;
                 break;
             }
@@ -1422,17 +1436,23 @@ public class JavaRunner
         }
     }
 
-    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state)
+    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? type)
     {
-        var r = state.Heap.AllocateArray<Reference>(count[dimensionsLeft]);
-
         if (dimensionsLeft == 0)
-            return r;
+        {
+            Reference zr;
+            if (type.HasValue)
+                return state.Heap.AllocateArray(type.Value, count[0]);
+
+            return state.Heap.AllocateArray<Reference>(count[0]);
+        }
+
+        var r = state.Heap.AllocateArray<Reference>(count[dimensionsLeft]);
 
         var arr = state.Heap.ResolveArray<Reference>(r);
         for (int i = 0; i < arr.Length; i++)
         {
-            arr[i] = CreateMultiSubArray(dimensionsLeft - 1, count, state);
+            arr[i] = CreateMultiSubArray(dimensionsLeft - 1, count, state, type);
         }
 
         return r;
