@@ -44,6 +44,11 @@ public class ByteArrayOutputStream : OutputStream
 
     public void write(int b)
     {
-        buf.Add((sbyte)b);
+        buf.Add((sbyte)(byte)(uint)b);
+    }
+
+    public void flush()
+    {
+        // do nothing
     }
 }
