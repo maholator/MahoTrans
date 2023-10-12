@@ -24,6 +24,16 @@ public class Image : Object
     }
 
     [return: JavaType(typeof(Image))]
+    public static Reference createImage([JavaType("[B")] Reference buf, int from, int len)
+    {
+        var blob = Heap.ResolveArray<sbyte>(buf).ToUnsigned().Skip(from).Take(len).ToArray();
+
+        var image = Heap.AllocateObject<Image>();
+        image.Handle = Heap.State.Toolkit.CreateImmutableImage(blob);
+        return image.This;
+    }
+
+    [return: JavaType(typeof(Image))]
     public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
     {
         var image = Heap.AllocateObject<Image>();
