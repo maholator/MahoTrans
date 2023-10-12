@@ -30,6 +30,11 @@ public class Class : Object
         return Heap.AllocateString(name);
     }
 
+    public Reference newInstance()
+    {
+        return Heap.AllocateObject(InternalClass);
+    }
+
     [return: JavaType(typeof(InputStream))]
     public Reference getResourceAsStream([String] Reference name)
     {
