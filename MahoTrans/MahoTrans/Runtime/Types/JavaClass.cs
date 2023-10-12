@@ -136,9 +136,6 @@ public class JavaClass
             else
             {
                 m.JavaBody.EnsureBytecodeLinked(state);
-                // java method do pointer++ on return, so we do pointer-- so frame will return to proper state after clinit return.
-                if (thread.ActiveFrame != null)
-                    thread.ActiveFrame.Pointer--;
                 thread.Push(m.JavaBody);
             }
         }

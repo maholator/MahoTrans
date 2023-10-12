@@ -1431,6 +1431,9 @@ public class JavaRunner
                 throw new NotImplementedException("No jsr opcode");
             case JavaOpcode.breakpoint:
                 throw new NotImplementedException("No breakpoint opcode");
+            case JavaOpcode._inplacereturn:
+                thread.Pop();
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }

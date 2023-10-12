@@ -9,7 +9,8 @@ public static class BytecodeLinker
     {
         try
         {
-            return LinkInternal(method.Method.Class, jvm, code);
+            return LinkInternal(method.Method.Class, jvm, code,
+                method.Method.Descriptor == new NameDescriptor("<clinit>", "()V"));
         }
         catch (Exception e)
         {
@@ -18,7 +19,7 @@ public static class BytecodeLinker
         }
     }
 
-    private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code)
+    private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code, bool isClinit)
     {
         Dictionary<int, int> offsets = new Dictionary<int, int>();
         for (int i = 0; i < code.Length; i++)
@@ -31,6 +32,7 @@ public static class BytecodeLinker
             var instruction = code[instrIndex];
             var args = instruction.Args;
             object data;
+            var opcode = instruction.Opcode;
 
             switch (instruction.Opcode)
             {
@@ -309,8 +311,12 @@ public static class BytecodeLinker
                 case JavaOpcode.dreturn:
                 case JavaOpcode.areturn:
                 case JavaOpcode.@return:
+                {
+                    if (isClinit)
+                        opcode = JavaOpcode._inplacereturn;
                     data = null!;
                     break;
+                }
                 case JavaOpcode.getstatic:
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
@@ -427,7 +433,7 @@ public static class BytecodeLinker
                     throw new ArgumentOutOfRangeException();
             }
 
-            output[instrIndex] = new LinkedInstruction(instruction.Opcode, data);
+            output[instrIndex] = new LinkedInstruction(opcode, data);
         }
 
         return output;
