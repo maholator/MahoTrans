@@ -68,6 +68,8 @@ public class Thread : Object, Runnable
     {
     }
 
+    public bool isAlive() => JavaThread.ActiveFrame != null;
+
     public void start()
     {
         if (started)
