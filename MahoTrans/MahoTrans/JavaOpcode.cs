@@ -208,4 +208,9 @@ public enum JavaOpcode : byte
     [OpcodeArgsCount(4)] goto_w = 200,
     [OpcodeArgsCount(4)] jsr_w = 201,
     breakpoint = 202,
+
+    /// <summary>
+    /// Special internal opcode. Performs method return but does not touch caller's frame. Used for clinit methods.
+    /// </summary>
+    _inplacereturn = 240,
 }
