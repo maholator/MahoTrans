@@ -41,6 +41,8 @@ public class Image : Object
         return image.This;
     }
 
+    public bool isMutable() => Handle.IsMutable;
+
     public int getWidth() => Handle.Width;
     public int getHeight() => Handle.Height;
 }
