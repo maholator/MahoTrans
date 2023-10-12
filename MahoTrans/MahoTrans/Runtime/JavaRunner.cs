@@ -1739,16 +1739,15 @@ public class JavaRunner
 
     private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread, JvmState state)
     {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread, state);
+            // we want to do this instruction again so no pointer increase here
+            return;
+        }
+
         if (m.Bridge != null)
         {
-            if (m.Class.PendingInitializer)
-            {
-                m.Class.Initialize(thread, state);
-                // we want to do this instruction again so no pointer increase here
-                // clinit will do ++ and -- but it does nothing
-                return;
-            }
-
             m.Bridge(frame);
             // we are done with the call, so going to next instruction
             frame.Pointer++;
@@ -1768,8 +1767,5 @@ public class JavaRunner
         }
 
         frame.Discard(argsLength);
-
-        if (m.Class.PendingInitializer)
-            m.Class.Initialize(thread, state);
     }
 }
