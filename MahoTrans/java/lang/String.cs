@@ -18,6 +18,12 @@ public sealed class String : Object
         Value = buf.DecodeDefault();
     }
 
+    [InitMethod]
+    public void Init()
+    {
+        Value = string.Empty;
+    }
+
     public int length()
     {
         return Value.Length;
