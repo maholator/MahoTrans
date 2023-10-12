@@ -1,3 +1,4 @@
+using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using Object = java.lang.Object;
@@ -66,6 +67,13 @@ public class Vector : Object
     public bool removeElement(Reference obj) => List.Remove(obj);
 
     public void removeAllElements() => List.Clear();
+
+    public void setElementAt(Reference obj, int index)
+    {
+        if (index < 0 || index >= size())
+            Heap.Throw<ArrayIndexOutOfBoundsException>();
+        List[index] = obj;
+    }
 
     public void trimToSize()
     {
