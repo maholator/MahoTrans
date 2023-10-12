@@ -89,8 +89,6 @@ public class JvmState
 
         foreach (var @class in Classes.Values)
             @class.RegenerateVirtualTable(this);
-
-        InitClasses(@new);
     }
 
     public void AddClrClasses(Assembly assembly)
@@ -103,23 +101,6 @@ public class JvmState
         });
         var nonIgnored = compatible.Where(x => x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
         AddClrClasses(nonIgnored);
-    }
-
-    private void InitClasses(JavaClass[] classes)
-    {
-        RunInContext(() =>
-        {
-            foreach (var cls in classes)
-            {
-                if (cls.Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var init))
-                {
-                    if (init.IsNative)
-                        init.NativeBody.Invoke(null, new object?[0]);
-                    else
-                        JavaThread.CreateSyntheticStaticAction(init, this).Execute(this);
-                }
-            }
-        });
     }
 
     #endregion

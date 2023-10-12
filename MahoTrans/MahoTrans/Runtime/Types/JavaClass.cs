@@ -18,6 +18,7 @@ public class JavaClass
     public Dictionary<NameDescriptor, Method> Methods = new();
     public Dictionary<int, Method>? VirtualTable;
     public Type? ClrType;
+    public bool PendingInitializer = true;
 
     public override string ToString()
     {
@@ -117,4 +118,29 @@ public class JavaClass
     }
 
     public void AddMethod(Method m) => Methods.Add(m.Descriptor, m);
+
+    /// <summary>
+    /// Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle.
+    /// </summary>
+    /// <param name="thread">Thread to run initialization on.</param>
+    /// <param name="state">JVM.</param>
+    public void Initialize(JavaThread thread, JvmState state)
+    {
+        PendingInitializer = false;
+        if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
+        {
+            if (m.Bridge != null)
+            {
+                m.Bridge(null!);
+            }
+            else
+            {
+                m.JavaBody.EnsureBytecodeLinked(state);
+                // java method do pointer++ on return, so we do pointer-- so frame will return to proper state after clinit return.
+                if (thread.ActiveFrame != null)
+                    thread.ActiveFrame.Pointer--;
+                thread.Push(m.JavaBody);
+            }
+        }
+    }
 }

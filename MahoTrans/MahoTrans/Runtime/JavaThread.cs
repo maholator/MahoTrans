@@ -21,7 +21,7 @@ public class JavaThread
     public int ActiveFrameIndex = -1;
 
     /// <summary>
-    /// This field stores running frame. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead.
+    /// This field stores running frame. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead. This may be null if thread is dead.
     /// </summary>
     public Frame? ActiveFrame;
 
@@ -113,7 +113,10 @@ public class JavaThread
             args.CopyTo(f.LocalVariables, 1);
         }
 
-        return new JavaThread(f, state);
+        var javaThread = new JavaThread(f, state);
+        if (launcher.Class.PendingInitializer)
+            launcher.Class.Initialize(javaThread, state);
+        return javaThread;
     }
 
     public static JavaThread CreateSyntheticVirtualAction(string name, Reference target, JvmState state) =>
@@ -149,6 +152,9 @@ public class JavaThread
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;
 
-        return new JavaThread(f, state);
+        var javaThread = new JavaThread(f, state);
+        if (thread.JavaClass.PendingInitializer)
+            thread.JavaClass.Initialize(javaThread, state);
+        return javaThread;
     }
 }
