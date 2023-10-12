@@ -189,34 +189,39 @@ public static class NativeLinker
         // for push operation
         il.Emit(OpCodes.Ldarg_0);
 
-        // setting stack pointer
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldc_I4, argsLength);
-        il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.SetFrom))!);
-
-        if (!method.IsStatic)
+        // all this is skipped if call is static and no args are needed.
+        if (argsLength != 0)
         {
-            // frame
-            il.Emit(OpCodes.Call, typeof(Object).GetProperty("Heap")!.GetMethod!);
-            // frame > heap
+            // setting stack pointer for pops
             il.Emit(OpCodes.Ldarg_0);
-            // frame > heap > frame
-            il.Emit(OpCodes.Call, StackReversePoppers[typeof(Reference)]);
-            // frame > heap > ref
-            il.Emit(OpCodes.Call, typeof(JavaHeap).GetMethod(nameof(JavaHeap.ResolveObject))!);
-            // frame > object
-        }
+            il.Emit(OpCodes.Ldc_I4, argsLength);
+            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.SetFrom))!);
 
-        foreach (var parameter in method.GetParameters())
-        {
+
+            if (!method.IsStatic)
+            {
+                // frame
+                il.Emit(OpCodes.Call, typeof(Object).GetProperty("Heap")!.GetMethod!);
+                // frame > heap
+                il.Emit(OpCodes.Ldarg_0);
+                // frame > heap > frame
+                il.Emit(OpCodes.Call, StackReversePoppers[typeof(Reference)]);
+                // frame > heap > ref
+                il.Emit(OpCodes.Call, typeof(JavaHeap).GetMethod(nameof(JavaHeap.ResolveObject))!);
+                // frame > object
+            }
+
+            foreach (var parameter in method.GetParameters())
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                var popper = StackReversePoppers[parameter.ParameterType];
+                il.Emit(OpCodes.Call, popper);
+            }
+
             il.Emit(OpCodes.Ldarg_0);
-            var popper = StackReversePoppers[parameter.ParameterType];
-            il.Emit(OpCodes.Call, popper);
+            il.Emit(OpCodes.Ldc_I4, argsLength);
+            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.Discard))!);
         }
-
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldc_I4, argsLength);
-        il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.Discard))!);
 
         il.Emit(OpCodes.Call, method);
 
