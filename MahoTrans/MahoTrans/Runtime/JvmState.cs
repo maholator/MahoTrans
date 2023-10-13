@@ -110,7 +110,7 @@ public class JvmState
     /// <summary>
     /// Gets class object from <see cref="Classes"/>. Automatically handles array types.
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="name">Class name to search.</param>
     /// <returns></returns>
     public JavaClass GetClass(string name)
     {

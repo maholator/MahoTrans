@@ -16,6 +16,11 @@ public interface IRecordStore
 
     void CloseStore(string name);
 
+    /// <summary>
+    /// Deletes record store. MIDP-side code must validate the operation before calling this method.
+    /// </summary>
+    /// <param name="name">Name of store.</param>
+    /// <returns>False, if there is no such store.</returns>
     bool DeleteStore(string name);
 
     int AddRecord(string name, sbyte[] data, int offset, int count);
