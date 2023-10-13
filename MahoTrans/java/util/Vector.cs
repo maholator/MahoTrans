@@ -68,6 +68,8 @@ public class Vector : Object
 
     public void removeAllElements() => List.Clear();
 
+    public void removeElementAt(int index) => List.RemoveAt(index);
+
     public void setElementAt(Reference obj, int index)
     {
         if (index < 0 || index >= size())
