@@ -1,7 +1,9 @@
 using java.io;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 
 namespace java.lang;
 
@@ -11,6 +13,8 @@ public class Class : Object
     /// JVM-side version of this object.
     /// </summary>
     [JavaIgnore] public JavaClass InternalClass = null!;
+
+    private static readonly NameDescriptor _initDescr = new NameDescriptor("<init>", "()V");
 
     [return: JavaType(typeof(Class))]
     public static Reference forName([String] Reference r)
@@ -30,8 +34,28 @@ public class Class : Object
         return Heap.AllocateString(name);
     }
 
-    public Reference newInstance()
+    [JavaDescriptor("()Ljava/lang/Object;")]
+    public JavaMethodBody newInstance(JavaClass cls)
     {
+        return new JavaMethodBody(2, 1)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.invokevirtual,
+                    cls.PushConstant(new NameDescriptor("allocate", "()Ljava/lang/Object;")).Split()),
+                new(JavaOpcode.dup),
+                new(JavaOpcode.invokevirtual, cls.PushConstant(_initDescr).Split()),
+                new(JavaOpcode.areturn)
+            }
+        };
+    }
+
+
+    public Reference allocate()
+    {
+        if (!InternalClass.Methods.ContainsKey(_initDescr))
+            Heap.Throw<IllegalAccessException>();
         return Heap.AllocateObject(InternalClass);
     }
 
