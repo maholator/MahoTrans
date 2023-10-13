@@ -55,4 +55,6 @@ public class Integer : Object
     }
 
     public static int parseInt([String] Reference str) => int.Parse(Heap.ResolveString(str));
+
+    public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Heap.ResolveString(str), radix);
 }
