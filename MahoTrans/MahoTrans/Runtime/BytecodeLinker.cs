@@ -320,29 +320,37 @@ public static class BytecodeLinker
                 case JavaOpcode.getstatic:
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var f = jvm.Classes[d.ClassName].Fields[d.Descriptor];
-                    data = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                    var c = jvm.Classes[d.ClassName];
+                    var f = c.Fields[d.Descriptor];
+                    var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                    data = new FieldPointer(b, c);
                     break;
                 }
                 case JavaOpcode.putstatic:
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var f = jvm.Classes[d.ClassName].Fields[d.Descriptor];
-                    data = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                    var c = jvm.Classes[d.ClassName];
+                    var f = c.Fields[d.Descriptor];
+                    var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                    data = new FieldPointer(b, c);
                     break;
                 }
                 case JavaOpcode.getfield:
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var f = jvm.Classes[d.ClassName].Fields[d.Descriptor];
-                    data = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                    var c = jvm.Classes[d.ClassName];
+                    var f = c.Fields[d.Descriptor];
+                    var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                    data = new FieldPointer(b, c);
                     break;
                 }
                 case JavaOpcode.putfield:
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var f = jvm.Classes[d.ClassName].Fields[d.Descriptor];
-                    data = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                    var c = jvm.Classes[d.ClassName];
+                    var f = c.Fields[d.Descriptor];
+                    var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                    data = new FieldPointer(b, c);
                     break;
                 }
                 case JavaOpcode.invokevirtual:

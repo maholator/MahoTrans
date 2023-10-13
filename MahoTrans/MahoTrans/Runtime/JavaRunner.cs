@@ -1220,8 +1220,14 @@ public class JavaRunner
             case JavaOpcode.getfield:
             case JavaOpcode.putfield:
             {
-                var bridge = (Action<Frame>)args;
-                bridge(frame);
+                var p = (FieldPointer)args;
+                if (p.Class.PendingInitializer)
+                {
+                    p.Class.Initialize(thread, state);
+                    return;
+                }
+
+                p.Bridge(frame);
                 pointer++;
                 break;
             }
