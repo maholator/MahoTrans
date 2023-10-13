@@ -126,6 +126,12 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a, _clip);
     }
 
+    public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a, int tr)
+    {
+        var res = Heap.Resolve<Image>(image);
+        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a, _clip);
+    }
+
     public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
         int transform, int x_dest,
         int y_dest, int anchor)
