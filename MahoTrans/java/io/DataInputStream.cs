@@ -44,6 +44,26 @@ public class DataInputStream : InputStream
         };
     }
 
+    [JavaDescriptor("([B)I")]
+    public JavaMethodBody read___bufFull(JavaClass @class)
+    {
+        return new JavaMethodBody(4, 4)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                new(JavaOpcode.aload_1),
+                new(JavaOpcode.iconst_0),
+                new(JavaOpcode.iload_1),
+                new(JavaOpcode.arraylength),
+                new(JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass("read", "([BII)I", input_stream)).Split()),
+                new(JavaOpcode.ireturn)
+            }
+        };
+    }
+
     [JavaDescriptor("([B)V")]
     public JavaMethodBody readFully(JavaClass cls)
     {
@@ -326,6 +346,25 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.lload_1),
                 new(JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("skip", "(J)J", input_stream)).Split()),
+                new(JavaOpcode.lreturn)
+            }
+        };
+    }
+
+    [JavaDescriptor("(I)I")]
+    public JavaMethodBody skipBytes(JavaClass @class)
+    {
+        return new JavaMethodBody(2, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.i2l),
+                new(JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass("skip", "(J)J", input_stream)).Split()),
+                new(JavaOpcode.l2i),
                 new(JavaOpcode.lreturn)
             }
         };
