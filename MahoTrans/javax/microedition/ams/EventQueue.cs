@@ -1,3 +1,4 @@
+using javax.microedition.ams.events;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -72,6 +73,54 @@ public class EventQueue : Thread
                 new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(invokeMethod).Split()),
                 // loop
                 new Instruction(JavaOpcode.@goto, (-11).Split())
+            }
+        };
+    }
+
+    public Reference TakePendingRepaint()
+    {
+        lock (_lock)
+        {
+            var list = _events.ToList();
+            for (int i = 0; i < list.Count; i++)
+            {
+                var evRef = list[i];
+                if (Heap.ResolveObject(evRef) is RepaintEvent re)
+                {
+                    list.RemoveAt(i);
+                    _events = new Queue<Reference>(list);
+                    return evRef;
+                }
+            }
+
+            return Reference.Null;
+        }
+    }
+
+    [JavaDescriptor("()V")]
+    public JavaMethodBody serviceRepaints(JavaClass cls)
+    {
+        /*
+         * if(repaints pending)
+         *      take object from queue
+         *      do now
+         *      return
+         * return
+         */
+        var taker = new NameDescriptorClass(nameof(TakePendingRepaint), "()Ljava/lang/Object;", typeof(EventQueue));
+        var invokeMethod = new NameDescriptorClass("invoke", "()V", typeof(Event).ToJavaName());
+        return new JavaMethodBody(2, 1)
+        {
+            RawCode = new Instruction[]
+            {
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(taker).Split()),
+                new Instruction(JavaOpcode.dup),
+                new Instruction(JavaOpcode.ifnonnull, new byte[] { 0, 5 }),
+                new Instruction(JavaOpcode.pop),
+                new Instruction(JavaOpcode.@return),
+                new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(invokeMethod).Split()),
+                new Instruction(JavaOpcode.@return),
             }
         };
     }

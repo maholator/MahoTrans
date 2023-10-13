@@ -1,6 +1,10 @@
+using javax.microedition.ams;
 using javax.microedition.ams.events;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 
 namespace javax.microedition.lcdui;
 
@@ -28,13 +32,30 @@ public class Canvas : Displayable
     {
         Heap.State.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
-    
+
     public void flushGraphics() => Handle.Flush();
 
-    public void serviceRepaints()
+    [JavaDescriptor("()V")]
+    public JavaMethodBody serviceRepaints(JavaClass cls)
     {
-        //TODO events loop
+        return new JavaMethodBody(1, 1)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.invokespecial,
+                    cls.PushConstant(new NameDescriptorClass(nameof(getQueue), "()Ljava/lang/Object;", typeof(Canvas)))
+                        .Split()),
+                new(JavaOpcode.invokespecial,
+                    cls.PushConstant(new NameDescriptorClass(nameof(EventQueue.serviceRepaints), "()V",
+                            typeof(EventQueue)))
+                        .Split()),
+                new(JavaOpcode.@return),
+            }
+        };
     }
+
+    public Reference getQueue() => Heap.State.EventQueue.This;
 
     public int getGameAction(int keyCode) => 0;
 
