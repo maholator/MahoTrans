@@ -1,3 +1,4 @@
+using com.nokia.mid.ui;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkit;
@@ -5,7 +6,7 @@ using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;
 
-public class Graphics : Object
+public class Graphics : Object, DirectGraphics
 {
     [JavaIgnore] public IGraphics Implementation = null!;
 
