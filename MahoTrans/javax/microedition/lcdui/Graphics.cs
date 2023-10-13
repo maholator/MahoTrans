@@ -62,6 +62,16 @@ public class Graphics : Object
         //TODO
     }
 
+    public void clipRect(int x, int y, int w, int h)
+    {
+        //TODO
+    }
+
+    public int getClipX() => _clip.X;
+    public int getClipY() => _clip.Y;
+    public int getClipWidth() => _clip.Width;
+    public int getClipHeight() => _clip.Height;
+
     #endregion
 
     #region Primitives
