@@ -101,6 +101,15 @@ public sealed class String : Object
         return Heap.AllocateString(Value.Substring(from, to - from));
     }
 
+    [return: String]
+    public Reference toUpperCase() => Heap.AllocateString(Value.ToUpper());
+
+    [return: String]
+    public Reference toLowerCase() => Heap.AllocateString(Value.ToLower());
+
+    [return: String]
+    public Reference replace(char from, char to) => Heap.AllocateString(Value.Replace(from, to));
+
     #region valueOf
 
     [return: String]
