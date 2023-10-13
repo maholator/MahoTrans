@@ -74,8 +74,7 @@ public static class NativeLinker
                 jc.SuperName = super;
         }
         var nativeFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly |
-                                          BindingFlags.Instance | BindingFlags.Static)
-            .Where(x => x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
+                                          BindingFlags.Instance | BindingFlags.Static).Where(IsJavaVisible);
         var nativeMethods = type.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
                                             BindingFlags.Static);
         List<Method> javaMethods = new();
@@ -240,6 +239,26 @@ public static class NativeLinker
         return num;
     }
 
+    public static bool IsJavaVisible(FieldInfo field)
+    {
+        if (field.GetCustomAttribute<JavaIgnoreAttribute>() != null)
+            return false;
+        var t = field.FieldType;
+
+        // enums are always service fields
+        if (t.IsEnum)
+            return false;
+
+        // ND/NDC are service too
+        if (t == typeof(NameDescriptor) || t == typeof(NameDescriptorClass))
+            return false;
+
+        // we use Class and String to show them to jvm
+        if (t == typeof(JavaClass) || t == typeof(string))
+            return false;
+
+        return true;
+    }
 
     private struct Parameter
     {
