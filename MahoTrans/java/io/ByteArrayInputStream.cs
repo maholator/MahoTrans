@@ -62,6 +62,8 @@ public class ByteArrayInputStream : InputStream
         return read;
     }
 
+    public int available() => count - pos;
+
     public void close()
     {
         // do nothing

@@ -369,4 +369,20 @@ public class DataInputStream : InputStream
             }
         };
     }
+
+    [JavaDescriptor("()I")]
+    public JavaMethodBody available(JavaClass @class)
+    {
+        return new JavaMethodBody(2, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                new(JavaOpcode.invokevirtual,
+                    @class.PushConstant(new NameDescriptorClass(nameof(available), "()I", input_stream)).Split()),
+                new(JavaOpcode.lreturn)
+            }
+        };
+    }
 }
