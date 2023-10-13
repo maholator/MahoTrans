@@ -15,7 +15,7 @@ public class ActionEvent : Event
     public JavaMethodBody invoke(JavaClass cls)
     {
         var thisName = typeof(ActionEvent).ToJavaName();
-        return new JavaMethodBody(3, 1)
+        return new JavaMethodBody(1, 1)
         {
             RawCode = new Instruction[]
             {
