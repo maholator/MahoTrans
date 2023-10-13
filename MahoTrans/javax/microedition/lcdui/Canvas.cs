@@ -28,6 +28,8 @@ public class Canvas : Displayable
     {
         Heap.State.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
+    
+    public void flushGraphics() => Handle.Flush();
 
     public void serviceRepaints()
     {

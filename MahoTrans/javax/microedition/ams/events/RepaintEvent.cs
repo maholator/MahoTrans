@@ -15,7 +15,7 @@ public class RepaintEvent : Event
     public JavaMethodBody invoke(JavaClass cls)
     {
         var thisName = typeof(RepaintEvent).ToJavaName();
-        return new JavaMethodBody(2, 1)
+        return new JavaMethodBody(3, 1)
         {
             RawCode = new Instruction[]
             {
@@ -23,10 +23,13 @@ public class RepaintEvent : Event
                 new Instruction(JavaOpcode.getfield,
                     cls.PushConstant(new NameDescriptorClass("Target", typeof(Canvas), thisName)).Split()),
                 new Instruction(JavaOpcode.dup),
+                new Instruction(JavaOpcode.dup),
                 new Instruction(JavaOpcode.invokevirtual,
                     cls.PushConstant(new NameDescriptor("ObtainGraphics", "()Ljavax/microedition/lcdui/Graphics;")).Split()),
                 new Instruction(JavaOpcode.invokevirtual,
                     cls.PushConstant(new NameDescriptor("paint", "(Ljavax/microedition/lcdui/Graphics;)V")).Split()),
+                new Instruction(JavaOpcode.invokevirtual,
+                    cls.PushConstant(new NameDescriptor("flushGraphics", "()V")).Split()),
                 new Instruction(JavaOpcode.@return)
             }
         };

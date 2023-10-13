@@ -23,8 +23,6 @@ public class GameCanvas : Canvas
         return ObtainGraphics();
     }
 
-    public void flushGraphics() => Handle.Flush();
-
     public void flushGraphics(int x, int y, int width, int height)
     {
         //TODO
