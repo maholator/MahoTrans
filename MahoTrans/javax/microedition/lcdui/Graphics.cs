@@ -18,7 +18,7 @@ public class Graphics : Object, DirectGraphics
     [JavaIgnore] private int _ty;
     [JavaIgnore] private GraphicsClip _clip = new(0, 0, int.MaxValue, int.MaxValue);
 
-    #region Setters
+    #region Color / font
 
     public void setColor(int argb)
     {
@@ -32,6 +32,8 @@ public class Graphics : Object, DirectGraphics
         var ub = (ulong)b;
         _color = (uint)((255UL << 24) | (ur << 16) | (ug << 8) | ub);
     }
+
+    public int getColor() => (int)_color;
 
     public void setFont([JavaType(typeof(Font))] Reference r)
     {
