@@ -34,6 +34,14 @@ public class Image : Object
     }
 
     [return: JavaType(typeof(Image))]
+    public static Reference createImage(int w, int h)
+    {
+        var image = Heap.AllocateObject<Image>();
+        image.Handle = Heap.State.Toolkit.CreateMutableImage(w, h);
+        return image.This;
+    }
+
+    [return: JavaType(typeof(Image))]
     public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
     {
         var image = Heap.AllocateObject<Image>();
