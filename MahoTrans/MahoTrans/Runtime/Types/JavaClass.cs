@@ -54,6 +54,7 @@ public class JavaClass
         if (Name == type)
             return true;
         JavaClass jc = this;
+
         while (true)
         {
             if (jc.SuperName == type)
@@ -69,8 +70,12 @@ public class JavaClass
         if (this == type)
             return true;
 
+        if (IsObject)
+            return false;
+
         var name = type.Name;
         JavaClass jc = this;
+
         while (true)
         {
             if (jc.Super == type)
@@ -124,6 +129,7 @@ public class JavaClass
     public void Initialize(JavaThread thread, JvmState state)
     {
         PendingInitializer = false;
+
         if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
         {
             if (m.Bridge != null)
