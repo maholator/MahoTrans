@@ -13,6 +13,10 @@ public class JvmState
 {
     public IToolkit Toolkit;
     public JavaHeap Heap;
+
+    /// <summary>
+    /// List of all loaded classes. Array classes are created only when needed, use <see cref="GetClass"/> to construct them.
+    /// </summary>
     public readonly Dictionary<string, JavaClass> Classes = new();
 
     /// <summary>
@@ -101,6 +105,53 @@ public class JvmState
         });
         var nonIgnored = compatible.Where(x => x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
         AddClrClasses(nonIgnored);
+    }
+
+    /// <summary>
+    /// Gets class object from <see cref="Classes"/>. Automatically handles array types.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public JavaClass GetClass(string name)
+    {
+        if (Classes.TryGetValue(name, out var o))
+            return o;
+        if (name.StartsWith('['))
+        {
+            // it's an array
+            var itemDescr = name.Split('[', StringSplitOptions.RemoveEmptyEntries).Last();
+            switch (itemDescr)
+            {
+                case "I":
+                case "J":
+                case "S":
+                case "C":
+                case "B":
+                case "Z":
+                case "F":
+                case "D":
+                    break;
+                default:
+                {
+                    var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
+                    if (!Classes.ContainsKey(itemClass))
+                        throw new JavaRuntimeError(
+                            $"Class {name} can't be created because items class {itemClass} is not loaded.");
+                    break;
+                }
+            }
+
+            JavaClass ac = new JavaClass
+            {
+                Name = name,
+                Super = GetClass("java/lang/Object"),
+            };
+            ac.RegenerateVirtualTable(this);
+            Classes.Add(name, ac);
+            return ac;
+        }
+
+        throw new JavaRuntimeError($"Class {name} is not loaded!");
     }
 
     #endregion

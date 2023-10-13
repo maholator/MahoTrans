@@ -1263,9 +1263,8 @@ public class JavaRunner
             case JavaOpcode.anewarray:
             {
                 int len = frame.PopInt();
-                var type = (string)args;
-                //TODO assign type
-                frame.PushReference(state.Heap.AllocateArray<Reference>(len));
+                var type = (JavaClass)args;
+                frame.PushReference(state.Heap.AllocateReferenceArray(len, type));
                 pointer++;
                 break;
             }
@@ -1407,7 +1406,7 @@ public class JavaRunner
                     count[i] = frame.PopInt();
                 }
 
-                var underlyingType = d.type.Split('[', StringSplitOptions.RemoveEmptyEntries).Single();
+                var underlyingType = d.type.Name.Split('[', StringSplitOptions.RemoveEmptyEntries).Single();
                 ArrayType? arrayType = underlyingType switch
                 {
                     "I" => ArrayType.T_INT,
@@ -1421,7 +1420,7 @@ public class JavaRunner
                     _ => null
                 };
 
-                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType));
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
                 pointer++;
                 break;
             }
@@ -1445,23 +1444,23 @@ public class JavaRunner
         }
     }
 
-    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? type)
+    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP, JavaClass typeA)
     {
         if (dimensionsLeft == 0)
         {
-            Reference zr;
-            if (type.HasValue)
-                return state.Heap.AllocateArray(type.Value, count[0]);
+            if (typeP.HasValue)
+                return state.Heap.AllocateArray(typeP.Value, count[0]);
 
-            return state.Heap.AllocateArray<Reference>(count[0]);
+            return state.Heap.AllocateReferenceArray(count[0], typeA);
         }
 
-        var r = state.Heap.AllocateArray<Reference>(count[dimensionsLeft]);
+        var r = state.Heap.AllocateReferenceArray(count[dimensionsLeft], typeA);
 
         var arr = state.Heap.ResolveArray<Reference>(r);
+        var subType = state.GetClass(typeA.Name.Substring(1));
         for (int i = 0; i < arr.Length; i++)
         {
-            arr[i] = CreateMultiSubArray(dimensionsLeft - 1, count, state, type);
+            arr[i] = CreateMultiSubArray(dimensionsLeft - 1, count, state, typeP, subType);
         }
 
         return r;

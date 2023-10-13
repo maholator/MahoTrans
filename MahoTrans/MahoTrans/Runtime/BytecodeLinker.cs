@@ -398,8 +398,7 @@ public static class BytecodeLinker
                 case JavaOpcode.anewarray:
                 {
                     var type = (string)consts[Combine(args[0], args[1])];
-                    // no class because this may contain [[I and so on.
-                    data = type;
+                    data = jvm.GetClass(type);
                     break;
                 }
                 case JavaOpcode.arraylength:
@@ -410,7 +409,7 @@ public static class BytecodeLinker
                 case JavaOpcode.instanceof:
                 {
                     var type = (string)consts[Combine(args[0], args[1])];
-                    data = jvm.Classes[type];
+                    data = jvm.GetClass(type);
                     break;
                 }
                 case JavaOpcode.monitorenter:
@@ -424,8 +423,7 @@ public static class BytecodeLinker
                 {
                     var dims = args[2];
                     var type = (string)consts[Combine(args[0], args[1])];
-                    // no class because this may contain [[I and so on.
-                    data = new MultiArrayInitializer(dims, type);
+                    data = new MultiArrayInitializer(dims, jvm.GetClass(type));
                     break;
                 }
                 case JavaOpcode.ifnull:

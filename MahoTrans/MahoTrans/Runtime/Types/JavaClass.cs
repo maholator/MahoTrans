@@ -20,10 +20,7 @@ public class JavaClass
     public Type? ClrType;
     public bool PendingInitializer = true;
 
-    public override string ToString()
-    {
-        return Name;
-    }
+    public override string ToString() => Name;
 
     public TypeAttributes ClrFlags
     {

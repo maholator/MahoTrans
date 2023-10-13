@@ -50,7 +50,7 @@ public sealed class String : Object
     public Reference getBytes()
     {
         var data = Value.EncodeDefault().ToSigned();
-        return Heap.AllocateArray(data);
+        return Heap.AllocateArray(data, "[B");
     }
 
     [JavaDescriptor("(Ljava/lang/String;)[B")]
@@ -58,7 +58,7 @@ public sealed class String : Object
     {
         //TODO
         var data = Value.EncodeUTF8().ToSigned();
-        return Heap.AllocateArray(data);
+        return Heap.AllocateArray(data, "[B");
     }
 
     [return: JavaType(typeof(String))]

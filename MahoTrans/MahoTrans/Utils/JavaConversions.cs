@@ -62,6 +62,6 @@ public static class JavaConversions
             r[i] = heap.AllocateString(list[i]);
         }
 
-        return heap.AllocateArray(r);
+        return heap.AllocateArray(r, "[java/lang/String");
     }
 }

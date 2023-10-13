@@ -27,7 +27,7 @@ public class ByteArrayOutputStream : OutputStream
     [JavaDescriptor("()[B")]
     public Reference toByteArray()
     {
-        return Heap.AllocateArray(buf.ToArray());
+        return Heap.AllocateArray(buf.ToArray(), "[B");
     }
 
     [return: String]

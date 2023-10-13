@@ -67,7 +67,7 @@ public class Class : Object
             return Reference.Null;
 
         var stream = Heap.AllocateObject<ByteArrayInputStream>();
-        var buf = Heap.AllocateArray(data);
+        var buf = Heap.AllocateArray(data, "[B");
         stream.Init(buf);
         return stream.This;
     }

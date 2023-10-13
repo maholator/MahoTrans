@@ -59,24 +59,41 @@ public class JavaHeap
 
     public Reference AllocateArray<T>(int length) where T : struct
     {
+        if (typeof(T) == typeof(Reference))
+            throw new JavaRuntimeError("Reference array must have assigned class!");
         var r = TakePlace();
         _heap[r.Index] = new Array<T>
         {
             HeapAddress = r.Index,
             Value = new T[length],
-            JavaClass = State.Classes["java/lang/Array"]
+            JavaClass = PrimitiveToArrayType<T>(),
         };
         return r;
     }
 
-    public Reference AllocateArray<T>(T[] data) where T : struct
+    public Reference AllocateReferenceArray(int length, JavaClass cls)
+    {
+        var r = TakePlace();
+        _heap[r.Index] = new Array<Reference>
+        {
+            HeapAddress = r.Index,
+            Value = new Reference[length],
+            JavaClass = cls
+        };
+        return r;
+    }
+
+    public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
+        AllocateArray<T>(data, State.GetClass(cls));
+
+    public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
         var r = TakePlace();
         _heap[r.Index] = new Array<T>
         {
             HeapAddress = r.Index,
             Value = data,
-            JavaClass = State.Classes["java/lang/Array"]
+            JavaClass = cls
         };
         return r;
     }
@@ -95,6 +112,30 @@ public class JavaHeap
             ArrayType.T_LONG => AllocateArray<long>(len),
             _ => throw new ArgumentOutOfRangeException(nameof(arrayType), arrayType, null)
         };
+    }
+
+    public JavaClass PrimitiveToArrayType<T>()
+    {
+        string name;
+        if (typeof(T) == typeof(int))
+            name = "[I";
+        else if (typeof(T) == typeof(long))
+            name = "[J";
+        else if (typeof(T) == typeof(float))
+            name = "[F";
+        else if (typeof(T) == typeof(double))
+            name = "[D";
+        else if (typeof(T) == typeof(short))
+            name = "[S";
+        else if (typeof(T) == typeof(char))
+            name = "[C";
+        else if (typeof(T) == typeof(bool))
+            name = "[Z";
+        else if (typeof(T) == typeof(sbyte))
+            name = "[B";
+        else
+            throw new ArgumentException();
+        return State.GetClass(name);
     }
 
     #endregion

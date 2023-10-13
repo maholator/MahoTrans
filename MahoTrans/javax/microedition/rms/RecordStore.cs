@@ -137,7 +137,7 @@ public class RecordStore : Object
         var buf = Toolkit.RecordStore.GetRecord(Heap.ResolveString(storeName), recordId);
         if (buf == null)
             Heap.Throw<InvalidRecordIDException>();
-        return Heap.AllocateArray(buf);
+        return Heap.AllocateArray(buf, "[B");
     }
 
     public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
