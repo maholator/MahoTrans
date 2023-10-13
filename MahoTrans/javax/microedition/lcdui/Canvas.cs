@@ -1,8 +1,6 @@
-using MahoTrans;
+using javax.microedition.ams.events;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Runtime.Types;
-using MahoTrans.Utils;
 
 namespace javax.microedition.lcdui;
 
@@ -26,29 +24,9 @@ public class Canvas : Displayable
         return g.This;
     }
 
-    [JavaDescriptor("()V")]
-    public JavaMethodBody repaint(JavaClass @class)
+    public void repaint()
     {
-        return new JavaMethodBody
-        {
-            LocalsCount = 1,
-            StackSize = 2,
-            RawCode = new Instruction[]
-            {
-                new Instruction(JavaOpcode.aload_0),
-                new Instruction(JavaOpcode.aload_0),
-                new Instruction(JavaOpcode.invokespecial,
-                    @class.PushConstant(new NameDescriptorClass("ObtainGraphics",
-                            "()Ljavax/microedition/lcdui/Graphics;",
-                            "javax/microedition/lcdui/Canvas"))
-                        .Split()),
-                new Instruction(JavaOpcode.invokevirtual,
-                    @class.PushConstant(new NameDescriptorClass("paint", "(Ljavax/microedition/lcdui/Graphics;)V",
-                            "javax/microedition/lcdui/Canvas"))
-                        .Split()),
-                new Instruction(JavaOpcode.@return)
-            }
-        };
+        Heap.State.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
 
     public void serviceRepaints()
