@@ -10,6 +10,8 @@ public sealed class String : Object
 {
     [JavaIgnore] public string Value = null!;
 
+    #region Constructors
+
     [InitMethod]
     [JavaDescriptor("([B)V")]
     public void InitBytes(Reference arr)
@@ -19,10 +21,42 @@ public sealed class String : Object
     }
 
     [InitMethod]
+    [JavaDescriptor("([BII)V")]
+    public void InitBytes(Reference arr, int from, int len)
+    {
+        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
+        Value = buf.DecodeDefault();
+    }
+
+    [InitMethod]
+    public void InitBytes([JavaType("[B")] Reference arr, int from, int len, [String] Reference enc)
+    {
+        //TODO
+        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
+        Value = buf.DecodeUTF8();
+    }
+
+    [InitMethod]
     public void Init()
     {
         Value = string.Empty;
     }
+
+    [InitMethod]
+    [JavaDescriptor("([C)V")]
+    public void Init(Reference charArr)
+    {
+        Value = new string(Heap.ResolveArray<char>(charArr));
+    }
+
+    [InitMethod]
+    [JavaDescriptor("([CII)V")]
+    public void Init(Reference charArr, int from, int len)
+    {
+        Value = new string(Heap.ResolveArray<char>(charArr), from, len);
+    }
+
+    #endregion
 
     public int length()
     {
@@ -109,6 +143,9 @@ public sealed class String : Object
 
     [return: String]
     public Reference replace(char from, char to) => Heap.AllocateString(Value.Replace(from, to));
+
+    [return: String]
+    public Reference trim() => Heap.AllocateString(Value.Trim());
 
     #region valueOf
 
