@@ -30,6 +30,8 @@ public class JvmState
     /// </summary>
     public readonly Dictionary<int, JavaThread> WaitingThreads = new();
 
+    private List<ThreadWakeupHook> WakeupHooks = new();
+
     private readonly object _threadPoolLock = new();
 
     private readonly Dictionary<string, byte[]> _resources = new();
@@ -259,7 +261,7 @@ public class JvmState
         }
     }
 
-    public void Detach(JavaThread thread)
+    public void Detach(JavaThread thread, long returnAfter)
     {
         lock (_threadPoolLock)
         {
@@ -267,6 +269,10 @@ public class JvmState
                 throw new JavaRuntimeError($"Attempt to detach {thread} which is not attached.");
 
             WaitingThreads.Add(thread.ThreadId, thread);
+            if (returnAfter >= 0)
+            {
+                WakeupHooks.Add(new ThreadWakeupHook(Toolkit.System.CurrentMillis + returnAfter, thread.ThreadId));
+            }
         }
     }
 
@@ -281,11 +287,30 @@ public class JvmState
         {
             if (WaitingThreads.Remove(id, out var th))
             {
+                for (int i = 0; i < WakeupHooks.Count; i++)
+                {
+                    if (WakeupHooks[i].ThreadId == id)
+                    {
+                        WakeupHooks.RemoveAt(i);
+                    }
+                }
+
                 AliveThreads.Insert(AliveThreads.Count, th);
                 return true;
             }
 
             return false;
+        }
+    }
+
+    public void CheckTimeouts()
+    {
+        var now = Toolkit.System.CurrentMillis;
+
+        for (int i = WakeupHooks.Count - 1; i >= 0; i--)
+        {
+            if (WakeupHooks[i].WakeupAtMs <= now)
+                Attach(WakeupHooks[i].ThreadId);
         }
     }
 
@@ -318,6 +343,7 @@ public class JvmState
                         JavaRunner.Step(thread, this);
                 }
 
+                CheckTimeouts();
                 count = AliveThreads.Count;
             }
         });
@@ -351,6 +377,8 @@ public class JvmState
                 else
                     JavaRunner.Step(thread, this);
             }
+
+            CheckTimeouts();
         });
     }
 

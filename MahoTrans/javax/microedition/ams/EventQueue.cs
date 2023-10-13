@@ -36,7 +36,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
             {
                 // no more events
-                Jvm.Detach(JavaThread);
+                Jvm.Detach(JavaThread, 0);
                 // it will stay detached until Enqueue is called.
             }
             // if there are more events - do nothing

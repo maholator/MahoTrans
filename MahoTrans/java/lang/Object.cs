@@ -52,7 +52,7 @@ public class Object
     /// For internal usage. Called by <see cref="wait()"/> to detach from monitor and scheduler.
     /// </summary>
     /// <returns>Waiter object to store on stack.</returns>
-    public long WaitMonitor()
+    public long WaitMonitor(long timeout)
     {
         // adding self to waitlist
         var mw = new MonitorWait(MonitorReEnterCount, MonitorOwner);
@@ -62,7 +62,7 @@ public class Object
         // detaching from scheduler
         var jvm = Heap.State;
         var thread = jvm.AliveThreads.Find(x => x.ThreadId == MonitorOwner);
-        jvm.Detach(thread!);
+        jvm.Detach(thread!, timeout <= 0 ? -1 : timeout);
 
         // leaving the monitor
         MonitorOwner = 0;
@@ -107,8 +107,9 @@ public class Object
             RawCode = new Instruction[]
             {
                 new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.aload_1),
                 new Instruction(JavaOpcode.invokespecial,
-                    @class.PushConstant(new NameDescriptorClass("WaitMonitor", "()J", "java/lang/Object")).Split()),
+                    @class.PushConstant(new NameDescriptorClass("WaitMonitor", "(J)J", "java/lang/Object")).Split()),
                 // at this point thread is detached
 
                 // running further? seems we have notified.
