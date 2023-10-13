@@ -14,8 +14,9 @@ public class RecordStore : Object
 {
     private Reference storeName;
     private int openCount;
-    [JavaType(typeof(Vector))]
-    public Reference listeners;
+
+    [JavaType(typeof(Vector))] public Reference listeners;
+
     private int version;
     private long modifiedAt;
 
@@ -52,6 +53,7 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var name = Heap.ResolveString(storeName);
+
         if (count == 0)
         {
             return Toolkit.RecordStore.AddRecord(name, Array.Empty<sbyte>(), 0, 0);
@@ -76,6 +78,7 @@ public class RecordStore : Object
         CheckNotClosed();
         openCount--;
         Toolkit.RecordStore.CloseStore(Heap.ResolveString(storeName));
+
         if (openCount == 0)
         {
             Heap.Resolve<Vector>(listeners).removeAllElements();
@@ -89,6 +92,7 @@ public class RecordStore : Object
     public static void deleteRecordStore([String] Reference str)
     {
         var name = Heap.ResolveString(str);
+
         if (openedStores.TryGetValue(name, out var storeRef))
         {
             var store = Heap.Resolve<RecordStore>(storeRef);
@@ -195,27 +199,28 @@ public class RecordStore : Object
     public static Reference openRecordStore([String] Reference name, bool create, int authMode, bool writable)
     {
         var nameStr = Heap.ResolveString(name);
+
+        if (!Toolkit.RecordStore.OpenStore(nameStr, create))
+        {
+            Heap.Throw<RecordStoreNotFoundException>();
+            return Reference.Null;
+        }
+
         if (openedStores.TryGetValue(nameStr, out var opened))
         {
-            var store = Heap.Resolve<RecordStore>(opened);
-            store.openCount++;
+            var s = Heap.Resolve<RecordStore>(opened);
+            s.openCount++;
             return opened;
         }
 
-        if (Toolkit.RecordStore.OpenStore(nameStr, create))
-        {
-            var store = Heap.AllocateObject<RecordStore>();
-            store.openCount = 1;
-            store.storeName = name;
-            var vec = Heap.AllocateObject<Vector>();
-            vec.Init();
-            store.listeners = vec.This;
-            openedStores.Add(nameStr, store.This);
-            return store.This;
-        }
-
-        Heap.Throw<RecordStoreNotFoundException>();
-        return Reference.Null;
+        var store = Heap.AllocateObject<RecordStore>();
+        store.openCount = 1;
+        store.storeName = name;
+        var vec = Heap.AllocateObject<Vector>();
+        vec.Init();
+        store.listeners = vec.This;
+        openedStores.Add(nameStr, store.This);
+        return store.This;
     }
 
     [return: JavaType(typeof(RecordStore))]
