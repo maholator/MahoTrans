@@ -55,4 +55,11 @@ public class Canvas : Displayable
     {
         //TODO events loop
     }
+
+    public int getGameAction(int keyCode) => 0;
+
+    //TODO all this
+    public void setFullScreenMode(bool mode)
+    {
+    }
 }
