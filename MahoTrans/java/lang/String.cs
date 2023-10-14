@@ -113,9 +113,31 @@ public sealed class String : Object
         return false;
     }
 
+    public int compareTo([String] Reference anotherString)
+    {
+        string s2 = Heap.ResolveString(anotherString);
+
+        var len = Math.min(s2.Length, Value.Length);
+
+        for (int k = 0; k < len; k++)
+        {
+            int diff = Value[k] - s2[k];
+            if (diff != 0)
+                return diff;
+        }
+
+        return Value.Length - s2.Length;
+    }
+
     public int indexOf(int c) => Value.IndexOf((char)c);
 
     public int indexOf(int c, int from) => Value.IndexOf((char)c, from);
+
+    public int indexOf([String] Reference strr)
+    {
+        var str = Heap.ResolveString(strr);
+        return Value.IndexOf(str, StringComparison.Ordinal);
+    }
 
     public int indexOf([String] Reference strr, int from)
     {
