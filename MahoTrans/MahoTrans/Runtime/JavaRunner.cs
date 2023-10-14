@@ -596,7 +596,31 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.dup2_x1:
-                throw new NotImplementedException("No dup2_x1 opcode");
+            {
+                var v1 = frame.Pop();
+                var t1 = frame.GetPoppedType();
+                var v2 = frame.Pop();
+                var t2 = frame.GetPoppedType();
+                if ((t1 & PrimitiveType.IsDouble) != 0)
+                {
+                    frame.PushUnchecked(v1,t1);
+                    frame.PushUnchecked(v2,t2);
+                    frame.PushUnchecked(v1,t1);
+                }
+                else
+                {
+                    var v3 = frame.Pop();
+                    var t3 = frame.GetPoppedType();
+                    frame.PushUnchecked(v2,t2);
+                    frame.PushUnchecked(v1,t1);
+                    frame.PushUnchecked(v3,t3);
+                    frame.PushUnchecked(v2,t2);
+                    frame.PushUnchecked(v1,t1);
+                }
+
+                pointer++;
+                break;
+            }
             case JavaOpcode.dup2_x2:
                 throw new NotImplementedException("No dup2_x2 opcode");
             case JavaOpcode.swap:
