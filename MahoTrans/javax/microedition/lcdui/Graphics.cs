@@ -140,4 +140,10 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height,
             (SpriteTransform)transform, (GraphicsAnchor)anchor, _clip);
     }
+
+    public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
+        int height, bool processAlpha)
+    {
+        //TODO
+    }
 }
