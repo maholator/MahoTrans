@@ -1,3 +1,4 @@
+using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkit;
@@ -53,4 +54,20 @@ public class Image : Object
 
     public int getWidth() => Handle.Width;
     public int getHeight() => Handle.Height;
+
+    public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
+        int height)
+    {
+        Handle.GetRGB(Heap.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
+    }
+
+    [return: JavaType(typeof(Graphics))]
+    public Reference getGraphics()
+    {
+        if(!Handle.IsMutable)
+            Heap.Throw<IllegalStateException>();
+        var g = Heap.AllocateObject<Graphics>();
+        g.Implementation = Handle.GetGraphics();
+        return g.This;
+    }
 }
