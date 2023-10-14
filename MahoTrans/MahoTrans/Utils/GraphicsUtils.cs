@@ -1,12 +1,12 @@
 using java.lang;
 using javax.microedition.lcdui;
-using MahoTrans.Runtime;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Utils;
 
 public static class GraphicsUtils
 {
-    public static (int, int) Anchor(this GraphicsAnchor anchor, int x, int y, int w, int h, JavaHeap heap)
+    public static (int, int) Anchor(this GraphicsAnchor anchor, int x, int y, int w, int h)
     {
         if (anchor == 0)
             return (x, y);
@@ -18,14 +18,17 @@ public static class GraphicsUtils
         {
             case GraphicsAnchor.Left:
                 break;
+
             case GraphicsAnchor.HCenter:
                 x -= w / 2;
                 break;
+
             case GraphicsAnchor.Right:
                 x -= w;
                 break;
+
             default:
-                heap.Throw<IllegalArgumentException>();
+                Object.Heap.Throw<IllegalArgumentException>();
                 break;
         }
 
@@ -33,14 +36,17 @@ public static class GraphicsUtils
         {
             case GraphicsAnchor.Top:
                 break;
+
             case GraphicsAnchor.VCenter:
                 y -= h / 2;
                 break;
+
             case GraphicsAnchor.Bottom:
                 y -= h;
                 break;
+
             default:
-                heap.Throw<IllegalArgumentException>();
+                Object.Heap.Throw<IllegalArgumentException>();
                 break;
         }
 
