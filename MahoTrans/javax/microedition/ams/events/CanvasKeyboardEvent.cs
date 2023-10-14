@@ -22,7 +22,7 @@ public class CanvasKeyboardEvent : Event
     [JavaIgnore]
     public JavaMethodBody GenerateBridge(JavaClass cls, string callbackName)
     {
-        var thisName = typeof(CanvasPointerEvent).ToJavaName();
+        var thisName = typeof(CanvasKeyboardEvent).ToJavaName();
         return new JavaMethodBody(2, 1)
         {
             RawCode = new Instruction[]
