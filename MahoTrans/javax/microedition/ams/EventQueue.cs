@@ -8,6 +8,9 @@ using Thread = java.lang.Thread;
 
 namespace javax.microedition.ams;
 
+/// <summary>
+/// Special thread that always works in JVM's background and handles events sent from AMS to midlet.
+/// </summary>
 public class EventQueue : Thread
 {
     [JavaIgnore] private Queue<Reference> _events = new();
