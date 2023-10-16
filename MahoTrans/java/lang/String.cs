@@ -95,6 +95,12 @@ public sealed class String : Object
         return Heap.AllocateArray(data, "[B");
     }
 
+    [return: JavaType("[C")]
+    public Reference toCharArray()
+    {
+        return Heap.AllocateArray(Value.ToCharArray(), "[C");
+    }
+
     [return: JavaType(typeof(String))]
     public Reference toString() => This;
 

@@ -92,6 +92,27 @@ public class StringBuffer : Object
         };
     }
 
+    [return: JavaType(typeof(StringBuffer))]
+    public Reference delete(int start, int end)
+    {
+        if (start >= _buffer.Count || start > end)
+            Heap.Throw<StringIndexOutOfBoundsException>();
+        _buffer = _buffer.Take(start).Concat(_buffer.Skip(end)).ToList();
+        return This;
+    }
+
+    public char charAt(int index) => _buffer[index];
+
+    [return: JavaType(typeof(StringBuffer))]
+    public Reference deleteCharAt(int index)
+    {
+        if (index < 0 || index >= _buffer.Count)
+            Heap.Throw<StringIndexOutOfBoundsException>();
+        _buffer.RemoveAt(index);
+        return This;
+    }
+
+
     public int length() => _buffer.Count;
 
     [return: String]
