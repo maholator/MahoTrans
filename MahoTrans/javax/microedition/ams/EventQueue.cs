@@ -16,10 +16,21 @@ public class EventQueue : Thread
     [JavaIgnore] private Queue<Reference> _events = new();
     [JavaIgnore] private object _lock = new();
 
+    public int Length => _events.Count;
+
     /// <summary>
     /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
     /// </summary>
     [JavaIgnore] public JvmState Jvm = null!;
+
+    [JavaIgnore] public Dictionary<Reference, bool> QueuedRepaints = new();
+
+    private bool IsRepaintPendingFor(Reference r)
+    {
+        if (QueuedRepaints.TryGetValue(r, out var b))
+            return b;
+        return false;
+    }
 
     [JavaIgnore]
     public void Enqueue<T>(Action<T> setup) where T : Event
@@ -28,7 +39,15 @@ public class EventQueue : Thread
         {
             var e = Jvm.Heap.AllocateObject<T>();
             setup.Invoke(e);
+            if (e is RepaintEvent re)
+            {
+                if (IsRepaintPendingFor(re.Target))
+                    return;
+                QueuedRepaints[re.Target] = true;
+            }
+
             _events.Enqueue(e.This);
+            //Console.WriteLine($"{e.JavaClass} is enqueued");
             Jvm.Attach(JavaThread.ThreadId);
         }
     }
@@ -55,6 +74,12 @@ public class EventQueue : Thread
             if (_events.Count == 0)
                 return Reference.Null;
             var e = _events.Dequeue();
+            if (Heap.ResolveObject(e) is RepaintEvent re)
+            {
+                QueuedRepaints[re.Target] = false;
+            }
+
+            //Console.WriteLine($"{Heap.ResolveObject(e).JavaClass} is dequeued, {_events.Count} more...");
             return e;
         }
     }
@@ -105,6 +130,7 @@ public class EventQueue : Thread
                 var evRef = list[i];
                 if (Heap.ResolveObject(evRef) is RepaintEvent re)
                 {
+                    QueuedRepaints[re.Target] = false;
                     list.RemoveAt(i);
                     _events = new Queue<Reference>(list);
                     return evRef;
