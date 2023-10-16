@@ -54,7 +54,13 @@ public class Integer : Object
         return Heap.AllocateString(Convert.ToString(i, 16));
     }
 
-    public static int parseInt([String] Reference str) => int.Parse(Heap.ResolveString(str));
+    public static int parseInt([String] Reference str)
+    {
+        if (!int.TryParse(Heap.ResolveString(str), out var i))
+            Heap.Throw<NumberFormatException>();
+
+        return i;
+    }
 
     public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Heap.ResolveString(str), radix);
 }
