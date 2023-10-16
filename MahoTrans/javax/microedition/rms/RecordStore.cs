@@ -175,7 +175,8 @@ public class RecordStore : Object
 
     public int getSizeAvailable()
     {
-        throw new NotImplementedException();
+        //TODO
+        return 798 * 1024 + 590;
     }
 
     public int getVersion() => version;
