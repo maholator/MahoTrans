@@ -72,10 +72,14 @@ public class EventQueue : Thread
                 new Instruction(JavaOpcode.invokespecial, cls.PushConstant(parkMethod).Split()),
                 // calling event
                 new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorenter),
+                new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.invokespecial, cls.PushConstant(dequeueMethod).Split()),
                 new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(invokeMethod).Split()),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorexit),
                 // loop
-                new Instruction(JavaOpcode.@goto, (-11).Split())
+                new Instruction(JavaOpcode.@goto, (-15).Split())
             }
         };
     }
@@ -117,12 +121,18 @@ public class EventQueue : Thread
             RawCode = new Instruction[]
             {
                 new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorenter),
+                new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(taker).Split()),
                 new Instruction(JavaOpcode.dup),
-                new Instruction(JavaOpcode.ifnonnull, new byte[] { 0, 5 }),
+                new Instruction(JavaOpcode.ifnonnull, new byte[] { 0, 7 }),
                 new Instruction(JavaOpcode.pop),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorexit),
                 new Instruction(JavaOpcode.@return),
                 new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(invokeMethod).Split()),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorexit),
                 new Instruction(JavaOpcode.@return),
             }
         };
