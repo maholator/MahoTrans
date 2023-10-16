@@ -77,6 +77,12 @@ public class Vector : Object
         List[index] = obj;
     }
 
+    public int indexOf(Reference obj)
+    {
+        //TODO equality
+        return List.IndexOf(obj);
+    }
+
     public void trimToSize()
     {
     }

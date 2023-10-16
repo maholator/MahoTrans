@@ -37,6 +37,14 @@ public sealed class String : Object
     }
 
     [InitMethod]
+    public void InitBytes([JavaType("[B")] Reference arr, [String] Reference enc)
+    {
+        //TODO
+        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().ToArray();
+        Value = buf.DecodeUTF8();
+    }
+
+    [InitMethod]
     public void Init()
     {
         Value = string.Empty;

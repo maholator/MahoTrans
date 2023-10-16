@@ -44,4 +44,10 @@ public class Display : Object
     {
         Heap.State.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
     }
+
+    public bool vibrate(int dur)
+    {
+        //TODO
+        return true;
+    }
 }
