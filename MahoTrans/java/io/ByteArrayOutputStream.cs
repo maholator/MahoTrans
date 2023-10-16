@@ -47,6 +47,8 @@ public class ByteArrayOutputStream : OutputStream
         buf.Add((sbyte)(byte)(uint)b);
     }
 
+    public int size() => buf.Count;
+
     public void flush()
     {
         // do nothing
