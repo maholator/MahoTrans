@@ -52,7 +52,10 @@ public class EventQueue : Thread
     {
         lock (_lock)
         {
-            return _events.Dequeue();
+            if (_events.Count == 0)
+                return Reference.Null;
+            var e = _events.Dequeue();
+            return e;
         }
     }
 
@@ -63,7 +66,7 @@ public class EventQueue : Thread
         var dequeueMethod = new NameDescriptorClass(nameof(dequeue), $"()L{typeof(Event).ToJavaName()};",
             typeof(EventQueue).ToJavaName());
         var invokeMethod = new NameDescriptorClass("invoke", "()V", typeof(Event).ToJavaName());
-        return new JavaMethodBody(1, 1)
+        return new JavaMethodBody(2, 1)
         {
             RawCode = new[]
             {
@@ -75,11 +78,19 @@ public class EventQueue : Thread
                 new Instruction(JavaOpcode.monitorenter),
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.invokespecial, cls.PushConstant(dequeueMethod).Split()),
+
+                new Instruction(JavaOpcode.dup),
+                new Instruction(JavaOpcode.ifnonnull, new byte[] { 0, 9 }),
+                new Instruction(JavaOpcode.pop),
+                new Instruction(JavaOpcode.aload_0),
+                new Instruction(JavaOpcode.monitorexit),
+                new Instruction(JavaOpcode.@goto, new byte[] { 0, 8 }),
+
                 new Instruction(JavaOpcode.invokevirtual, cls.PushConstant(invokeMethod).Split()),
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.monitorexit),
                 // loop
-                new Instruction(JavaOpcode.@goto, (-15).Split())
+                new Instruction(JavaOpcode.@goto, (-25).Split())
             }
         };
     }
