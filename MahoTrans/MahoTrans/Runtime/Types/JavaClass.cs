@@ -112,11 +112,40 @@ public class JavaClass
         VirtualTable = dict;
     }
 
-    public Field? GetLocalField(NameDescriptor descriptor)
+    /// <summary>
+    /// Gets field defined on this class or one of its supers. This assumes that class tree already built.
+    /// </summary>
+    /// <param name="descriptor">Descriptor of the field.</param>
+    /// <returns>Field object.</returns>
+    public Field GetFieldRecursive(NameDescriptor descriptor)
     {
-        if (Fields.TryGetValue(descriptor, out var f))
-            return f;
-        return null;
+        var cls = this;
+        while (true)
+        {
+            if (cls.Fields.TryGetValue(descriptor, out var f))
+                return f;
+            if (cls.IsObject)
+                throw new JavaLinkageException($"Field {descriptor} is not found in class {this}");
+            cls = cls.Super;
+        }
+    }
+
+    /// <summary>
+    /// Gets method defined on this class or one of its supers. This assumes that class tree already built.
+    /// </summary>
+    /// <param name="descriptor">Descriptor of the field.</param>
+    /// <returns>Method object.</returns>
+    public Method GetMethodRecursive(NameDescriptor descriptor)
+    {
+        var cls = this;
+        while (true)
+        {
+            if (cls.Methods.TryGetValue(descriptor, out var m))
+                return m;
+            if (cls.IsObject)
+                throw new JavaLinkageException($"Method {descriptor} is not found in class {this}");
+            cls = cls.Super;
+        }
     }
 
     public void AddMethod(Method m) => Methods.Add(m.Descriptor, m);

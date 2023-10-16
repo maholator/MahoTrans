@@ -7,16 +7,21 @@ public static class BytecodeLinker
 {
     public static LinkedInstruction[] Link(JavaMethodBody method, JvmState jvm, Instruction[] code)
     {
+        var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
+        var cls = method.Method.Class;
+#if DEBUG
+        return LinkInternal(cls, jvm, code, isClinit);
+#else
         try
         {
-            return LinkInternal(method.Method.Class, jvm, code,
-                method.Method.Descriptor == new NameDescriptor("<clinit>", "()V"));
+            return LinkInternal(cls, jvm, code, isClinit);
         }
         catch (Exception e)
         {
             throw new JavaLinkageException(
                 $"Failed to perform JIT linking for method {method} in class {method.Method?.Class}", e);
         }
+#endif
     }
 
     private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code, bool isClinit)
@@ -321,7 +326,7 @@ public static class BytecodeLinker
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                     var c = jvm.Classes[d.ClassName];
-                    var f = c.Fields[d.Descriptor];
+                    var f = c.GetFieldRecursive(d.Descriptor);
                     var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
                     data = new FieldPointer(b, c);
                     break;
@@ -330,7 +335,7 @@ public static class BytecodeLinker
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                     var c = jvm.Classes[d.ClassName];
-                    var f = c.Fields[d.Descriptor];
+                    var f = c.GetFieldRecursive(d.Descriptor);
                     var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
                     data = new FieldPointer(b, c);
                     break;
@@ -339,7 +344,7 @@ public static class BytecodeLinker
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                     var c = jvm.Classes[d.ClassName];
-                    var f = c.Fields[d.Descriptor];
+                    var f = c.GetFieldRecursive(d.Descriptor);
                     var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
                     data = new FieldPointer(b, c);
                     break;
@@ -348,7 +353,7 @@ public static class BytecodeLinker
                 {
                     var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                     var c = jvm.Classes[d.ClassName];
-                    var f = c.Fields[d.Descriptor];
+                    var f = c.GetFieldRecursive(d.Descriptor);
                     var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
                     data = new FieldPointer(b, c);
                     break;
@@ -362,18 +367,9 @@ public static class BytecodeLinker
                 case JavaOpcode.invokestatic:
                 {
                     var ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    var nd = ndc.Descriptor;
                     var @class = jvm.Classes[ndc.ClassName];
-                    try
-                    {
-                        var m = @class.Methods[nd];
-                        data = m;
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        throw new JavaLinkageException($"Method {nd} not found in class {ndc.ClassName}");
-                    }
-
+                    var m = @class.GetMethodRecursive(ndc.Descriptor);
+                    data = m;
                     break;
                 }
                 case JavaOpcode.invokeinterface:
