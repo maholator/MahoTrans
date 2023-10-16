@@ -57,7 +57,29 @@ public class Canvas : Displayable
 
     public Reference getQueue() => Heap.State.EventQueue.This;
 
-    public int getGameAction(int keyCode) => 0;
+    public int getGameAction(int keyCode)
+    {
+        switch (keyCode)
+        {
+            case -1:
+            case '2':
+                return 1;
+            case -2:
+            case '8':
+                return 6;
+            case -3:
+            case '4':
+                return 2;
+            case -4:
+            case '6':
+                return 5;
+            case -5:
+            case 5:
+                return 8;
+            default:
+                return 0;
+        }
+    }
 
     //TODO all this
     public void setFullScreenMode(bool mode)
