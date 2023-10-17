@@ -24,6 +24,11 @@ public class System : Object
     [return: String]
     public static Reference getProperty([String] Reference key)
     {
+        switch (Heap.ResolveString(key))
+        {
+            case "microedition.platform":
+                return Heap.AllocateString("Nokia MT-292");
+        }
         return new Reference(0);
     }
 
