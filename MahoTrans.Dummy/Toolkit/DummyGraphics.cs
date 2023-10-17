@@ -43,4 +43,10 @@ public class DummyGraphics : IGraphics
     public void DrawArc(int x, int y, int w, int h, int begin, int length, uint color, GraphicsClip clip)
     {
     }
+
+    public void DrawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width, int height,
+        bool processAlpha,
+        GraphicsClip clip)
+    {
+    }
 }

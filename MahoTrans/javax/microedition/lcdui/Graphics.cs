@@ -144,6 +144,7 @@ public class Graphics : Object, DirectGraphics
     public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
-        //TODO
+        var buf = Heap.ResolveArray<int>(rgbData);
+        Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha, _clip);
     }
 }
