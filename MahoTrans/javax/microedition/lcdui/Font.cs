@@ -39,11 +39,19 @@ public class Font : Object
 
     public int getHeight() => Height;
 
+    public int getBaselinePosition() => Height;
+
     public int getSize() => (int)Size;
 
     public int stringWidth([String] Reference str)
     {
         return Toolkit.Display.GetCharsWidth(Face, Style, Height, Heap.ResolveString(str));
+    }
+
+    public int substringWidth([String] Reference str, int from, int len)
+    {
+        return Toolkit.Display.GetCharsWidth(Face, Style, Height,
+            Heap.ResolveString(str).Skip(from).Take(len).ToArray());
     }
 
     public int charWidth(char c)
