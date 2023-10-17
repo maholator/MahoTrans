@@ -81,6 +81,10 @@ public class Canvas : Displayable
         }
     }
 
+    public bool hasPointerEvents() => true;
+
+    public bool isShown() => true;
+
     //TODO all this
     public void setFullScreenMode(bool mode)
     {
