@@ -394,7 +394,12 @@ public static class BytecodeLinker
                 case JavaOpcode.anewarray:
                 {
                     var type = (string)consts[Combine(args[0], args[1])];
-                    data = jvm.GetClass(type);
+                    string arrType;
+                    if (type.StartsWith('['))
+                        arrType = '[' + type;
+                    else
+                        arrType = $"[L{type};";
+                    data = jvm.GetClass(arrType);
                     break;
                 }
                 case JavaOpcode.arraylength:
