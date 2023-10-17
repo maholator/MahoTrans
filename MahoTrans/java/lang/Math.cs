@@ -6,7 +6,6 @@ public class Math : Object
     public static float abs(float a) => global::System.Math.Abs(a);
     public static int abs(int a) => global::System.Math.Abs(a);
     public static long abs(long a) => global::System.Math.Abs(a);
-    
 
 
     public static double sin(double a) => global::System.Math.Sin(a);
@@ -18,8 +17,13 @@ public class Math : Object
     public static int min(int a, int b) => global::System.Math.Min(a, b);
 
     public static int max(int a, int b) => global::System.Math.Max(a, b);
-    
+
     public static long min(long a, long b) => global::System.Math.Min(a, b);
 
     public static long max(long a, long b) => global::System.Math.Max(a, b);
+
+
+    public static double floor(double v) => global::System.Math.Floor(v);
+
+    public static double ceil(double v) => global::System.Math.Ceiling(v);
 }
