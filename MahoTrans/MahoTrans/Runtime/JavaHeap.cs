@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
+using javax.microedition.rms;
 using MahoTrans.Runtime.Types;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -247,6 +249,7 @@ public class JavaHeap
             // this object is a root now: enumerating subtree
             List<JavaClass> classes = new List<JavaClass>();
             var c = o.JavaClass;
+
             while (true)
             {
                 classes.Add(c);
@@ -255,20 +258,30 @@ public class JavaHeap
                 c = c.Super;
             }
 
+            foreach (var sr in o.EnumerableReferences())
+            {
+                if (sr.IsNull)
+                    continue;
+                enumQueue.Enqueue(sr);
+            }
+
             foreach (var cls in classes)
             {
                 foreach (var field in cls.Fields.Values)
                 {
                     if (field.NativeField.FieldType == typeof(Reference))
                     {
-                        enumQueue.Enqueue((Reference)field.NativeField.GetValue(null)!);
+                        enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
                     }
                 }
             }
         }
 
+        int deletedCount = 0;
+
         // we marked all alive objects as alive. Time to delete dead ones.
         var all = _heap.Keys.ToArray();
+
         foreach (var i in all)
         {
             if (_heap[i].Alive)
@@ -278,8 +291,11 @@ public class JavaHeap
             else
             {
                 _heap.Remove(i);
+                deletedCount++;
             }
         }
+
+        Console.WriteLine($"GC collected {deletedCount} objects. {all.Max()} objects in total.");
     }
 
     /// <summary>
@@ -305,6 +321,14 @@ public class JavaHeap
                         }
                     }
                 }
+
+                var m = cls.ClrType?.GetMethod(nameof(RecordStore.EnumerateStaticReferences));
+                if (m != null)
+                {
+                    Console.WriteLine($"{cls} has static leafs!");
+                    var refs = m.Invoke(null, Array.Empty<object?>());
+                    roots.AddRange((IEnumerable<Reference>)refs!);
+                }
             }
 
             // threads
@@ -312,6 +336,7 @@ public class JavaHeap
             {
                 roots.Add(thread.Model);
                 var frames = thread.CallStack.Take(thread.ActiveFrameIndex + 1);
+
                 foreach (var frame in frames)
                 {
                     for (int i = 0; i <= frame!.StackTop; i++)
@@ -329,6 +354,12 @@ public class JavaHeap
                             roots.Add(variable);
                     }
                 }
+            }
+
+            // internal strings
+            foreach (var str in _internalizedStrings.Values)
+            {
+                roots.Add(new Reference(str));
             }
         }
 
