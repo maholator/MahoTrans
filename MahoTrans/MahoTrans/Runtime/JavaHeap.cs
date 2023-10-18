@@ -218,4 +218,62 @@ public class JavaHeap
             return r;
         }
     }
+
+    /// <summary>
+    /// Performs collection in this heap. This must be called only when jvm is stopped!
+    /// </summary>
+    public void RunGarbageCollector()
+    {
+    }
+
+    /// <summary>
+    /// Helper for GC. Collects all references to objects which must stay alive.
+    /// </summary>
+    /// <returns>List of references. This may contain null and invalid references (i.e. random numbers which point to nowhere).</returns>
+    public List<Reference> CollectObjectGraphRoots()
+    {
+        List<Reference> roots = new List<Reference>();
+
+        // building roots list
+        {
+            // statics
+            foreach (var cls in State.Classes.Values)
+            {
+                foreach (var field in cls.Fields.Values)
+                {
+                    if ((field.Flags & FieldFlags.Static) != 0)
+                    {
+                        if (field.NativeField.FieldType == typeof(Reference))
+                        {
+                            roots.Add((Reference)field.NativeField.GetValue(null)!);
+                        }
+                    }
+                }
+            }
+
+            // threads
+            foreach (var thread in State.AliveThreads.Concat(State.WaitingThreads.Values))
+            {
+                roots.Add(thread.Model);
+                var frames = thread.CallStack.Take(thread.ActiveFrameIndex + 1);
+                foreach (var frame in frames)
+                {
+                    for (int i = 0; i <= frame!.StackTop; i++)
+                    {
+                        if ((frame.StackTypes[i] & PrimitiveType.Reference) != (PrimitiveType)0)
+                        {
+                            roots.Add(frame.Stack[i]);
+                        }
+                    }
+
+                    foreach (var variable in frame.LocalVariables)
+                    {
+                        //TODO push only references
+                        if (variable != 0)
+                            roots.Add(variable);
+                    }
+                }
+            }
+        }
+    }
 }

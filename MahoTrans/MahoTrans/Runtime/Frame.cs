@@ -12,6 +12,9 @@ public class Frame
     /// </summary>
     public PrimitiveType[] StackTypes;
 
+    /// <summary>
+    /// Pointer to stack top. Stack contains topmost operand at this index. Stack length is this field +1.
+    /// </summary>
     public int StackTop;
 
     public Frame(JavaMethodBody method)
