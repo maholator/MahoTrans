@@ -21,6 +21,11 @@ public class Object
     [JavaIgnore] public uint MonitorReEnterCount;
     [JavaIgnore] public List<MonitorWait>? Waiters;
 
+    /// <summary>
+    /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
+    /// </summary>
+    [JavaIgnore] public bool Alive;
+
     public static JavaHeap Heap
     {
         get

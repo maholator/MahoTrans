@@ -224,6 +224,66 @@ public class JavaHeap
     /// </summary>
     public void RunGarbageCollector()
     {
+        //TODO optimization
+
+        var roots = CollectObjectGraphRoots();
+        Queue<Reference> enumQueue = new Queue<Reference>(roots);
+
+        while (enumQueue.Count > 0)
+        {
+            var r = enumQueue.Dequeue();
+
+            // invalid references?
+
+            if (r.IsNull)
+                continue;
+            if (!_heap.TryGetValue(r.Index, out var o))
+                continue;
+
+            // this object already marked?
+
+            if (o.Alive)
+                continue;
+
+            // marking as alive
+            o.Alive = true;
+
+            // this object is a root now: enumerating subtree
+            List<JavaClass> classes = new List<JavaClass>();
+            var c = o.JavaClass;
+            while (true)
+            {
+                classes.Add(c);
+                if (c.IsObject)
+                    break;
+                c = c.Super;
+            }
+
+            foreach (var cls in classes)
+            {
+                foreach (var field in cls.Fields.Values)
+                {
+                    if (field.NativeField.FieldType == typeof(Reference))
+                    {
+                        enumQueue.Enqueue((Reference)field.NativeField.GetValue(null)!);
+                    }
+                }
+            }
+        }
+
+        // we marked all alive objects as alive. Time to delete dead ones.
+        var all = _heap.Keys.ToArray();
+        foreach (var i in all)
+        {
+            if (_heap[i].Alive)
+            {
+                _heap[i].Alive = false;
+            }
+            else
+            {
+                _heap.Remove(i);
+            }
+        }
     }
 
     /// <summary>
@@ -275,5 +335,7 @@ public class JavaHeap
                 }
             }
         }
+
+        return roots;
     }
 }
