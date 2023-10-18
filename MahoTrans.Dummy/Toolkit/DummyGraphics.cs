@@ -34,6 +34,10 @@ public class DummyGraphics : IGraphics
     {
     }
 
+    public void DrawImage(IImage image, int x, int y, ImageManipulation manipul, GraphicsAnchor an, GraphicsClip clip)
+    {
+    }
+
     public void DrawString(string text, int x, int y, GraphicsAnchor an, uint color, FontFace face, FontStyle style,
         int size,
         GraphicsClip clip)
