@@ -22,7 +22,7 @@ public class Font : Object
         font.Face = (FontFace)face;
         font.Style = (FontStyle)style;
         font.Size = (FontSize)size;
-        font.Height = Toolkit.Display.GetFontHeight(font.Size);
+        font.Height = Toolkit.Fonts.GetFontHeight(font.Size);
         return font.This;
     }
 
@@ -33,7 +33,7 @@ public class Font : Object
         font.Face = 0;
         font.Style = 0;
         font.Size = FontSize.Medium;
-        font.Height = Toolkit.Display.GetFontHeight(font.Size);
+        font.Height = Toolkit.Fonts.GetFontHeight(font.Size);
         return font.This;
     }
 
@@ -45,17 +45,17 @@ public class Font : Object
 
     public int stringWidth([String] Reference str)
     {
-        return Toolkit.Display.GetCharsWidth(Face, Style, Height, Heap.ResolveString(str));
+        return Toolkit.Fonts.GetCharsWidth(Face, Style, Height, Heap.ResolveString(str));
     }
 
     public int substringWidth([String] Reference str, int from, int len)
     {
-        return Toolkit.Display.GetCharsWidth(Face, Style, Height,
+        return Toolkit.Fonts.GetCharsWidth(Face, Style, Height,
             Heap.ResolveString(str).Skip(from).Take(len).ToArray());
     }
 
     public int charWidth(char c)
     {
-        return Toolkit.Display.GetCharWidth(Face, Style, Height, c);
+        return Toolkit.Fonts.GetCharWidth(Face, Style, Height, c);
     }
 }

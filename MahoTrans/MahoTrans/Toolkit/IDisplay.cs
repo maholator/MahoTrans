@@ -4,15 +4,9 @@ namespace MahoTrans.Toolkit;
 
 public interface IDisplay
 {
-    public int GetFontHeight(FontSize size);
+    DisplayableDescriptor Register(Displayable d);
 
-    public int GetCharWidth(FontFace face, FontStyle style, int size, char c);
+    DisplayableDescriptor? Current { get; set; }
 
-    public int GetCharsWidth(FontFace face, FontStyle style, int size, ReadOnlySpan<char> c);
-
-    public void Register(Display d);
-
-    public IDisplayable Register(Displayable d);
-    
-    public IDisplayable? Current { get; set; }
+    IDisplayable Resolve(DisplayableDescriptor descriptor);
 }

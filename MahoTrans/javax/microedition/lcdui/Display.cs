@@ -19,7 +19,6 @@ public class Display : Object
         {
             var disp = Heap.AllocateObject<Display>();
             midlet.Display = disp.This;
-            Toolkit.Display.Register(disp);
         }
 
         return midlet.Display;

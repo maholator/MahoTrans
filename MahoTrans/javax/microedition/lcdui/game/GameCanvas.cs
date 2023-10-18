@@ -14,7 +14,8 @@ public class GameCanvas : Canvas
 
     public void setFullScreenMode(bool full)
     {
-        Handle.Fullscreen = full;
+        //TODO
+        //Handle.Fullscreen = full;
     }
 
     [return: JavaType(typeof(Graphics))]

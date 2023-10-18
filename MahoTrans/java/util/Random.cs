@@ -9,7 +9,7 @@ public class Random : Object
     public long Seed;
 
     [InitMethod]
-    public void Init() => Init(Toolkit.System.CurrentMillis);
+    public void Init() => Init(Toolkit.Clock.GetCurrentMs());
 
     [InitMethod]
     public void Init(long seed) => setSeed(seed);

@@ -64,6 +64,9 @@ public class Thread : Object, Runnable
 
     public static void sleep(long time)
     {
+        //return;
+        if (CurrentThread != null)
+            Heap.State.Detach(CurrentThread, time);
     }
 
     public static void yield()

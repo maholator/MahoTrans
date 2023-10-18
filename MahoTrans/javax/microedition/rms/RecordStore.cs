@@ -245,6 +245,15 @@ public class RecordStore : Object
         vector.removeElement(listener);
     }
 
+    [JavaDescriptor(
+        "(Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)Ljavax/microedition/rms/RecordEnumeration;")]
+    public Reference enumerateRecords(Reference filter, Reference comp, bool z)
+    {
+        //TODO
+        Heap.Throw<RecordStoreNotOpenException>();
+        return Reference.Null;
+    }
+
     public void setMode(int authmode, bool writeable)
     {
         //TODO

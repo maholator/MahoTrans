@@ -2,15 +2,15 @@ namespace MahoTrans.Toolkit;
 
 public interface IToolkit
 {
-    IImage CreateImmutableImage(byte[] data);
+    ISystem System { get; }
 
-    IImage CreateImmutableImage(int[] rgb, int w, int h, bool alpha);
-    IImage CreateImmutableImage(IImage image);
-    IImage CreateMutableImage(int width, int height);
+    IClock Clock { get; }
+
+    IImageManager Images { get; }
+    
+    IFontManager Fonts { get; }
 
     IDisplay Display { get; }
 
     IRecordStore RecordStore { get; }
-
-    ISystem System { get; }
 }

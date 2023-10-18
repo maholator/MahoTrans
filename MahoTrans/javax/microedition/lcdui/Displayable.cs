@@ -6,7 +6,7 @@ namespace javax.microedition.lcdui;
 
 public class Displayable : Object
 {
-    [JavaIgnore] public IDisplayable Handle = null!;
+    [JavaIgnore] public DisplayableDescriptor Handle;
 
     [InitMethod]
     public override void Init()
@@ -14,7 +14,7 @@ public class Displayable : Object
         Handle = Toolkit.Display.Register(this);
     }
 
-    public int getWidth() => Handle.Width;
+    public int getWidth() => Toolkit.Display.Resolve(Handle).Width;
 
-    public int getHeight() => Handle.Height;
+    public int getHeight() => Toolkit.Display.Resolve(Handle).Height;
 }

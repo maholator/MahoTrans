@@ -33,7 +33,7 @@ public class System : Object
         return new Reference(0);
     }
 
-    public static long currentTimeMillis() => Toolkit.System.CurrentMillis;
+    public static long currentTimeMillis() => Toolkit.Clock.GetCurrentMs();
 
     public static void gc()
     {

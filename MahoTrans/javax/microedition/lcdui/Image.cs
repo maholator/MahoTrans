@@ -10,7 +10,7 @@ namespace javax.microedition.lcdui;
 
 public class Image : Object
 {
-    [JavaIgnore] public IImage Handle = null!;
+    [JavaIgnore] public ImageDescriptor Handle;
 
     [return: JavaType(typeof(Image))]
     public static Reference createImage([String] Reference name)
@@ -20,17 +20,17 @@ public class Image : Object
             Heap.Throw<IOException>();
 
         var image = Heap.AllocateObject<Image>();
-        image.Handle = Heap.State.Toolkit.CreateImmutableImage(blob.ToUnsigned());
+        image.Handle = Toolkit.Images.CreateFromFile(blob.ToUnsigned());
         return image.This;
     }
 
     [return: JavaType(typeof(Image))]
     public static Reference createImage([JavaType("[B")] Reference buf, int from, int len)
     {
-        var blob = Heap.ResolveArray<sbyte>(buf).ToUnsigned().Skip(from).Take(len).ToArray();
+        var blob = Heap.ResolveArray<sbyte>(buf).ToUnsigned();
 
         var image = Heap.AllocateObject<Image>();
-        image.Handle = Heap.State.Toolkit.CreateImmutableImage(blob);
+        image.Handle = Toolkit.Images.CreateFromFile(new Memory<byte>(blob, from, len));
         return image.This;
     }
 
@@ -38,7 +38,7 @@ public class Image : Object
     public static Reference createImage(int w, int h)
     {
         var image = Heap.AllocateObject<Image>();
-        image.Handle = Heap.State.Toolkit.CreateMutableImage(w, h);
+        image.Handle = Toolkit.Images.CreateBuffer(w, h);
         return image.This;
     }
 
@@ -46,28 +46,28 @@ public class Image : Object
     public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
     {
         var image = Heap.AllocateObject<Image>();
-        image.Handle = Heap.State.Toolkit.CreateImmutableImage(Heap.ResolveArray<int>(rgb), width, height, alpha);
+        image.Handle = Toolkit.Images.CreateFromRgb(Heap.ResolveArray<int>(rgb), width, height, alpha);
         return image.This;
     }
 
-    public bool isMutable() => Handle.IsMutable;
+    public bool isMutable() => Toolkit.Images.IsMutable(Handle);
 
-    public int getWidth() => Handle.Width;
-    public int getHeight() => Handle.Height;
+    public int getWidth() => Toolkit.Images.GetWidth(Handle);
+    public int getHeight() => Toolkit.Images.GetHeight(Handle);
 
     public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height)
     {
-        Handle.GetRGB(Heap.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
+        Toolkit.Images.CopyRgb(Heap.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
     }
 
     [return: JavaType(typeof(Graphics))]
     public Reference getGraphics()
     {
-        if(!Handle.IsMutable)
+        if (!isMutable())
             Heap.Throw<IllegalStateException>();
         var g = Heap.AllocateObject<Graphics>();
-        g.Implementation = Handle.GetGraphics();
+        g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;
     }
 }
