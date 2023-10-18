@@ -201,6 +201,12 @@ public class JavaHeap
     {
         lock (this)
         {
+            if (_nextObjectId % 2000 == 0)
+            {
+                // run GC every 2k object
+                RunGarbageCollector();
+            }
+
             var r = new Reference(_nextObjectId);
             obj.HeapAddress = _nextObjectId;
             _heap[_nextObjectId] = obj;
