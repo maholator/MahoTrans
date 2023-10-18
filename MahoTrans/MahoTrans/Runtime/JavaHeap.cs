@@ -18,34 +18,26 @@ public class JavaHeap
 
     public Reference AllocateObject(JavaClass @class)
     {
-        var r = TakePlace();
         Object o = (Activator.CreateInstance(@class.ClrType!) as Object)!;
-        o.HeapAddress = r.Index;
         o.JavaClass = @class;
-        _heap[r.Index] = o;
-        return r;
+        return PutToHeap(o);
     }
 
     public T AllocateObject<T>() where T : Object
     {
-        var r = TakePlace();
         var o = Activator.CreateInstance<T>();
-        o.HeapAddress = r.Index;
         o.JavaClass = State.Classes.Values.First(x => x.ClrType == typeof(T));
-        _heap[r.Index] = o;
+        PutToHeap(o);
         return o;
     }
 
     public Reference AllocateString(string str)
     {
-        var r = TakePlace();
-        _heap[r.Index] = new java.lang.String
+        return PutToHeap(new java.lang.String
         {
             Value = str,
-            HeapAddress = r.Index,
             JavaClass = State.Classes["java/lang/String"]
-        };
-        return r;
+        });
     }
 
     public Reference InternalizeString(string str)
@@ -61,26 +53,20 @@ public class JavaHeap
     {
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
-        var r = TakePlace();
-        _heap[r.Index] = new Array<T>
+        return PutToHeap(new Array<T>
         {
-            HeapAddress = r.Index,
             Value = new T[length],
             JavaClass = PrimitiveToArrayType<T>(),
-        };
-        return r;
+        });
     }
 
     public Reference AllocateReferenceArray(int length, JavaClass cls)
     {
-        var r = TakePlace();
-        _heap[r.Index] = new Array<Reference>
+        return PutToHeap(new Array<Reference>
         {
-            HeapAddress = r.Index,
             Value = new Reference[length],
             JavaClass = cls
-        };
-        return r;
+        });
     }
 
     public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
@@ -88,14 +74,11 @@ public class JavaHeap
 
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
-        var r = TakePlace();
-        _heap[r.Index] = new Array<T>
+        return PutToHeap(new Array<T>
         {
-            HeapAddress = r.Index,
             Value = data,
             JavaClass = cls
-        };
-        return r;
+        });
     }
 
     public Reference AllocateArray(ArrayType arrayType, int len)
@@ -209,11 +192,18 @@ public class JavaHeap
         }
     }
 
-    private Reference TakePlace()
+    /// <summary>
+    /// Takes place in the heap. Assigns taken address to passed object. Adds passed object to heap.
+    /// </summary>
+    /// <param name="obj">Object to add into heap.</param>
+    /// <returns>Reference to the object.</returns>
+    private Reference PutToHeap(Object obj)
     {
         lock (this)
         {
             var r = new Reference(_nextObjectId);
+            obj.HeapAddress = _nextObjectId;
+            _heap[_nextObjectId] = obj;
             _nextObjectId++;
             return r;
         }
