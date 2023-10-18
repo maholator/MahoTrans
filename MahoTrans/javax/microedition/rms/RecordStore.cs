@@ -22,6 +22,10 @@ public class RecordStore : Object
 
     [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
 
+    [JavaIgnore]
+    public static IEnumerable<Reference> EnumerateStaticReferences() => openedStores.Values;
+
+
     [JavaDescriptor("([BII)I")]
     public JavaMethodBody addRecord(JavaClass cls)
     {
