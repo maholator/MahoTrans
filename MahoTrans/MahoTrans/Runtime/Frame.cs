@@ -13,7 +13,7 @@ public class Frame
     public PrimitiveType[] StackTypes;
 
     /// <summary>
-    /// Pointer to stack top. Stack contains topmost operand at this index. Stack length is this field +1.
+    /// Pointer to stack top. Stack contains topmost operand at this index-1 (if zero, stack is empty). Stack length is equal to this field.
     /// </summary>
     public int StackTop;
 
