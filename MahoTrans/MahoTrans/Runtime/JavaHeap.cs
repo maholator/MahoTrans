@@ -1,8 +1,7 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
-using javax.microedition.rms;
 using MahoTrans.Runtime.Types;
-using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -224,6 +223,8 @@ public class JavaHeap
     {
         //TODO optimization
 
+        Stopwatch sw = new();
+        sw.Start();
         var roots = CollectObjectGraphRoots();
         Queue<Reference> enumQueue = new Queue<Reference>(roots);
 
@@ -258,18 +259,14 @@ public class JavaHeap
                 c = c.Super;
             }
 
-            foreach (var sr in o.EnumerableReferences())
-            {
-                if (sr.IsNull)
-                    continue;
-                enumQueue.Enqueue(sr);
-            }
+
+            o.AnnounceHiddenReferences(enumQueue);
 
             foreach (var cls in classes)
             {
                 foreach (var field in cls.Fields.Values)
                 {
-                    if (field.NativeField.FieldType == typeof(Reference))
+                    if (field.NativeField.FieldType == typeof(Reference) && !field.NativeField.IsStatic)
                     {
                         enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
                     }
@@ -295,7 +292,9 @@ public class JavaHeap
             }
         }
 
-        Console.WriteLine($"GC collected {deletedCount} objects. {all.Max()} objects in total.");
+        sw.Stop();
+        Console.WriteLine(
+            $"GC collected {deletedCount}/{all.Length} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
     }
 
     /// <summary>

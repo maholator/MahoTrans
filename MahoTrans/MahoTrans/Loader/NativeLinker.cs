@@ -97,7 +97,7 @@ public static class NativeLinker
             if (nm.IsSpecialName)
                 continue;
 
-            if (nm.Name == nameof(Object.EnumerableReferences))
+            if (nm.Name == nameof(Object.AnnounceHiddenReferences))
                 continue;
 
 

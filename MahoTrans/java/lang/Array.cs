@@ -11,14 +11,16 @@ public class Array<T> : Array where T : struct
 
     public override ClrArray BaseValue => Value;
 
-    public override IEnumerable<Reference> EnumerableReferences()
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         if (typeof(T) == typeof(Reference))
-        {
-            return (Reference[])(object)Value;
-        }
+            Push((Reference[])(object)Value, queue);
+    }
 
-        return base.EnumerableReferences();
+    private static void Push(Reference[] refs, Queue<Reference> q)
+    {
+        foreach (var r in refs)
+            q.Enqueue(r);
     }
 }
 

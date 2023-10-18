@@ -23,8 +23,9 @@ public class ArrayEnumerator : Object, Enumeration
         return el;
     }
 
-    public override IEnumerable<Reference> EnumerableReferences()
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
-        return Value;
+        foreach (var r in Value)
+            queue.Enqueue(r);
     }
 }

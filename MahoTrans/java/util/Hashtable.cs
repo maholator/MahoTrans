@@ -11,9 +11,12 @@ public class Hashtable : Object
 {
     [JavaIgnore] private Dictionary<Reference, Reference> _storage = new();
 
-    public override IEnumerable<Reference> EnumerableReferences()
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
-        return _storage.Keys.Concat(_storage.Values);
+        foreach (var r in _storage.Keys)
+            queue.Enqueue(r);
+        foreach (var r in _storage.Values)
+            queue.Enqueue(r);
     }
 
     [InitMethod]

@@ -1,7 +1,6 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace java.util;
@@ -10,9 +9,11 @@ public class Vector : Object
 {
     [JavaIgnore] public List<Reference> List = null!;
 
-    public override IEnumerable<Reference> EnumerableReferences()
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
-        return (IEnumerable<Reference>?)List ?? Array.Empty<Reference>();
+        if (List == null!)
+            return;
+        foreach (var r in List) queue.Enqueue(r);
     }
 
     [InitMethod]

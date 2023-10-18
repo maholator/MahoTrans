@@ -189,5 +189,7 @@ public class Object
     /// <summary>
     /// GC will call this method to collect objects which are referenced by this object. Override it if objects are stored in hidden form.
     /// </summary>
-    public virtual IEnumerable<Reference> EnumerableReferences() => global::System.Array.Empty<Reference>();
+    public virtual void AnnounceHiddenReferences(Queue<Reference> queue)
+    {
+    }
 }
