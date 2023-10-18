@@ -11,6 +11,11 @@ public class Hashtable : Object
 {
     [JavaIgnore] private Dictionary<Reference, Reference> _storage = new();
 
+    public override IEnumerable<Reference> EnumerableReferences()
+    {
+        return _storage.Keys.Concat(_storage.Values);
+    }
+
     [InitMethod]
     public void Init()
     {

@@ -25,6 +25,11 @@ public class EventQueue : Thread
 
     [JavaIgnore] public Dictionary<Reference, bool> QueuedRepaints = new();
 
+    public override IEnumerable<Reference> EnumerableReferences()
+    {
+        return _events.ToArray().Concat(QueuedRepaints.Keys);
+    }
+
     private bool IsRepaintPendingFor(Reference r)
     {
         if (QueuedRepaints.TryGetValue(r, out var b))

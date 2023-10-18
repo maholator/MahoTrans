@@ -22,4 +22,9 @@ public class ArrayEnumerator : Object, Enumeration
         index++;
         return el;
     }
+
+    public override IEnumerable<Reference> EnumerableReferences()
+    {
+        return Value;
+    }
 }

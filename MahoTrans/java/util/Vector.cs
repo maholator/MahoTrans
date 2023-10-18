@@ -1,6 +1,7 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace java.util;
@@ -8,6 +9,11 @@ namespace java.util;
 public class Vector : Object
 {
     [JavaIgnore] public List<Reference> List = null!;
+
+    public override IEnumerable<Reference> EnumerableReferences()
+    {
+        return (IEnumerable<Reference>?)List ?? Array.Empty<Reference>();
+    }
 
     [InitMethod]
     public new void Init()
