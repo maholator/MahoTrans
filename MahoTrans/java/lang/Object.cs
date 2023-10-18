@@ -185,4 +185,9 @@ public class Object
         cls.InternalClass = JavaClass;
         return cls.This;
     }
+
+    /// <summary>
+    /// GC will call this method to collect objects which are referenced by this object. Override it if object are stored in hidden form.
+    /// </summary>
+    public virtual IEnumerable<Reference> EnumerableReferences() => global::System.Array.Empty<Reference>();
 }

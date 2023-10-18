@@ -86,6 +86,9 @@ public static class NativeLinker
             if (nativeMethod.IsSpecialName)
                 continue;
 
+            if (nativeMethod.Name == nameof(Object.EnumerableReferences))
+                continue;
+
             var built = BuildMethod(nativeMethod, jc, type, bridge);
             javaMethods.Add(built);
         }
