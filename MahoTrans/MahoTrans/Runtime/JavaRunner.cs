@@ -1,6 +1,7 @@
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
 
@@ -13,6 +14,7 @@ public class JavaRunner
         // {
         try
         {
+            Thread.CurrentThread = thread;
             StepInternal(thread, state);
         }
         catch (JavaThrowable ex)
@@ -603,19 +605,19 @@ public class JavaRunner
                 var t2 = frame.GetPoppedType();
                 if ((t1 & PrimitiveType.IsDouble) != 0)
                 {
-                    frame.PushUnchecked(v1,t1);
-                    frame.PushUnchecked(v2,t2);
-                    frame.PushUnchecked(v1,t1);
+                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v2, t2);
+                    frame.PushUnchecked(v1, t1);
                 }
                 else
                 {
                     var v3 = frame.Pop();
                     var t3 = frame.GetPoppedType();
-                    frame.PushUnchecked(v2,t2);
-                    frame.PushUnchecked(v1,t1);
-                    frame.PushUnchecked(v3,t3);
-                    frame.PushUnchecked(v2,t2);
-                    frame.PushUnchecked(v1,t1);
+                    frame.PushUnchecked(v2, t2);
+                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v3, t3);
+                    frame.PushUnchecked(v2, t2);
+                    frame.PushUnchecked(v1, t1);
                 }
 
                 pointer++;
@@ -1468,7 +1470,8 @@ public class JavaRunner
         }
     }
 
-    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP, JavaClass typeA)
+    private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP,
+        JavaClass typeA)
     {
         if (dimensionsLeft == 0)
         {

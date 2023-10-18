@@ -10,6 +10,8 @@ public class Thread : Object, Runnable
 {
     [JavaIgnore] protected JavaThread JavaThread = null!;
 
+    [JavaIgnore] [ThreadStatic] public static JavaThread? CurrentThread;
+
     [JavaType(typeof(Runnable))] public Reference _target;
     [String] public Reference _name;
     public bool started;
