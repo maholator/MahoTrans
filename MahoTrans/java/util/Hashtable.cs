@@ -58,7 +58,7 @@ public class Hashtable : Object
             RawCode = new[] { new Instruction(JavaOpcode.@return) },
             Method = new Method(new NameDescriptor("", ""), MethodFlags.Static, new JavaClass())
         });
-        var equalityChecker = new JavaThread(retFrame, Heap.State);
+        var equalityChecker = new JavaThread(retFrame, Heap.State, Reference.Null);
         foreach (var kvp in _storage)
         {
             equalityChecker.ActiveFrameIndex = 0;

@@ -27,13 +27,16 @@ public class JavaThread
 
     public readonly int ThreadId;
 
-    public JavaThread()
+    public readonly Reference Model;
+
+    public JavaThread(Reference model)
     {
+        Model = model;
         ThreadId = _roller;
         _roller++;
     }
 
-    public JavaThread(Frame root, JvmState jvm) : this()
+    public JavaThread(Frame root, JvmState jvm, Reference model) : this(model)
     {
         root.Method.EnsureBytecodeLinked(jvm);
         ActiveFrameIndex = 0;
@@ -96,6 +99,7 @@ public class JavaThread
     /// <param name="args">List of args to pass.</param>
     /// <param name="state">JVM to operate on.</param>
     /// <returns>Thread with ready to run frame.</returns>
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSynthetic(Method launcher, Reference target, long[] args, JvmState state)
     {
         var f = new Frame(launcher.JavaBody);
@@ -113,19 +117,23 @@ public class JavaThread
             args.CopyTo(f.LocalVariables, 1);
         }
 
-        var javaThread = new JavaThread(f, state);
+        var t = state.Heap.AllocateObject<Thread>(); // object left untouched, this is okay for now?
+        var javaThread = new JavaThread(f, state, t.This);
         if (launcher.Class.PendingInitializer)
             launcher.Class.Initialize(javaThread, state);
         return javaThread;
     }
 
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSyntheticVirtualAction(string name, Reference target, JvmState state) =>
         CreateSyntheticVirtual(new NameDescriptor(name, "()V"), target, Array.Empty<long>(), state);
 
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSyntheticVirtual(NameDescriptor name, Reference target, long[] args,
         JvmState state) =>
         CreateSynthetic(state.GetVirtualMethod(state.GetVirtualPointer(name), target), target, args, state);
 
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSyntheticStaticAction(JavaClass @class, string name, JvmState state)
     {
         if (!@class.Methods.TryGetValue(new NameDescriptor(name, "()V"), out var method))
@@ -133,11 +141,13 @@ public class JavaThread
         return CreateSynthetic(method, default, Array.Empty<long>(), state);
     }
 
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSyntheticStaticAction(Method method, JvmState state)
     {
         return CreateSynthetic(method, default, Array.Empty<long>(), state);
     }
 
+    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
     public static JavaThread CreateSyntheticStatic(NameDescriptorClass name, long[] args, JvmState state) =>
         CreateSynthetic(state.GetMethod(name, true), default, args, state);
 
@@ -152,7 +162,7 @@ public class JavaThread
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;
 
-        var javaThread = new JavaThread(f, state);
+        var javaThread = new JavaThread(f, state, thread.This);
         if (thread.JavaClass.PendingInitializer)
             thread.JavaClass.Initialize(javaThread, state);
         return javaThread;
