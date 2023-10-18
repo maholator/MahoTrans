@@ -8,7 +8,7 @@ namespace javax.microedition.lcdui;
 
 public class Graphics : Object, DirectGraphics
 {
-    [JavaIgnore] public GraphicsDescriptor Handle;
+    [JavaIgnore] public GraphicsHandle Handle;
 
     private IGraphics Implementation => Toolkit.Images.ResolveGraphics(Handle);
 

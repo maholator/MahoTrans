@@ -8,6 +8,6 @@ public interface IDisplayable
     public int Width { get; }
     public int Height { get; }
     public bool Fullscreen { get; set; }
-    public GraphicsDescriptor GetGraphics();
+    public GraphicsHandle GetGraphics();
     void Flush();
 }

@@ -10,7 +10,7 @@ namespace javax.microedition.lcdui;
 
 public class Image : Object
 {
-    [JavaIgnore] public ImageDescriptor Handle;
+    [JavaIgnore] public ImageHandle Handle;
 
     [return: JavaType(typeof(Image))]
     public static Reference createImage([String] Reference name)

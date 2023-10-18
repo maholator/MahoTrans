@@ -2,29 +2,29 @@ namespace MahoTrans.Toolkit;
 
 public interface IImageManager
 {
-    ImageDescriptor CreateBuffer(int width, int height);
+    ImageHandle CreateBuffer(int width, int height);
 
-    ImageDescriptor CreateFromFile(Memory<byte> file);
+    ImageHandle CreateFromFile(Memory<byte> file);
 
-    ImageDescriptor CreateFromRgb(int[] rgb, int w, int h, bool alpha);
+    ImageHandle CreateFromRgb(int[] rgb, int w, int h, bool alpha);
 
-    ImageDescriptor CreateCopy(ImageDescriptor image);
+    ImageHandle CreateCopy(ImageHandle image);
 
-    ImageDescriptor CreateCopy(ImageDescriptor image, int x, int y, int w, int h, int tr);
+    ImageHandle CreateCopy(ImageHandle image, int x, int y, int w, int h, int tr);
 
-    int GetWidth(ImageDescriptor image);
+    int GetWidth(ImageHandle image);
 
-    int GetHeight(ImageDescriptor image);
+    int GetHeight(ImageHandle image);
 
-    bool IsMutable(ImageDescriptor image);
+    bool IsMutable(ImageHandle image);
 
     void CopyRgb(int[] target, int offset, int scanlength, int x, int y, int w, int h);
 
-    void ReleaseImage(ImageDescriptor image);
+    void ReleaseImage(ImageHandle image);
 
-    GraphicsDescriptor GetGraphics(ImageDescriptor image);
+    GraphicsHandle GetGraphics(ImageHandle image);
 
-    IGraphics ResolveGraphics(GraphicsDescriptor descriptor);
+    IGraphics ResolveGraphics(GraphicsHandle handle);
 
-    void ReleaseGraphics(GraphicsDescriptor descriptor);
+    void ReleaseGraphics(GraphicsHandle handle);
 }

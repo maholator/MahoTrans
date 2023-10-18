@@ -4,9 +4,13 @@ namespace MahoTrans.Toolkit;
 
 public interface IDisplay
 {
-    DisplayableDescriptor Register(Displayable d);
+    DisplayableHandle Register(Displayable d);
 
-    DisplayableDescriptor? Current { get; set; }
+    DisplayableHandle? Current { get; set; }
 
-    IDisplayable Resolve(DisplayableDescriptor descriptor);
+    IDisplayable Resolve(DisplayableHandle handle);
+
+    int GetWidth(DisplayableHandle handle);
+
+    int GetHeight(DisplayableHandle handle);
 }

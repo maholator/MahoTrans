@@ -16,13 +16,13 @@ public interface IGraphics
     void DrawLine(int x1, int y1, int x2, int y2, uint color, GraphicsClip clip);
 
     void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color, GraphicsClip clip);
-    void DrawImage(ImageDescriptor image, int x, int y, GraphicsAnchor an, GraphicsClip clip);
+    void DrawImage(ImageHandle image, int x, int y, GraphicsAnchor an, GraphicsClip clip);
 
-    void DrawImage(ImageDescriptor image, int fromX, int fromY, int toX, int toY, int w, int h,
+    void DrawImage(ImageHandle image, int fromX, int fromY, int toX, int toY, int w, int h,
         SpriteTransform transform,
         GraphicsAnchor an, GraphicsClip clip);
 
-    void DrawImage(ImageDescriptor image, int x, int y, ImageManipulation manipul, GraphicsAnchor an,
+    void DrawImage(ImageHandle image, int x, int y, ImageManipulation manipul, GraphicsAnchor an,
         GraphicsClip clip);
 
     void DrawString(string text, int x, int y, GraphicsAnchor an, uint color, FontFace face, FontStyle style, int size,

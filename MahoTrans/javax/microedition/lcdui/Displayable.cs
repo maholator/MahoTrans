@@ -6,7 +6,7 @@ namespace javax.microedition.lcdui;
 
 public class Displayable : Object
 {
-    [JavaIgnore] public DisplayableDescriptor Handle;
+    [JavaIgnore] public DisplayableHandle Handle;
 
     [InitMethod]
     public override void Init()
