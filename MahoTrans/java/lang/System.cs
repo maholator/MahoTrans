@@ -29,6 +29,7 @@ public class System : Object
             case "microedition.platform":
                 return Heap.AllocateString("Nokia MT-292");
         }
+
         return new Reference(0);
     }
 
@@ -36,6 +37,7 @@ public class System : Object
 
     public static void gc()
     {
+        Heap.RunGarbageCollector();
     }
 
     public static void arraycopy(Reference src, int src_position, Reference dst, int dst_position, int length)
