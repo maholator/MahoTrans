@@ -24,7 +24,7 @@ public class Canvas : Displayable
     public Reference ObtainGraphics()
     {
         var g = Heap.AllocateObject<Graphics>();
-        g.Handle = Toolkit.Display.Resolve(Handle).GetGraphics();
+        g.Handle = Toolkit.Display.GetGraphics(Handle);
         return g.This;
     }
 
@@ -33,7 +33,7 @@ public class Canvas : Displayable
         Heap.State.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
 
-    public void flushGraphics() => Toolkit.Display.Resolve(Handle).Flush();
+    public void flushGraphics() => Toolkit.Display.Flush(Handle);
 
     [JavaDescriptor("()V")]
     public JavaMethodBody serviceRepaints(JavaClass cls)

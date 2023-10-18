@@ -34,9 +34,9 @@ public class Display : Object
     {
         Current = d;
         if (d.IsNull)
-            Toolkit.Display.Current = null;
+            Toolkit.Display.SetNullCurrent();
         else
-            Toolkit.Display.Current = Heap.Resolve<Displayable>(d).Handle;
+            Toolkit.Display.SetCurrent(Heap.Resolve<Displayable>(d).Handle);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)

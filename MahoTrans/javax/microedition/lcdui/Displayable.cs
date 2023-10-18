@@ -14,7 +14,7 @@ public class Displayable : Object
         Handle = Toolkit.Display.Register(this);
     }
 
-    public int getWidth() => Toolkit.Display.Resolve(Handle).Width;
+    public int getWidth() => Toolkit.Display.GetWidth(Handle);
 
-    public int getHeight() => Toolkit.Display.Resolve(Handle).Height;
+    public int getHeight() => Toolkit.Display.GetHeight(Handle);
 }
