@@ -333,9 +333,14 @@ public class JavaHeap
 
                 foreach (var frame in frames)
                 {
-                    for (int i = 0; i <= frame!.StackTop; i++)
+                    if (frame == null)
+                        continue;
+
+                    var top = frame.StackTop;
+
+                    for (int i = 0; i < top; i++)
                     {
-                        if ((frame.StackTypes[i] & PrimitiveType.Reference) != (PrimitiveType)0)
+                        if ((frame.StackTypes[i] & PrimitiveType.IsReference) != 0)
                         {
                             roots.Add(frame.Stack[i]);
                         }
