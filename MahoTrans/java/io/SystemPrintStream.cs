@@ -7,12 +7,12 @@ public class SystemPrintStream : PrintStream
 {
     public void println([String] Reference str)
     {
-        Toolkit.System.Print(Heap.ResolveString(str));
+        Toolkit.System.PrintOut(Heap.ResolveString(str));
         println();
     }
 
     public void println()
     {
-        Toolkit.System.Print(Environment.NewLine);
+        Toolkit.System.PrintOut(Environment.NewLine);
     }
 }

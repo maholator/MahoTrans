@@ -20,7 +20,7 @@ public class Runtime : Object
 
     public void gc() => System.gc();
 
-    public long freeMemory() => 1024 * 1024 * 3;
+    public long freeMemory() => Toolkit.System.GetFreeMemory();
 
-    public long totalMemory() => 1024 * 1024 * 4;
+    public long totalMemory() => Toolkit.System.GetTotalMemory();
 }

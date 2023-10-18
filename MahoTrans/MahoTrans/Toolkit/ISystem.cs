@@ -6,6 +6,14 @@ namespace MahoTrans.Toolkit;
 public interface ISystem
 {
     int GetHashCode(Object obj);
+
     void PrintException(Throwable t);
-    void Print(string s);
+
+    void PrintOut(string s);
+
+    string? GetProperty(string name);
+
+    long GetTotalMemory();
+
+    long GetFreeMemory();
 }
