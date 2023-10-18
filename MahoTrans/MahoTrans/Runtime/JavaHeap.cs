@@ -322,13 +322,7 @@ public class JavaHeap
                     }
                 }
 
-                var m = cls.ClrType?.GetMethod(nameof(RecordStore.EnumerateStaticReferences));
-                if (m != null)
-                {
-                    Console.WriteLine($"{cls} has static leafs!");
-                    var refs = m.Invoke(null, Array.Empty<object?>());
-                    roots.AddRange((IEnumerable<Reference>)refs!);
-                }
+                cls.StaticAnnouncer?.Invoke(roots);
             }
 
             // threads

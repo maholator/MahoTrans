@@ -12,7 +12,7 @@ namespace javax.microedition.rms;
 
 public class RecordStore : Object
 {
-    private Reference storeName;
+    [String] private Reference storeName;
     private int openCount;
 
     [JavaType(typeof(Vector))] public Reference listeners;
@@ -22,8 +22,8 @@ public class RecordStore : Object
 
     [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
 
-    [JavaIgnore]
-    public static IEnumerable<Reference> EnumerateStaticReferences() => openedStores.Values;
+    [StaticFieldsAnnouncer]
+    public static void Statics(List<Reference> list) => list.AddRange(openedStores.Values);
 
 
     [JavaDescriptor("([BII)I")]

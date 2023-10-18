@@ -19,6 +19,7 @@ public class JavaClass
     public Dictionary<int, Method>? VirtualTable;
     public Type? ClrType;
     public bool PendingInitializer = true;
+    public Action<List<Reference>>? StaticAnnouncer;
 
     public override string ToString() => Name;
 

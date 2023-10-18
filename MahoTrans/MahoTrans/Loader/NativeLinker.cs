@@ -78,20 +78,33 @@ public static class NativeLinker
         var nativeMethods = type.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
                                             BindingFlags.Static);
         List<Method> javaMethods = new();
-        foreach (var nativeMethod in nativeMethods)
+        foreach (var nm in nativeMethods)
         {
-            if (nativeMethod.GetCustomAttribute<JavaIgnoreAttribute>() != null)
+            if (nm.GetCustomAttribute<StaticFieldsAnnouncerAttribute>() != null)
+            {
+                if (nm.IsStatic)
+                {
+                    jc.StaticAnnouncer = nm.CreateDelegate<Action<List<Reference>>>();
+                    continue;
+                }
+
+                throw new JavaLinkageException("Static announcer must be static!");
+            }
+
+            if (nm.GetCustomAttribute<JavaIgnoreAttribute>() != null)
                 continue;
 
-            if (nativeMethod.IsSpecialName)
+            if (nm.IsSpecialName)
                 continue;
 
-            if (nativeMethod.Name == nameof(Object.EnumerableReferences))
+            if (nm.Name == nameof(Object.EnumerableReferences))
                 continue;
 
-            var built = BuildMethod(nativeMethod, jc, type, bridge);
+
+            var built = BuildMethod(nm, jc, type, bridge);
             javaMethods.Add(built);
         }
+
 
         jc.Methods = javaMethods.ToDictionary(x => x.Descriptor, x => x);
         jc.Fields = nativeFields.Select(x =>
