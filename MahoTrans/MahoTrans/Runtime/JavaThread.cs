@@ -148,8 +148,11 @@ public class JavaThread
     }
 
     [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticStatic(NameDescriptorClass name, long[] args, JvmState state) =>
-        CreateSynthetic(state.GetMethod(name, true), default, args, state);
+    public static JavaThread CreateSyntheticStatic(NameDescriptorClass name, long[] args, JvmState state)
+    {
+        var cls = state.GetClass(name.ClassName);
+        return CreateSynthetic(cls.Methods[name.Descriptor], default, args, state);
+    }
 
 
     public static JavaThread CreateReal(Thread thread, JvmState state)

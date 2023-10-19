@@ -9,7 +9,7 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
-public class JvmState
+public partial class JvmState
 {
     public Toolkit Toolkit;
     public JavaHeap Heap;
@@ -185,21 +185,6 @@ public class JvmState
         }
 
         RunInContext(action);
-    }
-
-    public Method GetMethod(NameDescriptorClass descriptor, bool @static)
-    {
-        if (!Classes.TryGetValue(descriptor.ClassName, out var @class))
-            throw new JavaRuntimeError($"Failed to get class {descriptor.ClassName}");
-        try
-        {
-            return @class.Methods[descriptor.Descriptor];
-        }
-        catch (KeyNotFoundException)
-        {
-            throw new JavaRuntimeError(
-                $"Failed to find {(@static ? "static" : "instance")} method {descriptor.Descriptor} in class {descriptor.ClassName}");
-        }
     }
 
     public Method GetVirtualMethod(int pointer, Reference target)
