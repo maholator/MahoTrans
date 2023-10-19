@@ -216,13 +216,13 @@ public static class NativeLinker
             if (!method.IsStatic)
             {
                 // frame
-                il.Emit(OpCodes.Call, typeof(Object).GetProperty("Heap")!.GetMethod!);
+                il.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
                 // frame > heap
                 il.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
                 il.Emit(OpCodes.Call, StackReversePoppers[typeof(Reference)]);
                 // frame > heap > ref
-                il.Emit(OpCodes.Call, typeof(JavaHeap).GetMethod(nameof(JavaHeap.ResolveObject))!);
+                il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // frame > object
             }
 

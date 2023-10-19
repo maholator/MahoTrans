@@ -16,14 +16,14 @@ public class Stack : Vector
     public Reference peek()
     {
         if (empty())
-            Heap.Throw<EmptyStackException>();
+            Jvm.Throw<EmptyStackException>();
         return List[^1];
     }
 
     public Reference pop()
     {
         if (empty())
-            Heap.Throw<EmptyStackException>();
+            Jvm.Throw<EmptyStackException>();
         var r = List[^1];
         List.RemoveAt(List.Count - 1);
         return r;

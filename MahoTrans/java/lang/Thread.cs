@@ -66,7 +66,7 @@ public class Thread : Object, Runnable
     {
         //return;
         if (CurrentThread != null)
-            Heap.State.Detach(CurrentThread, time);
+            Jvm.Detach(CurrentThread, time);
     }
 
     public static void yield()
@@ -78,10 +78,10 @@ public class Thread : Object, Runnable
     public void start()
     {
         if (started)
-            Heap.Throw<IllegalThreadStateException>();
+            Jvm.Throw<IllegalThreadStateException>();
         started = true;
-        var javaThread = JavaThread.CreateReal(this, Heap.State);
-        Heap.State.RegisterThread(javaThread);
+        var javaThread = JavaThread.CreateReal(this, Jvm);
+        Jvm.RegisterThread(javaThread);
         JavaThread = javaThread;
     }
 }

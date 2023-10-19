@@ -18,7 +18,7 @@ public class ByteArrayInputStream : InputStream
     {
         buf = r;
         pos = 0;
-        count = Heap.Resolve<Array>(r).BaseValue.Length;
+        count = Jvm.Resolve<Array>(r).BaseValue.Length;
     }
 
     [InitMethod]
@@ -34,7 +34,7 @@ public class ByteArrayInputStream : InputStream
     {
         if (pos == count)
             return -1;
-        var b = Heap.ResolveArray<sbyte>(buf)[pos];
+        var b = Jvm.ResolveArray<sbyte>(buf)[pos];
         pos++;
         return (byte)b;
     }
@@ -45,8 +45,8 @@ public class ByteArrayInputStream : InputStream
         if (pos == count)
             return -1;
         int read = Math.Min(len, count - pos);
-        var b = Heap.ResolveArray<sbyte>(buf);
-        var target = Heap.ResolveArray<sbyte>(arr);
+        var b = Jvm.ResolveArray<sbyte>(buf);
+        var target = Jvm.ResolveArray<sbyte>(arr);
 
         for (int i = 0; i < read; i++)
             target[from + i] = b[pos + i];

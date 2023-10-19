@@ -28,7 +28,7 @@ public static class GraphicsUtils
                 break;
 
             default:
-                Object.Heap.Throw<IllegalArgumentException>();
+                Object.Jvm.Throw<IllegalArgumentException>();
                 break;
         }
 
@@ -46,7 +46,7 @@ public static class GraphicsUtils
                 break;
 
             default:
-                Object.Heap.Throw<IllegalArgumentException>();
+                Object.Jvm.Throw<IllegalArgumentException>();
                 break;
         }
 

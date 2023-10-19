@@ -42,7 +42,7 @@ internal class Program
 
     private static void RunMidlet(JvmState jvm)
     {
-        var midlet = jvm.Heap.AllocateObject(jvm.Classes["nmania/Nmania"]);
+        var midlet = jvm.AllocateObject(jvm.Classes["nmania/Nmania"]);
         jvm.RunInContext(() =>
         {
             JavaThread.CreateSyntheticVirtualAction("<init>", midlet, jvm).Execute(jvm);

@@ -16,6 +16,6 @@ public class Boolean : Object
     [return: String]
     public Reference toString()
     {
-        return Heap.AllocateString(_value ? "true" : "false");
+        return Jvm.AllocateString(_value ? "true" : "false");
     }
 }

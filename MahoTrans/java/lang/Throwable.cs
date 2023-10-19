@@ -11,6 +11,6 @@ public class Throwable : Object
     }
     public void printStackTrace()
     {
-        Heap.State.Toolkit.System.PrintException(this);
+        Jvm.Toolkit.System.PrintException(this);
     }
 }

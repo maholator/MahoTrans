@@ -10,14 +10,14 @@ public class Connector : Object
     [return: JavaType(typeof(Connection))]
     public static Reference open([String] Reference name)
     {
-        Heap.Throw<IOException>();
+        Jvm.Throw<IOException>();
         return default;
     }
 
     [return: JavaType(typeof(Connection))]
     public static Reference open([String] Reference name, int mode)
     {
-        Heap.Throw<IOException>();
+        Jvm.Throw<IOException>();
         return default;
     }
 }

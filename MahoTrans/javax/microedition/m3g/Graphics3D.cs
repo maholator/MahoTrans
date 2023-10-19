@@ -11,7 +11,7 @@ public class Graphics3D : Object
     [return: JavaType(typeof(Graphics3D))]
     public static Reference getInstance()
     {
-        inst ??= Heap.AllocateObject<Graphics3D>();
+        inst ??= Jvm.AllocateObject<Graphics3D>();
         return inst.This;
     }
 

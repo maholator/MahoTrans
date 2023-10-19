@@ -12,7 +12,7 @@ public class Runtime : Object
     {
         if (Instance.IsNull)
         {
-            Instance = Heap.AllocateObject<Runtime>().This;
+            Instance = Jvm.AllocateObject<Runtime>().This;
         }
 
         return Instance;

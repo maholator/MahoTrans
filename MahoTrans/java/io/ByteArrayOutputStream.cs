@@ -27,18 +27,18 @@ public class ByteArrayOutputStream : OutputStream
     [JavaDescriptor("()[B")]
     public Reference toByteArray()
     {
-        return Heap.AllocateArray(buf.ToArray(), "[B");
+        return Jvm.AllocateArray(buf.ToArray(), "[B");
     }
 
     [return: String]
     public Reference toString()
     {
-        return Heap.AllocateString(buf.ToArray().ToUnsigned().DecodeDefault());
+        return Jvm.AllocateString(buf.ToArray().ToUnsigned().DecodeDefault());
     }
 
     public void write([JavaType("[B")] Reference b, int off, int len)
     {
-        var arr = Heap.ResolveArray<sbyte>(b);
+        var arr = Jvm.ResolveArray<sbyte>(b);
         buf.AddRange(arr.Skip(off).Take(len));
     }
 

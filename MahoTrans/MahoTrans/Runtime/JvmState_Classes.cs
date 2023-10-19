@@ -133,7 +133,7 @@ public partial class JvmState
 
     public Method GetVirtualMethod(int pointer, Reference target)
     {
-        var obj = Heap.ResolveObject(target);
+        var obj = ResolveObject(target);
 
         if (obj.JavaClass.VirtualTable!.TryGetValue(pointer, out var mt))
             return mt;

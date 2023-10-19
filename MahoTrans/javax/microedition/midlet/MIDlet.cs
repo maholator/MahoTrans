@@ -21,9 +21,9 @@ public class MIDlet : Object
     [return: String]
     public Reference getAppProperty([String] Reference r)
     {
-        string key = Heap.ResolveString(r);
+        string key = Jvm.ResolveString(r);
         if (Properties.TryGetValue(key, out var val))
-            return Heap.InternalizeString(val);
+            return Jvm.InternalizeString(val);
         return default;
     }
 }

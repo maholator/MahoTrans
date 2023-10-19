@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Loader;
 
@@ -196,13 +197,13 @@ public static class ClassCompiler
             }
             else
             {
-                getter.Emit(OpCodes.Call, typeof(java.lang.Object).GetProperty("Heap")!.GetMethod!);
+                getter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
                 // frame > heap
                 getter.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
                 getter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
                 // frame > heap > ref
-                getter.Emit(OpCodes.Call, typeof(JavaHeap).GetMethod(nameof(JavaHeap.ResolveObject))!);
+                getter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // frame > object
                 getter.Emit(OpCodes.Ldfld, field);
             }
@@ -234,13 +235,13 @@ public static class ClassCompiler
                 // value
                 setter.Emit(OpCodes.Stloc, val);
                 // -
-                setter.Emit(OpCodes.Call, typeof(java.lang.Object).GetProperty("Heap")!.GetMethod!);
+                setter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
                 // heap
                 setter.Emit(OpCodes.Ldarg_0);
                 // heap > frame
                 setter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
                 // heap > ref
-                setter.Emit(OpCodes.Call, typeof(JavaHeap).GetMethod(nameof(JavaHeap.ResolveObject))!);
+                setter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // target
                 setter.Emit(OpCodes.Ldloc, val);
                 // target > value

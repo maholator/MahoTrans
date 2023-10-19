@@ -19,7 +19,7 @@ public class Long : Object
     {
         if (obj.IsNull)
             return false;
-        var l = Heap.ResolveObject(obj);
+        var l = Jvm.ResolveObject(obj);
         if (l is not Long ll)
             return false;
         return ll.Value == Value;
@@ -34,28 +34,28 @@ public class Long : Object
 
     public long longValue() => Value;
 
-    public static long parseLong([String] Reference s) => long.Parse(Heap.ResolveString(s));
+    public static long parseLong([String] Reference s) => long.Parse(Jvm.ResolveString(s));
 
     public static long parseLong([String] Reference s, int radix)
     {
-        return Convert.ToInt64(Heap.ResolveString(s), radix);
+        return Convert.ToInt64(Jvm.ResolveString(s), radix);
     }
 
     [return: String]
     public Reference toString()
     {
-        return Heap.AllocateString(Value.ToString());
+        return Jvm.AllocateString(Value.ToString());
     }
 
     [return: String]
     public static Reference toString(long l)
     {
-        return Heap.AllocateString(l.ToString());
+        return Jvm.AllocateString(l.ToString());
     }
 
     [return: String]
     public static Reference toString(long i, int radix)
     {
-        return Heap.AllocateString(Convert.ToString(i, radix));
+        return Jvm.AllocateString(Convert.ToString(i, radix));
     }
 }

@@ -15,11 +15,11 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage([String] Reference name)
     {
-        var blob = Heap.State.GetResource(Heap.ResolveString(name));
+        var blob = Jvm.GetResource(Jvm.ResolveString(name));
         if (blob == null)
-            Heap.Throw<IOException>();
+            Jvm.Throw<IOException>();
 
-        var image = Heap.AllocateObject<Image>();
+        var image = Jvm.AllocateObject<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(blob.ToUnsigned());
         return image.This;
     }
@@ -27,9 +27,9 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage([JavaType("[B")] Reference buf, int from, int len)
     {
-        var blob = Heap.ResolveArray<sbyte>(buf).ToUnsigned();
+        var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
 
-        var image = Heap.AllocateObject<Image>();
+        var image = Jvm.AllocateObject<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(new Memory<byte>(blob, from, len));
         return image.This;
     }
@@ -37,7 +37,7 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage(int w, int h)
     {
-        var image = Heap.AllocateObject<Image>();
+        var image = Jvm.AllocateObject<Image>();
         image.Handle = Toolkit.Images.CreateBuffer(w, h);
         return image.This;
     }
@@ -45,8 +45,8 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
     {
-        var image = Heap.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateFromRgb(Heap.ResolveArray<int>(rgb), width, height, alpha);
+        var image = Jvm.AllocateObject<Image>();
+        image.Handle = Toolkit.Images.CreateFromRgb(Jvm.ResolveArray<int>(rgb), width, height, alpha);
         return image.This;
     }
 
@@ -58,15 +58,15 @@ public class Image : Object
     public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height)
     {
-        Toolkit.Images.CopyRgb(Heap.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
+        Toolkit.Images.CopyRgb(Jvm.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
     }
 
     [return: JavaType(typeof(Graphics))]
     public Reference getGraphics()
     {
         if (!isMutable())
-            Heap.Throw<IllegalStateException>();
-        var g = Heap.AllocateObject<Graphics>();
+            Jvm.Throw<IllegalStateException>();
+        var g = Jvm.AllocateObject<Graphics>();
         g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;
     }

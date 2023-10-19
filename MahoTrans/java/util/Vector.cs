@@ -42,7 +42,7 @@ public class Vector : Object
 
     public void copyInto([JavaType("[Ljava/lang/Object;")] Reference arr)
     {
-        var a = Heap.ResolveArray<Reference>(arr);
+        var a = Jvm.ResolveArray<Reference>(arr);
         List.CopyTo(a);
     }
 
@@ -51,7 +51,7 @@ public class Vector : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference elements()
     {
-        var e = Heap.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.AllocateObject<ArrayEnumerator>();
         e.Value = List.ToArray();
         return e.This;
     }
@@ -63,7 +63,7 @@ public class Vector : Object
     public Reference firstElement()
     {
         if (List.Count == 0)
-            Heap.Throw<NoSuchElementException>();
+            Jvm.Throw<NoSuchElementException>();
         return List[0];
     }
 
@@ -80,7 +80,7 @@ public class Vector : Object
     public void setElementAt(Reference obj, int index)
     {
         if (index < 0 || index >= size())
-            Heap.Throw<ArrayIndexOutOfBoundsException>();
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
         List[index] = obj;
     }
 

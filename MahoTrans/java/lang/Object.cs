@@ -16,7 +16,7 @@ public class Object
     /// </summary>
     [JavaIgnore] public JavaClass JavaClass = null!;
 
-    [JavaIgnore] [ThreadStatic] private static JavaHeap? _heap;
+    [JavaIgnore] [ThreadStatic] private static JvmState? _jvm;
     [JavaIgnore] public int MonitorOwner;
     [JavaIgnore] public uint MonitorReEnterCount;
     [JavaIgnore] public List<MonitorWait>? Waiters;
@@ -26,27 +26,27 @@ public class Object
     /// </summary>
     [JavaIgnore] public bool Alive;
 
-    public static JavaHeap Heap
+    public static JvmState Jvm
     {
         get
         {
-            if (_heap == null)
+            if (_jvm == null)
                 throw new JavaRuntimeError("Heap is not attached to this thread!");
-            return _heap;
+            return _jvm;
         }
     }
 
-    public static bool HeapAttached => _heap != null;
+    public static bool HeapAttached => _jvm != null;
 
-    protected static Toolkit Toolkit => Heap.State.Toolkit;
+    protected static Toolkit Toolkit => Jvm.Toolkit;
 
     public Reference This => new Reference(HeapAddress);
 
     [JavaIgnore]
-    public static void AttachHeap(JavaHeap heap) => _heap = heap;
+    public static void AttachHeap(JvmState heap) => _jvm = heap;
 
     [JavaIgnore]
-    public static void DetachHeap() => _heap = null;
+    public static void DetachHeap() => _jvm = null;
 
     [InitMethod]
     public virtual void Init()
@@ -65,7 +65,7 @@ public class Object
         Waiters.Add(mw);
 
         // detaching from scheduler
-        var jvm = Heap.State;
+        var jvm = Jvm;
         var thread = jvm.AliveThreads.Find(x => x.ThreadId == MonitorOwner);
         jvm.Detach(thread!, timeout <= 0 ? -1 : timeout);
 
@@ -145,7 +145,7 @@ public class Object
         var mw = Waiters[^1];
         Waiters.RemoveAt(Waiters.Count - 1);
 
-        if (Heap.State.Attach(mw.MonitorOwner))
+        if (Jvm.Attach(mw.MonitorOwner))
             return;
 
         throw new JavaRuntimeError($"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
@@ -158,7 +158,7 @@ public class Object
 
         foreach (var mw in Waiters)
         {
-            if (!Heap.State.Attach(mw.MonitorOwner))
+            if (!Jvm.Attach(mw.MonitorOwner))
                 throw new JavaRuntimeError(
                     $"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
         }
@@ -170,7 +170,7 @@ public class Object
     public virtual Reference toString()
     {
         //TODO
-        return Heap.AllocateString($"Object {JavaClass} @ {GetHashCode()}");
+        return Jvm.AllocateString($"Object {JavaClass} @ {GetHashCode()}");
     }
 
     public bool equals(Reference r)
@@ -181,7 +181,7 @@ public class Object
     [return: JavaType(typeof(Class))]
     public Reference getClass()
     {
-        var cls = Heap.AllocateObject<Class>();
+        var cls = Jvm.AllocateObject<Class>();
         cls.InternalClass = JavaClass;
         return cls.This;
     }

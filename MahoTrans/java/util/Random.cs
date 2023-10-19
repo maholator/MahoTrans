@@ -30,7 +30,7 @@ public class Random : Object
     public int nextInt(int n)
     {
         if (n <= 0)
-            Heap.Throw<IllegalArgumentException>();
+            Jvm.Throw<IllegalArgumentException>();
 
         if ((n & -n) == n) // i.e., n is a power of 2
             return (int)((n * (long)next(31)) >> 31);

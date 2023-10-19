@@ -313,9 +313,9 @@ public class DataInputStream : InputStream
     [JavaDescriptor("([B)Ljava/lang/String;")]
     public static Reference decodeUTF(Reference r)
     {
-        var arr = Heap.ResolveArray<sbyte>(r);
+        var arr = Jvm.ResolveArray<sbyte>(r);
         var str = arr.ToUnsigned().DecodeJavaUnicode();
-        return Heap.AllocateString(str);
+        return Jvm.AllocateString(str);
     }
 
     [JavaDescriptor("()V")]

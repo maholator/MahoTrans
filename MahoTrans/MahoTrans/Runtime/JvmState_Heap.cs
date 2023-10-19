@@ -6,14 +6,11 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
-public class JavaHeap
+public partial class JvmState
 {
-    public readonly JvmState State;
     private Dictionary<int, Object> _heap = new();
     private int _nextObjectId = 1;
     private Dictionary<string, int> _internalizedStrings = new();
-
-    public JavaHeap(JvmState state) => State = state;
 
     #region Allocation
 
@@ -27,7 +24,7 @@ public class JavaHeap
     public T AllocateObject<T>() where T : Object
     {
         var o = Activator.CreateInstance<T>();
-        o.JavaClass = State.Classes.Values.First(x => x.ClrType == typeof(T));
+        o.JavaClass = Classes.Values.First(x => x.ClrType == typeof(T));
         PutToHeap(o);
         return o;
     }
@@ -37,7 +34,7 @@ public class JavaHeap
         return PutToHeap(new java.lang.String
         {
             Value = str,
-            JavaClass = State.Classes["java/lang/String"]
+            JavaClass = Classes["java/lang/String"]
         });
     }
 
@@ -71,7 +68,7 @@ public class JavaHeap
     }
 
     public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
-        AllocateArray<T>(data, State.GetClass(cls));
+        AllocateArray<T>(data, GetClass(cls));
 
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
@@ -119,7 +116,7 @@ public class JavaHeap
             name = "[B";
         else
             throw new ArgumentException();
-        return State.GetClass(name);
+        return GetClass(name);
     }
 
     #endregion
@@ -308,7 +305,7 @@ public class JavaHeap
         // building roots list
         {
             // statics
-            foreach (var cls in State.Classes.Values)
+            foreach (var cls in Classes.Values)
             {
                 foreach (var field in cls.Fields.Values)
                 {
@@ -325,7 +322,7 @@ public class JavaHeap
             }
 
             // threads
-            foreach (var thread in State.AliveThreads.Concat(State.WaitingThreads.Values))
+            foreach (var thread in AliveThreads.Concat(WaitingThreads.Values))
             {
                 roots.Add(thread.Model);
                 var frames = thread.CallStack.Take(thread.ActiveFrameIndex + 1);

@@ -7,7 +7,7 @@ public class SystemPrintStream : PrintStream
 {
     public void println([String] Reference str)
     {
-        Toolkit.System.PrintOut(Heap.ResolveString(str));
+        Toolkit.System.PrintOut(Jvm.ResolveString(str));
         println();
     }
 

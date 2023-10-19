@@ -38,7 +38,7 @@ public class JavaRunner
     private static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
     {
         var frame = thread.ActiveFrame!;
-        var t = state.Heap.Resolve<Throwable>(ex.Throwable);
+        var t = state.Resolve<Throwable>(ex.Throwable);
         Console.WriteLine($"Catching {t.JavaClass.Name}");
         Console.WriteLine("Call stack:");
         for (int i = thread.ActiveFrameIndex; i >= 0; i--)
@@ -215,7 +215,7 @@ public class JavaRunner
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
             {
-                state.Heap.PushClassConstant(frame, args);
+                state.PushClassConstant(frame, args);
                 pointer++;
                 break;
             }
@@ -1274,7 +1274,7 @@ public class JavaRunner
             case JavaOpcode.newobject:
             {
                 var type = (JavaClass)args;
-                var r = state.Heap.AllocateObject(type);
+                var r = state.AllocateObject(type);
                 frame.PushReference(r);
                 pointer++;
                 break;
@@ -1282,7 +1282,7 @@ public class JavaRunner
             case JavaOpcode.newarray:
             {
                 int len = frame.PopInt();
-                frame.PushReference(state.Heap.AllocateArray((ArrayType)args, len));
+                frame.PushReference(state.AllocateArray((ArrayType)args, len));
                 pointer++;
                 break;
             }
@@ -1290,13 +1290,13 @@ public class JavaRunner
             {
                 int len = frame.PopInt();
                 var type = (JavaClass)args;
-                frame.PushReference(state.Heap.AllocateReferenceArray(len, type));
+                frame.PushReference(state.AllocateReferenceArray(len, type));
                 pointer++;
                 break;
             }
             case JavaOpcode.arraylength:
             {
-                var arr = state.Heap.Resolve<java.lang.Array>(frame.PopReference());
+                var arr = state.Resolve<java.lang.Array>(frame.PopReference());
                 frame.PushInt(arr.BaseValue.Length);
                 pointer++;
                 break;
@@ -1305,7 +1305,7 @@ public class JavaRunner
             {
                 var ex = frame.PopReference();
                 if (ex.IsNull)
-                    state.Heap.Throw<NullPointerException>();
+                    state.Throw<NullPointerException>();
                 else
                     throw new JavaThrowable(ex);
                 break;
@@ -1318,13 +1318,13 @@ public class JavaRunner
                 {
                     // ok
                 }
-                else if (state.Heap.ResolveObject(obj).JavaClass.Is(type))
+                else if (state.ResolveObject(obj).JavaClass.Is(type))
                 {
                     // ok
                 }
                 else
                 {
-                    state.Heap.Throw<ClassCastException>();
+                    state.Throw<ClassCastException>();
                 }
 
                 frame.PushReference(obj);
@@ -1339,7 +1339,7 @@ public class JavaRunner
                 if (obj.IsNull)
                     frame.PushInt(0);
                 else
-                    frame.PushInt(state.Heap.ResolveObject(obj).JavaClass.Is(type) ? 1 : 0);
+                    frame.PushInt(state.ResolveObject(obj).JavaClass.Is(type) ? 1 : 0);
                 pointer++;
                 break;
             }
@@ -1352,12 +1352,12 @@ public class JavaRunner
             {
                 var r = frame.PopReference();
                 if (r.IsNull)
-                    state.Heap.Throw<NullPointerException>();
+                    state.Throw<NullPointerException>();
 
-                var obj = state.Heap.ResolveObject(r);
+                var obj = state.ResolveObject(r);
                 if (obj.MonitorOwner != thread.ThreadId)
                 {
-                    state.Heap.Throw<IllegalMonitorStateException>();
+                    state.Throw<IllegalMonitorStateException>();
                 }
                 else
                 {
@@ -1476,14 +1476,14 @@ public class JavaRunner
         if (dimensionsLeft == 0)
         {
             if (typeP.HasValue)
-                return state.Heap.AllocateArray(typeP.Value, count[0]);
+                return state.AllocateArray(typeP.Value, count[0]);
 
-            return state.Heap.AllocateReferenceArray(count[0], typeA);
+            return state.AllocateReferenceArray(count[0], typeA);
         }
 
-        var r = state.Heap.AllocateReferenceArray(count[dimensionsLeft], typeA);
+        var r = state.AllocateReferenceArray(count[dimensionsLeft], typeA);
 
-        var arr = state.Heap.ResolveArray<Reference>(r);
+        var arr = state.ResolveArray<Reference>(r);
         var subType = state.GetClass(typeA.Name.Substring(1));
         for (int i = 0; i < arr.Length; i++)
         {
@@ -1503,9 +1503,9 @@ public class JavaRunner
     {
         var r = frame.PopReference();
         if (r.IsNull)
-            state.Heap.Throw<NullPointerException>();
+            state.Throw<NullPointerException>();
 
-        var obj = state.Heap.ResolveObject(r);
+        var obj = state.ResolveObject(r);
         if (obj.MonitorReEnterCount == 0)
         {
             obj.MonitorOwner = thread.ThreadId;
@@ -1596,7 +1596,7 @@ public class JavaRunner
         var value = frame.PopDouble();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<double>>(reference).Value;
+        var array = state.Resolve<Array<double>>(reference).Value;
         array[index] = value;
     }
 
@@ -1605,7 +1605,7 @@ public class JavaRunner
         var value = frame.PopFloat();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<float>>(reference).Value;
+        var array = state.Resolve<Array<float>>(reference).Value;
         array[index] = value;
     }
 
@@ -1614,7 +1614,7 @@ public class JavaRunner
         var value = frame.PopReference();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<Reference>>(reference).Value;
+        var array = state.Resolve<Array<Reference>>(reference).Value;
         array[index] = value;
     }
 
@@ -1623,7 +1623,7 @@ public class JavaRunner
         var value = frame.PopLong();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<long>>(reference).Value;
+        var array = state.Resolve<Array<long>>(reference).Value;
         array[index] = value;
     }
 
@@ -1632,7 +1632,7 @@ public class JavaRunner
         var value = frame.PopInt();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<int>>(reference).Value;
+        var array = state.Resolve<Array<int>>(reference).Value;
         array[index] = value;
     }
 
@@ -1641,7 +1641,7 @@ public class JavaRunner
         var value = frame.PopChar();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<char>>(reference).Value;
+        var array = state.Resolve<Array<char>>(reference).Value;
         array[index] = value;
     }
 
@@ -1650,7 +1650,7 @@ public class JavaRunner
         var value = frame.PopShort();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<short>>(reference).Value;
+        var array = state.Resolve<Array<short>>(reference).Value;
         array[index] = value;
     }
 
@@ -1659,7 +1659,7 @@ public class JavaRunner
         var value = frame.PopByte();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<java.lang.Array>(reference);
+        var array = state.Resolve<java.lang.Array>(reference);
         if (array is Array<bool> b)
             b.Value[index] = value != 0;
         else if (array is Array<sbyte> s)
@@ -1672,9 +1672,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<char>>(reference).Value;
+        var array = state.Resolve<Array<char>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushChar(array[index]);
     }
 
@@ -1682,9 +1682,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<short>>(reference).Value;
+        var array = state.Resolve<Array<short>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushShort(array[index]);
     }
 
@@ -1692,9 +1692,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<Reference>>(reference).Value;
+        var array = state.Resolve<Array<Reference>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushReference(array[index]);
     }
 
@@ -1702,9 +1702,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<double>>(reference).Value;
+        var array = state.Resolve<Array<double>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushDouble(array[index]);
     }
 
@@ -1712,9 +1712,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<float>>(reference).Value;
+        var array = state.Resolve<Array<float>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushFloat(array[index]);
     }
 
@@ -1722,9 +1722,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<long>>(reference).Value;
+        var array = state.Resolve<Array<long>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushLong(array[index]);
     }
 
@@ -1732,9 +1732,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<Array<int>>(reference).Value;
+        var array = state.Resolve<Array<int>>(reference).Value;
         if (index < 0 || index >= array.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         frame.PushInt(array[index]);
     }
 
@@ -1742,9 +1742,9 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Heap.Resolve<java.lang.Array>(reference);
+        var array = state.Resolve<java.lang.Array>(reference);
         if (index < 0 || index >= array.BaseValue.Length)
-            state.Heap.Throw<ArrayIndexOutOfBoundsException>();
+            state.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)
             frame.PushBool(b.Value[index]);
         else if (array is Array<sbyte> s)
@@ -1760,7 +1760,7 @@ public class JavaRunner
         var pointer = (VirtualPointer)args;
         frame.SetFrom(pointer.ArgsCount + 1);
         var r = frame.PopReferenceFrom();
-        var obj = state.Heap.ResolveObject(r);
+        var obj = state.ResolveObject(r);
 
         if (!obj.JavaClass.VirtualTable!.TryGetValue(pointer.Pointer, out var m))
             throw new JavaRuntimeError(

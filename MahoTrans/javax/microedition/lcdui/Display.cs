@@ -14,10 +14,10 @@ public class Display : Object
     [return: JavaType(typeof(Display))]
     public static Reference getDisplay([JavaType(typeof(MIDlet))] Reference midletRef)
     {
-        var midlet = Heap.Resolve<MIDlet>(midletRef);
+        var midlet = Jvm.Resolve<MIDlet>(midletRef);
         if (midlet.Display.IsNull)
         {
-            var disp = Heap.AllocateObject<Display>();
+            var disp = Jvm.AllocateObject<Display>();
             midlet.Display = disp.This;
         }
 
@@ -36,12 +36,12 @@ public class Display : Object
         if (d.IsNull)
             Toolkit.Display.SetNullCurrent();
         else
-            Toolkit.Display.SetCurrent(Heap.Resolve<Displayable>(d).Handle);
+            Toolkit.Display.SetCurrent(Jvm.Resolve<Displayable>(d).Handle);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)
     {
-        Heap.State.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
+        Jvm.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
     }
 
     public bool vibrate(int dur)

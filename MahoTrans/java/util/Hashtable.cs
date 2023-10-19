@@ -40,8 +40,8 @@ public class Hashtable : Object
 
         //TODO this is unsafe and slow!
 
-        var pointer = Heap.State.GetVirtualPointer(new NameDescriptor("equals", "(Ljava/lang/Object;)Z"));
-        var method = Heap.State.GetVirtualMethod(pointer, key);
+        var pointer = Jvm.GetVirtualPointer(new NameDescriptor("equals", "(Ljava/lang/Object;)Z"));
+        var method = Jvm.GetVirtualMethod(pointer, key);
         if (method.Class.IsObject)
         {
             // default equality comparer checks reference equality. We already did that.
@@ -50,7 +50,7 @@ public class Hashtable : Object
 
         if (method.IsNative)
         {
-            var res = Heap.ResolveObject(key);
+            var res = Jvm.ResolveObject(key);
             var func = method.NativeBody.CreateDelegate<Func<Reference, bool>>(res);
             foreach (var kvp in _storage)
             {
@@ -66,14 +66,14 @@ public class Hashtable : Object
             RawCode = new[] { new Instruction(JavaOpcode.@return) },
             Method = new Method(new NameDescriptor("", ""), MethodFlags.Static, new JavaClass())
         });
-        var equalityChecker = new JavaThread(retFrame, Heap.State, Reference.Null);
+        var equalityChecker = new JavaThread(retFrame, Jvm, Reference.Null);
         foreach (var kvp in _storage)
         {
             equalityChecker.ActiveFrameIndex = 0;
             var f = equalityChecker.Push(method.JavaBody);
             f.PushReference(key);
             f.PushReference(kvp.Key);
-            equalityChecker.Execute(Heap.State);
+            equalityChecker.Execute(Jvm);
             bool equal = equalityChecker.CallStack[0]!.Stack[0] != 0;
             if (equal)
                 return kvp.Value;
@@ -85,7 +85,7 @@ public class Hashtable : Object
     public Reference put(Reference key, Reference val)
     {
         if (key.IsNull || val.IsNull)
-            Heap.Throw<NullPointerException>();
+            Jvm.Throw<NullPointerException>();
 
         if (_storage.TryGetValue(key, out var prev))
         {
@@ -114,7 +114,7 @@ public class Hashtable : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference keys()
     {
-        var e = Heap.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.AllocateObject<ArrayEnumerator>();
         e.Value = _storage.Keys.ToArray();
         return e.This;
     }
@@ -122,7 +122,7 @@ public class Hashtable : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference elements()
     {
-        var e = Heap.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.AllocateObject<ArrayEnumerator>();
         e.Value = _storage.Values.ToArray();
         return e.This;
     }

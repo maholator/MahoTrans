@@ -19,7 +19,7 @@ public class StringBuffer : Object
     [InitMethod]
     public void InitFromString([String] Reference str)
     {
-        _buffer = new List<char>(Heap.ResolveString(str));
+        _buffer = new List<char>(Jvm.ResolveString(str));
     }
 
     [return: JavaType(typeof(StringBuffer))]
@@ -39,7 +39,7 @@ public class StringBuffer : Object
     [return: JavaType(typeof(StringBuffer))]
     public Reference append([String] Reference s)
     {
-        _buffer.AddRange(Heap.ResolveString(s));
+        _buffer.AddRange(Jvm.ResolveString(s));
         return This;
     }
 
@@ -96,7 +96,7 @@ public class StringBuffer : Object
     public Reference delete(int start, int end)
     {
         if (start >= _buffer.Count || start > end)
-            Heap.Throw<StringIndexOutOfBoundsException>();
+            Jvm.Throw<StringIndexOutOfBoundsException>();
         _buffer = _buffer.Take(start).Concat(_buffer.Skip(end)).ToList();
         return This;
     }
@@ -107,7 +107,7 @@ public class StringBuffer : Object
     public Reference deleteCharAt(int index)
     {
         if (index < 0 || index >= _buffer.Count)
-            Heap.Throw<StringIndexOutOfBoundsException>();
+            Jvm.Throw<StringIndexOutOfBoundsException>();
         _buffer.RemoveAt(index);
         return This;
     }
@@ -118,6 +118,6 @@ public class StringBuffer : Object
     [return: String]
     public Reference toString()
     {
-        return Heap.AllocateString(new string(_buffer.ToArray()));
+        return Jvm.AllocateString(new string(_buffer.ToArray()));
     }
 }

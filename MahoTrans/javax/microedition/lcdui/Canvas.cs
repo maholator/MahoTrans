@@ -23,14 +23,14 @@ public class Canvas : Displayable
     [return: JavaType(typeof(Graphics))]
     public Reference ObtainGraphics()
     {
-        var g = Heap.AllocateObject<Graphics>();
+        var g = Jvm.AllocateObject<Graphics>();
         g.Handle = Toolkit.Display.GetGraphics(Handle);
         return g.This;
     }
 
     public void repaint()
     {
-        Heap.State.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
+        Jvm.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
 
     public void flushGraphics() => Toolkit.Display.Flush(Handle);
@@ -55,7 +55,7 @@ public class Canvas : Displayable
         };
     }
 
-    public Reference getQueue() => Heap.State.EventQueue.This;
+    public Reference getQueue() => Jvm.EventQueue.This;
 
     public int getGameAction(int keyCode)
     {

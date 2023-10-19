@@ -20,7 +20,7 @@ public class Short : Object
         if (r.IsNull)
             return false;
 
-        var obj = Heap.ResolveObject(r);
+        var obj = Jvm.ResolveObject(r);
 
         if (obj is Short s)
         {

@@ -117,7 +117,7 @@ public class JavaThread
             args.CopyTo(f.LocalVariables, 1);
         }
 
-        var t = state.Heap.AllocateObject<Thread>(); // object left untouched, this is okay for now?
+        var t = state.AllocateObject<Thread>(); // object left untouched, this is okay for now?
         var javaThread = new JavaThread(f, state, t.This);
         if (launcher.Class.PendingInitializer)
             launcher.Class.Initialize(javaThread, state);

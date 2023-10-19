@@ -12,22 +12,22 @@ public class System : Object
     [ClassInit]
     public static void Clinit()
     {
-        @out = Heap.AllocateObject<SystemPrintStream>().This;
-        err = Heap.AllocateObject<SystemPrintStream>().This;
+        @out = Jvm.AllocateObject<SystemPrintStream>().This;
+        err = Jvm.AllocateObject<SystemPrintStream>().This;
     }
 
     public static int identityHashCode(Reference x)
     {
-        return Toolkit.System.GetHashCode(Heap.ResolveObject(x));
+        return Toolkit.System.GetHashCode(Jvm.ResolveObject(x));
     }
 
     [return: String]
     public static Reference getProperty([String] Reference key)
     {
-        switch (Heap.ResolveString(key))
+        switch (Jvm.ResolveString(key))
         {
             case "microedition.platform":
-                return Heap.AllocateString("Nokia MT-292");
+                return Jvm.AllocateString("Nokia MT-292");
         }
 
         return new Reference(0);
@@ -37,13 +37,13 @@ public class System : Object
 
     public static void gc()
     {
-        Heap.RunGarbageCollector();
+        Jvm.RunGarbageCollector();
     }
 
     public static void arraycopy(Reference src, int src_position, Reference dst, int dst_position, int length)
     {
-        var arr1 = Heap.Resolve<Array>(src).BaseValue;
-        var arr2 = Heap.Resolve<Array>(dst).BaseValue;
+        var arr1 = Jvm.Resolve<Array>(src).BaseValue;
+        var arr2 = Jvm.Resolve<Array>(dst).BaseValue;
         global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
     }
 }

@@ -16,7 +16,7 @@ public sealed class String : Object
     [JavaDescriptor("([B)V")]
     public void InitBytes(Reference arr)
     {
-        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned();
+        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned();
         Value = buf.DecodeDefault();
     }
 
@@ -24,7 +24,7 @@ public sealed class String : Object
     [JavaDescriptor("([BII)V")]
     public void InitBytes(Reference arr, int from, int len)
     {
-        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
+        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
         Value = buf.DecodeDefault();
     }
 
@@ -32,7 +32,7 @@ public sealed class String : Object
     public void InitBytes([JavaType("[B")] Reference arr, int from, int len, [String] Reference enc)
     {
         //TODO
-        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
+        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
         Value = buf.DecodeUTF8();
     }
 
@@ -40,7 +40,7 @@ public sealed class String : Object
     public void InitBytes([JavaType("[B")] Reference arr, [String] Reference enc)
     {
         //TODO
-        var buf = Heap.ResolveArray<sbyte>(arr).ToUnsigned().ToArray();
+        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().ToArray();
         Value = buf.DecodeUTF8();
     }
 
@@ -54,14 +54,14 @@ public sealed class String : Object
     [JavaDescriptor("([C)V")]
     public void Init(Reference charArr)
     {
-        Value = new string(Heap.ResolveArray<char>(charArr));
+        Value = new string(Jvm.ResolveArray<char>(charArr));
     }
 
     [InitMethod]
     [JavaDescriptor("([CII)V")]
     public void Init(Reference charArr, int from, int len)
     {
-        Value = new string(Heap.ResolveArray<char>(charArr), from, len);
+        Value = new string(Jvm.ResolveArray<char>(charArr), from, len);
     }
 
     #endregion
@@ -73,13 +73,13 @@ public sealed class String : Object
 
     public bool startsWith([JavaType(typeof(String))] Reference s)
     {
-        var other = Heap.ResolveString(s);
+        var other = Jvm.ResolveString(s);
         return Value.StartsWith(other);
     }
 
     public bool endsWith([JavaType(typeof(String))] Reference s)
     {
-        var other = Heap.ResolveString(s);
+        var other = Jvm.ResolveString(s);
         return Value.EndsWith(other);
     }
 
@@ -92,7 +92,7 @@ public sealed class String : Object
     public Reference getBytes()
     {
         var data = Value.EncodeDefault().ToSigned();
-        return Heap.AllocateArray(data, "[B");
+        return Jvm.AllocateArray(data, "[B");
     }
 
     [JavaDescriptor("(Ljava/lang/String;)[B")]
@@ -100,13 +100,13 @@ public sealed class String : Object
     {
         //TODO
         var data = Value.EncodeUTF8().ToSigned();
-        return Heap.AllocateArray(data, "[B");
+        return Jvm.AllocateArray(data, "[B");
     }
 
     [return: JavaType("[C")]
     public Reference toCharArray()
     {
-        return Heap.AllocateArray(Value.ToCharArray(), "[C");
+        return Jvm.AllocateArray(Value.ToCharArray(), "[C");
     }
 
     [return: JavaType(typeof(String))]
@@ -117,7 +117,7 @@ public sealed class String : Object
         if (r.IsNull)
             return false;
 
-        var obj = Heap.ResolveObject(r);
+        var obj = Jvm.ResolveObject(r);
 
         if (obj is String s)
         {
@@ -129,7 +129,7 @@ public sealed class String : Object
 
     public int compareTo([String] Reference anotherString)
     {
-        string s2 = Heap.ResolveString(anotherString);
+        string s2 = Jvm.ResolveString(anotherString);
 
         var len = Math.min(s2.Length, Value.Length);
 
@@ -149,67 +149,67 @@ public sealed class String : Object
 
     public int indexOf([String] Reference strr)
     {
-        var str = Heap.ResolveString(strr);
+        var str = Jvm.ResolveString(strr);
         return Value.IndexOf(str, StringComparison.Ordinal);
     }
 
     public int indexOf([String] Reference strr, int from)
     {
-        var str = Heap.ResolveString(strr);
+        var str = Jvm.ResolveString(strr);
         return Value.IndexOf(str, from, StringComparison.Ordinal);
     }
 
     [return: String]
     public Reference substring(int from)
     {
-        return Heap.AllocateString(Value.Substring(from));
+        return Jvm.AllocateString(Value.Substring(from));
     }
 
     [return: String]
     public Reference substring(int from, int to)
     {
-        return Heap.AllocateString(Value.Substring(from, to - from));
+        return Jvm.AllocateString(Value.Substring(from, to - from));
     }
 
     [return: String]
-    public Reference toUpperCase() => Heap.AllocateString(Value.ToUpper());
+    public Reference toUpperCase() => Jvm.AllocateString(Value.ToUpper());
 
     [return: String]
-    public Reference toLowerCase() => Heap.AllocateString(Value.ToLower());
+    public Reference toLowerCase() => Jvm.AllocateString(Value.ToLower());
 
     [return: String]
-    public Reference replace(char from, char to) => Heap.AllocateString(Value.Replace(from, to));
+    public Reference replace(char from, char to) => Jvm.AllocateString(Value.Replace(from, to));
 
     [return: String]
-    public Reference trim() => Heap.AllocateString(Value.Trim());
+    public Reference trim() => Jvm.AllocateString(Value.Trim());
 
     #region valueOf
 
     [return: String]
-    public static Reference valueOf(bool v) => Heap.AllocateString(v ? "true" : "false");
+    public static Reference valueOf(bool v) => Jvm.AllocateString(v ? "true" : "false");
 
     [return: String]
-    public static Reference valueOf(char v) => Heap.AllocateString(v.ToString());
+    public static Reference valueOf(char v) => Jvm.AllocateString(v.ToString());
 
     [return: String]
     public static Reference valueOf([JavaType("[C")] Reference charArr) =>
-        Heap.AllocateString(new string(Heap.ResolveArray<char>(charArr)));
+        Jvm.AllocateString(new string(Jvm.ResolveArray<char>(charArr)));
 
     [return: String]
     public static Reference valueOf([JavaType("[C")] Reference charArr, int from, int count) =>
-        Heap.AllocateString(new string(Heap.ResolveArray<char>(charArr), from, count));
+        Jvm.AllocateString(new string(Jvm.ResolveArray<char>(charArr), from, count));
 
     [return: String]
-    public static Reference valueOf(double v) => Heap.AllocateString(v.ToString());
+    public static Reference valueOf(double v) => Jvm.AllocateString(v.ToString());
 
     [return: String]
-    public static Reference valueOf(float v) => Heap.AllocateString(v.ToString());
+    public static Reference valueOf(float v) => Jvm.AllocateString(v.ToString());
 
     [return: String]
-    public static Reference valueOf(int v) => Heap.AllocateString(v.ToString());
+    public static Reference valueOf(int v) => Jvm.AllocateString(v.ToString());
 
     [return: String]
-    public static Reference valueOf(long v) => Heap.AllocateString(v.ToString());
+    public static Reference valueOf(long v) => Jvm.AllocateString(v.ToString());
 
     [JavaDescriptor("(Ljava/lang/Object;)Ljava/lang/String;")]
     public static JavaMethodBody valueOf(JavaClass @class)

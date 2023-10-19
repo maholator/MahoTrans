@@ -4,6 +4,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace javax.microedition.ams;
@@ -21,7 +22,7 @@ public class EventQueue : Thread
     /// <summary>
     /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
     /// </summary>
-    [JavaIgnore] public JvmState Jvm = null!;
+    [JavaIgnore] public JvmState OwningJvm = null!;
 
     [JavaIgnore] public Dictionary<Reference, bool> QueuedRepaints = new();
 
@@ -45,7 +46,7 @@ public class EventQueue : Thread
     {
         lock (_lock)
         {
-            var e = Jvm.Heap.AllocateObject<T>();
+            var e = OwningJvm.AllocateObject<T>();
             setup.Invoke(e);
             if (e is RepaintEvent re)
             {
@@ -56,7 +57,7 @@ public class EventQueue : Thread
 
             _events.Enqueue(e.This);
             //Console.WriteLine($"{e.JavaClass} is enqueued");
-            Jvm.Attach(JavaThread.ThreadId);
+            OwningJvm.Attach(JavaThread.ThreadId);
         }
     }
 
@@ -67,7 +68,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
             {
                 // no more events
-                Jvm.Detach(JavaThread, 0);
+                OwningJvm.Detach(JavaThread, 0);
                 // it will stay detached until Enqueue is called.
             }
             // if there are more events - do nothing
@@ -82,7 +83,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
                 return Reference.Null;
             var e = _events.Dequeue();
-            if (Heap.ResolveObject(e) is RepaintEvent re)
+            if (Object.Jvm.ResolveObject(e) is RepaintEvent re)
             {
                 QueuedRepaints[re.Target] = false;
             }
@@ -136,7 +137,7 @@ public class EventQueue : Thread
             for (int i = 0; i < list.Count; i++)
             {
                 var evRef = list[i];
-                if (Heap.ResolveObject(evRef) is RepaintEvent re)
+                if (Object.Jvm.ResolveObject(evRef) is RepaintEvent re)
                 {
                     QueuedRepaints[re.Target] = false;
                     list.RemoveAt(i);

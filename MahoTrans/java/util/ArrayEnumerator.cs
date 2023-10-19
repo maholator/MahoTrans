@@ -17,7 +17,7 @@ public class ArrayEnumerator : Object, Enumeration
     public Reference nextElement()
     {
         if (index >= Value.Length)
-            Heap.Throw<NoSuchElementException>();
+            Jvm.Throw<NoSuchElementException>();
         var el = Value[index];
         index++;
         return el;

@@ -19,10 +19,10 @@ public class Class : Object
     [return: JavaType(typeof(Class))]
     public static Reference forName([String] Reference r)
     {
-        var name = Heap.ResolveString(r);
-        if (!Heap.State.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
-            Heap.Throw<ClassNotFoundException>();
-        var cls = Heap.AllocateObject<Class>();
+        var name = Jvm.ResolveString(r);
+        if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
+            Jvm.Throw<ClassNotFoundException>();
+        var cls = Jvm.AllocateObject<Class>();
         cls.InternalClass = jc!;
         return cls.This;
     }
@@ -31,7 +31,7 @@ public class Class : Object
     public Reference getName()
     {
         var name = InternalClass.Name.Replace('/', '.');
-        return Heap.AllocateString(name);
+        return Jvm.AllocateString(name);
     }
 
     [JavaDescriptor("()Ljava/lang/Object;")]
@@ -55,19 +55,19 @@ public class Class : Object
     public Reference allocate()
     {
         if (!InternalClass.Methods.ContainsKey(_initDescr))
-            Heap.Throw<IllegalAccessException>();
-        return Heap.AllocateObject(InternalClass);
+            Jvm.Throw<IllegalAccessException>();
+        return Jvm.AllocateObject(InternalClass);
     }
 
     [return: JavaType(typeof(InputStream))]
     public Reference getResourceAsStream([String] Reference name)
     {
-        var data = Heap.State.GetResource(Heap.ResolveString(name));
+        var data = Jvm.GetResource(Jvm.ResolveString(name));
         if (data == null)
             return Reference.Null;
 
-        var stream = Heap.AllocateObject<ByteArrayInputStream>();
-        var buf = Heap.AllocateArray(data, "[B");
+        var stream = Jvm.AllocateObject<ByteArrayInputStream>();
+        var buf = Jvm.AllocateArray(data, "[B");
         stream.Init(buf);
         return stream.This;
     }

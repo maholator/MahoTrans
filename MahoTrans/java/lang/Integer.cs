@@ -28,7 +28,7 @@ public class Integer : Object
     {
         if (obj.IsNull)
             return false;
-        var o = Heap.ResolveObject(obj);
+        var o = Jvm.ResolveObject(obj);
         if (o is not Integer ii)
             return false;
         return ii.Value == Value;
@@ -38,29 +38,29 @@ public class Integer : Object
     [return: String]
     public Reference toString()
     {
-        return Heap.AllocateString(Value.ToString());
+        return Jvm.AllocateString(Value.ToString());
     }
 
     [return: String]
     public static Reference toString(int i)
     {
-        return Heap.AllocateString(i.ToString());
+        return Jvm.AllocateString(i.ToString());
     }
 
 
     [return: String]
     public static Reference toHexString(int i)
     {
-        return Heap.AllocateString(Convert.ToString(i, 16));
+        return Jvm.AllocateString(Convert.ToString(i, 16));
     }
 
     public static int parseInt([String] Reference str)
     {
-        if (!int.TryParse(Heap.ResolveString(str), out var i))
-            Heap.Throw<NumberFormatException>();
+        if (!int.TryParse(Jvm.ResolveString(str), out var i))
+            Jvm.Throw<NumberFormatException>();
 
         return i;
     }
 
-    public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Heap.ResolveString(str), radix);
+    public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Jvm.ResolveString(str), radix);
 }

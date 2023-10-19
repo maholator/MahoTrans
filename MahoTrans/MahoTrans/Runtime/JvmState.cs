@@ -8,7 +8,6 @@ namespace MahoTrans.Runtime;
 public partial class JvmState
 {
     public Toolkit Toolkit;
-    public JavaHeap Heap;
 
     private bool _running;
 
@@ -17,7 +16,6 @@ public partial class JvmState
     public JvmState(Toolkit toolkit)
     {
         Toolkit = toolkit;
-        Heap = new(this);
     }
 
     public void RunInContext(Action action)
@@ -27,7 +25,7 @@ public partial class JvmState
 
         try
         {
-            Object.AttachHeap(Heap);
+            Object.AttachHeap(this);
             action();
         }
         finally
@@ -122,8 +120,8 @@ public partial class JvmState
             RunInContextIfNot(() =>
             {
                 Console.WriteLine("Starting queue processor...");
-                _eventQueue = Heap.AllocateObject<EventQueue>();
-                _eventQueue.Jvm = this;
+                _eventQueue = AllocateObject<EventQueue>();
+                _eventQueue.OwningJvm = this;
                 _eventQueue.start();
             });
             return _eventQueue!;

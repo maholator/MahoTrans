@@ -56,20 +56,20 @@ public class RecordStore : Object
     public int AddRecordInternal([JavaType("[B")] Reference data, int offset, int count)
     {
         CheckNotClosed();
-        var name = Heap.ResolveString(storeName);
+        var name = Jvm.ResolveString(storeName);
 
         if (count == 0)
         {
             return Toolkit.RecordStore.AddRecord(name, Array.Empty<sbyte>(), 0, 0);
         }
 
-        var arr = Heap.ResolveArray<sbyte>(data);
+        var arr = Jvm.ResolveArray<sbyte>(data);
         return Toolkit.RecordStore.AddRecord(name, arr, offset, count);
     }
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
-        Vector vector = Heap.Resolve<Vector>(listeners);
+        Vector vector = Jvm.Resolve<Vector>(listeners);
 
         if (!vector.contains(listener))
         {
@@ -81,11 +81,11 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         openCount--;
-        Toolkit.RecordStore.CloseStore(Heap.ResolveString(storeName));
+        Toolkit.RecordStore.CloseStore(Jvm.ResolveString(storeName));
 
         if (openCount == 0)
         {
-            Heap.Resolve<Vector>(listeners).removeAllElements();
+            Jvm.Resolve<Vector>(listeners).removeAllElements();
         }
     }
 
@@ -95,17 +95,17 @@ public class RecordStore : Object
 
     public static void deleteRecordStore([String] Reference str)
     {
-        var name = Heap.ResolveString(str);
+        var name = Jvm.ResolveString(str);
 
         if (openedStores.TryGetValue(name, out var storeRef))
         {
-            var store = Heap.Resolve<RecordStore>(storeRef);
+            var store = Jvm.Resolve<RecordStore>(storeRef);
             if (store.openCount > 0)
-                Heap.Throw<RecordStoreException>();
+                Jvm.Throw<RecordStoreException>();
         }
 
         if (!Toolkit.RecordStore.DeleteStore(name))
-            Heap.Throw<RecordStoreNotFoundException>();
+            Jvm.Throw<RecordStoreNotFoundException>();
     }
 
     public void enumerateRecords()
@@ -129,34 +129,34 @@ public class RecordStore : Object
     public int getNextRecordID()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetNextId(Heap.ResolveString(storeName));
+        return Toolkit.RecordStore.GetNextId(Jvm.ResolveString(storeName));
     }
 
     public int getNumRecords()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetCount(Heap.ResolveString(storeName));
+        return Toolkit.RecordStore.GetCount(Jvm.ResolveString(storeName));
     }
 
     [return: JavaType("[B")]
     public Reference getRecord(int recordId)
     {
         CheckNotClosed();
-        var buf = Toolkit.RecordStore.GetRecord(Heap.ResolveString(storeName), recordId);
+        var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(storeName), recordId);
         if (buf == null)
-            Heap.Throw<InvalidRecordIDException>();
-        return Heap.AllocateArray(buf, "[B");
+            Jvm.Throw<InvalidRecordIDException>();
+        return Jvm.AllocateArray(buf, "[B");
     }
 
     public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
     {
         CheckNotClosed();
-        var arr = Heap.ResolveArray<sbyte>(buf);
-        var r = Toolkit.RecordStore.GetRecord(Heap.ResolveString(storeName), recordId);
+        var arr = Jvm.ResolveArray<sbyte>(buf);
+        var r = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(storeName), recordId);
         if (r == null)
-            Heap.Throw<InvalidRecordIDException>();
+            Jvm.Throw<InvalidRecordIDException>();
         if (r.Length + offset > arr.Length)
-            Heap.Throw<ArrayIndexOutOfBoundsException>();
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
         r.CopyTo(arr, offset);
         return r.Length;
     }
@@ -164,17 +164,17 @@ public class RecordStore : Object
     public int getRecordSize(int recordId)
     {
         CheckNotClosed();
-        var size = Toolkit.RecordStore.GetSize(Heap.ResolveString(storeName), recordId);
+        var size = Toolkit.RecordStore.GetSize(Jvm.ResolveString(storeName), recordId);
         if (size.HasValue)
             return size.Value;
-        Heap.Throw<InvalidRecordIDException>();
+        Jvm.Throw<InvalidRecordIDException>();
         return 0;
     }
 
     public int getSize()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetSize(Heap.ResolveString(storeName));
+        return Toolkit.RecordStore.GetSize(Jvm.ResolveString(storeName));
     }
 
     public int getSizeAvailable()
@@ -191,7 +191,7 @@ public class RecordStore : Object
         var stores = Toolkit.RecordStore.ListStores();
         if (stores.Length == 0)
             return Reference.Null;
-        return stores.ToHeap(Heap);
+        return stores.ToHeap(Jvm);
     }
 
     [return: JavaType(typeof(RecordStore))]
@@ -203,25 +203,25 @@ public class RecordStore : Object
     [return: JavaType(typeof(RecordStore))]
     public static Reference openRecordStore([String] Reference name, bool create, int authMode, bool writable)
     {
-        var nameStr = Heap.ResolveString(name);
+        var nameStr = Jvm.ResolveString(name);
 
         if (!Toolkit.RecordStore.OpenStore(nameStr, create))
         {
-            Heap.Throw<RecordStoreNotFoundException>();
+            Jvm.Throw<RecordStoreNotFoundException>();
             return Reference.Null;
         }
 
         if (openedStores.TryGetValue(nameStr, out var opened))
         {
-            var s = Heap.Resolve<RecordStore>(opened);
+            var s = Jvm.Resolve<RecordStore>(opened);
             s.openCount++;
             return opened;
         }
 
-        var store = Heap.AllocateObject<RecordStore>();
+        var store = Jvm.AllocateObject<RecordStore>();
         store.openCount = 1;
         store.storeName = name;
-        var vec = Heap.AllocateObject<Vector>();
+        var vec = Jvm.AllocateObject<Vector>();
         vec.Init();
         store.listeners = vec.This;
         openedStores.Add(nameStr, store.This);
@@ -233,7 +233,7 @@ public class RecordStore : Object
         [String] Reference midletName)
     {
         //TODO
-        Heap.Throw<RecordStoreException>();
+        Jvm.Throw<RecordStoreException>();
         return Reference.Null;
     }
 
@@ -241,7 +241,7 @@ public class RecordStore : Object
     {
         if (listeners.IsNull)
             return;
-        var vector = Heap.Resolve<Vector>(listener);
+        var vector = Jvm.Resolve<Vector>(listener);
         vector.removeElement(listener);
     }
 
@@ -250,7 +250,7 @@ public class RecordStore : Object
     public Reference enumerateRecords(Reference filter, Reference comp, bool z)
     {
         //TODO
-        Heap.Throw<RecordStoreNotOpenException>();
+        Jvm.Throw<RecordStoreNotOpenException>();
         return Reference.Null;
     }
 
@@ -289,8 +289,8 @@ public class RecordStore : Object
     public void SetRecordInternal(int recordId, [JavaType("[B")] Reference newData, int offset, int count)
     {
         CheckNotClosed();
-        var arr = Heap.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Heap.ResolveString(storeName), recordId, arr, offset, count);
+        var arr = Jvm.ResolveArray<sbyte>(newData);
+        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(storeName), recordId, arr, offset, count);
     }
 
     #region Utils
@@ -298,7 +298,7 @@ public class RecordStore : Object
     private void CheckNotClosed()
     {
         if (openCount == 0)
-            Heap.Throw<RecordStoreNotOpenException>();
+            Jvm.Throw<RecordStoreNotOpenException>();
     }
 
     /// <summary>

@@ -39,7 +39,7 @@ public class Graphics : Object, DirectGraphics
 
     public void setFont([JavaType(typeof(Font))] Reference r)
     {
-        var f = Heap.Resolve<Font>(r);
+        var f = Jvm.Resolve<Font>(r);
         _style = f.Style;
         _face = f.Face;
         _size = f.Height;
@@ -118,19 +118,19 @@ public class Graphics : Object, DirectGraphics
 
     public void drawString([String] Reference str, int x, int y, int a)
     {
-        var text = Heap.ResolveString(str);
+        var text = Jvm.ResolveString(str);
         Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size, _clip);
     }
 
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
     {
-        var res = Heap.Resolve<Image>(image);
+        var res = Jvm.Resolve<Image>(image);
         Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a, _clip);
     }
 
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a, int tr)
     {
-        var res = Heap.Resolve<Image>(image);
+        var res = Jvm.Resolve<Image>(image);
         Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a, _clip);
     }
 
@@ -138,7 +138,7 @@ public class Graphics : Object, DirectGraphics
         int transform, int x_dest,
         int y_dest, int anchor)
     {
-        var res = Heap.Resolve<Image>(image);
+        var res = Jvm.Resolve<Image>(image);
         Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height,
             (SpriteTransform)transform, (GraphicsAnchor)anchor, _clip);
     }
@@ -146,7 +146,7 @@ public class Graphics : Object, DirectGraphics
     public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
-        var buf = Heap.ResolveArray<int>(rgbData);
+        var buf = Jvm.ResolveArray<int>(rgbData);
         Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha, _clip);
     }
 }
