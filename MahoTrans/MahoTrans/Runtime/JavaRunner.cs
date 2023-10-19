@@ -1258,7 +1258,7 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.invokevirtual:
-                CallVirtual(args, frame, thread, state);
+                CallVirtual((VirtualPointer)args, frame, thread, state);
                 break;
             case JavaOpcode.invokespecial:
                 CallMethod((Method)args, false, frame, thread);
@@ -1267,7 +1267,7 @@ public class JavaRunner
                 CallMethod((Method)args, true, frame, thread);
                 break;
             case JavaOpcode.invokeinterface:
-                CallVirtual(args, frame, thread, state);
+                CallVirtual((VirtualPointer)args, frame, thread, state);
                 break;
             case JavaOpcode.invokedynamic:
                 throw new JavaRuntimeError("Dynamic invoke is not supported");
@@ -1465,6 +1465,15 @@ public class JavaRunner
             case JavaOpcode._inplacereturn:
                 thread.Pop();
                 break;
+            case JavaOpcode._invokeany:
+            {
+                var descr = state.ResolveString(frame.PopReference());
+                var name = state.ResolveString(frame.PopReference());
+                var virtPoint = state.GetVirtualPointer(new NameDescriptor(name, descr));
+                var argsCount = DescriptorUtils.ParseMethodArgsCount(descr);
+                CallVirtual(new VirtualPointer(virtPoint, argsCount), frame, thread, state);
+                break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -1755,9 +1764,8 @@ public class JavaRunner
 
     #endregion
 
-    private static void CallVirtual(object args, Frame frame, JavaThread thread, JvmState state)
+    private static void CallVirtual(VirtualPointer pointer, Frame frame, JavaThread thread, JvmState state)
     {
-        var pointer = (VirtualPointer)args;
         frame.SetFrom(pointer.ArgsCount + 1);
         var r = frame.PopReferenceFrom();
         var obj = state.ResolveObject(r);
