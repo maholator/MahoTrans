@@ -1,11 +1,8 @@
-﻿using MahoTrans.Environment;
-using MahoTrans.Loader;
-using MahoTrans.Runtime;
-
-internal class Program
+﻿internal class Program
 {
     public static void Main(string[] args)
     {
+        /*
         var all = ClassLoader.ReadJar(
             File.OpenRead("/home/ansel/repos/j2me/nmania/deployed/DefaultColorPhone/nmania.jar"),
             false);
@@ -47,7 +44,7 @@ internal class Program
         {
             JavaThread.CreateSyntheticVirtualAction("<init>", midlet, jvm).Execute(jvm);
             JavaThread.CreateSyntheticVirtualAction("startApp", midlet, jvm).Execute(jvm);
-        });
+        }); */
     }
 }
 /*
