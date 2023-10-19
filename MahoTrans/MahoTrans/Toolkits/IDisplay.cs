@@ -1,6 +1,6 @@
 using javax.microedition.lcdui;
 
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 public interface IDisplay
 {

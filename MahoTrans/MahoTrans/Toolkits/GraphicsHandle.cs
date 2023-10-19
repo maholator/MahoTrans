@@ -1,4 +1,4 @@
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 public readonly struct GraphicsHandle : IEquatable<GraphicsHandle>
 {

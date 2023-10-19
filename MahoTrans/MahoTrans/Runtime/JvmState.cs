@@ -3,7 +3,7 @@ using javax.microedition.ams;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkit;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -11,7 +11,7 @@ namespace MahoTrans.Runtime;
 
 public class JvmState
 {
-    public IToolkit Toolkit;
+    public Toolkit Toolkit;
     public JavaHeap Heap;
 
     /// <summary>
@@ -41,7 +41,7 @@ public class JvmState
 
     private EventQueue? _eventQueue;
 
-    public JvmState(IToolkit toolkit)
+    public JvmState(Toolkit toolkit)
     {
         Toolkit = toolkit;
         Heap = new(this);

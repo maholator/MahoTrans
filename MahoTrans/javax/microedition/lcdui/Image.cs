@@ -1,7 +1,7 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkit;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using IOException = java.io.IOException;
 using Object = java.lang.Object;

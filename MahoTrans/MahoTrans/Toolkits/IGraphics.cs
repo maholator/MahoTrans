@@ -1,6 +1,6 @@
 using javax.microedition.lcdui;
 
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 /// <summary>
 /// Toolkit which encapsulates image and tools to paint on it. This must be inaccessible from JVM! Get it using <see cref="IImageManager.ResolveGraphics"/> when you need it and abandon once done.

@@ -2,7 +2,7 @@ using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkit;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 
 namespace java.lang;
@@ -38,7 +38,7 @@ public class Object
 
     public static bool HeapAttached => _heap != null;
 
-    protected static IToolkit Toolkit => Heap.State.Toolkit;
+    protected static Toolkit Toolkit => Heap.State.Toolkit;
 
     public Reference This => new Reference(HeapAddress);
 

@@ -1,7 +1,7 @@
 using java.lang;
 using Object = java.lang.Object;
 
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 public interface ISystem
 {

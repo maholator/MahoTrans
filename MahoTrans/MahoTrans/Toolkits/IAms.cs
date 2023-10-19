@@ -1,4 +1,4 @@
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 public interface IAms
 {

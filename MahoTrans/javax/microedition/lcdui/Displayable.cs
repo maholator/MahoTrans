@@ -1,5 +1,5 @@
 using MahoTrans.Native;
-using MahoTrans.Toolkit;
+using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;

@@ -1,6 +1,6 @@
 using javax.microedition.rms;
 
-namespace MahoTrans.Toolkit;
+namespace MahoTrans.Toolkits;
 
 public interface IRecordStore
 {

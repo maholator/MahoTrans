@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using MahoTrans.Dummy;
 using MahoTrans.Environment;
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
@@ -22,7 +21,7 @@ public class Nmania
             File.OpenRead("/home/ansel/repos/j2me/nmania/deployed/DefaultColorPhone/nmania.jar"),
             false);
 
-        jvm = new JvmState(new DummyToolkit());
+        jvm = new JvmState(null!);
         EnvironmentInitializer.Init(jvm, typeof(JavaRunner).Assembly);
         jvm.AddJvmClasses(all, "nmania", "nmania");
         classes = all.Item1;
