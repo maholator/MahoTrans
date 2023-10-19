@@ -1,3 +1,5 @@
+using java.lang;
+using Array = System.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -91,22 +93,32 @@ public class JavaThread
         }
     }
 
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticVirtualAction(string name, Reference target, JvmState state)
+    /// <summary>
+    /// Creates synthetic thread, i.e. thread that executes specified method. Uses <see cref="AnyCallBridge"/>.
+    /// Only creates java-side model object and sets it up. Call <see cref="Thread.start"/> on it to continue.
+    /// </summary>
+    /// <param name="nd">Method's descriptor.</param>
+    /// <param name="target">Object to call the method on.</param>
+    /// <param name="state">Jvm.</param>
+    /// <returns></returns>
+    public static Thread CreateSynthetic(NameDescriptor nd, Reference target, JvmState state)
     {
-        var virtp = state.GetVirtualPointer(new NameDescriptor(name, "()V"));
-        var method = state.GetVirtualMethod(virtp, target);
-        var f = new Frame(method.JavaBody);
+        var bridge = state.AllocateObject<AnyCallBridge>();
+        bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
 
-        f.LocalVariables[0] = target;
+        var model = state.AllocateObject<Thread>();
+        model.InitTargeted(bridge.This);
 
-        var t = state.AllocateObject<Thread>(); // object left untouched!
-        var javaThread = new JavaThread(f, t.This);
-        if (method.Class.PendingInitializer)
-            method.Class.Initialize(javaThread);
-        return javaThread;
+        return model;
     }
 
+    /// <summary>
+    /// Creates thread for passed java model. Does nothing with the created thread.
+    /// </summary>
+    /// <param name="thread"></param>
+    /// <param name="state"></param>
+    /// <returns></returns>
+    /// <exception cref="JavaRuntimeError"></exception>
     public static JavaThread CreateReal(Thread thread, JvmState state)
     {
         if (thread.This.IsNull)
