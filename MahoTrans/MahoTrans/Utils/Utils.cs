@@ -35,4 +35,18 @@ public static class Utils
     /// <param name="t">Type to get name from.</param>
     /// <returns>Name with dots replaced by slashes int L; form.</returns>
     public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
+
+    public static int NextKey<T>(this Dictionary<int, T> dict, int defaultKey = 0)
+    {
+        if (dict.Count == 0)
+            return defaultKey;
+        return dict.Keys.Max() + 1;
+    }
+
+    public static int Push<T>(this Dictionary<int, T> dict, T value, int defaultKey = 0)
+    {
+        var k = dict.NextKey(defaultKey);
+        dict[k] = value;
+        return k;
+    }
 }

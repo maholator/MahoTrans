@@ -30,4 +30,6 @@ public readonly struct ImageHandle : IEquatable<ImageHandle>
     {
         return !left.Equals(right);
     }
+
+    public static implicit operator int(ImageHandle ih) => ih.Id;
 }

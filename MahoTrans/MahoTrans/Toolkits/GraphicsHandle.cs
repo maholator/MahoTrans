@@ -33,4 +33,6 @@ public readonly struct GraphicsHandle : IEquatable<GraphicsHandle>
     {
         return !left.Equals(right);
     }
+
+    public static implicit operator int(GraphicsHandle gh) => gh.Id;
 }

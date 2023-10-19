@@ -33,4 +33,6 @@ public readonly struct DisplayableHandle : IEquatable<DisplayableHandle>
     {
         return !left.Equals(right);
     }
+
+    public static implicit operator int(DisplayableHandle dh) => dh.Id;
 }
