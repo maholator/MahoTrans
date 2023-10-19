@@ -1,4 +1,3 @@
-using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -92,69 +91,21 @@ public class JavaThread
         }
     }
 
-    /// <summary>
-    /// Creates a new thread which runs specific java method.
-    /// </summary>
-    /// <param name="launcher">Method to run.</param>
-    /// <param name="target">Object to call method on. Pass <c>null</c> if method is static. Passing null reference (with zero pointer) will call method with null <c>this</c>.</param>
-    /// <param name="args">List of args to pass.</param>
-    /// <param name="state">JVM to operate on.</param>
-    /// <returns>Thread with ready to run frame.</returns>
     [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSynthetic(Method launcher, Reference target, long[] args, JvmState state)
+    public static JavaThread CreateSyntheticVirtualAction(string name, Reference target, JvmState state)
     {
-        var f = new Frame(launcher.JavaBody);
-        if (launcher.IsStatic)
-        {
-            if (!target.IsNull)
-                throw new JavaRuntimeError($"Attempt to invoke static method {launcher} on object.");
-            args.CopyTo(f.LocalVariables, 0);
-        }
-        else
-        {
-            if (target.IsNull)
-                throw new JavaRuntimeError($"Attempt to call instance method {launcher} without object.");
-            f.LocalVariables[0] = target;
-            args.CopyTo(f.LocalVariables, 1);
-        }
+        var virtp = state.GetVirtualPointer(new NameDescriptor(name, "()V"));
+        var method = state.GetVirtualMethod(virtp, target);
+        var f = new Frame(method.JavaBody);
 
-        var t = state.AllocateObject<Thread>(); // object left untouched, this is okay for now?
+        f.LocalVariables[0] = target;
+
+        var t = state.AllocateObject<Thread>(); // object left untouched!
         var javaThread = new JavaThread(f, t.This);
-        if (launcher.Class.PendingInitializer)
-            launcher.Class.Initialize(javaThread);
+        if (method.Class.PendingInitializer)
+            method.Class.Initialize(javaThread);
         return javaThread;
     }
-
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticVirtualAction(string name, Reference target, JvmState state) =>
-        CreateSyntheticVirtual(new NameDescriptor(name, "()V"), target, Array.Empty<long>(), state);
-
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticVirtual(NameDescriptor name, Reference target, long[] args,
-        JvmState state) =>
-        CreateSynthetic(state.GetVirtualMethod(state.GetVirtualPointer(name), target), target, args, state);
-
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticStaticAction(JavaClass @class, string name, JvmState state)
-    {
-        if (!@class.Methods.TryGetValue(new NameDescriptor(name, "()V"), out var method))
-            throw new JavaRuntimeError($"Static action {name} was not found on {@class}.");
-        return CreateSynthetic(method, default, Array.Empty<long>(), state);
-    }
-
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticStaticAction(Method method, JvmState state)
-    {
-        return CreateSynthetic(method, default, Array.Empty<long>(), state);
-    }
-
-    [Obsolete("Syntetic threads produce UB if midlet attempts to interact with them.")]
-    public static JavaThread CreateSyntheticStatic(NameDescriptorClass name, long[] args, JvmState state)
-    {
-        var cls = state.GetClass(name.ClassName);
-        return CreateSynthetic(cls.Methods[name.Descriptor], default, args, state);
-    }
-
 
     public static JavaThread CreateReal(Thread thread, JvmState state)
     {
