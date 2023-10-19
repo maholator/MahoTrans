@@ -5,6 +5,9 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
+/// <summary>
+/// Object which holds all information about JVM - threads, objects, classes, etc.
+/// </summary>
 public partial class JvmState
 {
     public Toolkit Toolkit;
@@ -78,6 +81,9 @@ public partial class JvmState
         });
     }
 
+    /// <summary>
+    /// Attempts to interrupt this jvm, if it was launched using <see cref="Execute"/>. Returns instantly. Jvm may stop its work after some time.
+    /// </summary>
     public void Stop()
     {
         _running = false;

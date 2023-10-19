@@ -1,5 +1,8 @@
 namespace MahoTrans.Toolkits;
 
+/// <summary>
+/// Object which holds all implementations needed for JVM to work.
+/// </summary>
 public sealed class Toolkit
 {
     public readonly ISystem System;
@@ -16,7 +19,8 @@ public sealed class Toolkit
 
     public readonly IRecordStore RecordStore;
 
-    public Toolkit(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams, IRecordStore recordStore)
+    public Toolkit(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams,
+        IRecordStore recordStore)
     {
         System = system;
         Clock = clock;
