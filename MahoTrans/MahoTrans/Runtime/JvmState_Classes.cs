@@ -173,14 +173,8 @@ public partial class JvmState
 
         if (_resources.TryGetValue(name, out var blob))
         {
-            var copy = new sbyte[blob.Length];
-            for (int i = 0; i < blob.Length; i++)
-            {
-                //TODO
-                copy[i] = (sbyte)blob[i];
-            }
-
             Console.WriteLine($"Returning buffer of {blob.Length} bytes.");
+            var copy = blob.ToSigned().ToArray();
             return copy;
         }
 
