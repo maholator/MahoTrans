@@ -274,24 +274,28 @@ public partial class JvmState
         int deletedCount = 0;
 
         // we marked all alive objects as alive. Time to delete dead ones.
-        var all = _heap.Keys.ToArray();
 
-        foreach (var i in all)
+        var newHeap = new Dictionary<int, Object>(_heap.Count);
+
+        foreach (var i in _heap.Keys)
         {
-            if (_heap[i].Alive)
+            var obj = _heap[i];
+            if (obj.Alive)
             {
-                _heap[i].Alive = false;
+                obj.Alive = false;
+                newHeap.Add(i, obj);
             }
             else
             {
-                _heap.Remove(i);
                 deletedCount++;
             }
         }
 
+        _heap = newHeap;
+
         sw.Stop();
         Console.WriteLine(
-            $"GC collected {deletedCount}/{all.Length} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
+            $"GC collected {deletedCount} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
     }
 
     /// <summary>
