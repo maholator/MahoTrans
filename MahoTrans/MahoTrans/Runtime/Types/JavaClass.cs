@@ -50,7 +50,7 @@ public class JavaClass
         }
     }
 
-    public bool Is(string type, JvmState state)
+    public bool Is(string type)
     {
         if (Name == type)
             return true;
@@ -152,11 +152,10 @@ public class JavaClass
     public void AddMethod(Method m) => Methods.Add(m.Descriptor, m);
 
     /// <summary>
-    /// Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle.
+    /// Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle. This must be called inside JVM context.
     /// </summary>
     /// <param name="thread">Thread to run initialization on.</param>
-    /// <param name="state">JVM.</param>
-    public void Initialize(JavaThread thread, JvmState state)
+    public void Initialize(JavaThread thread)
     {
         PendingInitializer = false;
 
@@ -168,7 +167,7 @@ public class JavaClass
             }
             else
             {
-                m.JavaBody.EnsureBytecodeLinked(state);
+                m.JavaBody.EnsureBytecodeLinked();
                 thread.Push(m.JavaBody);
             }
         }

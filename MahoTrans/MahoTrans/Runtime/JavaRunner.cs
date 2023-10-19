@@ -84,7 +84,7 @@ public class JavaRunner
             if (@catch.IsIn(instr))
             {
                 string allowedType = (string)frame.Method.Method.Class.Constants[@catch.Type];
-                if (t.JavaClass.Is(allowedType, state))
+                if (t.JavaClass.Is(allowedType))
                 {
                     var code = frame.Method.Code;
                     var tByte = @catch.CatchStart;
@@ -1249,7 +1249,7 @@ public class JavaRunner
                 var p = (FieldPointer)args;
                 if (p.Class.PendingInitializer)
                 {
-                    p.Class.Initialize(thread, state);
+                    p.Class.Initialize(thread);
                     return;
                 }
 
@@ -1261,10 +1261,10 @@ public class JavaRunner
                 CallVirtual(args, frame, thread, state);
                 break;
             case JavaOpcode.invokespecial:
-                CallMethod((Method)args, false, frame, thread, state);
+                CallMethod((Method)args, false, frame, thread);
                 break;
             case JavaOpcode.invokestatic:
-                CallMethod((Method)args, true, frame, thread, state);
+                CallMethod((Method)args, true, frame, thread);
                 break;
             case JavaOpcode.invokeinterface:
                 CallVirtual(args, frame, thread, state);
@@ -1766,14 +1766,14 @@ public class JavaRunner
             throw new JavaRuntimeError(
                 $"No virt method {state.DecodeVirtualPointer(pointer.Pointer)} found on object {obj.JavaClass.Name}");
 
-        CallMethod(m, false, frame, thread, state);
+        CallMethod(m, false, frame, thread);
     }
 
-    private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread, JvmState state)
+    private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread)
     {
         if (m.Class.PendingInitializer)
         {
-            m.Class.Initialize(thread, state);
+            m.Class.Initialize(thread);
             // we want to do this instruction again so no pointer increase here
             return;
         }
@@ -1790,7 +1790,7 @@ public class JavaRunner
 
         var argsLength = DescriptorUtils.ParseMethodArgsCount(m.Descriptor.Descriptor);
         argsLength += (@static ? 0 : 1);
-        m.JavaBody.EnsureBytecodeLinked(state);
+        m.JavaBody.EnsureBytecodeLinked();
         var f = thread.Push(m.JavaBody);
         frame.SetFrom(argsLength);
         for (var arg = 0; arg < argsLength; arg++)

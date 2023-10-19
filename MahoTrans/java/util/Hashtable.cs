@@ -66,14 +66,14 @@ public class Hashtable : Object
             RawCode = new[] { new Instruction(JavaOpcode.@return) },
             Method = new Method(new NameDescriptor("", ""), MethodFlags.Static, new JavaClass())
         });
-        var equalityChecker = new JavaThread(retFrame, Jvm, Reference.Null);
+        var equalityChecker = new JavaThread(retFrame, Reference.Null);
         foreach (var kvp in _storage)
         {
             equalityChecker.ActiveFrameIndex = 0;
             var f = equalityChecker.Push(method.JavaBody);
             f.PushReference(key);
             f.PushReference(kvp.Key);
-            equalityChecker.Execute(Jvm);
+            equalityChecker.Execute();
             bool equal = equalityChecker.CallStack[0]!.Stack[0] != 0;
             if (equal)
                 return kvp.Value;

@@ -1,4 +1,5 @@
 using MahoTrans.Runtime.Types;
+using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
@@ -36,9 +37,9 @@ public class JavaThread
         _roller++;
     }
 
-    public JavaThread(Frame root, JvmState jvm, Reference model) : this(model)
+    public JavaThread(Frame root, Reference model) : this(model)
     {
-        root.Method.EnsureBytecodeLinked(jvm);
+        root.Method.EnsureBytecodeLinked();
         ActiveFrameIndex = 0;
         ActiveFrame = root;
         CallStack[0] = root;
@@ -80,14 +81,14 @@ public class JavaThread
     }
 
     /// <summary>
-    /// Spins thread until it ends. It is not guaranteed that this method will ever return.
+    /// Spins thread until it ends. It is not guaranteed that this method will ever return. This must be called inside jvm context.
     /// </summary>
-    /// <param name="state">JVM to run in.</param>
-    public void Execute(JvmState state)
+    public void Execute()
     {
+        var jvm = Object.Jvm;
         while (ActiveFrame != null)
         {
-            JavaRunner.Step(this, state);
+            JavaRunner.Step(this, jvm);
         }
     }
 
@@ -118,9 +119,9 @@ public class JavaThread
         }
 
         var t = state.AllocateObject<Thread>(); // object left untouched, this is okay for now?
-        var javaThread = new JavaThread(f, state, t.This);
+        var javaThread = new JavaThread(f, t.This);
         if (launcher.Class.PendingInitializer)
-            launcher.Class.Initialize(javaThread, state);
+            launcher.Class.Initialize(javaThread);
         return javaThread;
     }
 
@@ -165,9 +166,9 @@ public class JavaThread
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;
 
-        var javaThread = new JavaThread(f, state, thread.This);
+        var javaThread = new JavaThread(f, thread.This);
         if (thread.JavaClass.PendingInitializer)
-            thread.JavaClass.Initialize(javaThread, state);
+            thread.JavaClass.Initialize(javaThread);
         return javaThread;
     }
 }

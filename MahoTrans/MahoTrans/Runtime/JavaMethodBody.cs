@@ -1,4 +1,5 @@
 using MahoTrans.Runtime.Types;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
@@ -53,11 +54,14 @@ public class JavaMethodBody
         }
     }
 
-    public void EnsureBytecodeLinked(JvmState jvm)
+    /// <summary>
+    /// Ensures that method's bytecode is linked. Links if not. This must be called inside JVM context.
+    /// </summary>
+    public void EnsureBytecodeLinked()
     {
         if (LinkedCode != null!)
             return;
-        LinkedCode = BytecodeLinker.Link(this, jvm, Code);
+        LinkedCode = BytecodeLinker.Link(this, Object.Jvm, Code);
     }
 
     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
