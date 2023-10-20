@@ -119,12 +119,14 @@ public class JavaThread
     /// <param name="state"></param>
     /// <returns></returns>
     /// <exception cref="JavaRuntimeError"></exception>
-    public static JavaThread CreateReal(Thread thread, JvmState state)
+    public static JavaThread CreateReal(Thread thread)
     {
         if (thread.This.IsNull)
             throw new JavaRuntimeError("Attempt to launch thread which is created not in java heap.");
 
-        var method = state.GetVirtualMethod(state.GetVirtualPointer(new NameDescriptor("run", "()V")), thread.This);
+        var runDescr = new NameDescriptor("run", "()V");
+        var jvm = Object.Jvm;
+        var method = jvm.GetVirtualMethod(jvm.GetVirtualPointer(runDescr), thread.This);
 
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;

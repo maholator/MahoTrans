@@ -80,7 +80,7 @@ public class Thread : Object, Runnable
         if (started)
             Jvm.Throw<IllegalThreadStateException>();
         started = true;
-        var javaThread = JavaThread.CreateReal(this, Jvm);
+        var javaThread = JavaThread.CreateReal(this);
         Jvm.RegisterThread(javaThread);
         JavaThread = javaThread;
     }
