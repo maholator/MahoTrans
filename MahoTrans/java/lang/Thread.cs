@@ -62,6 +62,10 @@ public class Thread : Object, Runnable
         };
     }
 
+    public void setPriority(int p)
+    {
+    }
+
     public static void sleep(long time)
     {
         //return;
