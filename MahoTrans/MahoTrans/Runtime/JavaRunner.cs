@@ -1467,11 +1467,7 @@ public class JavaRunner
                 break;
             case JavaOpcode._invokeany:
             {
-                var descr = state.ResolveString(frame.PopReference());
-                var name = state.ResolveString(frame.PopReference());
-                var virtPoint = state.GetVirtualPointer(new NameDescriptor(name, descr));
-                var argsCount = DescriptorUtils.ParseMethodArgsCount(descr);
-                CallVirtual(new VirtualPointer(virtPoint, argsCount), frame, thread, state);
+                CallAny(thread, state, frame);
                 break;
             }
             default:
@@ -1763,6 +1759,37 @@ public class JavaRunner
     }
 
     #endregion
+
+    private static void CallAny(JavaThread thread, JvmState state, Frame frame)
+    {
+        // taking name & descriptor
+        frame.SetFrom(2);
+        var name = state.ResolveString(frame.PopReferenceFrom());
+        var descr = state.ResolveString(frame.PopReferenceFrom());
+
+        // resolving pointer
+        var virtPoint = state.GetVirtualPointer(new NameDescriptor(name, descr));
+        var argsCount = DescriptorUtils.ParseMethodArgsCount(descr);
+
+        // target (1), args (var), name (1), decr (1)
+        frame.SetFrom(2 + argsCount + 1);
+
+        // resolving object to check <clinit>
+        var obj = state.ResolveObject(frame.PopReferenceFrom());
+        var callClass = obj.JavaClass.VirtualTable[virtPoint].Class;
+        if (callClass.PendingInitializer)
+        {
+            callClass.Initialize(thread);
+            // we want to do this instruction again so no pointer increase here
+            return;
+        }
+
+        // name & descriptor
+        frame.Discard(2);
+
+        // call
+        CallVirtual(new VirtualPointer(virtPoint, argsCount), frame, thread, state);
+    }
 
     private static void CallVirtual(VirtualPointer pointer, Frame frame, JavaThread thread, JvmState state)
     {

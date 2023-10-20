@@ -12,8 +12,8 @@ namespace java.lang;
 public class AnyCallBridge : Object, Runnable
 {
     public Reference Target;
-    public Reference MethodName;
-    public Reference MethodDescriptor;
+    [String] public Reference MethodName;
+    [String] public Reference MethodDescriptor;
 
     [InitMethod]
     public void Init(Reference target, [String] Reference name, [String] Reference descr)
