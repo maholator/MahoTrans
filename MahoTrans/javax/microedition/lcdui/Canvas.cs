@@ -85,8 +85,32 @@ public class Canvas : Displayable
 
     public bool isShown() => true;
 
-    //TODO all this
     public void setFullScreenMode(bool mode)
     {
+        Toolkit.Display.SetFullscreen(Handle, mode);
     }
+
+    #region Event stubs
+
+    public void showNotify()
+    {
+    }
+
+    public void hideNotify()
+    {
+    }
+
+    public void pointerPressed(int x, int y)
+    {
+    }
+
+    public void pointerDragged(int x, int y)
+    {
+    }
+
+    public void pointerReleased(int x, int y)
+    {
+    }
+
+    #endregion
 }
