@@ -23,10 +23,11 @@ public class DisplayableHiddenEvent : Event
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
-                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Displayable).ToJavaName(),
+                    cls.PushConstant(new NameDescriptorClass("Target", typeof(Displayable),
                         typeof(DisplayableShownEvent).ToJavaName())).Split()),
                 new Instruction(JavaOpcode.invokevirtual,
-                    cls.PushConstant(new NameDescriptor("hideNotify", "()V")).Split())
+                    cls.PushConstant(new NameDescriptor("hideNotify", "()V")).Split()),
+                new Instruction(JavaOpcode.@return)
             }
         };
     }
