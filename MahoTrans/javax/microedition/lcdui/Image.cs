@@ -58,7 +58,7 @@ public class Image : Object
     public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height)
     {
-        Toolkit.Images.CopyRgb(Jvm.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
+        Toolkit.Images.CopyRgb(Handle, Jvm.ResolveArray<int>(rgbData), offset, scanlength, x, y, width, height);
     }
 
     [return: JavaType(typeof(Graphics))]

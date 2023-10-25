@@ -18,7 +18,7 @@ public interface IImageManager
 
     bool IsMutable(ImageHandle image);
 
-    void CopyRgb(int[] target, int offset, int scanlength, int x, int y, int w, int h);
+    void CopyRgb(ImageHandle image, int[] target, int offset, int scanlength, int x, int y, int w, int h);
 
     void ReleaseImage(ImageHandle image);
 
