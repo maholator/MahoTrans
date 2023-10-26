@@ -54,7 +54,7 @@ public partial class JvmState
     /// <summary>
     /// Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
     /// </summary>
-    /// <param name="new"></param>
+    /// <param name="new">Newly added classes.</param>
     private void RefreshState(JavaClass[] @new)
     {
         foreach (var @class in @new)
@@ -65,7 +65,10 @@ public partial class JvmState
         }
 
         foreach (var @class in Classes.Values)
+        {
             @class.GenerateVirtualTable(this);
+            @class.RecalculateSize();
+        }
     }
 
     public void AddClrClasses(Assembly assembly)

@@ -20,6 +20,8 @@ public class JavaClass
     public Type? ClrType;
     public bool PendingInitializer = true;
     public Action<List<Reference>>? StaticAnnouncer;
+    public int Size;
+
 
     public override string ToString() => Name;
 
@@ -114,6 +116,40 @@ public class JavaClass
         }
 
         VirtualTable = dict;
+    }
+
+    public void RecalculateSize()
+    {
+        int size = 0;
+        var cls = this;
+        while (true)
+        {
+            foreach (var field in cls.Fields.Values)
+            {
+                size += field.Descriptor.Descriptor[0] switch
+                {
+                    'B' => 1,
+                    'Z' => 1,
+                    'S' => 2,
+                    'C' => 2,
+                    'I' => 4,
+                    'J' => 8,
+                    'F' => 4,
+                    'D' => 8,
+                    '[' => 4,
+                    'L' => 4,
+                    _ => throw new ArgumentException()
+                };
+            }
+
+            if (cls.IsObject)
+            {
+                Size = size;
+                return;
+            }
+
+            cls = cls.Super;
+        }
     }
 
     /// <summary>
