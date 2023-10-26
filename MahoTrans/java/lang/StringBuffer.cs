@@ -95,8 +95,15 @@ public class StringBuffer : Object
     [return: JavaType(typeof(StringBuffer))]
     public Reference delete(int start, int end)
     {
-        if (start >= _buffer.Count || start > end)
+        if (start == end)
+        {
+            // no changes
+            return This;
+        }
+
+        if (start < 0 || start > _buffer.Count || start > end)
             Jvm.Throw<StringIndexOutOfBoundsException>();
+
         _buffer = _buffer.Take(start).Concat(_buffer.Skip(end)).ToList();
         return This;
     }
