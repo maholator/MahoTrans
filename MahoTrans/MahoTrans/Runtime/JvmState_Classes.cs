@@ -65,7 +65,7 @@ public partial class JvmState
         }
 
         foreach (var @class in Classes.Values)
-            @class.RegenerateVirtualTable(this);
+            @class.GenerateVirtualTable(this);
     }
 
     public void AddClrClasses(Assembly assembly)
@@ -119,7 +119,7 @@ public partial class JvmState
                 Name = name,
                 Super = GetClass("java/lang/Object"),
             };
-            ac.RegenerateVirtualTable(this);
+            ac.GenerateVirtualTable(this);
             Classes.Add(name, ac);
             return ac;
         }

@@ -92,18 +92,21 @@ public class JavaClass
     public bool IsObject => Name == "java/lang/Object";
 
     [MemberNotNull(nameof(VirtualTable))]
-    public void RegenerateVirtualTable(JvmState jvm)
+    public void GenerateVirtualTable(JvmState jvm)
     {
+        if (VirtualTable != null)
+            return;
+
         Dictionary<int, Method>? dict = null;
 
         if (Name != "java/lang/Object")
         {
             if (Super.VirtualTable == null)
-                Super.RegenerateVirtualTable(jvm);
-            dict = new(Super.VirtualTable);
+                Super.GenerateVirtualTable(jvm);
+            dict = new Dictionary<int, Method>(Super.VirtualTable);
         }
 
-        dict ??= new();
+        dict ??= new Dictionary<int, Method>();
 
         foreach (var method in Methods)
         {
