@@ -12,6 +12,9 @@ public partial class JvmState
     private int _nextObjectId = 1;
     private Dictionary<string, int> _internalizedStrings = new();
 
+    private List<Reference> _fixedRoots = new();
+    private int _fixNewObjects = 0;
+
     #region Allocation
 
     public Reference AllocateObject(JavaClass @class)
@@ -207,6 +210,11 @@ public partial class JvmState
 
             var r = new Reference(_nextObjectId);
             obj.HeapAddress = _nextObjectId;
+            if (_fixNewObjects != 0)
+            {
+                _fixedRoots.Add(r);
+            }
+
             _heap[_nextObjectId] = obj;
             _nextObjectId++;
             return r;
@@ -308,6 +316,9 @@ public partial class JvmState
 
         // building roots list
         {
+            // fixeds
+            roots.AddRange(_fixedRoots);
+
             // statics
             foreach (var cls in Classes.Values)
             {
@@ -363,5 +374,32 @@ public partial class JvmState
         }
 
         return roots;
+    }
+
+    public FixedScope BeginFixedScope() => new FixedScope(this);
+
+    public readonly struct FixedScope : IDisposable
+    {
+        private readonly JvmState _state;
+
+        public FixedScope(JvmState state)
+        {
+            _state = state;
+            lock (_state)
+            {
+                _state._fixNewObjects++;
+            }
+        }
+
+
+        public void Dispose()
+        {
+            lock (_state)
+            {
+                _state._fixNewObjects--;
+                if (_state._fixNewObjects == 0)
+                    _state._fixedRoots.Clear();
+            }
+        }
     }
 }
