@@ -18,7 +18,6 @@ public class Graphics : Object, DirectGraphics
     [JavaIgnore] private int _size;
     [JavaIgnore] private int _tx;
     [JavaIgnore] private int _ty;
-    [JavaIgnore] private GraphicsClip _clip = new(0, 0, int.MaxValue, int.MaxValue);
 
     #region Color / font
 
@@ -64,18 +63,18 @@ public class Graphics : Object, DirectGraphics
 
     public void setClip(int x, int y, int w, int h)
     {
-        _clip = new GraphicsClip(x + _tx, y + _ty, w, h);
+        Implementation.Clip = new GraphicsClip(x + _tx, y + _ty, w, h);
     }
 
     public void clipRect(int x, int y, int w, int h)
     {
-        //TODO
+        Implementation.ClipRect(new GraphicsClip(x + _tx, y + _ty, w, h));
     }
 
-    public int getClipX() => _clip.X - _tx;
-    public int getClipY() => _clip.Y - _ty;
-    public int getClipWidth() => _clip.Width;
-    public int getClipHeight() => _clip.Height;
+    public int getClipX() => Implementation.Clip.X - _tx;
+    public int getClipY() => Implementation.Clip.Y - _ty;
+    public int getClipWidth() => Implementation.Clip.Width;
+    public int getClipHeight() => Implementation.Clip.Height;
 
     #endregion
 
@@ -95,43 +94,43 @@ public class Graphics : Object, DirectGraphics
     }
 
     public void fillRect(int x, int y, int w, int h) =>
-        Implementation.FillRect(x + _tx, y + _ty, w, h, _color, _clip);
+        Implementation.FillRect(x + _tx, y + _ty, w, h, _color);
 
     public void fillRoundRect(int x, int y, int w, int h, int arcWidth, int arcHeight)
     {
-        Implementation.FillRoundRect(x + _tx, y + _ty, w, h, arcWidth, arcHeight, _color, _clip);
+        Implementation.FillRoundRect(x + _tx, y + _ty, w, h, arcWidth, arcHeight, _color);
     }
 
     public void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3) =>
-        Implementation.FillTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, _color, _clip);
+        Implementation.FillTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, _color);
 
     public void drawArc(int x, int y, int w, int h, int s, int e) =>
-        Implementation.DrawArc(x + _tx, y + _ty, w, h, s, e, _color, _clip);
+        Implementation.DrawArc(x + _tx, y + _ty, w, h, s, e, _color);
 
     public void fillArc(int x, int y, int w, int h, int s, int l) =>
-        Implementation.FillArc(x + _tx, y + _ty, w, h, s, l, _color, _clip);
+        Implementation.FillArc(x + _tx, y + _ty, w, h, s, l, _color);
 
     public void drawLine(int x1, int y1, int x2, int y2) =>
-        Implementation.DrawLine(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, _color, _clip);
+        Implementation.DrawLine(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, _color);
 
     #endregion
 
     public void drawString([String] Reference str, int x, int y, int a)
     {
         var text = Jvm.ResolveString(str);
-        Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size, _clip);
+        Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
     }
 
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
     {
         var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a, _clip);
+        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a);
     }
 
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a, int tr)
     {
         var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a, _clip);
+        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a);
     }
 
     public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
@@ -140,13 +139,13 @@ public class Graphics : Object, DirectGraphics
     {
         var res = Jvm.Resolve<Image>(image);
         Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height,
-            (SpriteTransform)transform, (GraphicsAnchor)anchor, _clip);
+            (SpriteTransform)transform, (GraphicsAnchor)anchor);
     }
 
     public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
         var buf = Jvm.ResolveArray<int>(rgbData);
-        Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha, _clip);
+        Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
     }
 }
