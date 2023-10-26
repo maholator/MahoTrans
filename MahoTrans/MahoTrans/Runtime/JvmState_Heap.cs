@@ -163,8 +163,13 @@ public partial class JvmState
     [DoesNotReturn]
     public void Throw<T>() where T : Throwable
     {
-        var ex = AllocateObject<T>();
-        throw new JavaThrowable(ex.This);
+        Reference exRef;
+        using (BeginFixedScope())
+        {
+            exRef = AllocateObject<T>().This;
+        }
+
+        throw new JavaThrowable(exRef);
     }
 
     #endregion
@@ -174,7 +179,11 @@ public partial class JvmState
         switch (o)
         {
             case string s:
-                frame.PushReference(InternalizeString(s));
+                using (BeginFixedScope())
+                {
+                    frame.PushReference(InternalizeString(s));
+                }
+
                 return;
             case int i:
                 frame.PushInt(i);

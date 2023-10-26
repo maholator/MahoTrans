@@ -1447,7 +1447,11 @@ public class JavaRunner
                     _ => null
                 };
 
-                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
+                using (state.BeginFixedScope())
+                {
+                    frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
+                }
+
                 pointer++;
                 break;
             }
