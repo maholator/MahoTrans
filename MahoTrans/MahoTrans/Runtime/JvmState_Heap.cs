@@ -15,6 +15,8 @@ public partial class JvmState
     private List<Reference> _fixedRoots = new();
     private int _fixNewObjects;
 
+    private int bytesAllocated;
+
     #region Allocation
 
     public Reference AllocateObject(JavaClass @class)
@@ -233,6 +235,9 @@ public partial class JvmState
             }
 
             _heap[_nextObjectId] = obj;
+
+            bytesAllocated += obj.JavaClass.Size;
+
             _nextObjectId++;
             if (_nextObjectId == _heap.Length)
                 _nextObjectId = 1;
@@ -315,6 +320,7 @@ public partial class JvmState
             else
             {
                 deletedCount++;
+                bytesAllocated -= obj.JavaClass.Size;
                 _heap[i] = null;
             }
         }
