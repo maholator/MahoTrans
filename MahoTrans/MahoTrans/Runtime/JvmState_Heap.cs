@@ -336,7 +336,7 @@ public partial class JvmState
                     if (frame == null)
                         continue;
 
-                    var top = frame.StackTop;
+                    var top = frame.Stack.Length;
 
                     for (int i = 0; i < top; i++)
                     {
