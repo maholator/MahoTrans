@@ -13,7 +13,7 @@ public partial class JvmState
     private Dictionary<string, int> _internalizedStrings = new();
 
     private List<Reference> _fixedRoots = new();
-    private int _fixNewObjects = 0;
+    private int _fixNewObjects;
 
     #region Allocation
 
@@ -71,7 +71,7 @@ public partial class JvmState
     }
 
     public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
-        AllocateArray<T>(data, GetClass(cls));
+        AllocateArray(data, GetClass(cls));
 
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
@@ -130,21 +130,21 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        return _heap[r.Index];
+        return _heap[r.Index]!;
     }
 
     public T Resolve<T>(Reference r) where T : Object
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        return (T)_heap[r.Index];
+        return (T)_heap[r.Index]!;
     }
 
     public string ResolveString(Reference r)
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (java.lang.String)_heap[r.Index];
+        var obj = (java.lang.String)_heap[r.Index]!;
         return obj.Value;
     }
 
@@ -152,7 +152,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (Array<T>)_heap[r.Index];
+        var obj = (Array<T>)_heap[r.Index]!;
         return obj.Value;
     }
 
