@@ -8,7 +8,7 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private Dictionary<int, Object> _heap = new();
+    private Object?[] _heap = new Object?[1024 * 16];
     private int _nextObjectId = 1;
     private Dictionary<string, int> _internalizedStrings = new();
 
@@ -217,6 +217,14 @@ public partial class JvmState
                 RunGarbageCollector();
             }
 
+            while (_heap[_nextObjectId] != null)
+            {
+                // slot taken
+                _nextObjectId++;
+                if (_nextObjectId == _heap.Length)
+                    _nextObjectId = 1;
+            }
+
             var r = new Reference(_nextObjectId);
             obj.HeapAddress = _nextObjectId;
             if (_fixNewObjects != 0)
@@ -226,6 +234,8 @@ public partial class JvmState
 
             _heap[_nextObjectId] = obj;
             _nextObjectId++;
+            if (_nextObjectId == _heap.Length)
+                _nextObjectId = 1;
             return r;
         }
     }
@@ -248,9 +258,10 @@ public partial class JvmState
 
             // invalid references?
 
-            if (r.IsNull)
+            if (r.Index <= 0 || r.Index >= _heap.Length)
                 continue;
-            if (!_heap.TryGetValue(r.Index, out var o))
+            var o = _heap[r.Index];
+            if (o == null)
                 continue;
 
             // this object already marked?
@@ -292,23 +303,21 @@ public partial class JvmState
 
         // we marked all alive objects as alive. Time to delete dead ones.
 
-        var newHeap = new Dictionary<int, Object>(_heap.Count);
-
-        foreach (var i in _heap.Keys)
+        for (int i = 0; i < _heap.Length; i++)
         {
             var obj = _heap[i];
+            if (obj == null)
+                continue;
             if (obj.Alive)
             {
                 obj.Alive = false;
-                newHeap.Add(i, obj);
             }
             else
             {
                 deletedCount++;
+                _heap[i] = null;
             }
         }
-
-        _heap = newHeap;
 
         sw.Stop();
         Console.WriteLine(
