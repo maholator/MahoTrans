@@ -81,6 +81,27 @@ public class DataOutputStream : OutputStream
         };
     }
 
+    [JavaDescriptor("(I)V")]
+    public JavaMethodBody writeShort(JavaClass cls)
+    {
+        byte[] streamWrite = cls.PushConstant(_write).Split();
+        return new JavaMethodBody(3, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.iload_1),
+                new(JavaOpcode.bipush, new byte[] { 8 }),
+                new(JavaOpcode.ishr),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.iload_1),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.@return),
+            }
+        };
+    }
+
     [JavaDescriptor("()V")]
     public JavaMethodBody flush(JavaClass cls)
     {
