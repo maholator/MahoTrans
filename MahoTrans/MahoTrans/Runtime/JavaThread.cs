@@ -38,7 +38,8 @@ public class JavaThread
         _roller++;
     }
 
-    public JavaThread(Frame root, Reference model) : this(model)
+    public JavaThread(Frame root, Reference model)
+        : this(model)
     {
         root.Method.EnsureBytecodeLinked();
         ActiveFrameIndex = 0;
@@ -49,6 +50,7 @@ public class JavaThread
     public Frame Push(JavaMethodBody method)
     {
         ActiveFrameIndex++;
+
         if (ActiveFrameIndex == CallStack.Length)
         {
             var a = new Frame[CallStack.Length * 2];
@@ -68,7 +70,6 @@ public class JavaThread
         }
 
         ActiveFrame = f;
-
         return f;
     }
 
@@ -87,6 +88,7 @@ public class JavaThread
     public void Execute()
     {
         var jvm = Object.Jvm;
+
         while (ActiveFrame != null)
         {
             JavaRunner.Step(this, jvm);
@@ -103,13 +105,16 @@ public class JavaThread
     /// <returns></returns>
     public static Thread CreateSynthetic(NameDescriptor nd, Reference target, JvmState state)
     {
-        var bridge = state.AllocateObject<AnyCallBridge>();
-        bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
+        using (state.BeginFixedScope())
+        {
+            var bridge = state.AllocateObject<AnyCallBridge>();
+            bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
 
-        var model = state.AllocateObject<Thread>();
-        model.InitTargeted(bridge.This);
+            var model = state.AllocateObject<Thread>();
+            model.InitTargeted(bridge.This);
 
-        return model;
+            return model;
+        }
     }
 
     /// <summary>
