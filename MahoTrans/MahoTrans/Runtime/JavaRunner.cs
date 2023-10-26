@@ -1,6 +1,7 @@
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
@@ -1815,7 +1816,11 @@ public class JavaRunner
 
         if (m.Bridge != null)
         {
-            m.Bridge(frame);
+            using (Object.Jvm.BeginFixedScope())
+            {
+                m.Bridge(frame);
+            }
+
             // we are done with the call, so going to next instruction
             frame.Pointer++;
             return;
