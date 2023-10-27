@@ -44,7 +44,8 @@ public partial class JvmState
             WaitingThreads.Add(thread.ThreadId, thread);
             if (returnAfter >= 0)
             {
-                WakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentMs() + returnAfter, thread.ThreadId));
+                WakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
+                    thread.ThreadId));
             }
         }
     }
@@ -78,7 +79,7 @@ public partial class JvmState
 
     public void CheckTimeouts()
     {
-        var now = Toolkit.Clock.GetCurrentMs();
+        var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);
 
         for (int i = WakeupHooks.Count - 1; i >= 0; i--)
         {

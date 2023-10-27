@@ -33,7 +33,7 @@ public class System : Object
         return new Reference(0);
     }
 
-    public static long currentTimeMillis() => Toolkit.Clock.GetCurrentMs();
+    public static long currentTimeMillis() => Toolkit.Clock.GetCurrentMs(Jvm.CycleNumber);
 
     public static void gc()
     {
