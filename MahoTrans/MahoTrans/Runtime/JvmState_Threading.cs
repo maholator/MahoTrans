@@ -13,7 +13,7 @@ public partial class JvmState
     /// </summary>
     public readonly Dictionary<int, JavaThread> WaitingThreads = new();
 
-    private List<ThreadWakeupHook> WakeupHooks = new();
+    private List<ThreadWakeupHook> _wakeupHooks = new();
     private readonly object _threadPoolLock = new();
 
     #region Threads management
@@ -44,7 +44,7 @@ public partial class JvmState
             WaitingThreads.Add(thread.ThreadId, thread);
             if (returnAfter >= 0)
             {
-                WakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
+                _wakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
                     thread.ThreadId));
             }
         }
@@ -61,11 +61,11 @@ public partial class JvmState
         {
             if (WaitingThreads.Remove(id, out var th))
             {
-                for (int i = 0; i < WakeupHooks.Count; i++)
+                for (int i = 0; i < _wakeupHooks.Count; i++)
                 {
-                    if (WakeupHooks[i].ThreadId == id)
+                    if (_wakeupHooks[i].ThreadId == id)
                     {
-                        WakeupHooks.RemoveAt(i);
+                        _wakeupHooks.RemoveAt(i);
                     }
                 }
 
@@ -81,10 +81,10 @@ public partial class JvmState
     {
         var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);
 
-        for (int i = WakeupHooks.Count - 1; i >= 0; i--)
+        for (int i = _wakeupHooks.Count - 1; i >= 0; i--)
         {
-            if (WakeupHooks[i].WakeupAtMs <= now)
-                Attach(WakeupHooks[i].ThreadId);
+            if (_wakeupHooks[i].WakeupAtMs <= now)
+                Attach(_wakeupHooks[i].ThreadId);
         }
     }
 
