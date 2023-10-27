@@ -20,6 +20,8 @@ public partial class JvmState
 
     public long CycleNumber => _cycleNumber;
 
+    public const int CYCLES_PER_BUNCH = 1024;
+
     public JvmState(Toolkit toolkit)
     {
         Toolkit = toolkit;
@@ -53,38 +55,48 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Runs all registered threads in cycle. This method may never return.
+    /// Runs all registered threads in cycle.
     /// </summary>
     public void Execute()
     {
         RunInContext(() =>
         {
-            _running = true;
-            var count = AliveThreads.Count;
-            while (_running && count > 0)
+            do
             {
-                for (int i = count - 1; i >= 0; i--)
+                do
                 {
-                    var thread = AliveThreads[i];
-                    if (thread == null!)
+                    for (int i = AliveThreads.Count - 1; i >= 0; i--)
                     {
-                        Console.WriteLine(
-                            $"Null thread in the list at {i}! Cached count is {count}, real is {AliveThreads.Count}");
-                        continue;
+                        var thread = AliveThreads[i];
+                        if (thread.ActiveFrame != null)
+                            JavaRunner.Step(thread, this);
                     }
 
-                    if (thread.ActiveFrame == null)
+                    _cycleNumber++;
+
+                    if (_cycleNumber % CYCLES_PER_BUNCH == 0)
+                    {
+                        break;
+                    }
+                } while (_running);
+
+                // deleting dead threads
+                for (int i = AliveThreads.Count - 1; i >= 0; i--)
+                {
+                    if (AliveThreads[i].ActiveFrame == null)
                         AliveThreads.RemoveAt(i);
-                    else
-                        JavaRunner.Step(thread, this);
                 }
 
-                _cycleNumber++;
-
+                // attaching timeouted threads
                 CheckTimeouts();
-                count = AliveThreads.Count;
-            }
+            } while (_running);
         });
+    }
+
+    public void ExecuteLoop()
+    {
+        _running = true;
+        Execute();
     }
 
     /// <summary>
@@ -93,36 +105,6 @@ public partial class JvmState
     public void Stop()
     {
         _running = false;
-    }
-
-    /// <summary>
-    /// Same as <see cref="Execute"/>, but only one operation for each thread. Use to go step-by-step.
-    /// </summary>
-    public void SpinOnce()
-    {
-        RunInContext(() =>
-        {
-            var count = AliveThreads.Count;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                var thread = AliveThreads[i];
-                if (thread == null!)
-                {
-                    Console.WriteLine(
-                        $"Null thread in the list at {i}! Cached count is {count}, real is {AliveThreads.Count}");
-                    continue;
-                }
-
-                if (thread.ActiveFrame == null)
-                    AliveThreads.RemoveAt(i);
-                else
-                    JavaRunner.Step(thread, this);
-            }
-
-            _cycleNumber++;
-
-            CheckTimeouts();
-        });
     }
 
     public EventQueue EventQueue
