@@ -16,6 +16,10 @@ public partial class JvmState
 
     private EventQueue? _eventQueue;
 
+    private long _cycleNumber;
+
+    public long CycleNumber => _cycleNumber;
+
     public JvmState(Toolkit toolkit)
     {
         Toolkit = toolkit;
@@ -75,6 +79,8 @@ public partial class JvmState
                         JavaRunner.Step(thread, this);
                 }
 
+                _cycleNumber++;
+
                 CheckTimeouts();
                 count = AliveThreads.Count;
             }
@@ -112,6 +118,8 @@ public partial class JvmState
                 else
                     JavaRunner.Step(thread, this);
             }
+
+            _cycleNumber++;
 
             CheckTimeouts();
         });
