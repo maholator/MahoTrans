@@ -1,5 +1,9 @@
+using MahoTrans.Utils;
+using Newtonsoft.Json;
+
 namespace MahoTrans.Runtime;
 
+[JsonConverter(typeof(ReferenceJsonConverter))]
 public struct Reference : IEquatable<Reference>
 {
     public readonly int Index;
