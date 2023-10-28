@@ -51,6 +51,24 @@ public partial class JvmState
                 var t = JsonConvert.SerializeObject(_wakeupHooks.ToArray());
                 s.Write(t);
             });
+            zip.AddTextEntry("heap/strings.json", s =>
+            {
+                var t = JsonConvert.SerializeObject(_internalizedStrings);
+                s.Write(t);
+            });
+            zip.AddTextEntry("heap/next.txt", s => s.Write(_nextObjectId));
+            zip.AddTextEntry("heap/heap.json", s =>
+            {
+                var t = JsonConvert.SerializeObject(_heap,new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All,
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                    NullValueHandling = NullValueHandling.Include,
+                    PreserveReferencesHandling = PreserveReferencesHandling.All,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Error,
+                });
+                s.Write(t);
+            });
         }
 
         {

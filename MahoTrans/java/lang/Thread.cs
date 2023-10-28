@@ -3,14 +3,16 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
 public class Thread : Object, Runnable
 {
-    [JavaIgnore] protected JavaThread JavaThread = null!;
+    [JavaIgnore] [JsonIgnore] protected JavaThread JavaThread = null!;
 
-    [JavaIgnore] [ThreadStatic] public static JavaThread? CurrentThread;
+    [JavaIgnore] [ThreadStatic] [JsonIgnore]
+    public static JavaThread? CurrentThread;
 
     [JavaType(typeof(Runnable))] public Reference _target;
     [String] public Reference _name;

@@ -4,6 +4,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -22,7 +23,7 @@ public class EventQueue : Thread
     /// <summary>
     /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
     /// </summary>
-    [JavaIgnore] public JvmState OwningJvm = null!;
+    [JavaIgnore] [JsonIgnore] public JvmState OwningJvm = null!;
 
     [JavaIgnore] public Dictionary<Reference, bool> QueuedRepaints = new();
 

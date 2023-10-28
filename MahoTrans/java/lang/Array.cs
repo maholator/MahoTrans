@@ -1,5 +1,6 @@
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json;
 using ClrArray = System.Array;
 
 namespace java.lang;
@@ -26,5 +27,5 @@ public class Array<T> : Array where T : struct
 
 public abstract class Array : Object
 {
-    public abstract ClrArray BaseValue { get; }
+    [JsonIgnore] public abstract ClrArray BaseValue { get; }
 }
