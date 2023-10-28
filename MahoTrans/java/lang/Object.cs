@@ -4,6 +4,7 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
@@ -14,9 +15,21 @@ public class Object
     /// <summary>
     /// Reference to java class, which this object is instance of.
     /// </summary>
-    [JavaIgnore] public JavaClass JavaClass = null!;
+    [JavaIgnore] [JsonIgnore] public JavaClass JavaClass = null!;
 
-    [JavaIgnore] [ThreadStatic] private static JvmState? _jvm;
+    /// <summary>
+    /// Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass"/> to take object's class.
+    /// Deserialization MUST occur withing JVM context.
+    /// </summary>
+    public string ClassName
+    {
+        get => JavaClass.Name;
+        set => JavaClass = Jvm.GetClass(value);
+    }
+
+    [JavaIgnore] [ThreadStatic] [JsonIgnore]
+    private static JvmState? _jvm;
+
     [JavaIgnore] public int MonitorOwner;
     [JavaIgnore] public uint MonitorReEnterCount;
     [JavaIgnore] public List<MonitorWait>? Waiters;
@@ -24,8 +37,9 @@ public class Object
     /// <summary>
     /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
     /// </summary>
-    [JavaIgnore] public bool Alive;
+    [JavaIgnore] [JsonIgnore] public bool Alive;
 
+    [JsonIgnore]
     public static JvmState Jvm
     {
         get
@@ -36,11 +50,11 @@ public class Object
         }
     }
 
-    public static bool HeapAttached => _jvm != null;
+    [JsonIgnore] public static bool HeapAttached => _jvm != null;
 
-    protected static Toolkit Toolkit => Jvm.Toolkit;
+    [JsonIgnore] protected static Toolkit Toolkit => Jvm.Toolkit;
 
-    public Reference This => new Reference(HeapAddress);
+    [JsonIgnore] public Reference This => new Reference(HeapAddress);
 
     [JavaIgnore]
     public static void AttachHeap(JvmState heap) => _jvm = heap;
