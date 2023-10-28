@@ -77,6 +77,19 @@ public partial class JvmState
         }
     }
 
+    /// <summary>
+    /// Removes passed thread from JVM completely. Use this if thread finished its work.
+    /// </summary>
+    /// <param name="thread">Thread to remove.</param>
+    /// <returns>False, if this thread was not in jvm.</returns>
+    public bool Kill(JavaThread thread)
+    {
+        lock (_threadPoolLock)
+        {
+            return AliveThreads.Remove(thread) || WaitingThreads.Remove(thread.ThreadId);
+        }
+    }
+
     public void CheckTimeouts()
     {
         var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);

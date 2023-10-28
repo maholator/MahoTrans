@@ -6,7 +6,8 @@ using Thread = java.lang.Thread;
 namespace MahoTrans.Runtime;
 
 /// <summary>
-/// JVM thread. Create it using static methods. Then run it using <see cref="Execute"/> or add to jvm pool using <see cref="JvmState.RegisterThread"/>.
+/// JVM thread. Create it via static methods.
+/// Then run it using <see cref="Execute"/> or add to jvm pool using <see cref="JvmState.RegisterThread"/>.
 /// </summary>
 public class JavaThread
 {
@@ -23,7 +24,9 @@ public class JavaThread
     public int ActiveFrameIndex = -1;
 
     /// <summary>
-    /// This field stores running frame. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead. This may be null if thread is dead.
+    /// This field stores running frame. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead.
+    /// This may be null if thread is dead.
+    /// There must not be a situation when this is null and thread is running, use <see cref="JvmState.Kill"/> before clearing.
     /// </summary>
     public Frame? ActiveFrame;
 
@@ -73,13 +76,19 @@ public class JavaThread
         return f;
     }
 
+    /// <summary>
+    /// Pops thread's frame. If thread is finishing its work, this must be called from JVM context.
+    /// </summary>
     public void Pop()
     {
         ActiveFrameIndex--;
         if (ActiveFrameIndex >= 0)
             ActiveFrame = CallStack[ActiveFrameIndex];
         else
+        {
             ActiveFrame = null;
+            Object.Jvm.Kill(this);
+        }
     }
 
     /// <summary>
