@@ -3,13 +3,14 @@ using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace java.util;
 
 public class Hashtable : Object
 {
-    [JavaIgnore] private Dictionary<Reference, Reference> _storage = new();
+    [JavaIgnore] [JsonProperty] private Dictionary<Reference, Reference> _storage = new();
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {

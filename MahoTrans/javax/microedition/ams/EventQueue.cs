@@ -15,10 +15,10 @@ namespace javax.microedition.ams;
 /// </summary>
 public class EventQueue : Thread
 {
-    [JavaIgnore] private Queue<Reference> _events = new();
+    [JavaIgnore] [JsonIgnore] private Queue<Reference> _events = new();
     [JavaIgnore] private object _lock = new();
 
-    public int Length => _events.Count;
+    [JsonIgnore] public int Length => _events.Count;
 
     /// <summary>
     /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
@@ -26,6 +26,23 @@ public class EventQueue : Thread
     [JavaIgnore] [JsonIgnore] public JvmState OwningJvm = null!;
 
     [JavaIgnore] public Dictionary<int, bool> QueuedRepaints = new();
+
+    /// <summary>
+    /// For snapshots.
+    /// </summary>
+    public Reference[] Events
+    {
+        get
+        {
+            lock (_lock)
+                return _events.ToArray();
+        }
+        set
+        {
+            lock (_lock)
+                _events = new Queue<Reference>(value);
+        }
+    }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {

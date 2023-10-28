@@ -5,6 +5,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 using Array = System.Array;
 using Object = java.lang.Object;
 
@@ -12,15 +13,15 @@ namespace javax.microedition.rms;
 
 public class RecordStore : Object
 {
-    [String] private Reference storeName;
-    private int openCount;
+    [String] public Reference StoreName;
+    [JsonProperty] private int _openCount;
 
-    [JavaType(typeof(Vector))] public Reference listeners;
+    [JavaType(typeof(Vector))] public Reference Listeners;
 
-    private int version;
-    private long modifiedAt;
+    [JsonProperty] private int _version;
+    [JsonProperty] private long _modifiedAt;
 
-    [JavaIgnore] private static Dictionary<string, Reference> openedStores = new();
+    [JavaIgnore] public static Dictionary<string, Reference> openedStores = new();
 
     [StaticFieldsAnnouncer]
     public static void Statics(List<Reference> list) => list.AddRange(openedStores.Values);
@@ -56,7 +57,7 @@ public class RecordStore : Object
     public int AddRecordInternal([JavaType("[B")] Reference data, int offset, int count)
     {
         CheckNotClosed();
-        var name = Jvm.ResolveString(storeName);
+        var name = Jvm.ResolveString(StoreName);
 
         if (count == 0)
         {
@@ -69,7 +70,7 @@ public class RecordStore : Object
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
-        Vector vector = Jvm.Resolve<Vector>(listeners);
+        Vector vector = Jvm.Resolve<Vector>(Listeners);
 
         if (!vector.contains(listener))
         {
@@ -80,12 +81,12 @@ public class RecordStore : Object
     public void closeRecordStore()
     {
         CheckNotClosed();
-        openCount--;
-        Toolkit.RecordStore.CloseStore(Jvm.ResolveString(storeName));
+        _openCount--;
+        Toolkit.RecordStore.CloseStore(Jvm.ResolveString(StoreName));
 
-        if (openCount == 0)
+        if (_openCount == 0)
         {
-            Jvm.Resolve<Vector>(listeners).removeAllElements();
+            Jvm.Resolve<Vector>(Listeners).removeAllElements();
         }
     }
 
@@ -100,7 +101,7 @@ public class RecordStore : Object
         if (openedStores.TryGetValue(name, out var storeRef))
         {
             var store = Jvm.Resolve<RecordStore>(storeRef);
-            if (store.openCount > 0)
+            if (store._openCount > 0)
                 Jvm.Throw<RecordStoreException>();
         }
 
@@ -116,33 +117,33 @@ public class RecordStore : Object
     public long getLastModified()
     {
         CheckNotClosed();
-        return modifiedAt;
+        return _modifiedAt;
     }
 
     [return: String]
     public Reference getName()
     {
         CheckNotClosed();
-        return storeName;
+        return StoreName;
     }
 
     public int getNextRecordID()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetNextId(Jvm.ResolveString(storeName));
+        return Toolkit.RecordStore.GetNextId(Jvm.ResolveString(StoreName));
     }
 
     public int getNumRecords()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetCount(Jvm.ResolveString(storeName));
+        return Toolkit.RecordStore.GetCount(Jvm.ResolveString(StoreName));
     }
 
     [return: JavaType("[B")]
     public Reference getRecord(int recordId)
     {
         CheckNotClosed();
-        var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(storeName), recordId);
+        var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(StoreName), recordId);
         if (buf == null)
             Jvm.Throw<InvalidRecordIDException>();
         return Jvm.AllocateArray(buf, "[B");
@@ -152,7 +153,7 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(buf);
-        var r = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(storeName), recordId);
+        var r = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(StoreName), recordId);
         if (r == null)
             Jvm.Throw<InvalidRecordIDException>();
         if (r.Length + offset > arr.Length)
@@ -164,7 +165,7 @@ public class RecordStore : Object
     public int getRecordSize(int recordId)
     {
         CheckNotClosed();
-        var size = Toolkit.RecordStore.GetSize(Jvm.ResolveString(storeName), recordId);
+        var size = Toolkit.RecordStore.GetSize(Jvm.ResolveString(StoreName), recordId);
         if (size.HasValue)
             return size.Value;
         Jvm.Throw<InvalidRecordIDException>();
@@ -174,7 +175,7 @@ public class RecordStore : Object
     public int getSize()
     {
         CheckNotClosed();
-        return Toolkit.RecordStore.GetSize(Jvm.ResolveString(storeName));
+        return Toolkit.RecordStore.GetSize(Jvm.ResolveString(StoreName));
     }
 
     public int getSizeAvailable()
@@ -183,7 +184,7 @@ public class RecordStore : Object
         return 798 * 1024 + 590;
     }
 
-    public int getVersion() => version;
+    public int getVersion() => _version;
 
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference listRecordStores()
@@ -214,16 +215,16 @@ public class RecordStore : Object
         if (openedStores.TryGetValue(nameStr, out var opened))
         {
             var s = Jvm.Resolve<RecordStore>(opened);
-            s.openCount++;
+            s._openCount++;
             return opened;
         }
 
         var store = Jvm.AllocateObject<RecordStore>();
-        store.openCount = 1;
-        store.storeName = name;
+        store._openCount = 1;
+        store.StoreName = name;
         var vec = Jvm.AllocateObject<Vector>();
         vec.Init();
-        store.listeners = vec.This;
+        store.Listeners = vec.This;
         openedStores.Add(nameStr, store.This);
         return store.This;
     }
@@ -239,7 +240,7 @@ public class RecordStore : Object
 
     public void removeRecordListener([JavaType(typeof(RecordListener))] Reference listener)
     {
-        if (listeners.IsNull)
+        if (Listeners.IsNull)
             return;
         var vector = Jvm.Resolve<Vector>(listener);
         vector.removeElement(listener);
@@ -290,14 +291,14 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(storeName), recordId, arr, offset, count);
+        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, arr, offset, count);
     }
 
     #region Utils
 
     private void CheckNotClosed()
     {
-        if (openCount == 0)
+        if (_openCount == 0)
             Jvm.Throw<RecordStoreNotOpenException>();
     }
 
@@ -326,7 +327,7 @@ public class RecordStore : Object
     /// </remarks>
     private Instruction[] GenerateListenersCalls(JavaClass cls, string eventName)
     {
-        var lf = cls.PushConstant(new NameDescriptorClass(nameof(listeners), typeof(Vector), typeof(RecordStore)));
+        var lf = cls.PushConstant(new NameDescriptorClass(nameof(Listeners), typeof(Vector), typeof(RecordStore)));
         var vs = cls.PushConstant(new NameDescriptor(nameof(Vector.size), "()I"));
         var vg = cls.PushConstant(new NameDescriptor(nameof(Vector.elementAt), "(I)Ljava/lang/Object;"));
         var ev = cls.PushConstant(new NameDescriptor(eventName, $"({typeof(RecordStore).ToJavaDescriptor()}I)V"));

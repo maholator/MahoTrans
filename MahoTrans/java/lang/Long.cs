@@ -5,7 +5,7 @@ namespace java.lang;
 
 public class Long : Object
 {
-    private long Value;
+    public long Value;
 
     [InitMethod]
     public void Init(long value)

@@ -5,7 +5,7 @@ namespace java.lang;
 
 public class Integer : Object
 {
-    private int Value;
+    public int Value;
 
     [InitMethod]
     public void Init(int value)

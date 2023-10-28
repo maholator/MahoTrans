@@ -5,15 +5,15 @@ namespace java.util;
 
 public class Date : Object
 {
-    private long _time;
+    public long Time;
 
     [InitMethod]
     public void Init(long ms)
     {
-        _time = ms;
+        Time = ms;
     }
 
-    public long getTime() => _time;
+    public long getTime() => Time;
 
-    public void setTime(long time) => _time = time;
+    public void setTime(long time) => Time = time;
 }

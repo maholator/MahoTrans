@@ -10,18 +10,14 @@ public class Array<T> : Array where T : struct
 {
     [JavaIgnore] public T[] Value = null!;
 
-    public override ClrArray BaseValue => Value;
+    [JsonIgnore] public override ClrArray BaseValue => Value;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
-        if (typeof(T) == typeof(Reference))
-            Push((Reference[])(object)Value, queue);
-    }
-
-    private static void Push(Reference[] refs, Queue<Reference> q)
-    {
-        foreach (var r in refs)
-            q.Enqueue(r);
+        if (typeof(T) != typeof(Reference))
+            return;
+        foreach (var r in (Reference[])(object)Value)
+            queue.Enqueue(r);
     }
 }
 

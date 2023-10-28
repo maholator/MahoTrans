@@ -2,6 +2,7 @@ using com.nokia.mid.ui;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkits;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;
@@ -12,12 +13,12 @@ public class Graphics : Object, DirectGraphics
 
     private IGraphics Implementation => Toolkit.Images.ResolveGraphics(Handle);
 
-    [JavaIgnore] private uint _color;
-    [JavaIgnore] private FontStyle _style;
-    [JavaIgnore] private FontFace _face;
-    [JavaIgnore] private int _size;
-    [JavaIgnore] private int _tx;
-    [JavaIgnore] private int _ty;
+    [JavaIgnore] [JsonProperty] private uint _color;
+    [JavaIgnore] [JsonProperty] private FontStyle _style;
+    [JavaIgnore] [JsonProperty] private FontFace _face;
+    [JavaIgnore] [JsonProperty] private int _size;
+    [JavaIgnore] [JsonProperty] private int _tx;
+    [JavaIgnore] [JsonProperty] private int _ty;
 
     #region Color / font
 

@@ -5,17 +5,17 @@ namespace java.lang;
 
 public class Boolean : Object
 {
-    private bool _value;
+    public bool Value;
 
     [InitMethod]
     public void Init(bool v)
     {
-        _value = v;
+        Value = v;
     }
 
     [return: String]
     public Reference toString()
     {
-        return Jvm.AllocateString(_value ? "true" : "false");
+        return Jvm.AllocateString(Value ? "true" : "false");
     }
 }

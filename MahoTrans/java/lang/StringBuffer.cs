@@ -3,12 +3,13 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
 public class StringBuffer : Object
 {
-    [JavaIgnore] private List<char> _buffer = null!;
+    [JavaIgnore] [JsonProperty] private List<char> _buffer = null!;
 
     [InitMethod]
     public void Init() => _buffer = new List<char>();
