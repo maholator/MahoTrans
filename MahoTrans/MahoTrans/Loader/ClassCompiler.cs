@@ -149,7 +149,7 @@ public static class ClassCompiler
 
         // fields
         var jsonPropCon =
-            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public, Array.Empty<Type>())!;
+            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())!;
 
         foreach (var rawClass in queued)
         {
