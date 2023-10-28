@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Loader;
@@ -25,7 +26,7 @@ public static class ClassCompiler
         { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShort))! },
         { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReference))! }
     };
-    
+
     public static readonly Dictionary<Type, MethodInfo> StackPushers = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PushInt))! },
@@ -40,8 +41,7 @@ public static class ClassCompiler
     };
 
     public static void CompileTypes(Dictionary<string, JavaClass> loaded, IEnumerable<JavaClass> queued,
-        string assemblyName,
-        string moduleName)
+        string assemblyName, string moduleName)
     {
         var classes = queued as JavaClass[] ?? queued.ToArray();
         var name = new AssemblyName(assemblyName);
@@ -148,6 +148,8 @@ public static class ClassCompiler
         // linking is done, all cache entries have builders
 
         // fields
+        var jsonPropCon =
+            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public, Array.Empty<Type>())!;
 
         foreach (var rawClass in queued)
         {
@@ -157,6 +159,8 @@ public static class ClassCompiler
                 object o = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
                 var t = o as Type ?? typeof(Reference);
                 var f = c.Builder!.DefineField(GetFieldName(field.Descriptor, rawClass), t, ConvertFlags(field.Flags));
+                var jab = new CustomAttributeBuilder(jsonPropCon, Array.Empty<object>());
+                f.SetCustomAttribute(jab);
                 BuildBridges(c.Builder!, f, field.Descriptor, rawClass);
             }
         }
@@ -273,6 +277,7 @@ public static class ClassCompiler
         FieldAttributes a = 0;
 
         // access
+#if USE_REAL_FIELD_ATTRIBS
         if (flags.HasFlag(FieldFlags.Public))
             a |= FieldAttributes.Public;
         if (flags.HasFlag(FieldFlags.Private))
@@ -281,10 +286,13 @@ public static class ClassCompiler
             a |= FieldAttributes.FamORAssem;
         if (a == 0)
             a = FieldAttributes.Assembly;
-
+#else
+        a |= FieldAttributes.Public;
+#endif
         // mods
         if (flags.HasFlag(FieldFlags.Static))
             a |= FieldAttributes.Static;
+
         // finals won't be final
         // volatile is not impl TODO
         // trans/synth/enum don't exist here
