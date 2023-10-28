@@ -79,8 +79,8 @@ public partial class JvmState
                     }
                 } while (_running);
 
-                // attaching timeouted threads
-                CheckTimeouts();
+                // attaching threads who want to attach
+                CheckWakeups();
 
                 // this will be positive if we are running faster than needed
                 var target = Toolkit.Clock.GetTicksPerCycleBunch();

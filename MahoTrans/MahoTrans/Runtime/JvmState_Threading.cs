@@ -3,8 +3,9 @@ namespace MahoTrans.Runtime;
 public partial class JvmState
 {
     /// <summary>
-    /// List of all threads, attached to scheduler. Anyone can append threads here at any time.
-    /// Threads must be removed only by themselves during execution, else behaviour is undefined.
+    /// List of all threads, attached to scheduler.
+    /// This list must NOT be modified outside of <see cref="Detach"/>, <see cref="Kill"/> and <see cref="CheckWakeups"/> methods.
+    /// First two must be called ONLY from jvm itself. The lust must be called ONLY when interpereter is suspended.
     /// </summary>
     public readonly List<JavaThread> AliveThreads = new(256);
 
@@ -13,8 +14,20 @@ public partial class JvmState
     /// </summary>
     public readonly Dictionary<int, JavaThread> WaitingThreads = new();
 
+    /// <summary>
+    /// Additional storage for threads from <see cref="WaitingThreads"/> who want to wakeup after some time.
+    /// </summary>
     private List<ThreadWakeupHook> _wakeupHooks = new();
+
+    /// <summary>
+    /// This is used to synchronize thread modifications.
+    /// </summary>
     private readonly object _threadPoolLock = new();
+
+    /// <summary>
+    /// Threads which we created/attached and waiting to actually do so.
+    /// </summary>
+    private Queue<JavaThread> _wakeingUpQueue = new();
 
     #region Threads management
 
@@ -30,7 +43,7 @@ public partial class JvmState
         Console.WriteLine("Thread registered!");
         lock (_threadPoolLock)
         {
-            AliveThreads.Insert(AliveThreads.Count, thread);
+            _wakeingUpQueue.Enqueue(thread);
         }
     }
 
@@ -69,7 +82,7 @@ public partial class JvmState
                     }
                 }
 
-                AliveThreads.Insert(AliveThreads.Count, th);
+                _wakeingUpQueue.Enqueue(th);
                 return true;
             }
 
@@ -90,7 +103,7 @@ public partial class JvmState
         }
     }
 
-    public void CheckTimeouts()
+    public void CheckWakeups()
     {
         var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);
 
@@ -98,6 +111,17 @@ public partial class JvmState
         {
             if (_wakeupHooks[i].WakeupAtMs <= now)
                 Attach(_wakeupHooks[i].ThreadId);
+        }
+
+        if (_wakeingUpQueue.Count != 0)
+        {
+            lock (_threadPoolLock)
+            {
+                while (_wakeingUpQueue.Count > 0)
+                {
+                    AliveThreads.Add(_wakeingUpQueue.Dequeue());
+                }
+            }
         }
     }
 
