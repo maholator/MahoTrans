@@ -63,13 +63,13 @@ public partial class JvmState
         {
             do
             {
+                var ticksAtBegin = DateTime.UtcNow.Ticks;
+
                 do
                 {
                     for (int i = AliveThreads.Count - 1; i >= 0; i--)
                     {
-                        var thread = AliveThreads[i];
-                        if (thread.ActiveFrame != null)
-                            JavaRunner.Step(thread, this);
+                        JavaRunner.Step(AliveThreads[i], this);
                     }
 
                     _cycleNumber++;
@@ -80,15 +80,15 @@ public partial class JvmState
                     }
                 } while (_running);
 
-                // deleting dead threads
-                for (int i = AliveThreads.Count - 1; i >= 0; i--)
-                {
-                    if (AliveThreads[i].ActiveFrame == null)
-                        AliveThreads.RemoveAt(i);
-                }
-
                 // attaching timeouted threads
                 CheckTimeouts();
+
+                // this will be positive if we are running faster than needed
+                var target = Toolkit.Clock.GetTicksPerCycleBunch();
+                while (target - (DateTime.UtcNow.Ticks - ticksAtBegin) > 0)
+                {
+                    Thread.SpinWait(50);
+                }
             } while (_running);
         });
     }
@@ -135,6 +135,7 @@ public partial class JvmState
 
         Console.WriteLine();
         Console.WriteLine("Unused:");
+
         foreach (var kvp in d.Where(x => x.Value == 0))
         {
             Console.WriteLine($"{kvp.Key}");
