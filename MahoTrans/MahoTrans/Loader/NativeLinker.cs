@@ -67,6 +67,7 @@ public static class NativeLinker
         {
             Name = name,
             ClrType = type,
+            Flags = type.IsInterface ? (ClassFlags.Interface | ClassFlags.Public) : ClassFlags.Public
         };
         {
             var super = type.BaseType?.FullName?.Replace('.', '/');

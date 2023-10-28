@@ -110,6 +110,8 @@ public class JavaClass
 
     public bool IsObject => Name == "java/lang/Object";
 
+    public bool IsInterface => (Flags & ClassFlags.Interface) != 0;
+
     [MemberNotNull(nameof(VirtualTable))]
     public void GenerateVirtualTable(JvmState jvm)
     {

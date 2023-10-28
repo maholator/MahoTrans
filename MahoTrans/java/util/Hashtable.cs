@@ -10,7 +10,7 @@ namespace java.util;
 
 public class Hashtable : Object
 {
-    [JavaIgnore] [JsonProperty] private Dictionary<Reference, Reference> _storage = new();
+    [JavaIgnore] [JsonProperty] private Dictionary<int, Reference> _storage = new();
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -36,7 +36,7 @@ public class Hashtable : Object
     {
         if (key.IsNull)
             return Reference.Null;
-        if (_storage.TryGetValue(key, out var value))
+        if (_storage.TryGetValue(key.Index, out var value))
             return value;
 
         //TODO this is unsafe and slow!
@@ -88,19 +88,19 @@ public class Hashtable : Object
         if (key.IsNull || val.IsNull)
             Jvm.Throw<NullPointerException>();
 
-        if (_storage.TryGetValue(key, out var prev))
+        if (_storage.TryGetValue(key.Index, out var prev))
         {
-            _storage[key] = val;
+            _storage[key.Index] = val;
             return prev;
         }
 
-        _storage[key] = val;
+        _storage[key.Index] = val;
         return Reference.Null;
     }
 
     public Reference remove(Reference key)
     {
-        if (_storage.Remove(key, out var p))
+        if (_storage.Remove(key.Index, out var p))
             return p;
         return Reference.Null;
     }
@@ -116,7 +116,7 @@ public class Hashtable : Object
     public Reference keys()
     {
         var e = Jvm.AllocateObject<ArrayEnumerator>();
-        e.Value = _storage.Keys.ToArray();
+        e.Value = _storage.Keys.Select(x => new Reference(x)).ToArray();
         return e.This;
     }
 

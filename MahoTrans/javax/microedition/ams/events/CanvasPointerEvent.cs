@@ -7,7 +7,7 @@ using MahoTrans.Utils;
 
 namespace javax.microedition.ams.events;
 
-public abstract class CanvasPointerEvent : Event
+public class CanvasPointerEvent : Event
 {
     [JavaType(typeof(Canvas))] public Reference Target;
     public int X;

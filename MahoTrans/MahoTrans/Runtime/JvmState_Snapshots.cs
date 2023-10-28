@@ -16,7 +16,9 @@ public partial class JvmState
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
+        Converters = { new CustomConvertorAssembly() },
     };
+
 
     private const string cycle_number_txt = "cycle_number.txt";
     private const string classes_txt = "classes.txt";
@@ -28,6 +30,7 @@ public partial class JvmState
     private const string heap_strings_json = "heap/strings.json";
     private const string heap_next_txt = "heap/next.txt";
     private const string heap_heap_json = "heap/heap.json";
+    private const string heap_statics_json = "heap/statics.json";
 
     /// <summary>
     /// Gets snapshot of this JVM.
@@ -85,6 +88,20 @@ public partial class JvmState
                 var t = JsonConvert.SerializeObject(_heap, _heapSerializeSettings);
                 s.Write(t);
             });
+            zip.AddTextEntry(heap_statics_json, s =>
+            {
+                var all = Classes.Values
+                    .Where(x => !x.IsInterface && x.ClrType != null && !x.ClrType.IsAbstract)
+                    .Select(x =>
+                    {
+                        var obj = (Object)Activator.CreateInstance(x.ClrType!);
+                        obj.JavaClass = x;
+                        return obj;
+                    })
+                    .ToArray();
+                var t = JsonConvert.SerializeObject(all, _heapSerializeSettings);
+                s.Write(t);
+            });
         }
 
         {
@@ -125,6 +142,7 @@ public partial class JvmState
                 Object.AttachHeap(this);
                 _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
                     _heapSerializeSettings)!;
+                JsonConvert.DeserializeObject<object[]>(zip.ReadTextEntry(heap_statics_json), _heapSerializeSettings);
                 Object.DetachHeap();
             }
         }
