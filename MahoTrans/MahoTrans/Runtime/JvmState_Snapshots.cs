@@ -1,11 +1,34 @@
 using System.IO.Compression;
+using System.Text;
+using javax.microedition.ams;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
+using Object = java.lang.Object;
+using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
+    private static readonly JsonSerializerSettings _heapSerializeSettings = new JsonSerializerSettings
+    {
+        TypeNameHandling = TypeNameHandling.All,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+        NullValueHandling = NullValueHandling.Include,
+        ReferenceLoopHandling = ReferenceLoopHandling.Error,
+    };
+
+    private const string cycle_number_txt = "cycle_number.txt";
+    private const string classes_txt = "classes.txt";
+    private const string virtp_table_json = "virtp_table.json";
+    private const string threads_alive_json = "threads/alive.json";
+    private const string threads_waiting_json = "threads/waiting.json";
+    private const string threads_queue_json = "threads/queue.json";
+    private const string threads_hooks_json = "threads/hooks.json";
+    private const string heap_strings_json = "heap/strings.json";
+    private const string heap_next_txt = "heap/next.txt";
+    private const string heap_heap_json = "heap/heap.json";
+
     /// <summary>
     /// Gets snapshot of this JVM.
     /// </summary>
@@ -14,10 +37,10 @@ public partial class JvmState
     {
         using var snapshotStream = new MemoryStream();
 
-        using (var zip = new ZipArchive(snapshotStream, ZipArchiveMode.Create, true))
+        using (var zip = new ZipArchive(snapshotStream, ZipArchiveMode.Create, true, Encoding.UTF8))
         {
-            zip.AddTextEntry("cycle_number.txt", s => s.Write(CycleNumber));
-            zip.AddTextEntry("classes.txt", s =>
+            zip.AddTextEntry(cycle_number_txt, s => s.Write(CycleNumber));
+            zip.AddTextEntry(classes_txt, s =>
             {
                 foreach (var cls in Classes.Values)
                 {
@@ -26,47 +49,40 @@ public partial class JvmState
                     s.WriteLine(cls.Name);
                 }
             });
-            zip.AddTextEntry("virtp_table.json", s =>
+            zip.AddTextEntry(virtp_table_json, s =>
             {
                 var t = JsonConvert.SerializeObject(_virtualPointers);
                 s.Write(t);
             });
-            zip.AddTextEntry("threads/alive.json", s =>
+            zip.AddTextEntry(threads_alive_json, s =>
             {
                 var t = JsonConvert.SerializeObject(SnapshotThreads(AliveThreads));
                 s.Write(t);
             });
-            zip.AddTextEntry("threads/waiting.json", s =>
+            zip.AddTextEntry(threads_waiting_json, s =>
             {
                 var t = JsonConvert.SerializeObject(SnapshotThreads(WaitingThreads.Values));
                 s.Write(t);
             });
-            zip.AddTextEntry("threads/queue.json", s =>
+            zip.AddTextEntry(threads_queue_json, s =>
             {
                 var t = JsonConvert.SerializeObject(SnapshotThreads(_wakeingUpQueue));
                 s.Write(t);
             });
-            zip.AddTextEntry("threads/hooks.json", s =>
+            zip.AddTextEntry(threads_hooks_json, s =>
             {
                 var t = JsonConvert.SerializeObject(_wakeupHooks.ToArray());
                 s.Write(t);
             });
-            zip.AddTextEntry("heap/strings.json", s =>
+            zip.AddTextEntry(heap_strings_json, s =>
             {
                 var t = JsonConvert.SerializeObject(_internalizedStrings);
                 s.Write(t);
             });
-            zip.AddTextEntry("heap/next.txt", s => s.Write(_nextObjectId));
-            zip.AddTextEntry("heap/heap.json", s =>
+            zip.AddTextEntry(heap_next_txt, s => s.Write(_nextObjectId));
+            zip.AddTextEntry(heap_heap_json, s =>
             {
-                var t = JsonConvert.SerializeObject(_heap,new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.All,
-                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                    NullValueHandling = NullValueHandling.Include,
-                    PreserveReferencesHandling = PreserveReferencesHandling.All,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Error,
-                });
+                var t = JsonConvert.SerializeObject(_heap, _heapSerializeSettings);
                 s.Write(t);
             });
         }
@@ -78,12 +94,92 @@ public partial class JvmState
         }
     }
 
-    public void RestoreFromSnapshot()
+    public void RestoreFromSnapshot(Stream stream)
     {
+        using (var zip = new ZipArchive(stream, ZipArchiveMode.Read, true, Encoding.UTF8))
+        {
+            _cycleNumber = long.Parse(zip.ReadTextEntry(cycle_number_txt));
+            //TODO check classes
+            //TODO check virttable
+
+            // threads
+            {
+                AliveThreads.Clear();
+                AliveThreads.AddRange(Restore(zip, threads_alive_json));
+                WaitingThreads.Clear();
+                foreach (var thread in Restore(zip, threads_waiting_json))
+                {
+                    WaitingThreads.Add(thread.ThreadId, thread);
+                }
+
+                _wakeingUpQueue = new Queue<JavaThread>(Restore(zip, threads_queue_json));
+                _wakeupHooks = JsonConvert.DeserializeObject<ThreadWakeupHook[]>(zip.ReadTextEntry(threads_hooks_json))!
+                    .ToList();
+            }
+
+            // heap
+            {
+                _nextObjectId = int.Parse(zip.ReadTextEntry(heap_next_txt));
+                _internalizedStrings =
+                    JsonConvert.DeserializeObject<Dictionary<string, int>>(zip.ReadTextEntry(heap_strings_json))!;
+                Object.AttachHeap(this);
+                _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
+                    _heapSerializeSettings)!;
+                Object.DetachHeap();
+            }
+        }
+
+        SyncHeapAfterRestore();
+    }
+
+    /// <summary>
+    /// Called from <see cref="RestoreFromSnapshot"/>. Links things to each other.
+    /// </summary>
+    private void SyncHeapAfterRestore()
+    {
+        _eventQueue = _heap.OfType<EventQueue>().FirstOrDefault();
+        if (_eventQueue != null)
+            _eventQueue.OwningJvm = this;
+        foreach (var thread in AliveThreads.Concat(WaitingThreads.Values).Concat(_wakeingUpQueue))
+        {
+            var t = (Thread)_heap[thread.Model.Index]!;
+            t.JavaThread = thread;
+        }
     }
 
     private SnapshotedThread[] SnapshotThreads(IEnumerable<JavaThread> threads) =>
-        threads.Select(x => new SnapshotedThread(x)).ToArray();
+        threads.Select(SnapshotedThread.Create).ToArray();
+
+    private JavaThread[] Restore(SnapshotedThread[] snapshotedThreads)
+    {
+        return snapshotedThreads.Select(x =>
+        {
+            var jt = new JavaThread(x.Model, x.Id);
+            List<Frame> frames = new();
+            foreach (var sh in x.Frames)
+            {
+                var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
+                frames.Add(new Frame(method)
+                {
+                    Pointer = sh.Pointer,
+                    LocalVariables = sh.LocalVariables.ToArray(),
+                    Stack = sh.Stack.ToArray(),
+                    StackTypes = sh.StackTypes.ToArray(),
+                    StackTop = sh.StackTop
+                });
+            }
+
+            jt.CallStack = frames.ToArray();
+            jt.ActiveFrameIndex = frames.Count - 1;
+            jt.ActiveFrame = frames.Last();
+            return jt;
+        }).ToArray();
+    }
+
+    private JavaThread[] Restore(ZipArchive zip, string name)
+    {
+        return Restore(JsonConvert.DeserializeObject<SnapshotedThread[]>(zip.ReadTextEntry(name))!);
+    }
 
     private class SnapshotedThread
     {
@@ -91,11 +187,12 @@ public partial class JvmState
         public Reference Model;
         public SnapshotedFrame[] Frames;
 
-        public SnapshotedThread(JavaThread jt)
+        public static SnapshotedThread Create(JavaThread jt)
         {
-            Id = jt.ThreadId;
-            Model = jt.Model;
-            Frames = jt.CallStack.Take(jt.ActiveFrameIndex + 1).Select(x =>
+            var s = new SnapshotedThread();
+            s.Id = jt.ThreadId;
+            s.Model = jt.Model;
+            s.Frames = jt.CallStack.Take(jt.ActiveFrameIndex + 1).Select(x =>
             {
                 return new SnapshotedFrame
                 {
@@ -108,6 +205,7 @@ public partial class JvmState
                     ClassName = x.Method.Method.Class.Name,
                 };
             }).ToArray();
+            return s;
         }
     }
 

@@ -9,7 +9,7 @@ namespace java.lang;
 
 public class Thread : Object, Runnable
 {
-    [JavaIgnore] [JsonIgnore] protected JavaThread JavaThread = null!;
+    [JavaIgnore] [JsonIgnore] public JavaThread JavaThread = null!;
 
     [JavaIgnore] [ThreadStatic] [JsonIgnore]
     public static JavaThread? CurrentThread;

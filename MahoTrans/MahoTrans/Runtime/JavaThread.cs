@@ -41,6 +41,12 @@ public class JavaThread
         _roller++;
     }
 
+    public JavaThread(Reference model, int id)
+    {
+        Model = model;
+        ThreadId = id;
+    }
+
     public JavaThread(Frame root, Reference model)
         : this(model)
     {

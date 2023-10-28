@@ -25,7 +25,7 @@ public class EventQueue : Thread
     /// </summary>
     [JavaIgnore] [JsonIgnore] public JvmState OwningJvm = null!;
 
-    [JavaIgnore] public Dictionary<Reference, bool> QueuedRepaints = new();
+    [JavaIgnore] public Dictionary<int, bool> QueuedRepaints = new();
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -37,7 +37,7 @@ public class EventQueue : Thread
 
     private bool IsRepaintPendingFor(Reference r)
     {
-        if (QueuedRepaints.TryGetValue(r, out var b))
+        if (QueuedRepaints.TryGetValue(r.Index, out var b))
             return b;
         return false;
     }
@@ -55,7 +55,7 @@ public class EventQueue : Thread
                 {
                     if (IsRepaintPendingFor(re.Target))
                         return;
-                    QueuedRepaints[re.Target] = true;
+                    QueuedRepaints[re.Target.Index] = true;
                 }
 
                 _events.Enqueue(e.This);
@@ -90,7 +90,7 @@ public class EventQueue : Thread
             var e = _events.Dequeue();
             if (Object.Jvm.ResolveObject(e) is RepaintEvent re)
             {
-                QueuedRepaints[re.Target] = false;
+                QueuedRepaints[re.Target.Index] = false;
             }
 
             //Console.WriteLine($"{Heap.ResolveObject(e).JavaClass} is dequeued, {_events.Count} more...");
@@ -144,7 +144,7 @@ public class EventQueue : Thread
                 var evRef = list[i];
                 if (Object.Jvm.ResolveObject(evRef) is RepaintEvent re)
                 {
-                    QueuedRepaints[re.Target] = false;
+                    QueuedRepaints[re.Target.Index] = false;
                     list.RemoveAt(i);
                     _events = new Queue<Reference>(list);
                     return evRef;
