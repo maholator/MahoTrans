@@ -1,6 +1,6 @@
 namespace MahoTrans.Runtime;
 
-public readonly struct Instruction
+public readonly struct Instruction : IEquatable<Instruction>
 {
     public readonly int Offset;
     public readonly JavaOpcode Opcode;
@@ -40,5 +40,30 @@ public readonly struct Instruction
             return Opcode.ToString();
 
         return $"{Opcode} {string.Join(',', Args)}";
+    }
+
+    public bool Equals(Instruction other)
+    {
+        return Offset == other.Offset && Opcode == other.Opcode && Args.Equals(other.Args);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Instruction other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Offset, (int)Opcode, Args);
+    }
+
+    public static bool operator ==(Instruction left, Instruction right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Instruction left, Instruction right)
+    {
+        return !left.Equals(right);
     }
 }

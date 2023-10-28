@@ -46,4 +46,13 @@ public class Method
             return $"{s} (native)";
         return s;
     }
+
+    public int GetSnapshotHash()
+    {
+        var baseHash = HashCode.Combine(Flags, Descriptor);
+        if (IsNative)
+            return baseHash;
+
+        return HashCode.Combine(baseHash, JavaBody);
+    }
 }

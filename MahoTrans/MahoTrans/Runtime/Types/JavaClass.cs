@@ -5,7 +5,6 @@ namespace MahoTrans.Runtime.Types;
 
 public class JavaClass
 {
-    public int Magic;
     public short MinorVersion;
     public short MajorVersion;
     public object[] Constants = Array.Empty<object>();
@@ -22,8 +21,26 @@ public class JavaClass
     public Action<List<Reference>>? StaticAnnouncer;
     public int Size;
 
-
     public override string ToString() => Name;
+
+    public ulong GetSnapshotHash()
+    {
+        ulong baseHash = (uint)HashCode.Combine(Constants, Flags, SuperName, Interfaces);
+
+        var fieldsHash = 0;
+        foreach (var value in Fields.Values)
+        {
+            fieldsHash = HashCode.Combine(fieldsHash, value.GetHashCode());
+        }
+
+        var methodsHash = 0;
+        foreach (var value in Methods.Values)
+        {
+            methodsHash = HashCode.Combine(methodsHash, value.GetSnapshotHash());
+        }
+
+        return (baseHash << 32) | (uint)HashCode.Combine(fieldsHash, methodsHash);
+    }
 
     public TypeAttributes ClrFlags
     {

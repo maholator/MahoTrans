@@ -82,7 +82,8 @@ public static class ClassLoader
 
     private static void ReadHeader(JavaClass c, BeBinaryReader reader)
     {
-        c.Magic = reader.ReadInt32();
+        var magic = reader.ReadInt32();
+        //TODO check magic
         c.MinorVersion = reader.ReadInt16();
         c.MajorVersion = reader.ReadInt16();
     }

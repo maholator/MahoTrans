@@ -91,4 +91,20 @@ public class JavaMethodBody
             return true;
         }
     }
+
+    public int GetSnapshotHash()
+    {
+        int acc = 0;
+        foreach (var instruction in Code)
+        {
+            acc = HashCode.Combine(acc, instruction);
+        }
+
+        foreach (var @catch in Catches)
+        {
+            acc = HashCode.Combine(acc, @catch);
+        }
+
+        return HashCode.Combine(StackSize, LocalsCount, acc);
+    }
 }

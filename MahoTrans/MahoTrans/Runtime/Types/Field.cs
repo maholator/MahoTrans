@@ -33,4 +33,9 @@ public class Field
     }
 
     public override string ToString() => Descriptor.ToString();
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Flags, Descriptor);
+    }
 }
