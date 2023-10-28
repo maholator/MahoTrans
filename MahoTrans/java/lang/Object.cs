@@ -102,6 +102,8 @@ public class Object
         };
     }
 
+    //TODO nanoseconds precision
+
     [JavaDescriptor("(J)V")]
     public static JavaMethodBody wait(JavaClass @class)
     {
