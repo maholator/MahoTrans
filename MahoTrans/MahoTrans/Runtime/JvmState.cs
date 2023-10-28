@@ -61,10 +61,9 @@ public partial class JvmState
     {
         RunInContext(() =>
         {
+            long clrTicks = DateTime.UtcNow.Ticks;
             do
             {
-                var ticksAtBegin = DateTime.UtcNow.Ticks;
-
                 do
                 {
                     for (int i = AliveThreads.Count - 1; i >= 0; i--)
@@ -85,10 +84,12 @@ public partial class JvmState
 
                 // this will be positive if we are running faster than needed
                 var target = Toolkit.Clock.GetTicksPerCycleBunch();
-                while (target - (DateTime.UtcNow.Ticks - ticksAtBegin) > 0)
+                while (target - (DateTime.UtcNow.Ticks - clrTicks) > 0)
                 {
                     Thread.SpinWait(50);
                 }
+
+                clrTicks += target;
             } while (_running);
         });
     }
