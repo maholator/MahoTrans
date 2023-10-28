@@ -8,7 +8,7 @@ public class Frame
     public long[] Stack;
 
     /// <summary>
-    /// Types of values on stack
+    /// Types of values on stack.
     /// </summary>
     public PrimitiveType[] StackTypes;
 
