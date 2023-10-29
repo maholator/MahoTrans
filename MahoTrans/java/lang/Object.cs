@@ -237,5 +237,13 @@ public class Object
     {
     }
 
+    /// <summary>
+    /// GC will call this method right before object deletion from the heap. Return true to make the object survive in this collection.
+    /// </summary>
+    public virtual bool OnObjectDelete()
+    {
+        return false;
+    }
+
     #endregion
 }

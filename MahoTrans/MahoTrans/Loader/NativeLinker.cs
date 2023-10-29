@@ -101,6 +101,8 @@ public static class NativeLinker
             if (nm.Name == nameof(Object.AnnounceHiddenReferences))
                 continue;
 
+            if (nm.Name == nameof(Object.OnObjectDelete))
+                continue;
 
             var built = BuildMethod(nm, jc, type, bridge);
             javaMethods.Add(built);

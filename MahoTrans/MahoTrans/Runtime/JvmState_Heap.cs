@@ -321,6 +321,8 @@ public partial class JvmState
             }
             else
             {
+                if (obj.OnObjectDelete())
+                    continue;
                 deletedCount++;
                 _bytesAllocated -= obj.JavaClass.Size;
                 _heap[i] = null;
