@@ -70,4 +70,10 @@ public class Image : Object
         g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;
     }
+
+    public override bool OnObjectDelete()
+    {
+        Toolkit.Images.ReleaseImage(Handle);
+        return false;
+    }
 }

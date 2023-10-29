@@ -152,4 +152,10 @@ public class Graphics : Object, DirectGraphics
         var buf = Jvm.ResolveArray<int>(rgbData);
         Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
     }
+
+    public override bool OnObjectDelete()
+    {
+        Toolkit.Images.ReleaseGraphics(Handle);
+        return false;
+    }
 }

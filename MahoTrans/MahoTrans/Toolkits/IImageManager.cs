@@ -22,6 +22,11 @@ public interface IImageManager
 
     void ReleaseImage(ImageHandle image);
 
+    /// <summary>
+    /// Creates a graphics object for specified buffer.
+    /// </summary>
+    /// <param name="image">Buffer to bind with. Must be mutable.</param>
+    /// <returns>Handle of created object. Use <see cref="ResolveGraphics"/> to get it.</returns>
     GraphicsHandle GetGraphics(ImageHandle image);
 
     IGraphics ResolveGraphics(GraphicsHandle handle);
