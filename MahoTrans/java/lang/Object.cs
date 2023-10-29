@@ -10,7 +10,12 @@ namespace java.lang;
 
 public class Object
 {
-    [JavaIgnore] public int HeapAddress;
+    #region Object properties
+
+    /// <summary>
+    /// Address of this object in attached heap. The following is always true: <code>this.Jvm.ResolveObject(this.HeapAddress) == this</code>
+    /// </summary>
+    [JavaIgnore] [JsonProperty] public int HeapAddress;
 
     /// <summary>
     /// Reference to java class, which this object is instance of.
@@ -18,26 +23,28 @@ public class Object
     [JavaIgnore] [JsonIgnore] public JavaClass JavaClass = null!;
 
     /// <summary>
+    /// <see cref="HeapAddress"/> wrapped in <see cref="Reference"/> struct.
+    /// </summary>
+    [JsonIgnore]
+    public Reference This => new Reference(HeapAddress);
+
+    /// <summary>
     /// Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass"/> to take object's class.
     /// Deserialization MUST occur withing JVM context.
     /// </summary>
+    [JsonProperty]
     public string ClassName
     {
         get => JavaClass.Name;
         set => JavaClass = Jvm.GetClass(value);
     }
 
+    #endregion
+
+    #region Context
+
     [JavaIgnore] [ThreadStatic] [JsonIgnore]
     private static JvmState? _jvm;
-
-    [JavaIgnore] public int MonitorOwner;
-    [JavaIgnore] public uint MonitorReEnterCount;
-    [JavaIgnore] public List<MonitorWait>? Waiters;
-
-    /// <summary>
-    /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
-    /// </summary>
-    [JavaIgnore] [JsonIgnore] public bool Alive;
 
     [JsonIgnore]
     public static JvmState Jvm
@@ -54,18 +61,21 @@ public class Object
 
     [JsonIgnore] protected static Toolkit Toolkit => Jvm.Toolkit;
 
-    [JsonIgnore] public Reference This => new Reference(HeapAddress);
-
     [JavaIgnore]
     public static void AttachHeap(JvmState heap) => _jvm = heap;
 
     [JavaIgnore]
     public static void DetachHeap() => _jvm = null;
 
-    [InitMethod]
-    public virtual void Init()
-    {
-    }
+    #endregion
+
+    #region Monitors
+
+    [JavaIgnore] [JsonProperty] public int MonitorOwner;
+
+    [JavaIgnore] [JsonProperty] public uint MonitorReEnterCount;
+
+    [JavaIgnore] [JsonProperty] public List<MonitorWait>? Waiters;
 
     /// <summary>
     /// For internal usage. Called by <see cref="wait()"/> to detach from monitor and scheduler.
@@ -96,6 +106,15 @@ public class Object
         MonitorReEnterCount = mw.MonitorReEnterCount;
         if (MonitorOwner != mw.MonitorOwner)
             throw new JavaRuntimeError("After wait, thread that owns the object was changed.");
+    }
+
+    #endregion
+
+    #region Java members
+
+    [InitMethod]
+    public virtual void Init()
+    {
     }
 
     [JavaDescriptor("()V")]
@@ -202,10 +221,21 @@ public class Object
         return cls.This;
     }
 
+    #endregion
+
+    #region GC
+
+    /// <summary>
+    /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
+    /// </summary>
+    [JavaIgnore] [JsonIgnore] public bool Alive;
+
     /// <summary>
     /// GC will call this method to collect objects which are referenced by this object. Override it if objects are stored in hidden form.
     /// </summary>
     public virtual void AnnounceHiddenReferences(Queue<Reference> queue)
     {
     }
+
+    #endregion
 }

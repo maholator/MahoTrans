@@ -50,4 +50,9 @@ public struct Reference : IEquatable<Reference>
     {
         return new Reference((int)pointer);
     }
+
+    public static implicit operator Reference(int pointer)
+    {
+        return new Reference(pointer);
+    }
 }
