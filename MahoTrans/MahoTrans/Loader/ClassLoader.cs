@@ -5,18 +5,30 @@ using System.Text;
 using Be.IO;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 
 namespace MahoTrans.Loader;
 
+/// <summary>
+/// Set of tools to take useful things from JAR file.
+/// </summary>
 public static class ClassLoader
 {
-    public static (JavaClass[], Dictionary<string, byte[]>) ReadJar(Stream file, bool leaveOpen)
+    /// <summary>
+    /// Reads JAR package.
+    /// </summary>
+    /// <param name="file">Actual file stream.</param>
+    /// <param name="leaveOpen">True to leave stream opened.</param>
+    /// <param name="logger">Logger to print info into.</param>
+    /// <returns>JAR object.</returns>
+    public static JarPackage ReadJar(Stream file, bool leaveOpen, ILogger logger)
     {
         using (var zip = new ZipArchive(file, ZipArchiveMode.Read, leaveOpen, Encoding.UTF8))
         {
             List<JavaClass> classes = new();
             Dictionary<string, byte[]> res = new();
+            Dictionary<string, string>? manifest = null;
             var files = zip.Entries;
             foreach (var entry in files)
             {
@@ -42,9 +54,31 @@ public static class ClassLoader
                     var cls = ClassLoader.Read(stream, true);
                     classes.Add(cls);
                 }
+
+                if (entry.Name == "META-INF/MANIFEST.MF")
+                {
+                    //TODO check MIDP docs
+                    manifest = Encoding.UTF8.GetString(res["META-INF/MANIFEST.MF"])
+                        .Split('\n')
+                        .Select(x => x.Trim('\r').Trim())
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Select(x => x.Split(':', 2,
+                            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        .Where(x => x.Length == 2)
+                        .ToDictionary(x => x[0], x => x[1]);
+                }
             }
 
-            return (classes.ToArray(), res);
+            if (manifest == null)
+            {
+                logger.PrintLoadTime(LogLevel.Error, "Manifest file was not found");
+                manifest = new()
+                {
+                    { "MIDlet-Version", "1.0.0" }
+                };
+            }
+
+            return new JarPackage(classes.ToArray(), res, manifest);
         }
     }
 
