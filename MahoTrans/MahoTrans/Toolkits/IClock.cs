@@ -27,6 +27,6 @@ public interface IClock : IToolkit
     /// <summary>
     /// Gets CLR time in which ticks bunch must be done. Ticks count is set by <see cref="JvmState.CYCLES_PER_BUNCH"/>
     /// </summary>
-    /// <returns></returns>
+    /// <returns>CLR ticks.</returns>
     long GetTicksPerCycleBunch();
 }
