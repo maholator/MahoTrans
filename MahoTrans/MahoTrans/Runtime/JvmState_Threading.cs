@@ -105,22 +105,25 @@ public partial class JvmState
 
     public void CheckWakeups()
     {
-        var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);
-
-        for (int i = _wakeupHooks.Count - 1; i >= 0; i--)
+        if (_wakeupHooks.Count != 0)
         {
-            if (_wakeupHooks[i].WakeupAtMs <= now)
-                Attach(_wakeupHooks[i].ThreadId);
+            var now = Toolkit.Clock.GetCurrentJvmMs(_cycleNumber);
+
+            for (int i = _wakeupHooks.Count - 1; i >= 0; i--)
+            {
+                if (_wakeupHooks[i].WakeupAtMs <= now)
+                    Attach(_wakeupHooks[i].ThreadId);
+            }
         }
 
-        if (_wakeingUpQueue.Count != 0)
+        if (_wakeingUpQueue.Count == 0)
+            return;
+
+        lock (_threadPoolLock)
         {
-            lock (_threadPoolLock)
+            while (_wakeingUpQueue.Count > 0)
             {
-                while (_wakeingUpQueue.Count > 0)
-                {
-                    AliveThreads.Add(_wakeingUpQueue.Dequeue());
-                }
+                AliveThreads.Add(_wakeingUpQueue.Dequeue());
             }
         }
     }
