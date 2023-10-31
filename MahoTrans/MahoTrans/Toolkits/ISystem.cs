@@ -12,8 +12,4 @@ public interface ISystem : IToolkit
     void PrintOut(string s);
 
     string? GetProperty(string name);
-
-    long GetTotalMemory();
-
-    long GetFreeMemory();
 }

@@ -16,6 +16,10 @@ public partial class JvmState
 
     public int BytesAllocated => _bytesAllocated;
 
+    //TODO
+    public int TotalMemory { get; }
+    public int FreeMemory { get; }
+
     private bool _gcPending = false;
 
     #region Allocation

@@ -20,7 +20,7 @@ public class Runtime : Object
 
     public void gc() => System.gc();
 
-    public long freeMemory() => Toolkit.System.GetFreeMemory();
+    public long freeMemory() => Jvm.FreeMemory;
 
-    public long totalMemory() => Toolkit.System.GetTotalMemory();
+    public long totalMemory() => Jvm.TotalMemory;
 }
