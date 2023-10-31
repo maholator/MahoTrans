@@ -20,12 +20,12 @@ public partial class JvmState
 
     #region Class loading
 
-    public void AddJvmClasses((JavaClass[], Dictionary<string, byte[]>) data, string assemblyName, string moduleName)
+    public void AddJvmClasses(JarPackage jar, string assemblyName, string moduleName)
     {
-        foreach (var kvp in data.Item2)
+        foreach (var kvp in jar.Resources)
             _resources.Add(kvp.Key, kvp.Value);
 
-        AddJvmClasses(data.Item1, assemblyName, moduleName);
+        AddJvmClasses(jar.Classes, assemblyName, moduleName);
     }
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
