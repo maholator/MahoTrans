@@ -11,18 +11,27 @@ using MahoTrans.Utils;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// Set of tools to take useful things from JAR file.
+/// Set of tools to take useful things from JAR file. This must be used from one thread.
 /// </summary>
-public static class ClassLoader
+public class ClassLoader
 {
+    private ILogger _logger;
+    private string _classFileName = "";
+
+    public ClassLoader(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    private void Log(LogLevel level, string message) => _logger.PrintLoadTime(level, _classFileName, message);
+
     /// <summary>
     /// Reads JAR package.
     /// </summary>
     /// <param name="file">Actual file stream.</param>
     /// <param name="leaveOpen">True to leave stream opened.</param>
-    /// <param name="logger">Logger to print info into.</param>
     /// <returns>JAR object.</returns>
-    public static JarPackage ReadJar(Stream file, bool leaveOpen, ILogger logger)
+    public JarPackage ReadJar(Stream file, bool leaveOpen)
     {
         using (var zip = new ZipArchive(file, ZipArchiveMode.Read, leaveOpen, Encoding.UTF8))
         {
@@ -51,11 +60,12 @@ public static class ClassLoader
                 if (entry.Name.EndsWith(".class"))
                 {
                     using var stream = entry.Open();
-                    var cls = ClassLoader.Read(stream, true);
+                    _classFileName = entry.FullName;
+                    var cls = Read(stream);
                     classes.Add(cls);
                 }
 
-                if (entry.Name == "META-INF/MANIFEST.MF")
+                if (entry.FullName == "META-INF/MANIFEST.MF")
                 {
                     //TODO check MIDP docs
                     manifest = Encoding.UTF8.GetString(res["META-INF/MANIFEST.MF"])
@@ -71,7 +81,7 @@ public static class ClassLoader
 
             if (manifest == null)
             {
-                logger.PrintLoadTime(LogLevel.Error, "Manifest file was not found");
+                _logger.PrintLoadTime(LogLevel.Error, "META-INF/MANIFEST.MF", "Manifest file was not found");
                 manifest = new()
                 {
                     { "MIDlet-Version", "1.0.0" }
@@ -82,9 +92,9 @@ public static class ClassLoader
         }
     }
 
-    public static JavaClass Read(Stream file, bool leaveOpen)
+    public JavaClass Read(Stream file)
     {
-        using (var reader = new BeBinaryReader(file, Encoding.UTF8, leaveOpen))
+        using (var reader = new BeBinaryReader(file, Encoding.UTF8, true))
         {
             var c = new JavaClass();
 
@@ -99,7 +109,7 @@ public static class ClassLoader
         }
     }
 
-    private static ReadOnlyDictionary<JavaOpcode, int> _opcodeArgsCache = BuildOpcodeCache();
+    private static readonly ReadOnlyDictionary<JavaOpcode, int> OpcodeArgsCache = BuildOpcodeCache();
 
     private static ReadOnlyDictionary<JavaOpcode, int> BuildOpcodeCache()
     {
@@ -114,15 +124,19 @@ public static class ClassLoader
         return new ReadOnlyDictionary<JavaOpcode, int>(dict);
     }
 
-    private static void ReadHeader(JavaClass c, BeBinaryReader reader)
+    private void ReadHeader(JavaClass c, BeBinaryReader reader)
     {
-        var magic = reader.ReadInt32();
-        //TODO check magic
+        uint magic = (uint)reader.ReadInt32();
+        if (magic != 0xCAFEBABE)
+        {
+            Log(LogLevel.Error, $"Class has invalid magic {magic:X}, must be 0xCAFEBABE");
+        }
+
         c.MinorVersion = reader.ReadInt16();
         c.MajorVersion = reader.ReadInt16();
     }
 
-    private static void ReadConstants(JavaClass rc, BeBinaryReader reader)
+    private void ReadConstants(JavaClass rc, BeBinaryReader reader)
     {
         int count = reader.ReadInt16();
         object?[] consts = new object?[count];
@@ -169,39 +183,23 @@ public static class ClassLoader
                     consts[i] = ReadUtf(reader);
                     break;
                 case ConstantType.CONSTANT_MethodHandle:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException("MethodHandle constants are not supported.");
                 case ConstantType.CONSTANT_MethodType:
                     consts[i] = new StringReference(reader.ReadInt16());
                     break;
                 case ConstantType.CONSTANT_InvokeDynamic:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException("Dynamic binding constants are not supported.");
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentException(
+                        $"There is a constant of unknown type \"{ct}\" in class {_classFileName}");
             }
         }
 
-        for (var i = 0; i < consts.Length; i++)
-        {
-            var @const = consts[i];
-            switch (@const)
-            {
-                case StringReference strRef:
-                    consts[i] = consts[strRef.Index];
-                    break;
-                case NameTypeReference ntRef:
-                {
-                    var name = consts[ntRef.NameIndex] as string ??
-                               throw new JavaLinkageException("Name part of descriptor was not a string");
-                    var d = consts[ntRef.DescriptorIndex] as string ??
-                            throw new JavaLinkageException("Descriptor part of descriptor was not a string");
-                    consts[i] = new NameDescriptor(name,
-                        d);
-                    break;
-                }
-            }
-        }
+        InlineStringConstants(consts);
 
-        object[] linkedConsts = new object[count];
+        InlineNameDescriptorConstants(consts);
+
+        var linkedConsts = new object[count];
 
         for (int i = 0; i < count; i++)
         {
@@ -215,12 +213,12 @@ public static class ClassLoader
                 var ntb = consts[mr.NameTypeIndex];
                 if (ntb is not NameDescriptor nt)
                 {
-                    throw new JavaLinkageException($"ND part for NDC was not a ND (constant #{mr.NameTypeIndex})");
+                    nt = new NameDescriptor("", "");
+                    _logger.PrintLoadTime(LogLevel.Error, _classFileName,
+                        $"Constant #{mr.NameTypeIndex} must be ND, but it is {ntb?.GetType().Name ?? "null"}");
                 }
 
-                var cls = consts[mr.ClassIndex] as string ??
-                          throw new JavaLinkageException(
-                              $"Class name part for NDC was not a string (constant #{mr.ClassIndex})");
+                var cls = PullStringSafely(consts, mr.ClassIndex);
                 linkedConsts[i] = new NameDescriptorClass(nt, cls);
             }
             else
@@ -232,32 +230,63 @@ public static class ClassLoader
         rc.Constants = linkedConsts;
     }
 
-    private static void ReadInfo(JavaClass rc, BeBinaryReader reader)
+    private string PullStringSafely(object?[] consts, int at)
     {
-        rc.Flags = (ClassFlags)reader.ReadInt16();
-        var clsNameIndex = reader.ReadInt16();
-        rc.Name = rc.Constants[clsNameIndex] as string ??
-                  throw new JavaLinkageException($"Class name was not a string (constant #{clsNameIndex})");
-        var clsSuper = reader.ReadInt16();
-        rc.SuperName = rc.Constants[clsSuper] as string ??
-                       throw new JavaLinkageException($"Class super was not a string (constant #{clsSuper})");
+        var obj = consts[at];
+        if (obj is string s)
+            return s;
+        _logger.PrintLoadTime(LogLevel.Error, _classFileName,
+            $"Constant #{at} must be string, but it is {obj?.GetType().Name ?? "null"}");
+        return string.Empty;
     }
 
-    private static void ReadInterfaces(JavaClass rc, BeBinaryReader reader)
+    private void InlineNameDescriptorConstants(object?[] consts)
+    {
+        for (var i = 0; i < consts.Length; i++)
+        {
+            var @const = consts[i];
+            if (@const is NameTypeReference ntRef)
+            {
+                var name = PullStringSafely(consts, ntRef.NameIndex);
+                var d = PullStringSafely(consts, ntRef.DescriptorIndex);
+                consts[i] = new NameDescriptor(name, d);
+            }
+        }
+    }
+
+    private void InlineStringConstants(object?[] consts)
+    {
+        for (var i = 0; i < consts.Length; i++)
+        {
+            if (consts[i] is StringReference strRef)
+            {
+                consts[i] = PullStringSafely(consts, strRef.Index);
+            }
+        }
+    }
+
+    private void ReadInfo(JavaClass rc, BeBinaryReader reader)
+    {
+        rc.Flags = (ClassFlags)reader.ReadInt16();
+
+        rc.Name = PullStringSafely(rc.Constants, reader.ReadInt16());
+        rc.SuperName = PullStringSafely(rc.Constants, reader.ReadInt16());
+    }
+
+    private void ReadInterfaces(JavaClass rc, BeBinaryReader reader)
     {
         int count = reader.ReadInt16();
         var a = new string[count];
         for (int i = 0; i < count; i++)
         {
             var ii = reader.ReadInt16();
-            a[i] = rc.Constants[ii] as string ??
-                   throw new JavaLinkageException($"Interface name was not a string (constant #{ii})");
+            a[i] = PullStringSafely(rc.Constants, ii);
         }
 
         rc.Interfaces = a;
     }
 
-    private static void ReadFields(JavaClass rc, BeBinaryReader reader)
+    private void ReadFields(JavaClass rc, BeBinaryReader reader)
     {
         int count = reader.ReadInt16();
         var a = new Field[count];
@@ -286,7 +315,7 @@ public static class ClassLoader
         rc.Fields = a.ToDictionary(x => x.Descriptor, x => x);
     }
 
-    private static void ReadMethods(JavaClass rc, BeBinaryReader reader)
+    private void ReadMethods(JavaClass rc, BeBinaryReader reader)
     {
         int count = reader.ReadInt16();
         var a = new Method[count];
@@ -324,41 +353,29 @@ public static class ClassLoader
         rc.Methods = a.ToDictionary(x => x.Descriptor, x => x);
     }
 
-    private static string ReadAttributeName(BeBinaryReader stream, object[] consts)
+    private string ReadAttributeName(BeBinaryReader stream, object[] consts)
     {
         var attrNameIndex = stream.ReadInt16();
-        if (consts[attrNameIndex] is string attrType)
-            return attrType;
-        throw new JavaLinkageException($"Attribute name was not a string (constant #{attrNameIndex})");
+        return PullStringSafely(consts, attrNameIndex);
     }
 
-    private static NameDescriptor ReadMemberND(BeBinaryReader stream, object[] consts)
+    private NameDescriptor ReadMemberND(BeBinaryReader stream, object[] consts)
     {
         var nameIndex = stream.ReadInt16();
         var descriptorIndex = stream.ReadInt16();
 
-        if (consts[nameIndex] is not string name)
-        {
-            throw new JavaLinkageException($"Member name was not a string (constant #{nameIndex})");
-        }
-
-        if (consts[descriptorIndex] is not string descriptor)
-        {
-            throw new JavaLinkageException($"Member descriptor was not a string (constant #{descriptorIndex})");
-        }
-
+        var name = PullStringSafely(consts, nameIndex);
+        var descriptor = PullStringSafely(consts, descriptorIndex);
         return new NameDescriptor(name, descriptor);
     }
 
     private static string ReadUtf(BeBinaryReader stream)
     {
         int len = stream.ReadInt16();
-        byte[] data = stream.ReadBytes(len);
-        return data.DecodeJavaUnicode();
+        return stream.ReadBytes(len).DecodeJavaUnicode();
     }
 
-
-    private static JavaMethodBody ReadCode(byte[] data, object[] consts)
+    private JavaMethodBody ReadCode(byte[] data, object[] consts)
     {
         using (MemoryStream ms = new MemoryStream(data, false))
         {
@@ -396,7 +413,7 @@ public static class ClassLoader
                         int offset = i;
                         JavaOpcode op = (JavaOpcode)code[offset];
                         i++;
-                        _opcodeArgsCache.TryGetValue(op, out int args);
+                        OpcodeArgsCache.TryGetValue(op, out int args);
                         if (args == 0)
                         {
                             instrs.Add(new Instruction(offset, op));
