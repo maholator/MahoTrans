@@ -3,7 +3,7 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Toolkits;
 
-public interface ISystem
+public interface ISystem : IToolkit
 {
     int GetHashCode(Object obj);
 

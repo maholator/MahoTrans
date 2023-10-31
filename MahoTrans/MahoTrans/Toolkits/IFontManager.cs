@@ -2,7 +2,7 @@ using javax.microedition.lcdui;
 
 namespace MahoTrans.Toolkits;
 
-public interface IFontManager
+public interface IFontManager : IToolkit
 {
     int GetFontHeight(FontSize size);
 

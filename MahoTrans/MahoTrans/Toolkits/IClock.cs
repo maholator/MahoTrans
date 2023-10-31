@@ -3,7 +3,7 @@ using MahoTrans.Runtime;
 
 namespace MahoTrans.Toolkits;
 
-public interface IClock
+public interface IClock : IToolkit
 {
     /// <summary>
     /// Gets current time of the system. This is used for <see cref="System.currentTimeMillis"/>.

@@ -2,7 +2,7 @@ using javax.microedition.lcdui;
 
 namespace MahoTrans.Toolkits;
 
-public interface IDisplay
+public interface IDisplay : IToolkit
 {
     DisplayableHandle Register(Displayable d);
 

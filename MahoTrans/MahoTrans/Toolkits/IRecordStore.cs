@@ -2,7 +2,7 @@ using javax.microedition.rms;
 
 namespace MahoTrans.Toolkits;
 
-public interface IRecordStore
+public interface IRecordStore : IToolkit
 {
     string[] ListStores();
 

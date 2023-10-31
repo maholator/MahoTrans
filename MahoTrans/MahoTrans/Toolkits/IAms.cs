@@ -1,6 +1,6 @@
 namespace MahoTrans.Toolkits;
 
-public interface IAms
+public interface IAms : IToolkit
 {
     void PauseMidlet();
 

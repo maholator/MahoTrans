@@ -1,6 +1,6 @@
 namespace MahoTrans.Toolkits;
 
-public interface IImageManager
+public interface IImageManager : IToolkit
 {
     ImageHandle CreateBuffer(int width, int height);
 
