@@ -82,6 +82,13 @@ public partial class JvmState
                 // attaching threads who want to attach
                 CheckWakeups();
 
+                // gc
+                if (_gcPending)
+                {
+                    _gcPending = false;
+                    RunGarbageCollector();
+                }
+
                 // this will be positive if we are running faster than needed
                 var target = Toolkit.Clock.GetTicksPerCycleBunch();
                 while (target - (DateTime.UtcNow.Ticks - clrTicks) > 0)

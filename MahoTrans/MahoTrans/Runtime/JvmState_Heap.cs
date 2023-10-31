@@ -12,12 +12,11 @@ public partial class JvmState
     private int _nextObjectId = 1;
     private Dictionary<string, int> _internalizedStrings = new();
 
-    private List<Reference> _fixedRoots = new();
-    private int _fixNewObjects;
-
     private int _bytesAllocated;
 
     public int BytesAllocated => _bytesAllocated;
+
+    private bool _gcPending = false;
 
     #region Allocation
 
@@ -165,16 +164,7 @@ public partial class JvmState
     #region Exceptions
 
     [DoesNotReturn]
-    public void Throw<T>() where T : Throwable
-    {
-        Reference exRef;
-        using (BeginFixedScope())
-        {
-            exRef = AllocateObject<T>().This;
-        }
-
-        throw new JavaThrowable(exRef);
-    }
+    public void Throw<T>() where T : Throwable => throw new JavaThrowable(AllocateObject<T>().This);
 
     #endregion
 
@@ -183,11 +173,7 @@ public partial class JvmState
         switch (o)
         {
             case string s:
-                using (BeginFixedScope())
-                {
-                    frame.PushReference(InternalizeString(s));
-                }
-
+                frame.PushReference(InternalizeString(s));
                 return;
             case int i:
                 frame.PushInt(i);
@@ -218,7 +204,7 @@ public partial class JvmState
             if (_nextObjectId % 2000 == 0)
             {
                 // run GC every 2k object
-                RunGarbageCollector();
+                _gcPending = true;
             }
 
             while (_heap[_nextObjectId] != null)
@@ -231,11 +217,6 @@ public partial class JvmState
 
             var r = new Reference(_nextObjectId);
             obj.HeapAddress = _nextObjectId;
-            if (_fixNewObjects != 0)
-            {
-                _fixedRoots.Add(r);
-            }
-
             _heap[_nextObjectId] = obj;
 
             _bytesAllocated += obj.JavaClass.Size;
@@ -344,9 +325,6 @@ public partial class JvmState
 
         // building roots list
         {
-            // fixeds
-            roots.AddRange(_fixedRoots);
-
             // statics
             foreach (var cls in Classes.Values)
             {
@@ -402,32 +380,5 @@ public partial class JvmState
         }
 
         return roots;
-    }
-
-    public FixedScope BeginFixedScope() => new FixedScope(this);
-
-    public readonly struct FixedScope : IDisposable
-    {
-        private readonly JvmState _state;
-
-        public FixedScope(JvmState state)
-        {
-            _state = state;
-            lock (_state)
-            {
-                _state._fixNewObjects++;
-            }
-        }
-
-
-        public void Dispose()
-        {
-            lock (_state)
-            {
-                _state._fixNewObjects--;
-                if (_state._fixNewObjects == 0)
-                    _state._fixedRoots.Clear();
-            }
-        }
     }
 }

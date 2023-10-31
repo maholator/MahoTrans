@@ -1,7 +1,6 @@
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
-using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
@@ -1447,10 +1446,7 @@ public class JavaRunner
                     _ => null
                 };
 
-                using (state.BeginFixedScope())
-                {
-                    frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
-                }
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
 
                 pointer++;
                 break;
@@ -1813,10 +1809,7 @@ public class JavaRunner
 
         if (m.Bridge != null)
         {
-            using (Object.Jvm.BeginFixedScope())
-            {
-                m.Bridge(frame);
-            }
+            m.Bridge(frame);
 
             // we are done with the call, so going to next instruction
             frame.Pointer++;

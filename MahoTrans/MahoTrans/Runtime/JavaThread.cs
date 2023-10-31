@@ -120,16 +120,13 @@ public class JavaThread
     /// <returns></returns>
     public static Thread CreateSynthetic(NameDescriptor nd, Reference target, JvmState state)
     {
-        using (state.BeginFixedScope())
-        {
-            var bridge = state.AllocateObject<AnyCallBridge>();
-            bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
+        var bridge = state.AllocateObject<AnyCallBridge>();
+        bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
 
-            var model = state.AllocateObject<Thread>();
-            model.InitTargeted(bridge.This);
+        var model = state.AllocateObject<Thread>();
+        model.InitTargeted(bridge.This);
 
-            return model;
-        }
+        return model;
     }
 
     /// <summary>

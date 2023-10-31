@@ -64,22 +64,19 @@ public class EventQueue : Thread
     {
         lock (_lock)
         {
-            using (OwningJvm.BeginFixedScope())
+            var e = OwningJvm.AllocateObject<T>();
+            setup.Invoke(e);
+            if (e is RepaintEvent re)
             {
-                var e = OwningJvm.AllocateObject<T>();
-                setup.Invoke(e);
-                if (e is RepaintEvent re)
-                {
-                    if (IsRepaintPendingFor(re.Target))
-                        return;
-                    QueuedRepaints[re.Target.Index] = true;
-                }
-
-                _events.Enqueue(e.This);
-
-                //Console.WriteLine($"{e.JavaClass} is enqueued");
-                OwningJvm.Attach(JavaThread.ThreadId);
+                if (IsRepaintPendingFor(re.Target))
+                    return;
+                QueuedRepaints[re.Target.Index] = true;
             }
+
+            _events.Enqueue(e.This);
+
+            //Console.WriteLine($"{e.JavaClass} is enqueued");
+            OwningJvm.Attach(JavaThread.ThreadId);
         }
     }
 
