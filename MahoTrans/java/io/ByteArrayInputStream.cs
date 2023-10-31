@@ -39,6 +39,22 @@ public class ByteArrayInputStream : InputStream
         return (byte)b;
     }
 
+    [JavaDescriptor("([B)I")]
+    public int read(Reference arr)
+    {
+        if (pos == count)
+            return -1;
+        var b = Jvm.ResolveArray<sbyte>(buf);
+        var target = Jvm.ResolveArray<sbyte>(arr);
+        int read = Math.Min(target.Length, count - pos);
+
+        for (int i = 0; i < read; i++)
+            target[i] = b[pos + i];
+
+        pos += read;
+        return read;
+    }
+
     [JavaDescriptor("([BII)I")]
     public int read(Reference arr, int from, int len)
     {

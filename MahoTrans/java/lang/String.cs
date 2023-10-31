@@ -1,3 +1,4 @@
+using System.Globalization;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -126,6 +127,13 @@ public sealed class String : Object
 
         return false;
     }
+
+    public bool equalsIgnoreCase([String] Reference anotherString)
+    {
+        string s2 = Jvm.ResolveString(anotherString);
+        return Value.ToLower(CultureInfo.InvariantCulture) == s2.ToLower(CultureInfo.InvariantCulture);
+    }
+
 
     public int compareTo([String] Reference anotherString)
     {
