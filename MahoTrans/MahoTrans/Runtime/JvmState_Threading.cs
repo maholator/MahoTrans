@@ -55,7 +55,7 @@ public partial class JvmState
                 throw new JavaRuntimeError($"Attempt to detach {thread} which is not attached.");
 
             WaitingThreads.Add(thread.ThreadId, thread);
-            if (returnAfter >= 0)
+            if (returnAfter > 0)
             {
                 _wakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
                     thread.ThreadId));
