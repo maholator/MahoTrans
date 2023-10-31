@@ -3,7 +3,7 @@ using System.Text;
 
 namespace MahoTrans.Utils;
 
-internal static class ZipUtils
+public static class ZipUtils
 {
     /// <summary>
     /// Adds content to archive.
