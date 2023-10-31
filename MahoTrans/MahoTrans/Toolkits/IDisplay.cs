@@ -9,6 +9,8 @@ public interface IDisplay : IToolkit
     void SetCurrent(DisplayableHandle handle);
     void SetNullCurrent();
 
+    DisplayableHandle? GetCurrent();
+
     int GetWidth(DisplayableHandle handle);
 
     int GetHeight(DisplayableHandle handle);
@@ -16,6 +18,8 @@ public interface IDisplay : IToolkit
     DisplayableType GetType(DisplayableHandle handle);
 
     void SetFullscreen(DisplayableHandle handle, bool state);
+
+    void SetTitle(DisplayableHandle handle, string title);
 
     GraphicsHandle GetGraphics(DisplayableHandle handle);
 

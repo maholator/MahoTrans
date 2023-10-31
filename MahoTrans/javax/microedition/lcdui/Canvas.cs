@@ -83,8 +83,6 @@ public class Canvas : Displayable
 
     public bool hasPointerEvents() => true;
 
-    public bool isShown() => true;
-
     public void setFullScreenMode(bool mode)
     {
         Toolkit.Display.SetFullscreen(Handle, mode);
