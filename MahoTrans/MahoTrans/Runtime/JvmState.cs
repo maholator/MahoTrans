@@ -29,7 +29,7 @@ public partial class JvmState
 
     public void RunInContext(Action action)
     {
-        if (Object.HeapAttached)
+        if (Object.JvmAttached)
             throw new JavaRuntimeError("This thread already has attached context!");
 
         try
@@ -45,7 +45,7 @@ public partial class JvmState
 
     public void RunInContextIfNot(Action action)
     {
-        if (Object.HeapAttached)
+        if (Object.JvmAttached)
         {
             action();
             return;

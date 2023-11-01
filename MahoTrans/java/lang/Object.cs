@@ -57,7 +57,7 @@ public class Object
         }
     }
 
-    [JsonIgnore] public static bool HeapAttached => _jvm != null;
+    [JsonIgnore] public static bool JvmAttached => _jvm != null;
 
     [JsonIgnore] protected static Toolkit Toolkit => Jvm.Toolkit;
 
