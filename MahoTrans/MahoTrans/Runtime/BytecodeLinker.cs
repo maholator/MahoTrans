@@ -116,7 +116,7 @@ public static class BytecodeLinker
                     else
                     {
                         logger.LogLoadtime(LogLevel.Warning, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its method will be used");
+                            $"\"{ndc.ClassName}\" can't be found but its method {ndc.Descriptor} will be used");
                     }
 
                     break;
