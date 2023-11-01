@@ -30,7 +30,7 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
     {
-        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName);
+        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, Toolkit.Logger);
         foreach (var cls in classes)
         {
             Classes.Add(cls.Name, cls);

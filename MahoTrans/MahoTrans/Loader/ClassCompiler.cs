@@ -61,7 +61,7 @@ public static class ClassCompiler
                     }
                     else
                     {
-                        logger.PrintLoadTime(LogLevel.Error, cls.Name,
+                        logger.LogLoadtime(LogLevel.Error, cls.Name,
                             $"The class has super \"{cls.SuperName}\" which can't be found. lang.Object will be set as super.");
                         cls.SuperName = "java/lang/Object";
                         ready = false;
@@ -91,7 +91,7 @@ public static class ClassCompiler
                             }
                             else
                             {
-                                logger.PrintLoadTime(LogLevel.Error, cls.Name,
+                                logger.LogLoadtime(LogLevel.Error, cls.Name,
                                     $"The class has interface \"{inter}\" which can't be found. Dummy interface will be used instead.");
                                 cls.Interfaces[i] = typeof(DummyInterface).ToJavaName();
                                 ready = false;
@@ -121,22 +121,46 @@ public static class ClassCompiler
         // linking is done, all cache entries have builders
 
         // fields
-        var jsonPropCon =
-            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public | BindingFlags.Instance,
-                Array.Empty<Type>())!;
+        var jsonPropCon = JsonPropConstructor;
 
-        foreach (var rawClass in queued)
+        foreach (var cls in queued)
         {
-            var c = cache[rawClass];
-            foreach (var field in rawClass.Fields.Values)
+            var c = cache[cls];
+            foreach (var field in cls.Fields.Values)
             {
-                object o = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
-                var t = o as Type ?? typeof(Reference);
-                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, rawClass), t,
+                // field define
+                object fieldType = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
+                var t = fieldType as Type ?? typeof(Reference);
+                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, cls), t,
                     ConvertFlags(field.Flags));
-                var jab = new CustomAttributeBuilder(jsonPropCon, Array.Empty<object>());
-                f.SetCustomAttribute(jab);
-                BridgeCompiler.BuildBridges(c.Builder!, f, field.Descriptor, rawClass);
+                // attribute attachment
+                {
+                    var jab = new CustomAttributeBuilder(jsonPropCon, Array.Empty<object>());
+                    f.SetCustomAttribute(jab);
+                }
+                // bridges
+                BridgeCompiler.BuildBridges(c.Builder!, f, field.Descriptor, cls);
+                // verify
+                {
+                    if (fieldType is not Type)
+                    {
+                        var clsName = fieldType as string;
+                        if (clsName == null)
+                        {
+                            if (fieldType is DescriptorUtils.ArrayOf ao)
+                                clsName = ao.Type as string;
+                        }
+
+                        if (clsName != null)
+                        {
+                            if (!queuedDict.ContainsKey(clsName) && !loaded.ContainsKey(clsName))
+                            {
+                                logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                                    $"There is a field of type {clsName} which can't be found");
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -188,6 +212,15 @@ public static class ClassCompiler
         // trans/synth/enum don't exist here
 
         return a;
+    }
+
+    private static ConstructorInfo JsonPropConstructor
+    {
+        get
+        {
+            var t = typeof(JsonPropertyAttribute);
+            return t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())!;
+        }
     }
 
     private class CompilerCache
