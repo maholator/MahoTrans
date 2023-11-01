@@ -2,9 +2,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Loader;
 
@@ -14,46 +14,13 @@ namespace MahoTrans.Loader;
 /// <seealso cref="NativeLinker"/>
 public static class ClassCompiler
 {
-    private static readonly Dictionary<Type, MethodInfo> StackPoppers = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLong))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PopFloat))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PopDouble))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PopBool))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PopByte))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PopChar))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShort))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReference))! }
-    };
-
-    public static readonly Dictionary<Type, MethodInfo> StackPushers = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PushInt))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PushLong))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PushFloat))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PushDouble))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PushBool))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PushByte))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PushChar))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PushShort))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PushReference))! },
-    };
-
-    public static void CompileTypes(Dictionary<string, JavaClass> loaded, IEnumerable<JavaClass> queued,
-        string assemblyName, string moduleName)
-    {
-        var classes = queued as JavaClass[] ?? queued.ToArray();
-        var name = new AssemblyName(assemblyName);
-        CompileTypes(loaded, classes, name, moduleName);
-    }
-
-    public static void CompileTypes(Dictionary<string, JavaClass> loaded, JavaClass[] queued, AssemblyName assemblyName,
-        string moduleName)
+    public static void CompileTypes(Dictionary<string, JavaClass> loaded, JavaClass[] queued,
+        string assemblyName, string moduleName, ILogger logger)
     {
         Dictionary<string, JavaClass> queuedDict = queued.ToDictionary(x => x.Name, x => x);
         Dictionary<JavaClass, CompilerCache> cache = queued.ToDictionary(x => x, x => new CompilerCache(x));
-        var builder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndCollect);
+        var builder =
+            AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.RunAndCollect);
         var module = builder.DefineDynamicModule(moduleName);
 
         int counter = 0;
@@ -61,27 +28,27 @@ public static class ClassCompiler
         {
             bool ready = true;
 
-            foreach (var linked in queued)
+            foreach (var cls in queued)
             {
-                var c = cache[linked];
+                var c = cache[cls];
                 if (c.Builder != null)
                     continue;
 
                 if (c.SuperType == null)
                 {
-                    if (linked.Flags.HasFlag(ClassFlags.Interface))
+                    if (cls.Flags.HasFlag(ClassFlags.Interface))
                     {
                         c.SuperType = typeof(object);
                     }
-                    else if (linked.Name == "java/lang/Object")
+                    else if (cls.Name == "java/lang/Object")
                     {
                         c.SuperType = typeof(object);
                     }
-                    else if (loaded.TryGetValue(linked.SuperName, out var bit))
+                    else if (loaded.TryGetValue(cls.SuperName, out var bit))
                     {
                         c.SuperType = bit.ClrType;
                     }
-                    else if (queuedDict.TryGetValue(linked.SuperName, out var lt))
+                    else if (queuedDict.TryGetValue(cls.SuperName, out var lt))
                     {
                         var superC = cache[lt];
                         if (superC.Builder == null)
@@ -94,14 +61,17 @@ public static class ClassCompiler
                     }
                     else
                     {
-                        throw new JavaLinkageException(linked.Name + "'s super class is " + linked.SuperName +
-                                                       ", which can't be found.");
+                        logger.PrintLoadTime(LogLevel.Error, cls.Name,
+                            $"The class has super \"{cls.SuperName}\" which can't be found. lang.Object will be set as super.");
+                        cls.SuperName = "java/lang/Object";
+                        ready = false;
+                        continue;
                     }
                 }
 
-                var inters = linked.Interfaces;
-                foreach (var inter in inters)
+                for (var i = 0; i < cls.Interfaces.Length; i++)
                 {
+                    var inter = cls.Interfaces[i];
                     if (c.Interfaces[inter] == null)
                     {
                         if (loaded.TryGetValue(inter, out var bit))
@@ -121,21 +91,24 @@ public static class ClassCompiler
                             }
                             else
                             {
-                                throw new JavaLinkageException(linked.Name + " has interface " + inter +
-                                                               ", which can't be found.");
+                                logger.PrintLoadTime(LogLevel.Error, cls.Name,
+                                    $"The class has interface \"{inter}\" which can't be found. Dummy interface will be used instead.");
+                                cls.Interfaces[i] = typeof(DummyInterface).ToJavaName();
+                                ready = false;
+                                goto loopEnd; // continue
                             }
                         }
                     }
                 }
 
-                var clrFlags = linked.ClrFlags;
-                if (linked.Flags.HasFlag(ClassFlags.Interface))
+                var clrFlags = cls.ClrFlags;
+                if (cls.Flags.HasFlag(ClassFlags.Interface))
                     c.SuperType = null;
 
                 counter++;
                 c.Number = counter;
 
-                c.Builder = module.DefineType(linked.Name, clrFlags, c.SuperType,
+                c.Builder = module.DefineType(cls.Name, clrFlags, c.SuperType,
                     c.Interfaces.Values.ToArray()!);
 
                 loopEnd: ;
@@ -149,7 +122,8 @@ public static class ClassCompiler
 
         // fields
         var jsonPropCon =
-            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())!;
+            typeof(JsonPropertyAttribute).GetConstructor(BindingFlags.Public | BindingFlags.Instance,
+                Array.Empty<Type>())!;
 
         foreach (var rawClass in queued)
         {
@@ -158,10 +132,11 @@ public static class ClassCompiler
             {
                 object o = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
                 var t = o as Type ?? typeof(Reference);
-                var f = c.Builder!.DefineField(GetFieldName(field.Descriptor, rawClass), t, ConvertFlags(field.Flags));
+                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, rawClass), t,
+                    ConvertFlags(field.Flags));
                 var jab = new CustomAttributeBuilder(jsonPropCon, Array.Empty<object>());
                 f.SetCustomAttribute(jab);
-                BuildBridges(c.Builder!, f, field.Descriptor, rawClass);
+                BridgeCompiler.BuildBridges(c.Builder!, f, field.Descriptor, rawClass);
             }
         }
 
@@ -174,103 +149,18 @@ public static class ClassCompiler
             item.Key.ClrType = type;
             foreach (var field in item.Key.Fields.Values)
             {
-                field.NativeField = type.GetField(GetFieldName(field.Descriptor, item.Key),
+                field.NativeField = type.GetField(BridgeCompiler.GetFieldName(field.Descriptor, item.Key),
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance |
                     BindingFlags.DeclaredOnly)!;
-                field.GetValue = type.GetMethod(GetFieldGetterName(field.Descriptor, item.Key),
+                field.GetValue = type.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, item.Key),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = type.GetMethod(GetFieldSetterName(field.Descriptor, item.Key),
+                field.SetValue = type.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, item.Key),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
             }
         }
     }
-
-    public static void BuildBridges(TypeBuilder typeBuilder, FieldInfo field, NameDescriptor name, JavaClass cls)
-    {
-        {
-            var getter = DefineBridge(GetFieldGetterName(name, cls), typeBuilder);
-
-            getter.Emit(OpCodes.Ldarg_0);
-            // frame
-
-            if (field.IsStatic)
-            {
-                getter.Emit(OpCodes.Ldsfld, field);
-            }
-            else
-            {
-                getter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
-                // frame > heap
-                getter.Emit(OpCodes.Ldarg_0);
-                // frame > heap > frame
-                getter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
-                // frame > heap > ref
-                getter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
-                // frame > object
-                getter.Emit(OpCodes.Ldfld, field);
-            }
-
-            // frame > value
-            getter.Emit(OpCodes.Call, StackPushers[field.FieldType]);
-            // -
-            getter.Emit(OpCodes.Ret);
-        }
-        {
-            var setter = DefineBridge(GetFieldSetterName(name, cls), typeBuilder);
-
-            if (field.IsStatic)
-            {
-                setter.Emit(OpCodes.Ldarg_0);
-                // frame
-                setter.Emit(OpCodes.Call, StackPoppers[field.FieldType]);
-                // value
-                setter.Emit(OpCodes.Stsfld, field);
-                // -
-                setter.Emit(OpCodes.Ret);
-            }
-            else
-            {
-                var val = setter.DeclareLocal(field.FieldType);
-                setter.Emit(OpCodes.Ldarg_0);
-                // frame
-                setter.Emit(OpCodes.Call, StackPoppers[field.FieldType]);
-                // value
-                setter.Emit(OpCodes.Stloc, val);
-                // -
-                setter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
-                // heap
-                setter.Emit(OpCodes.Ldarg_0);
-                // heap > frame
-                setter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
-                // heap > ref
-                setter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
-                // target
-                setter.Emit(OpCodes.Ldloc, val);
-                // target > value
-                setter.Emit(OpCodes.Stfld, field);
-                // -
-                setter.Emit(OpCodes.Ret);
-            }
-        }
-    }
-
-    private static ILGenerator DefineBridge(string name, TypeBuilder builder)
-    {
-        var method = builder.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static,
-            CallingConventions.Standard, null, new[] { typeof(Frame) });
-        method.DefineParameter(1, ParameterAttributes.None, "javaFrame");
-        return method.GetILGenerator();
-    }
-
-    public static string GetFieldName(NameDescriptor descriptor, JavaClass cls) => $"{cls.Name}_{descriptor}";
-
-    public static string GetFieldGetterName(NameDescriptor descriptor, JavaClass cls) =>
-        GetFieldName(descriptor, cls) + "_bridge_get";
-
-    public static string GetFieldSetterName(NameDescriptor descriptor, JavaClass cls) =>
-        GetFieldName(descriptor, cls) + "_bridge_set";
 
     public static FieldAttributes ConvertFlags(FieldFlags flags)
     {

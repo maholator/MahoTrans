@@ -49,9 +49,9 @@ public static class NativeLinker
 
             foreach (var field in @class.Fields.Values)
             {
-                field.GetValue = loaded.GetMethod(ClassCompiler.GetFieldGetterName(field.Descriptor, @class))!
+                field.GetValue = loaded.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, @class))!
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = loaded.GetMethod(ClassCompiler.GetFieldSetterName(field.Descriptor, @class))!
+                field.SetValue = loaded.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, @class))!
                     .CreateDelegate<Action<Frame>>();
             }
         }
@@ -120,7 +120,7 @@ public static class NativeLinker
             {
                 NativeField = x,
             };
-            ClassCompiler.BuildBridges(bridge, x, d, jc);
+            BridgeCompiler.BuildBridges(bridge, x, d, jc);
             return field;
         }).ToDictionary(x => x.Descriptor, x => x);
         return jc;
@@ -246,7 +246,7 @@ public static class NativeLinker
         if (method.ReturnType != typeof(void))
         {
             // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, ClassCompiler.StackPushers[method.ReturnType]);
+            il.Emit(OpCodes.Call, BridgeCompiler.StackPushers[method.ReturnType]);
         }
         else
         {
