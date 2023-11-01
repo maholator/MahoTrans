@@ -37,6 +37,8 @@ public partial class JvmState
         }
 
         RefreshState(classes);
+        foreach (var cls in classes)
+            BytecodeLinker.VerifyCalls(cls, this);
     }
 
     public void AddClrClasses(IEnumerable<Type> types)

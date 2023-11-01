@@ -1,4 +1,5 @@
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime;
@@ -22,6 +23,106 @@ public static class BytecodeLinker
                 $"Failed to perform JIT linking for method {method} in class {method.Method?.Class}", e);
         }
 #endif
+    }
+
+    public static void VerifyCalls(JavaClass cls, JvmState jvm)
+    {
+        foreach (var method in cls.Methods.Values)
+        {
+            VerifyCalls(method, cls, jvm);
+        }
+    }
+
+    private static void VerifyCalls(Method m, JavaClass cls, JvmState jvm)
+    {
+        if (m.IsNative)
+            return;
+
+        var consts = cls.Constants;
+        var logger = jvm.Toolkit.Logger;
+
+        Instruction[] code;
+
+        try
+        {
+            code = m.JavaBody.Code;
+        }
+        catch
+        {
+            return;
+        }
+
+        foreach (var instruction in code)
+        {
+            var args = instruction.Args;
+            switch (instruction.Opcode)
+            {
+                case JavaOpcode.newobject:
+                {
+                    var type = (string)consts[Combine(args[0], args[1])];
+                    if (!jvm.Classes.TryGetValue(type, out var cls1))
+                    {
+                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                            $"\"{type}\" can't be found but going to be instantiated");
+                    }
+
+                    break;
+                }
+                case JavaOpcode.checkcast:
+                case JavaOpcode.instanceof:
+                {
+                    var type = (string)consts[Combine(args[0], args[1])];
+                    try
+                    {
+                        jvm.GetClass(type);
+                    }
+                    catch
+                    {
+                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                            $"\"{type}\" can't be found but going to be casted into");
+                    }
+
+                    break;
+                }
+                case JavaOpcode.invokespecial:
+                case JavaOpcode.invokestatic:
+                case JavaOpcode.invokeinterface:
+                case JavaOpcode.invokevirtual:
+                {
+                    NameDescriptorClass ndc;
+                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
+                    {
+                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+                    {
+                        if (c.IsInterface)
+                            break;
+                        try
+                        {
+                            c.GetMethodRecursive(ndc.Descriptor);
+                        }
+                        catch
+                        {
+                            logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                                $"\"{ndc.ClassName}\" has no method {ndc.Descriptor}");
+                        }
+                    }
+                    else
+                    {
+                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                            $"\"{ndc.ClassName}\" can't be found but going to be called");
+                    }
+
+                    break;
+                }
+            }
+        }
     }
 
     private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code, bool isClinit)
