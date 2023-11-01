@@ -38,6 +38,15 @@ public static class ZipUtils
         }
     }
 
+    public static byte[] ReadEntry(this ZipArchive zip, string name)
+    {
+        var entry = zip.GetEntry(name);
+        using var stream = entry.Open();
+        using var memoryStream = new MemoryStream();
+        stream.CopyTo(memoryStream);
+        return memoryStream.ToArray();
+    }
+
     public static string ReadTextEntry(this ZipArchive zip, string name)
     {
         var entry = zip.GetEntry(name);
