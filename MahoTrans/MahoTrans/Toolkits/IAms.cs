@@ -7,4 +7,6 @@ public interface IAms : IToolkit
     void ResumeMidlet();
 
     void DestroyMidlet();
+
+    void PlatformRequest(string url);
 }
