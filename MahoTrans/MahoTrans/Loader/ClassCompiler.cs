@@ -94,6 +94,8 @@ public static class ClassCompiler
                                 logger.LogLoadtime(LogLevel.Error, cls.Name,
                                     $"The class has interface \"{inter}\" which can't be found. Dummy interface will be used instead.");
                                 cls.Interfaces[i] = typeof(DummyInterface).ToJavaName();
+                                c.Interfaces.Remove(inter);
+                                c.Interfaces.TryAdd(cls.Interfaces[i], null);
                                 ready = false;
                                 goto loopEnd; // continue
                             }
