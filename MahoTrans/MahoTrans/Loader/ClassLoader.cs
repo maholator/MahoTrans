@@ -23,7 +23,7 @@ public class ClassLoader
         _logger = logger;
     }
 
-    private void Log(LogLevel level, string message) => _logger.PrintLoadTime(level, _classFileName, message);
+    private void Log(LogLevel level, string message) => _logger.LogLoadtime(level, _classFileName, message);
 
     /// <summary>
     /// Reads JAR package.
@@ -81,7 +81,7 @@ public class ClassLoader
 
             if (manifest == null)
             {
-                _logger.PrintLoadTime(LogLevel.Error, "META-INF/MANIFEST.MF", "Manifest file was not found");
+                _logger.LogLoadtime(LogLevel.Error, "META-INF/MANIFEST.MF", "Manifest file was not found");
                 manifest = new()
                 {
                     { "MIDlet-Version", "1.0.0" }
@@ -214,7 +214,7 @@ public class ClassLoader
                 if (ntb is not NameDescriptor nt)
                 {
                     nt = new NameDescriptor("", "");
-                    _logger.PrintLoadTime(LogLevel.Error, _classFileName,
+                    _logger.LogLoadtime(LogLevel.Error, _classFileName,
                         $"Constant #{mr.NameTypeIndex} must be ND, but it is {ntb?.GetType().Name ?? "null"}");
                 }
 
@@ -235,7 +235,7 @@ public class ClassLoader
         var obj = consts[at];
         if (obj is string s)
             return s;
-        _logger.PrintLoadTime(LogLevel.Error, _classFileName,
+        _logger.LogLoadtime(LogLevel.Error, _classFileName,
             $"Constant #{at} must be string, but it is {obj?.GetType().Name ?? "null"}");
         return string.Empty;
     }

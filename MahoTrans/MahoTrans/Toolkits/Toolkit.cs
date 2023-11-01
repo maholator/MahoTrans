@@ -19,8 +19,10 @@ public sealed class Toolkit
 
     public readonly IRecordStore RecordStore;
 
+    public readonly ILogger Logger;
+
     public Toolkit(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams,
-        IRecordStore recordStore)
+        IRecordStore recordStore, ILogger logger)
     {
         System = system;
         Clock = clock;
@@ -29,5 +31,6 @@ public sealed class Toolkit
         Display = display;
         Ams = ams;
         RecordStore = recordStore;
+        Logger = logger;
     }
 }
