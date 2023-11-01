@@ -10,13 +10,14 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private static readonly JsonSerializerSettings _heapSerializeSettings = new JsonSerializerSettings
+    public static readonly JsonSerializerSettings HeapSerializeSettings = new JsonSerializerSettings
     {
         TypeNameHandling = TypeNameHandling.All,
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
         Converters = { new CustomConvertorAssembly() },
+        EqualityComparer = CustomJsonEqualityComparer.Instance
     };
 
 
@@ -85,7 +86,7 @@ public partial class JvmState
             zip.AddTextEntry(heap_next_txt, s => s.Write(_nextObjectId));
             zip.AddTextEntry(heap_heap_json, s =>
             {
-                var t = JsonConvert.SerializeObject(_heap, _heapSerializeSettings);
+                var t = JsonConvert.SerializeObject(_heap, HeapSerializeSettings);
                 s.Write(t);
             });
             zip.AddTextEntry(heap_statics_json, s =>
@@ -99,7 +100,7 @@ public partial class JvmState
                         return obj;
                     })
                     .ToArray();
-                var t = JsonConvert.SerializeObject(all, _heapSerializeSettings);
+                var t = JsonConvert.SerializeObject(all, HeapSerializeSettings);
                 s.Write(t);
             });
         }
@@ -141,8 +142,8 @@ public partial class JvmState
                     JsonConvert.DeserializeObject<Dictionary<string, int>>(zip.ReadTextEntry(heap_strings_json))!;
                 Object.AttachHeap(this);
                 _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
-                    _heapSerializeSettings)!;
-                JsonConvert.DeserializeObject<object[]>(zip.ReadTextEntry(heap_statics_json), _heapSerializeSettings);
+                    HeapSerializeSettings)!;
+                JsonConvert.DeserializeObject<object[]>(zip.ReadTextEntry(heap_statics_json), HeapSerializeSettings);
                 Object.DetachHeap();
             }
         }

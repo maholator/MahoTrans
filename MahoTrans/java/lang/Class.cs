@@ -4,6 +4,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
@@ -12,7 +13,23 @@ public class Class : Object
     /// <summary>
     /// JVM-side version of this object.
     /// </summary>
-    [JavaIgnore] public JavaClass InternalClass = null!;
+    [JavaIgnore] [JsonIgnore] public JavaClass InternalClass = null!;
+
+    /// <summary>
+    /// Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass"/> to take object's class.
+    /// Deserialization MUST occur withing JVM context.
+    /// </summary>
+    [JsonProperty]
+    public string? InternalClassName
+    {
+        get => InternalClass?.Name;
+        set
+        {
+            if (value == null)
+                return;
+            InternalClass = Jvm.GetClass(value);
+        }
+    }
 
     private static readonly NameDescriptor _initDescr = new NameDescriptor("<init>", "()V");
 
