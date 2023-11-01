@@ -30,7 +30,7 @@ public class MIDlet : Object
         return Reference.Null;
     }
 
-    public void nofifyDestroyed()
+    public void notifyDestroyed()
     {
         Toolkit.Ams.DestroyMidlet();
     }
