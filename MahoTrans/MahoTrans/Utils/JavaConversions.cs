@@ -38,6 +38,31 @@ public static class JavaConversions
         return new string(chars.ToArray());
     }
 
+    public static byte[] EncodeJavaUnicode(this string str)
+    {
+        List<byte> data = new List<byte>(str.Length);
+        foreach (int c in str)
+        {
+            if (c >= 0x0001 && c <= 0x007F)
+            {
+                data.Add((byte)c);
+            }
+            else if (c == 0 || (c >= 0x0080 && c <= 0x07FF))
+            {
+                data.Add((byte)(0xc0 | (0x1f & (c >> 6))));
+                data.Add((byte)(0x80 | (0x3f & c)));
+            }
+            else
+            {
+                data.Add((byte)(0xe0 | (0x0f & (c >> 12))));
+                data.Add((byte)(0x80 | (0x3f & (c >> 6))));
+                data.Add((byte)(0x80 | (0x3f & c)));
+            }
+        }
+
+        return data.ToArray();
+    }
+
     public static string DecodeDefault(this byte[] data)
     {
         // TODO iso8859-1

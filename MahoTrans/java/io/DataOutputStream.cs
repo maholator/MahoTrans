@@ -14,7 +14,7 @@ public class DataOutputStream : OutputStream
         new("out", typeof(OutputStream), typeof(DataOutputStream));
 
     [JavaIgnore]
-    private readonly NameDescriptorClass _write = new NameDescriptorClass("write", "(I)V", typeof(OutputStream));
+    private readonly NameDescriptorClass _write = new NameDescriptorClass("write", "(I)V", typeof(DataOutputStream));
 
     [InitMethod]
     public void Init([JavaType(typeof(OutputStream))] Reference r)
@@ -100,6 +100,41 @@ public class DataOutputStream : OutputStream
                 new(JavaOpcode.@return),
             }
         };
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;)V")]
+    public JavaMethodBody writeUTF(JavaClass cls)
+    {
+        byte[] encode = cls.PushConstant(_write).Split();
+        byte[] writeShort = cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(OutputStream))).Split();
+        byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(OutputStream))).Split();
+        return new JavaMethodBody(4, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.iload_1),
+                new(JavaOpcode.invokestatic, encode),
+                // this, arr
+                new(JavaOpcode.dup),
+                // this, arr, arr
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.swap),
+                // this, arr, this, arr
+                new(JavaOpcode.arraylength),
+                new(JavaOpcode.invokevirtual, writeShort),
+                // this, arr
+                new(JavaOpcode.invokevirtual, writeBuf),
+                new(JavaOpcode.@return),
+            }
+        };
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;)[B")]
+    public static Reference encodeUTF(Reference r)
+    {
+        var data = Jvm.ResolveString(r).EncodeJavaUnicode().ToSigned();
+        return Jvm.AllocateArray(data, "[B");
     }
 
     [JavaDescriptor("()V")]
