@@ -54,6 +54,21 @@ public static class ZipUtils
         }
     }
 
+    /// <summary>
+    /// Adds content to archive.
+    /// </summary>
+    /// <param name="zip">Zip archive to work with.</param>
+    /// <param name="name">Name of the entry.</param>
+    /// <param name="data">Data to write.</param>
+    public static void AddTextEntry(this ZipArchive zip, string name, string data)
+    {
+        var entry = zip.CreateEntry(name, CompressionLevel.Optimal);
+        entry.SetUnixRights();
+        using var stream = entry.Open();
+        using var sw = new StreamWriter(stream, Encoding.UTF8);
+        sw.Write(data);
+    }
+
     public static byte[] ReadEntry(this ZipArchive zip, string name)
     {
         var entry = zip.GetEntry(name);
