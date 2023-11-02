@@ -4,6 +4,8 @@ public enum DisplayableType
 {
     EventBasedCanvas,
     GameCanvas,
-    SimpleScreen,
-    Form
+    Form,
+    TextBox,
+    List,
+    Alert,
 }
