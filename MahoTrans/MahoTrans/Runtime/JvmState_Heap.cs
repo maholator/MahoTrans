@@ -82,6 +82,11 @@ public partial class JvmState
 
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
+        if (data == null!)
+        {
+            throw new JavaRuntimeError("Attempt to convert null array");
+        }
+
         return PutToHeap(new Array<T>
         {
             Value = data,

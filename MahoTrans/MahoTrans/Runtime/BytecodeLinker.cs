@@ -39,7 +39,7 @@ public static class BytecodeLinker
             return;
 
         var consts = cls.Constants;
-        var logger = jvm.Toolkit.Logger;
+        var logger = jvm.Toolkit.LoadLogger;
 
         Instruction[] code;
 
@@ -60,9 +60,9 @@ public static class BytecodeLinker
                 case JavaOpcode.newobject:
                 {
                     var type = (string)consts[Combine(args[0], args[1])];
-                    if (!jvm.Classes.TryGetValue(type, out var cls1))
+                    if (!jvm.Classes.ContainsKey(type))
                     {
-                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                        logger.Log(LogLevel.Warning, cls.Name,
                             $"\"{type}\" can't be found but going to be instantiated");
                     }
 
@@ -78,7 +78,7 @@ public static class BytecodeLinker
                     }
                     catch
                     {
-                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                        logger.Log(LogLevel.Warning, cls.Name,
                             $"\"{type}\" can't be found but going to be casted into");
                     }
 
@@ -109,13 +109,13 @@ public static class BytecodeLinker
                         }
                         catch
                         {
-                            logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                            logger.Log(LogLevel.Warning, cls.Name,
                                 $"\"{ndc.ClassName}\" has no method {ndc.Descriptor}");
                         }
                     }
                     else
                     {
-                        logger.LogLoadtime(LogLevel.Warning, cls.Name,
+                        logger.Log(LogLevel.Warning, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its method {ndc.Descriptor} will be used");
                     }
 

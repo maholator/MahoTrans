@@ -19,10 +19,14 @@ public sealed class Toolkit
 
     public readonly IRecordStore RecordStore;
 
+    public readonly ILoadTimeLogger LoadLogger;
+
     public ILogger Logger;
 
+    public IHeapDebugger? HeapDebugger;
+
     public Toolkit(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams,
-        IRecordStore recordStore, ILogger logger)
+        IRecordStore recordStore, ILoadTimeLogger loadLogger, ILogger logger)
     {
         System = system;
         Clock = clock;
@@ -31,6 +35,7 @@ public sealed class Toolkit
         Display = display;
         Ams = ams;
         RecordStore = recordStore;
+        LoadLogger = loadLogger;
         Logger = logger;
     }
 }
