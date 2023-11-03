@@ -233,6 +233,9 @@ public partial class JvmState
             _nextObjectId++;
             if (_nextObjectId == _heap.Length)
                 _nextObjectId = 1;
+
+            Toolkit.HeapDebugger?.ObjectCreated(obj);
+
             return r;
         }
     }
@@ -242,86 +245,90 @@ public partial class JvmState
     /// </summary>
     public void RunGarbageCollector()
     {
-        //TODO optimization
-
-        Stopwatch sw = new();
-        sw.Start();
-        var roots = CollectObjectGraphRoots();
-        Queue<Reference> enumQueue = new Queue<Reference>(roots);
-
-        while (enumQueue.Count > 0)
+        lock (this)
         {
-            var r = enumQueue.Dequeue();
+            //TODO optimization
 
-            // invalid references?
+            Stopwatch sw = new();
+            sw.Start();
+            var roots = CollectObjectGraphRoots();
+            Queue<Reference> enumQueue = new Queue<Reference>(roots);
 
-            if (r.Index <= 0 || r.Index >= _heap.Length)
-                continue;
-            var o = _heap[r.Index];
-            if (o == null)
-                continue;
-
-            // this object already marked?
-
-            if (o.Alive)
-                continue;
-
-            // marking as alive
-            o.Alive = true;
-
-            // this object is a root now: enumerating subtree
-            List<JavaClass> classes = new List<JavaClass>();
-            var c = o.JavaClass;
-
-            while (true)
+            while (enumQueue.Count > 0)
             {
-                classes.Add(c);
-                if (c.IsObject)
-                    break;
-                c = c.Super;
-            }
+                var r = enumQueue.Dequeue();
 
+                // invalid references?
 
-            o.AnnounceHiddenReferences(enumQueue);
+                if (r.Index <= 0 || r.Index >= _heap.Length)
+                    continue;
+                var o = _heap[r.Index];
+                if (o == null)
+                    continue;
 
-            foreach (var cls in classes)
-            {
-                foreach (var field in cls.Fields.Values)
+                // this object already marked?
+
+                if (o.Alive)
+                    continue;
+
+                // marking as alive
+                o.Alive = true;
+
+                // this object is a root now: enumerating subtree
+                List<JavaClass> classes = new List<JavaClass>();
+                var c = o.JavaClass;
+
+                while (true)
                 {
-                    if (field.NativeField.FieldType == typeof(Reference) && !field.NativeField.IsStatic)
+                    classes.Add(c);
+                    if (c.IsObject)
+                        break;
+                    c = c.Super;
+                }
+
+
+                o.AnnounceHiddenReferences(enumQueue);
+
+                foreach (var cls in classes)
+                {
+                    foreach (var field in cls.Fields.Values)
                     {
-                        enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
+                        if (field.NativeField.FieldType == typeof(Reference) && !field.NativeField.IsStatic)
+                        {
+                            enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
+                        }
                     }
                 }
             }
-        }
 
-        int deletedCount = 0;
+            int deletedCount = 0;
 
-        // we marked all alive objects as alive. Time to delete dead ones.
+            // we marked all alive objects as alive. Time to delete dead ones.
 
-        for (int i = 0; i < _heap.Length; i++)
-        {
-            var obj = _heap[i];
-            if (obj == null)
-                continue;
-            if (obj.Alive)
+            for (int i = 0; i < _heap.Length; i++)
             {
-                obj.Alive = false;
-            }
-            else
-            {
-                if (obj.OnObjectDelete())
+                var obj = _heap[i];
+                if (obj == null)
                     continue;
-                deletedCount++;
-                _bytesAllocated -= obj.JavaClass.Size;
-                _heap[i] = null;
+                if (obj.Alive)
+                {
+                    obj.Alive = false;
+                }
+                else
+                {
+                    if (obj.OnObjectDelete())
+                        continue;
+                    deletedCount++;
+                    _bytesAllocated -= obj.JavaClass.Size;
+                    _heap[i] = null;
+                    Toolkit.HeapDebugger?.ObjectDeleted(obj);
+                }
             }
-        }
 
-        sw.Stop();
-        Console.WriteLine(
-            $"GC collected {deletedCount} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
+            sw.Stop();
+            Console.WriteLine(
+                $"GC collected {deletedCount} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
+        }
     }
 
     /// <summary>
