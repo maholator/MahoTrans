@@ -19,7 +19,7 @@ public sealed class Toolkit
 
     public readonly IRecordStore RecordStore;
 
-    public readonly ILogger Logger;
+    public ILogger Logger;
 
     public Toolkit(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams,
         IRecordStore recordStore, ILogger logger)
