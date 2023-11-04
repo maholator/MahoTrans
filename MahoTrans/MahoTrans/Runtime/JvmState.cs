@@ -149,4 +149,47 @@ public partial class JvmState
             Console.WriteLine($"{kvp.Key}");
         }
     }
+
+    public void Dispose()
+    {
+        var assemblies = Classes.Values.Select(x => x.ClrType?.Assembly)
+            .Where(x => x != null && x.IsDynamic && x.FullName.StartsWith("jar")).Distinct();
+        Console.WriteLine($"Assemblies count: {assemblies.Count()}");
+        foreach (var cls in Classes.Values)
+        {
+            cls.VirtualTable?.Clear();
+            cls.VirtualTable = null;
+            cls.StaticAnnouncer = null;
+            cls.Super = null!;
+            foreach (var f in cls.Fields.Values)
+            {
+                f.SetValue = null;
+                f.GetValue = null;
+                f.NativeField = null!;
+            }
+
+            cls.Fields.Clear();
+            cls.Fields = null!;
+            foreach (var m in cls.Methods.Values)
+            {
+                m.Dispose();
+            }
+
+            cls.Methods.Clear();
+            cls.Methods = null!;
+
+            cls.ClrType = null;
+            cls.Interfaces = null!;
+        }
+
+        Classes.Clear();
+        Toolkit = null!;
+        _eventQueue = null;
+        _internalizedStrings.Clear();
+        _heap = Array.Empty<Object>();
+        AliveThreads.Clear();
+        WaitingThreads.Clear();
+        _wakeingUpQueue.Clear();
+        _wakeupHooks.Clear();
+    }
 }

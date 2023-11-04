@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace MahoTrans.Runtime.Types;
 
-public class Method
+public class Method : IDisposable
 {
     public readonly MethodFlags Flags;
     public readonly NameDescriptor Descriptor;
@@ -54,5 +54,12 @@ public class Method
             return baseHash;
 
         return HashCode.Combine(baseHash, JavaBody);
+    }
+
+    public void Dispose()
+    {
+        Attributes = null!;
+        _methodBody = null!;
+        Bridge = null!;
     }
 }
