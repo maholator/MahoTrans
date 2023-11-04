@@ -49,4 +49,12 @@ public static class Utils
         dict[k] = value;
         return k;
     }
+
+    public static void Enqueue<T>(this Queue<T> queue, IEnumerable<T> list)
+    {
+        foreach (var val in list)
+        {
+            queue.Enqueue(val);
+        }
+    }
 }
