@@ -346,8 +346,10 @@ public static class BytecodeLinker
                         data = opcodeNum;
                     else
                     {
+                        var offsetsPrint = string.Join('\n',
+                            offsets.Select(x => $"{x.Value}: {x.Key} ({code[x.Value].Opcode})"));
                         throw new JavaLinkageException(
-                            $"There is no opcode at offset {os} (relative {ros}).\nAvailable offsets:\n{string.Join('\n', offsets.Select(x => $"{x.Value}: {x.Key}"))}");
+                            $"There is no opcode at offset {os} (relative {ros}).\nAvailable offsets:\n{offsetsPrint}");
                     }
 
                     break;
