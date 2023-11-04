@@ -3,6 +3,7 @@ using System.Text;
 using javax.microedition.ams;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -10,14 +11,15 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    public static readonly JsonSerializerSettings HeapSerializeSettings = new JsonSerializerSettings
+    private JsonSerializerSettings HeapSerializeSettings => new JsonSerializerSettings
     {
         TypeNameHandling = TypeNameHandling.All,
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
         Converters = { new CustomConvertorAssembly() },
-        EqualityComparer = CustomJsonEqualityComparer.Instance
+        EqualityComparer = CustomJsonEqualityComparer.Instance,
+        SerializationBinder = new Binder(this),
     };
 
 
@@ -131,6 +133,7 @@ public partial class JvmState
                         thread.CallStack[i]!.Method.EnsureBytecodeLinked();
                     }
                 }
+
                 WaitingThreads.Clear();
                 foreach (var thread in Restore(zip, threads_waiting_json))
                 {
@@ -249,5 +252,32 @@ public partial class JvmState
         public int StackTop;
         public NameDescriptor MethodDescriptor;
         public string ClassName;
+    }
+
+    private class Binder : ISerializationBinder
+    {
+        private readonly JvmState _jvm;
+        private readonly DefaultSerializationBinder _binder = new();
+
+        public Binder(JvmState jvm)
+        {
+            _jvm = jvm;
+        }
+
+        public Type BindToType(string? assemblyName, string typeName)
+        {
+            if (assemblyName == "jar")
+            {
+                return _jvm.Classes[typeName].ClrType ??
+                       throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");
+            }
+
+            return _binder.BindToType(assemblyName, typeName);
+        }
+
+        public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
+        {
+            _binder.BindToName(serializedType, out assemblyName, out typeName);
+        }
     }
 }
