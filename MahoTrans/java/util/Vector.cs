@@ -1,6 +1,9 @@
 using java.lang;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace java.util;
@@ -84,10 +87,53 @@ public class Vector : Object
         List[index] = obj;
     }
 
-    public int indexOf(Reference obj)
+    [JavaDescriptor("(Ljava/lang/Object;)I")]
+    public JavaMethodBody indexOf(JavaClass cls)
     {
-        //TODO equality
-        return List.IndexOf(obj);
+        var els = cls.PushConstant(new NameDescriptorClass(nameof(elements), "()Ljava/util/Enumeration;",
+            typeof(Vector))).Split();
+        var hasMore = cls.PushConstant(new NameDescriptorClass(nameof(ArrayEnumerator.hasMoreElements), "()Z",
+            typeof(Enumeration))).Split();
+        var nextEl = cls.PushConstant(new NameDescriptor(nameof(ArrayEnumerator.nextElement), "()Ljava/lang/Object;"))
+            .Split();
+        return new JavaMethodBody(2, 4)
+        {
+            // locals: this > target > enum > index
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.invokevirtual, els),
+                new(JavaOpcode.astore_2),
+                new(JavaOpcode.iconst_0),
+                new(JavaOpcode.istore_3),
+                new(JavaOpcode.@goto, new byte[] { 0, 20 }),
+
+                // loop
+                new(JavaOpcode.aload_2),
+                new(JavaOpcode.invokevirtual, nextEl),
+                new Instruction(JavaOpcode.aload_1),
+                new Instruction(JavaOpcode.swap),
+                // target > el
+                new(JavaOpcode.invokevirtual,
+                    cls.PushConstant(new NameDescriptor(nameof(equals), "(Ljava/lang/Object;)Z")).Split()),
+                // areEquals
+                new(JavaOpcode.ifne, new byte[] { 0, 5 }),
+                new(JavaOpcode.iload_3),
+                new(JavaOpcode.ireturn),
+
+                new(JavaOpcode.iinc, new byte[] { 3, 1 }),
+
+                // condition
+                new(JavaOpcode.aload_2),
+                new(JavaOpcode.invokevirtual,
+                    hasMore),
+                new(JavaOpcode.ifne, (-21).Split()),
+
+                // return -1 if nothing found
+                new(JavaOpcode.iconst_m1),
+                new(JavaOpcode.ireturn),
+            }
+        };
     }
 
     public void trimToSize()
