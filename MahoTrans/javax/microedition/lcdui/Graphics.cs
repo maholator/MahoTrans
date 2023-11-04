@@ -125,6 +125,18 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
     }
 
+    public void drawChar(char c, int x, int y, int a)
+    {
+        Implementation.DrawString(new string(c, 1), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+    }
+
+    public void drawChars([JavaType("[C")] Reference data, int offset, int length, int x, int y, int a)
+    {
+        char[] arr = Jvm.ResolveArray<char>(data);
+        Implementation.DrawString(new string(arr, offset, length), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face,
+            _style, _size);
+    }
+
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
     {
         var res = Jvm.Resolve<Image>(image);
