@@ -44,6 +44,46 @@ public class DataOutputStream : OutputStream
         };
     }
 
+    [JavaDescriptor("([B)V")]
+    public JavaMethodBody write___buf(JavaClass @class)
+    {
+        byte[] streamWrite = @class.PushConstant(_write).Split();
+        return new JavaMethodBody(3, 3)
+        {
+            // Locals: this > arr > index
+            RawCode = new Instruction[]
+            {
+                // i=0
+                new(JavaOpcode.iconst_0),
+                new(JavaOpcode.istore_2),
+
+                new(JavaOpcode.@goto, new byte[] { 0, 16 }),
+
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                // > stream
+                new(JavaOpcode.aload_1),
+                // > stream > arr
+                new(JavaOpcode.iload_2),
+                // > stream > arr > i
+                new(JavaOpcode.baload),
+                // > stream > value
+                new(JavaOpcode.invokevirtual, streamWrite),
+                // i++
+                new(JavaOpcode.iinc, new byte[] { 2, 1 }),
+
+                // if(i<buf.len) goto
+                new(JavaOpcode.iload_2),
+                new(JavaOpcode.aload_1),
+                new(JavaOpcode.arraylength),
+                // > i > len
+                new(JavaOpcode.if_icmplt, (-16).Split()),
+
+                new(JavaOpcode.@return),
+            }
+        };
+    }
+
     [JavaDescriptor("(I)V")]
     public JavaMethodBody writeByte(JavaClass cls) => write___byte(cls);
 
@@ -106,7 +146,8 @@ public class DataOutputStream : OutputStream
     public JavaMethodBody writeUTF(JavaClass cls)
     {
         byte[] encode = cls.PushConstant(_write).Split();
-        byte[] writeShort = cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(OutputStream))).Split();
+        byte[] writeShort =
+            cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(OutputStream))).Split();
         byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(OutputStream))).Split();
         return new JavaMethodBody(4, 2)
         {
