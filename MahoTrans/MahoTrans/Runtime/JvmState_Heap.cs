@@ -17,8 +17,10 @@ public partial class JvmState
     public int BytesAllocated => _bytesAllocated;
 
     //TODO
-    public int TotalMemory { get; }
-    public int FreeMemory { get; }
+    public int TotalMemory { get; } = 1024 * 1024 * 4;
+    public int FreeMemory => TotalMemory - BytesAllocated;
+
+    public int GcCount = 0;
 
     private bool _gcPending = false;
 
@@ -326,6 +328,7 @@ public partial class JvmState
             }
 
             sw.Stop();
+            GcCount++;
             Console.WriteLine(
                 $"GC collected {deletedCount} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
         }

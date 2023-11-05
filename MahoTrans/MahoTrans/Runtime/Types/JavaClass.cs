@@ -139,7 +139,7 @@ public class JavaClass
 
     public void RecalculateSize()
     {
-        int size = 0;
+        int size = 20; // base object size
         var cls = this;
         while (true)
         {
