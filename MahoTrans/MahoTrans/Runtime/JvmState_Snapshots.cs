@@ -125,7 +125,8 @@ public partial class JvmState
             //classes
             {
                 var classesList = zip.ReadTextEntry(classes_txt).Split('\n', 3, (StringSplitOptions)3);
-                var classesDict = classesList.Select(x => x.Split(' ')).ToDictionary(x => x[2], x => (x[0][0]=='1', x[1]));
+                var classesDict = classesList.Select(x => x.Split(' '))
+                    .ToDictionary(x => x[2], x => (x[0][0] == '1', x[1]));
                 foreach (var cls in Classes.Values)
                 {
                     if (!classesDict.TryGetValue(cls.Name, out var sn))
@@ -140,6 +141,12 @@ public partial class JvmState
 
                     cls.PendingInitializer = sn.Item1;
                     classesDict.Remove(cls.Name);
+                }
+
+                if (classesDict.Count != 0)
+                {
+                    throw new JavaRuntimeError(
+                        $"Classes {string.Join(", ", classesDict.Values)} are not loaded but present in snapshot.");
                 }
             }
 
