@@ -50,6 +50,8 @@ public partial class JvmState
             {
                 foreach (var cls in Classes.Values)
                 {
+                    s.Write(cls.PendingInitializer?"1":"0");
+                    s.Write(' ');
                     s.Write(cls.GetSnapshotHash());
                     s.Write(' ');
                     s.WriteLine(cls.Name);
