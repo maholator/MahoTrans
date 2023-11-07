@@ -50,11 +50,12 @@ public partial class JvmState
             {
                 foreach (var cls in Classes.Values)
                 {
-                    s.Write(cls.PendingInitializer?"1":"0");
+                    s.Write(cls.PendingInitializer ? "1" : "0");
                     s.Write(' ');
                     s.Write(cls.GetSnapshotHash());
                     s.Write(' ');
-                    s.WriteLine(cls.Name);
+                    s.Write(cls.Name);
+                    s.Write('\n');
                 }
             });
             zip.AddTextEntry(virtp_table_json, s =>
@@ -121,7 +122,27 @@ public partial class JvmState
         using (var zip = new ZipArchive(stream, ZipArchiveMode.Read, true, Encoding.UTF8))
         {
             _cycleNumber = long.Parse(zip.ReadTextEntry(cycle_number_txt));
-            //TODO check classes
+            //classes
+            {
+                var classesList = zip.ReadTextEntry(classes_txt).Split('\n', 3, (StringSplitOptions)3);
+                var classesDict = classesList.Select(x => x.Split(' ')).ToDictionary(x => x[2], x => (x[0][0]=='1', x[1]));
+                foreach (var cls in Classes.Values)
+                {
+                    if (!classesDict.TryGetValue(cls.Name, out var sn))
+                    {
+                        throw new JavaRuntimeError($"Class {cls.Name} is not found in snapshot.");
+                    }
+
+                    if (cls.GetSnapshotHash().ToString() != sn.Item2)
+                    {
+                        throw new JavaRuntimeError($"Class hash for {cls.Name} doesn't match snapshoted one");
+                    }
+
+                    cls.PendingInitializer = sn.Item1;
+                    classesDict.Remove(cls.Name);
+                }
+            }
+
             //TODO check virttable
 
             // threads
