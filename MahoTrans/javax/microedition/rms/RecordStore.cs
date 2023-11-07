@@ -23,6 +23,12 @@ public class RecordStore : Object
 
     [JavaIgnore] public static Dictionary<string, Reference> openedStores = new();
 
+    [ClassInit]
+    public static void ClInit()
+    {
+        openedStores.Clear();
+    }
+
     [StaticFieldsAnnouncer]
     public static void Statics(List<Reference> list) => list.AddRange(openedStores.Values);
 

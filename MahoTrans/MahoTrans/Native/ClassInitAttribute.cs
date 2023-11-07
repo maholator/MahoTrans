@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+
 namespace MahoTrans.Native;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace MahoTrans.Native;
 /// </summary>
 /// <seealso cref="InitMethodAttribute"/>
 [AttributeUsage(AttributeTargets.Method)]
+[MeansImplicitUse]
 public class ClassInitAttribute : Attribute
 {
 }
