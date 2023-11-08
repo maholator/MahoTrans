@@ -22,6 +22,8 @@ public partial class JvmState
 
     public const int CYCLES_PER_BUNCH = 1024;
 
+    public event Action<long>? BetweenBunches;
+
     public JvmState(Toolkit toolkit)
     {
         Toolkit = toolkit;
@@ -78,6 +80,9 @@ public partial class JvmState
                         break;
                     }
                 } while (_running);
+
+                // synchronize with externals
+                BetweenBunches?.Invoke(_cycleNumber);
 
                 // attaching threads who want to attach
                 CheckWakeups();
