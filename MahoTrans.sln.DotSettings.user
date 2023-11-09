@@ -8,6 +8,7 @@
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Prototypes.TryBuildGlue&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Tests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Native.BuilderTests.TestLoop&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	
