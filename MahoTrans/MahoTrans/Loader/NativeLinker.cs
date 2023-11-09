@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Loader;
@@ -279,38 +280,10 @@ public static class NativeLinker
         return true;
     }
 
-    //TODO call ToJavaDes inside
-    public static string? GetDescriptorForNativeType(Type t)
+    private readonly struct Parameter
     {
-        if (t == typeof(Reference))
-            return "Ljava/lang/Object;";
-        if (t == typeof(int))
-            return "I";
-        if (t == typeof(long))
-            return "J";
-        if (t == typeof(float))
-            return "F";
-        if (t == typeof(double))
-            return "D";
-        if (t == typeof(char))
-            return "C";
-        if (t == typeof(short))
-            return "S";
-        if (t == typeof(sbyte))
-            return "B";
-        if (t == typeof(bool))
-            return "Z";
-        if (t == typeof(string))
-            return "Ljava/lang/String;";
-        if (t == typeof(void))
-            return "V";
-        return null;
-    }
-
-    private struct Parameter
-    {
-        public Type Native;
-        public string? Java;
+        public readonly Type Native;
+        public readonly string? Java;
 
         public Parameter(Type native, string? java)
         {
@@ -318,21 +291,17 @@ public static class NativeLinker
             Java = java;
         }
 
-        public bool IsInt => Native == typeof(int) || Native == typeof(char) || Native == typeof(short) ||
-                             Native == typeof(sbyte);
-
         public override string ToString()
         {
-            if (Java != null)
-            {
-                if (Java.StartsWith('['))
-                    return Java;
-                return $"L{Java};";
-            }
+            if (Java == null)
+                return Native.ToJavaDescriptorNative();
+            if (Java.StartsWith('['))
+                return Java;
+            if (Java.StartsWith('L') && Java.EndsWith(';'))
+                return Java;
 
-            var r = GetDescriptorForNativeType(Native);
-            if (r != null) return r;
-            throw new ArgumentOutOfRangeException(nameof(Native), Native.ToString());
+            return $"L{Java};";
+
         }
 
         public static Parameter FromParam(ParameterInfo info)

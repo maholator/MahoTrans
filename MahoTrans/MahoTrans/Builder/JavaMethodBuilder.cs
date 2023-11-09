@@ -1,24 +1,24 @@
 using System.Text;
-using MahoTrans.Loader;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace MahoTrans.Builder;
 
 public class JavaMethodBuilder
 {
-    public JavaClass Class { get; }
+    private readonly JavaClass _class;
 
-    private List<IBuilderEntry> _code = new();
-    private Dictionary<int, int> labels = new();
+    private readonly List<IBuilderEntry> _code = new();
+    private readonly Dictionary<int, int> _labels = new();
 
-    private Dictionary<int, int> loopStates = new();
+    private readonly Dictionary<int, int> _loopStates = new();
 
 
     public JavaMethodBuilder(JavaClass cls)
     {
-        Class = cls;
+        _class = cls;
     }
 
     public void Append(JavaOpcode opcode)
@@ -39,7 +39,7 @@ public class JavaMethodBuilder
         _code.Add(new InstructionEntry(instruction));
     }
 
-    public void Append(Instruction[] code)
+    public void Append(params Instruction[] code)
     {
         foreach (var instruction in code)
         {
@@ -61,13 +61,13 @@ public class JavaMethodBuilder
 
     public void AppendVirtcall(NameDescriptor nameDescriptor)
     {
-        var c = Class.PushConstant(nameDescriptor).Split();
+        var c = _class.PushConstant(nameDescriptor).Split();
         Append(new Instruction(JavaOpcode.invokevirtual, c));
     }
 
-    public void AppendVirtcall(string name, string descr)
+    public void AppendVirtcall(string name, string descriptor)
     {
-        AppendVirtcall(new NameDescriptor(name, descr));
+        AppendVirtcall(new NameDescriptor(name, descriptor));
     }
 
     public void AppendVirtcall(string name, Type returns)
@@ -81,52 +81,38 @@ public class JavaMethodBuilder
         sb.Append('(');
         foreach (var type in args)
         {
-            var n = NativeLinker.GetDescriptorForNativeType(type);
-            n ??= type.ToJavaDescriptor();
-            sb.Append(n);
+            sb.Append(type.ToJavaDescriptorNative());
         }
 
         sb.Append(')');
-        var r = NativeLinker.GetDescriptorForNativeType(returns);
-        r ??= returns.ToJavaDescriptor();
-        sb.Append(r);
+        sb.Append(returns.ToJavaDescriptorNative());
         AppendVirtcall(name, sb.ToString());
-    }
-
-    public void AppendLoop(Instruction[] body, Instruction[] loop, JavaOpcode condition)
-    {
-        var conditionBegin = AppendGoto();
-        var loopBegin = PlaceLabel();
-        Append(body);
-        BringLabel(conditionBegin);
-        Append(loop);
-        AppendGoto(condition, loopBegin);
     }
 
     public JavaLabel PlaceLabel()
     {
-        return new JavaLabel(this, labels.Push(_code.Count, 1));
+        return new JavaLabel(this, _labels.Push(_code.Count, 1));
     }
 
     public void BringLabel(JavaLabel label)
     {
-        labels[label] = _code.Count;
+        _labels[label] = _code.Count;
     }
 
     #region Loops
 
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
-        var id = loopStates.Push(1, 1);
-        var lc = AppendGoto(JavaOpcode.@goto);
+        var id = _loopStates.Push(1, 1);
+        var lc = AppendGoto();
         var lb = PlaceLabel();
         return new JavaLoop(this, id, lb, lc, condition);
     }
 
     public void BeginLoopCondition(JavaLoop loop)
     {
-        if (loopStates[loop.Number] == 1)
-            loopStates[loop.Number] = 2;
+        if (_loopStates[loop.Number] == 1)
+            _loopStates[loop.Number] = 2;
         else
             throw new InvalidOperationException("Loop is in invalid state");
 
@@ -135,8 +121,8 @@ public class JavaMethodBuilder
 
     public void EndLoop(JavaLoop loop)
     {
-        if (loopStates[loop.Number] == 2)
-            loopStates[loop.Number] = 3;
+        if (_loopStates[loop.Number] == 2)
+            _loopStates[loop.Number] = 3;
         else
             throw new InvalidOperationException("Loop is in invalid state");
         AppendGoto(loop.Condition, loop.LoopBegin);
@@ -146,8 +132,8 @@ public class JavaMethodBuilder
 
     public Instruction[] Build()
     {
-        int len = 0;
-        int[] offsets = new int[_code.Count];
+        var len = 0;
+        var offsets = new int[_code.Count];
         for (var i = 0; i < _code.Count; i++)
         {
             var entry = _code[i];
@@ -156,24 +142,25 @@ public class JavaMethodBuilder
             len += entry.ArgsLength;
         }
 
-        Instruction[] code = new Instruction[_code.Count];
+        var code = new Instruction[_code.Count];
         for (var i = 0; i < _code.Count; i++)
         {
             var entry = _code[i];
             var thisOffset = offsets[i];
-            if (entry is GotoEntry gotoEntry)
+            switch (entry)
             {
-                var targetOffset = offsets[labels[gotoEntry.Label]];
-                var jump = targetOffset - thisOffset;
-                code[i] = new Instruction(thisOffset, gotoEntry.Opcode, jump.Split());
-            }
-            else if (entry is InstructionEntry ie)
-            {
-                code[i] = new Instruction(thisOffset, ie.Instruction.Opcode, ie.Instruction.Args);
-            }
-            else
-            {
-                throw new JavaLinkageException("Invalid builder entry");
+                case GotoEntry gotoEntry:
+                {
+                    var targetOffset = offsets[_labels[gotoEntry.Label]];
+                    var jump = targetOffset - thisOffset;
+                    code[i] = new Instruction(thisOffset, gotoEntry.Opcode, jump.Split());
+                    break;
+                }
+                case InstructionEntry ie:
+                    code[i] = new Instruction(thisOffset, ie.Instruction.Opcode, ie.Instruction.Args);
+                    break;
+                default:
+                    throw new JavaLinkageException("Invalid builder entry");
             }
         }
 

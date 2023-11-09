@@ -1,3 +1,5 @@
+using MahoTrans.Runtime;
+
 namespace MahoTrans.Utils;
 
 public static class DescriptorUtils
@@ -146,5 +148,59 @@ public static class DescriptorUtils
         }
 
         return count;
+    }
+
+    public static bool IsTypeInt32OnStack(this Type t)
+    {
+        return t == typeof(int) || t == typeof(char) || t == typeof(short) || t == typeof(sbyte);
+    }
+
+    /// <summary>
+    /// Gets full type name in java style.
+    /// </summary>
+    /// <param name="t">Type to get name from.</param>
+    /// <returns>Name where dots are replaced with slashes.</returns>
+    public static string ToJavaName(this Type t) => t.FullName!.Replace('.', '/');
+
+    /// <summary>
+    /// Gets full type name as descriptor, i.e. Lpkg/obj;.
+    /// If you want to convert native primitives like bool->Z, use <see cref="ToJavaDescriptorNative"/> instead.
+    /// </summary>
+    /// <param name="t">Type to get name from.</param>
+    /// <returns>Name with dots replaced by slashes int L; form.</returns>
+    public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
+
+    /// <summary>
+    /// Gets full type name as descriptor, i.e. Lpkg/obj;.
+    /// If the type if a native primitive, handles it correctly, i.e. bool->Z, void->V and so on.
+    /// If the type is guaranteed to be a java class, use <see cref="ToJavaDescriptor"/> directly.
+    /// </summary>
+    /// <param name="t">Type to get name from.</param>
+    /// <returns>Type descriptor.</returns>
+    public static string ToJavaDescriptorNative(this Type t)
+    {
+        if (t == typeof(Reference))
+            return "Ljava/lang/Object;";
+        if (t == typeof(int))
+            return "I";
+        if (t == typeof(long))
+            return "J";
+        if (t == typeof(float))
+            return "F";
+        if (t == typeof(double))
+            return "D";
+        if (t == typeof(char))
+            return "C";
+        if (t == typeof(short))
+            return "S";
+        if (t == typeof(sbyte))
+            return "B";
+        if (t == typeof(bool))
+            return "Z";
+        if (t == typeof(string))
+            return "Ljava/lang/String;";
+        if (t == typeof(void))
+            return "V";
+        return t.ToJavaDescriptor();
     }
 }

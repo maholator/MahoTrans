@@ -22,20 +22,6 @@ public static class Utils
         }
     }
 
-    /// <summary>
-    /// Gets full type name in java style.
-    /// </summary>
-    /// <param name="t">Type to get name from.</param>
-    /// <returns>Name where dots are replaced with slashes.</returns>
-    public static string ToJavaName(this Type t) => t.FullName!.Replace('.', '/');
-
-    /// <summary>
-    /// Gets full type name as descriptor, i.e. Lpkg/obj;
-    /// </summary>
-    /// <param name="t">Type to get name from.</param>
-    /// <returns>Name with dots replaced by slashes int L; form.</returns>
-    public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
-
     public static int NextKey<T>(this Dictionary<int, T> dict, int defaultKey = 0)
     {
         if (dict.Count == 0)
