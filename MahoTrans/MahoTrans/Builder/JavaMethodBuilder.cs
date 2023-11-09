@@ -2,6 +2,7 @@ using System.Text;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace MahoTrans.Builder;
@@ -72,7 +73,7 @@ public class JavaMethodBuilder
 
     public void AppendVirtcall(string name, Type returns)
     {
-        AppendVirtcall(name, $"(){returns.ToJavaDescriptor()}");
+        AppendVirtcall(name, $"(){returns.ToJavaDescriptorNative()}");
     }
 
     public void AppendVirtcall(string name, Type returns, params Type[] args)
@@ -89,6 +90,16 @@ public class JavaMethodBuilder
         AppendVirtcall(name, sb.ToString());
     }
 
+    public void AppendGetLocalField(string name, string type)
+    {
+        var c = _class.PushConstant(new NameDescriptorClass(name, type, _class.Name)).Split();
+        Append(new Instruction(JavaOpcode.getfield, c));
+    }
+
+    public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
+
+    #region Labels and jumps
+
     public JavaLabel PlaceLabel()
     {
         return new JavaLabel(this, _labels.Push(_code.Count, 1));
@@ -98,6 +109,8 @@ public class JavaMethodBuilder
     {
         _labels[label] = _code.Count;
     }
+
+    #endregion
 
     #region Loops
 
@@ -165,5 +178,13 @@ public class JavaMethodBuilder
         }
 
         return code;
+    }
+
+    public JavaMethodBody Build(int maxStack, int maxLocals)
+    {
+        return new JavaMethodBody(maxStack, maxLocals)
+        {
+            Code = Build()
+        };
     }
 }
