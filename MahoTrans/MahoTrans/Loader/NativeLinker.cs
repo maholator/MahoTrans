@@ -279,6 +279,33 @@ public static class NativeLinker
         return true;
     }
 
+    public static string? GetDescriptorForNativeType(Type t)
+    {
+        if (t == typeof(Reference))
+            return "Ljava/lang/Object;";
+        if (t == typeof(int))
+            return "I";
+        if (t == typeof(long))
+            return "J";
+        if (t == typeof(float))
+            return "F";
+        if (t == typeof(double))
+            return "D";
+        if (t == typeof(char))
+            return "C";
+        if (t == typeof(short))
+            return "S";
+        if (t == typeof(sbyte))
+            return "B";
+        if (t == typeof(bool))
+            return "Z";
+        if (t == typeof(string))
+            return "Ljava/lang/String;";
+        if (t == typeof(void))
+            return "V";
+        return null;
+    }
+
     private struct Parameter
     {
         public Type Native;
@@ -302,28 +329,8 @@ public static class NativeLinker
                 return $"L{Java};";
             }
 
-            if (Native == typeof(Reference))
-                return "Ljava/lang/Object;";
-            if (Native == typeof(int))
-                return "I";
-            if (Native == typeof(long))
-                return "J";
-            if (Native == typeof(float))
-                return "F";
-            if (Native == typeof(double))
-                return "D";
-            if (Native == typeof(char))
-                return "C";
-            if (Native == typeof(short))
-                return "S";
-            if (Native == typeof(sbyte))
-                return "B";
-            if (Native == typeof(bool))
-                return "Z";
-            if (Native == typeof(string))
-                return "Ljava/lang/String;";
-            if (Native == typeof(void))
-                return "V";
+            var r = GetDescriptorForNativeType(Native);
+            if (r != null) return r;
             throw new ArgumentOutOfRangeException(nameof(Native), Native.ToString());
         }
 
