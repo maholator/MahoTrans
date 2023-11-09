@@ -2,7 +2,7 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 
-namespace MahoTrans.Expressions;
+namespace MahoTrans.Builder;
 
 public class JavaMethodBuilder
 {

@@ -1,4 +1,4 @@
-namespace MahoTrans.Expressions;
+namespace MahoTrans.Builder;
 
 public class GotoEntry : IBuilderEntry
 {

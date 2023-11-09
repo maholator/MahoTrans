@@ -1,6 +1,6 @@
 using MahoTrans.Runtime;
 
-namespace MahoTrans.Expressions;
+namespace MahoTrans.Builder;
 
 public class InstructionEntry : IBuilderEntry
 {
