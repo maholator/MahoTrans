@@ -24,6 +24,10 @@ public readonly struct Instruction : IEquatable<Instruction>
     {
         Opcode = opcode;
         Offset = 0;
+#if DEBUG
+        if (args == null!)
+            throw new NullReferenceException("Args must be not null!");
+#endif
         Args = args;
     }
 
@@ -36,7 +40,7 @@ public readonly struct Instruction : IEquatable<Instruction>
 
     public override string ToString()
     {
-        if (Args.Length == 0)
+        if (Args == null || Args.Length == 0)
             return Opcode.ToString();
 
         return $"{Opcode} {string.Join(',', Args)}";
@@ -44,7 +48,7 @@ public readonly struct Instruction : IEquatable<Instruction>
 
     public bool Equals(Instruction other)
     {
-        return Offset == other.Offset && Opcode == other.Opcode && Args.Equals(other.Args);
+        return Offset == other.Offset && Opcode == other.Opcode && Args.SequenceEqual(other.Args);
     }
 
     public override bool Equals(object? obj)
