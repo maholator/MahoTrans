@@ -1,3 +1,5 @@
+using System.Text;
+using MahoTrans.Loader;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -14,6 +16,11 @@ public class JavaMethodBuilder
     public JavaMethodBuilder(JavaClass cls)
     {
         Class = cls;
+    }
+
+    public void Append(JavaOpcode opcode)
+    {
+        Append(new Instruction(opcode));
     }
 
     public void Append(Instruction instruction)
@@ -47,6 +54,34 @@ public class JavaMethodBuilder
         Append(new Instruction(JavaOpcode.invokevirtual, c));
     }
 
+    public void AppendVirtcall(string name, string descr)
+    {
+        AppendVirtcall(new NameDescriptor(name, descr));
+    }
+
+    public void AppendVirtcall(string name, Type returns)
+    {
+        AppendVirtcall(name, $"(){returns.ToJavaDescriptor()}");
+    }
+
+    public void AppendVirtcall(string name, Type returns, params Type[] args)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append('(');
+        foreach (var type in args)
+        {
+            var n = NativeLinker.GetDescriptorForNativeType(type);
+            n ??= type.ToJavaDescriptor();
+            sb.Append(n);
+        }
+
+        sb.Append(')');
+        var r = NativeLinker.GetDescriptorForNativeType(returns);
+        r ??= returns.ToJavaDescriptor();
+        sb.Append(r);
+        AppendVirtcall(name, sb.ToString());
+    }
+
     public void AppendLoop(Instruction[] body, Instruction[] loop, JavaOpcode condition)
     {
         var conditionBegin = AppendForwardGoto(JavaOpcode.@goto);
@@ -57,6 +92,16 @@ public class JavaMethodBuilder
         AppendGoto(condition, loopBegin);
     }
 
+    public void AppendLoadThis()
+    {
+        Append(new Instruction(JavaOpcode.aload_0));
+    }
+
+    public void AppendInc(byte variable, sbyte value)
+    {
+        Append(new Instruction(JavaOpcode.iinc, new[] { variable, (byte)value }));
+    }
+
     public JavaLabel PlaceLabel()
     {
         return labels.Push(_code.Count, 1);
@@ -65,6 +110,23 @@ public class JavaMethodBuilder
     public void BringLabel(JavaLabel label)
     {
         labels[label] = _code.Count;
+    }
+
+    public JavaLoop BeginLoop(JavaOpcode condition)
+    {
+        var lc = AppendForwardGoto(JavaOpcode.@goto);
+        var lb = PlaceLabel();
+        return new JavaLoop(lb, lc, condition);
+    }
+
+    public void BeginLoopCondition(JavaLoop loop)
+    {
+        BringLabel(loop.ConditionBegin);
+    }
+
+    public void EndLoop(JavaLoop loop)
+    {
+        AppendGoto(loop.Condition, loop.LoopBegin);
     }
 
     public Instruction[] Build()
@@ -79,7 +141,7 @@ public class JavaMethodBuilder
             len += entry.ArgsLength;
         }
 
-        Instruction[] code = new Instruction[len];
+        Instruction[] code = new Instruction[_code.Count];
         for (var i = 0; i < _code.Count; i++)
         {
             var entry = _code[i];
