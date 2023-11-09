@@ -12,6 +12,16 @@ public static class Utils
         return new[] { (byte)((i >> 8) & 0xFF), (byte)(i & 0xFF) };
     }
 
+    /// <summary>
+    /// Returns byte[2] with bytes of passed number. I.e. for 258 returns [0x01,0x02].
+    /// </summary>
+    /// <param name="s">Number to split.</param>
+    /// <returns>Splitted bytes.</returns>
+    public static byte[] Split(this short s)
+    {
+        return new[] { (byte)((s >> 8) & 0xFF), (byte)(s & 0xFF) };
+    }
+
     public static IEnumerable<Type> EnumerateBaseTypes(this Type type)
     {
         var t = type;
