@@ -145,14 +145,16 @@ public class JavaMethodBuilder
         for (var i = 0; i < _code.Count; i++)
         {
             var entry = _code[i];
+            var thisOffset = offsets[i];
             if (entry is GotoEntry gotoEntry)
             {
-                var tOf = offsets[gotoEntry.Label];
-                code[i] = new Instruction(offsets[i], gotoEntry.Opcode, (tOf - offsets[i]).Split());
+                var targetOffset = offsets[labels[gotoEntry.Label]];
+                var jump = targetOffset - thisOffset;
+                code[i] = new Instruction(thisOffset, gotoEntry.Opcode, jump.Split());
             }
             else if (entry is InstructionEntry ie)
             {
-                code[i] = new Instruction(offsets[i], ie.Instruction.Opcode, ie.Instruction.Args);
+                code[i] = new Instruction(thisOffset, ie.Instruction.Opcode, ie.Instruction.Args);
             }
             else
             {

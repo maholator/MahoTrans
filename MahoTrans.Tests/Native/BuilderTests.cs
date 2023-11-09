@@ -51,6 +51,37 @@ public class BuilderTests
         new(JavaOpcode.ireturn),
     };
 
+    [Test]
+    public void TestSimpleBranch()
+    {
+        var cls = new JavaClass { Name = "java/util/Vector" };
+        Assert.That(cls.Constants, Is.Empty);
+        var b = new JavaMethodBuilder(cls);
+        Assert.That(b.Build(), Is.Empty);
+
+        b.AppendLoadThis();
+        b.AppendVirtcall("field", typeof(bool));
+        var @if = b.AppendForwardGoto(JavaOpcode.ifeq);
+        b.Append(JavaOpcode.iconst_2);
+        var @else = b.AppendForwardGoto(JavaOpcode.@goto);
+        b.BringLabel(@if);
+        b.Append(JavaOpcode.iconst_3);
+        b.BringLabel(@else);
+        b.Append(JavaOpcode.ireturn);
+
+        Instruction[] res = new[]
+        {
+            new Instruction(0, JavaOpcode.aload_0),
+            new Instruction(1, JavaOpcode.invokevirtual, new byte[] { 0, 0 }),
+            new Instruction(4, JavaOpcode.ifeq, 7.Split()),
+            new Instruction(7, JavaOpcode.iconst_2),
+            new Instruction(8, JavaOpcode.@goto, 4.Split()),
+            new Instruction(11, JavaOpcode.iconst_3),
+            new Instruction(12, JavaOpcode.ireturn)
+        };
+
+        Assert.That(b.Build(), Is.EquivalentTo(res));
+    }
 
     [Test]
     public void TestLoop()

@@ -279,6 +279,7 @@ public static class NativeLinker
         return true;
     }
 
+    //TODO call ToJavaDes inside
     public static string? GetDescriptorForNativeType(Type t)
     {
         if (t == typeof(Reference))

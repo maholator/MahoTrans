@@ -4,13 +4,10 @@
   &lt;Assembly Path="/home/ansel/repos/maholator/MahoTrans/MahoTrans.Tests/bin/Debug/net6.0/MahoTrans.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/home/ansel/.cache/JetBrains/Rider2023.1/resharper-host/temp/Rider/vAny/CoverageData/_MahoTrans.-2048616954/Snapshot/snapshot.utdcvr</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b2392609_002Db417_002D4591_002D9d14_002D6206b9bb5c91/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TryBuildGlue" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Prototypes.TryBuildGlue&lt;/TestId&gt;
-    &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Tests&lt;/TestId&gt;
-    &lt;TestId&gt;NUnit3x::99AA1BBE-64DD-4369-A8D6-5B6F5A2B2DD0::net6.0::MahoTrans.Tests.Native.BuilderTests.TestLoop&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0e8cb671_002D3193_002D42de_002D8195_002D318a05b38dc9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Solution /&gt;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	</wpf:ResourceDictionary>
