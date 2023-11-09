@@ -13,6 +13,9 @@ public class JavaMethodBuilder
     private List<IBuilderEntry> _code = new();
     private Dictionary<int, int> labels = new();
 
+    private Dictionary<int, int> loopStates = new();
+
+
     public JavaMethodBuilder(JavaClass cls)
     {
         Class = cls;
@@ -21,6 +24,14 @@ public class JavaMethodBuilder
     public void Append(JavaOpcode opcode)
     {
         Append(new Instruction(opcode));
+    }
+
+    public void Append(params JavaOpcode[] opcodes)
+    {
+        foreach (var opcode in opcodes)
+        {
+            Append(opcode);
+        }
     }
 
     public void Append(Instruction instruction)
@@ -41,7 +52,7 @@ public class JavaMethodBuilder
         _code.Add(new GotoEntry(opcode, label));
     }
 
-    public JavaLabel AppendForwardGoto(JavaOpcode opcode)
+    public JavaLabel AppendGoto(JavaOpcode opcode = JavaOpcode.@goto)
     {
         var l = PlaceLabel();
         AppendGoto(opcode, l);
@@ -84,7 +95,7 @@ public class JavaMethodBuilder
 
     public void AppendLoop(Instruction[] body, Instruction[] loop, JavaOpcode condition)
     {
-        var conditionBegin = AppendForwardGoto(JavaOpcode.@goto);
+        var conditionBegin = AppendGoto();
         var loopBegin = PlaceLabel();
         Append(body);
         BringLabel(conditionBegin);
@@ -92,19 +103,9 @@ public class JavaMethodBuilder
         AppendGoto(condition, loopBegin);
     }
 
-    public void AppendLoadThis()
-    {
-        Append(new Instruction(JavaOpcode.aload_0));
-    }
-
-    public void AppendInc(byte variable, sbyte value)
-    {
-        Append(new Instruction(JavaOpcode.iinc, new[] { variable, (byte)value }));
-    }
-
     public JavaLabel PlaceLabel()
     {
-        return labels.Push(_code.Count, 1);
+        return new JavaLabel(this, labels.Push(_code.Count, 1));
     }
 
     public void BringLabel(JavaLabel label)
@@ -112,22 +113,36 @@ public class JavaMethodBuilder
         labels[label] = _code.Count;
     }
 
+    #region Loops
+
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
-        var lc = AppendForwardGoto(JavaOpcode.@goto);
+        var id = loopStates.Push(1, 1);
+        var lc = AppendGoto(JavaOpcode.@goto);
         var lb = PlaceLabel();
-        return new JavaLoop(lb, lc, condition);
+        return new JavaLoop(this, id, lb, lc, condition);
     }
 
     public void BeginLoopCondition(JavaLoop loop)
     {
+        if (loopStates[loop.Number] == 1)
+            loopStates[loop.Number] = 2;
+        else
+            throw new InvalidOperationException("Loop is in invalid state");
+
         BringLabel(loop.ConditionBegin);
     }
 
     public void EndLoop(JavaLoop loop)
     {
+        if (loopStates[loop.Number] == 2)
+            loopStates[loop.Number] = 3;
+        else
+            throw new InvalidOperationException("Loop is in invalid state");
         AppendGoto(loop.Condition, loop.LoopBegin);
     }
+
+    #endregion
 
     public Instruction[] Build()
     {

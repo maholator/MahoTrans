@@ -59,11 +59,11 @@ public class BuilderTests
         var b = new JavaMethodBuilder(cls);
         Assert.That(b.Build(), Is.Empty);
 
-        b.AppendLoadThis();
+        b.AppendThis();
         b.AppendVirtcall("field", typeof(bool));
-        var @if = b.AppendForwardGoto(JavaOpcode.ifeq);
+        var @if = b.AppendGoto(JavaOpcode.ifeq);
         b.Append(JavaOpcode.iconst_2);
-        var @else = b.AppendForwardGoto(JavaOpcode.@goto);
+        var @else = b.AppendGoto(JavaOpcode.@goto);
         b.BringLabel(@if);
         b.Append(JavaOpcode.iconst_3);
         b.BringLabel(@else);
@@ -91,31 +91,31 @@ public class BuilderTests
         var b = new JavaMethodBuilder(cls);
         Assert.That(b.Build(), Is.Empty);
 
-        b.AppendLoadThis();
+        b.AppendThis();
         b.AppendVirtcall("elements", typeof(Enumeration));
         b.Append(JavaOpcode.astore_2);
-        b.Append(JavaOpcode.iconst_0);
-        b.Append(JavaOpcode.istore_3);
+        b.Append(JavaOpcode.iconst_0, JavaOpcode.istore_3);
 
-        var loop = b.BeginLoop(JavaOpcode.ifne);
+        using (var loop = b.BeginLoop(JavaOpcode.ifne))
+        {
+            b.Append(JavaOpcode.aload_2);
+            b.AppendVirtcall(nameof(ArrayEnumerator.nextElement), typeof(Object));
+            b.Append(JavaOpcode.aload_1);
+            b.Append(JavaOpcode.swap);
+            b.AppendVirtcall(nameof(Object.equals), typeof(bool), typeof(Reference));
 
-        b.Append(JavaOpcode.aload_2);
-        b.AppendVirtcall(nameof(ArrayEnumerator.nextElement), typeof(Object));
-        b.Append(JavaOpcode.aload_1);
-        b.Append(JavaOpcode.swap);
-        b.AppendVirtcall(nameof(Object.equals), typeof(bool), typeof(Reference));
-        var notEq = b.AppendForwardGoto(JavaOpcode.ifne);
-        b.Append(JavaOpcode.iload_3);
-        b.Append(JavaOpcode.ireturn);
-        b.BringLabel(notEq);
-        b.AppendInc(3, 1);
+            using (b.AppendGoto(JavaOpcode.ifne))
+            {
+                b.Append(JavaOpcode.iload_3, JavaOpcode.ireturn);
+            }
 
-        b.BeginLoopCondition(loop);
+            b.AppendInc(3, 1);
 
-        b.Append(JavaOpcode.aload_2);
-        b.AppendVirtcall(nameof(ArrayEnumerator.hasMoreElements), typeof(bool));
+            loop.ConditionSection();
 
-        b.EndLoop(loop);
+            b.Append(JavaOpcode.aload_2);
+            b.AppendVirtcall(nameof(ArrayEnumerator.hasMoreElements), typeof(bool));
+        }
 
         b.Append(JavaOpcode.iconst_m1);
         b.Append(JavaOpcode.ireturn);
