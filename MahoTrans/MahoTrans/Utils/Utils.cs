@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace MahoTrans.Utils;
 
 public static class Utils
@@ -52,5 +54,19 @@ public static class Utils
         {
             queue.Enqueue(val);
         }
+    }
+
+    public static string Join<T>(this IEnumerable<T> sequence, string separator = "")
+    {
+        return string.Join(separator, sequence);
+    }
+
+    public static string CalcFileMD5(this string filePath)
+    {
+        using var md5 = MD5.Create();
+        using var stream = File.OpenRead(filePath);
+
+        var ba = md5.ComputeHash(stream);
+        return string.Join("", ba.Select(x => $"{x:X2}"));
     }
 }
