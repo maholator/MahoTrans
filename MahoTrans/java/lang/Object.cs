@@ -221,6 +221,11 @@ public class Object
         return cls.This;
     }
 
+    public int hashCode()
+    {
+        return System.identityHashCode(This);
+    }
+
     #endregion
 
     #region GC
