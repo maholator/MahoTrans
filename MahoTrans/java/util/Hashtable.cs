@@ -100,7 +100,7 @@ public class Hashtable : Object
         }
 
         b.Append(JavaOpcode.aload_2);
-        b.AppendGetField(nameof(HashtableEntry.Next), typeof(Reference), typeof(HashtableEntry));
+        b.AppendGetField(nameof(HashtableEntry.Next), typeof(HashtableEntry), typeof(HashtableEntry));
         b.Append(JavaOpcode.dup);
         using (b.AppendGoto(JavaOpcode.ifnull))
         {
@@ -143,7 +143,6 @@ public class Hashtable : Object
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
         b.AppendVirtcall(nameof(hashCode), "()I");
-        b.Append(JavaOpcode.dup);
         b.AppendVirtcall(nameof(GetList), "(I)Ljava/util/HashtableEntry;");
         b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_2);
@@ -164,7 +163,7 @@ public class Hashtable : Object
         }
 
         b.Append(JavaOpcode.aload_2);
-        b.AppendGetField(nameof(HashtableEntry.Next), typeof(Reference), typeof(HashtableEntry));
+        b.AppendGetField(nameof(HashtableEntry.Next), typeof(HashtableEntry), typeof(HashtableEntry));
         b.Append(JavaOpcode.dup);
         using (b.AppendGoto(JavaOpcode.ifnull))
         {
@@ -242,7 +241,7 @@ public class Hashtable : Object
         // else, take next entry and check it
 
         b.Append(JavaOpcode.aload_3);
-        b.AppendGetField(nameof(HashtableEntry.Next), typeof(Reference), typeof(HashtableEntry));
+        b.AppendGetField(nameof(HashtableEntry.Next), typeof(HashtableEntry), typeof(HashtableEntry));
         b.Append(JavaOpcode.dup);
         using (b.AppendGoto(JavaOpcode.ifnull))
         {
