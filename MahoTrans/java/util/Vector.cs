@@ -74,6 +74,7 @@ public class Vector : Object
 
     public bool isEmpty() => List.Count == 0;
 
+    //TODO equals()?
     public bool removeElement(Reference obj) => List.Remove(obj);
 
     public void removeAllElements() => List.Clear();
