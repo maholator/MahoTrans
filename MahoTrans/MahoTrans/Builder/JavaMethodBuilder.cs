@@ -2,6 +2,7 @@ using System.Text;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -97,6 +98,30 @@ public class JavaMethodBuilder
     }
 
     public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
+
+    public void AppendGetField(string name, string type, Type cls)
+    {
+        var c = _class.PushConstant(new NameDescriptorClass(name, type, cls)).Split();
+        Append(new Instruction(JavaOpcode.getfield, c));
+    }
+
+    public void AppendGetField(string name, Type type, Type cls) =>
+        AppendGetField(name, type.ToJavaDescriptorNative(), cls);
+
+    public void AppendPutField(string name, string type, Type cls)
+    {
+        var c = _class.PushConstant(new NameDescriptorClass(name, type, cls)).Split();
+        Append(new Instruction(JavaOpcode.putfield, c));
+    }
+
+    public void AppendPutField(string name, Type type, Type cls) =>
+        AppendPutField(name, type.ToJavaDescriptorNative(), cls);
+
+    public void AppendNewObject<T>() where T : Object
+    {
+        var c = _class.PushConstant(typeof(T).ToJavaDescriptorNative()).Split();
+        Append(new Instruction(JavaOpcode.newobject, c));
+    }
 
     #region Labels and jumps
 

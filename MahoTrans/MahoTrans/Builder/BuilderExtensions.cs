@@ -24,4 +24,16 @@ public static class BuilderExtensions
     public static void AppendReturn(this JavaMethodBuilder b) => b.Append(JavaOpcode.@return);
     public static void AppendReturnReference(this JavaMethodBuilder b) => b.Append(JavaOpcode.areturn);
     public static void AppendReturnInt(this JavaMethodBuilder b) => b.Append(JavaOpcode.ireturn);
+
+    public static void AppendReturnLong(this JavaMethodBuilder b) => b.Append(JavaOpcode.lreturn);
+
+    public static void AppendReturnFloat(this JavaMethodBuilder b) => b.Append(JavaOpcode.freturn);
+
+    public static void AppendReturnDouble(this JavaMethodBuilder b) => b.Append(JavaOpcode.dreturn);
+
+    public static void AppendReturnNull(this JavaMethodBuilder b)
+    {
+        b.Append(JavaOpcode.aconst_null);
+        b.AppendReturnReference();
+    }
 }
