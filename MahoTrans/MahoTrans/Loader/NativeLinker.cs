@@ -159,7 +159,8 @@ public static class NativeLinker
                 throw new JavaLinkageException("Java method builder must take 1 argument - containing JVM type.");
 
             if (descriptor == null)
-                throw new JavaLinkageException("Java method builder must have a descriptor attribute.");
+                throw new JavaLinkageException(
+                    $"Java method builder must have a descriptor attribute - method {nativeName} in {clrType.FullName} doesn't.");
 
             var d = new NameDescriptor(name, descriptor);
             var target = nativeMethod.IsStatic ? null : Activator.CreateInstance(clrType);
@@ -301,7 +302,6 @@ public static class NativeLinker
                 return Java;
 
             return $"L{Java};";
-
         }
 
         public static Parameter FromParam(ParameterInfo info)

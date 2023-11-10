@@ -35,6 +35,7 @@ public class Hashtable : Object
 
     public void clear() => _storage.Clear();
 
+    [JavaDescriptor("(Ljava/lang/Object;)Z")]
     public JavaMethodBody contains(JavaClass cls)
     {
         // locals: this > obj > enum
@@ -70,6 +71,7 @@ public class Hashtable : Object
         return b.Build(3, 3);
     }
 
+    [JavaDescriptor("(Ljava/lang/Object;)Z")]
     public JavaMethodBody containsKey(JavaClass cls)
     {
         // locals: this > key > entry
