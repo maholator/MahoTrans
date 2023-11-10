@@ -119,7 +119,7 @@ public class JavaMethodBuilder
 
     public void AppendNewObject<T>() where T : Object
     {
-        var c = _class.PushConstant(typeof(T).ToJavaDescriptorNative()).Split();
+        var c = _class.PushConstant(typeof(T).ToJavaName()).Split();
         Append(new Instruction(JavaOpcode.newobject, c));
     }
 
