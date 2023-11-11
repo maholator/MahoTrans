@@ -1,4 +1,5 @@
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -82,6 +83,30 @@ public class DataOutputStream : OutputStream
                 new(JavaOpcode.@return),
             }
         };
+    }
+
+    [JavaDescriptor("([BII)V")]
+    public JavaMethodBody write___bufExplicit(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var loop = b.BeginLoop(JavaOpcode.if_icmplt))
+        {
+            b.AppendThis();
+            b.AppendGetLocalField(nameof(@out), typeof(OutputStream));
+            b.Append(JavaOpcode.aload_1);
+            b.Append(JavaOpcode.iload_2);
+            b.Append(JavaOpcode.baload);
+            b.AppendVirtcall("write", "(I)V");
+            b.AppendInc(2, 1);
+
+            loop.ConditionSection();
+
+            b.Append(JavaOpcode.iload_2);
+            b.Append(JavaOpcode.iload_3);
+        }
+
+        b.AppendReturn();
+        return new JavaMethodBody(3, 4);
     }
 
     [JavaDescriptor("(I)V")]
