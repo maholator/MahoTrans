@@ -6,7 +6,8 @@ namespace java.lang;
 public class RuntimeException : Exception
 {
     [InitMethod]
-    public void Init([String] Reference msg)
+    public new void Init([String] Reference msg)
     {
+        base.Init(msg);
     }
 }

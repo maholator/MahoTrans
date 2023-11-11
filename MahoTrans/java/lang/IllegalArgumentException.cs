@@ -11,7 +11,8 @@ public class IllegalArgumentException : RuntimeException
     }
 
     [InitMethod]
-    public void Init([String] Reference msg)
+    public new void Init([String] Reference msg)
     {
+        base.Init(msg);
     }
 }
