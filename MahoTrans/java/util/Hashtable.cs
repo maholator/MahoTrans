@@ -31,6 +31,7 @@ public class Hashtable : Object
     public void Init(int cap)
     {
         _storage = new Dictionary<int, Reference>();
+        _storage.EnsureCapacity(cap);
     }
 
     public void clear() => _storage.Clear();
