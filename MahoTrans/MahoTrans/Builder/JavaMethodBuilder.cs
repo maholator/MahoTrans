@@ -1,4 +1,3 @@
-using System.Text;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -79,16 +78,20 @@ public class JavaMethodBuilder
 
     public void AppendVirtcall(string name, Type returns, params Type[] args)
     {
-        StringBuilder sb = new StringBuilder();
-        sb.Append('(');
-        foreach (var type in args)
-        {
-            sb.Append(type.ToJavaDescriptorNative());
-        }
+        var descriptor = DescriptorUtils.BuildMethodDescriptor(returns, args);
+        AppendVirtcall(name, descriptor);
+    }
 
-        sb.Append(')');
-        sb.Append(returns.ToJavaDescriptorNative());
-        AppendVirtcall(name, sb.ToString());
+    public void AppendStaticCall(NameDescriptorClass nameDescriptor)
+    {
+        var c = _class.PushConstant(nameDescriptor).Split();
+        Append(new Instruction(JavaOpcode.invokestatic, c));
+    }
+
+    public void AppendStaticCall<T>(string name, Type returns, params Type[] args) where T : Object
+    {
+        var descriptor = DescriptorUtils.BuildMethodDescriptor(returns, args);
+        AppendStaticCall(new NameDescriptorClass(name, descriptor, typeof(T)));
     }
 
     public void AppendGetLocalField(string name, string type)
@@ -139,6 +142,14 @@ public class JavaMethodBuilder
 
     #region Loops
 
+    /// <summary>
+    /// Begins while(condition) { body } loop. Append your body first, then call <see cref="BeginLoopCondition"/> then append the condition.
+    /// </summary>
+    /// <param name="condition">
+    /// Goto opcode to go to loop's beginning.
+    /// So, if your condition is i &lt; length, you should use <see cref="JavaOpcode.if_icmplt"/>.
+    /// </param>
+    /// <returns>Loop handle. Call <see cref="EndLoop"/> to end the loop. Call <see cref="BeginLoopCondition"/> to mark condition start.</returns>
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
         var id = _loopStates.Push(1, 1);

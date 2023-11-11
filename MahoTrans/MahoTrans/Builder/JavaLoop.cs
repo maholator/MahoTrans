@@ -6,21 +6,25 @@ public readonly struct JavaLoop : IDisposable
     public readonly JavaLabel LoopBegin;
     public readonly JavaLabel ConditionBegin;
     public readonly JavaOpcode Condition;
-    public readonly JavaMethodBuilder Builder;
+    private readonly JavaMethodBuilder _builder;
 
-    public JavaLoop(JavaMethodBuilder builder, int number, JavaLabel loopBegin, JavaLabel conditionBegin, JavaOpcode condition)
+    public JavaLoop(JavaMethodBuilder builder, int number, JavaLabel loopBegin, JavaLabel conditionBegin,
+        JavaOpcode condition)
     {
         LoopBegin = loopBegin;
         ConditionBegin = conditionBegin;
         Condition = condition;
-        Builder = builder;
+        _builder = builder;
         Number = number;
     }
 
-    public void ConditionSection() => Builder.BeginLoopCondition(this);
+    /// <summary>
+    /// Calls <see cref="JavaMethodBuilder.BeginLoopCondition"/>. This looks better with using-styled usage.
+    /// </summary>
+    public void ConditionSection() => _builder.BeginLoopCondition(this);
 
     public void Dispose()
     {
-        Builder.EndLoop(this);
+        _builder.EndLoop(this);
     }
 }

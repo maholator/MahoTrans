@@ -1,3 +1,4 @@
+using System.Text;
 using MahoTrans.Runtime;
 
 namespace MahoTrans.Utils;
@@ -202,5 +203,18 @@ public static class DescriptorUtils
         if (t == typeof(void))
             return "V";
         return t.ToJavaDescriptor();
+    }
+
+    public static string BuildMethodDescriptor(Type returnType, params Type[] args)
+    {
+        var sb = new StringBuilder("(");
+        foreach (var type in args)
+        {
+            sb.Append(type.ToJavaDescriptorNative());
+        }
+
+        sb.Append(')');
+        sb.Append(returnType.ToJavaDescriptorNative());
+        return sb.ToString();
     }
 }
