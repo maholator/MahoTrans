@@ -31,7 +31,7 @@ public class ClassLoader
     /// <param name="file">Actual file stream.</param>
     /// <param name="leaveOpen">True to leave stream opened.</param>
     /// <returns>JAR object.</returns>
-    public JarPackage ReadJar(Stream file, bool leaveOpen)
+    public JarPackage ReadJarFile(Stream file, bool leaveOpen)
     {
         using (var zip = new ZipArchive(file, ZipArchiveMode.Read, leaveOpen, Encoding.UTF8))
         {
@@ -61,7 +61,7 @@ public class ClassLoader
                 {
                     using var stream = entry.Open();
                     _classFileName = entry.FullName;
-                    var cls = Read(stream);
+                    var cls = ReadClassFile(stream);
                     classes.Add(cls);
                 }
 
@@ -92,7 +92,7 @@ public class ClassLoader
         }
     }
 
-    public JavaClass Read(Stream file)
+    public JavaClass ReadClassFile(Stream file)
     {
         using (var reader = new BeBinaryReader(file, Encoding.UTF8, true))
         {

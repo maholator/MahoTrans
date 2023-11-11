@@ -3,7 +3,7 @@ using MahoTrans.Runtime.Types;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// Created by <see cref="ClassLoader.ReadJar"/>.
+/// Created by <see cref="ClassLoader.ReadJarFile"/>.
 /// </summary>
 public class JarPackage
 {
