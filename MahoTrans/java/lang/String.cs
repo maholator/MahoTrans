@@ -111,9 +111,9 @@ public sealed class String : Object
     }
 
     [return: JavaType(typeof(String))]
-    public Reference toString() => This;
+    public new Reference toString() => This;
 
-    public bool equals(Reference r)
+    public new bool equals(Reference r)
     {
         if (r.IsNull)
             return false;
@@ -126,6 +126,29 @@ public sealed class String : Object
         }
 
         return false;
+    }
+
+    //TODO add unit tests on this
+    public new int hashCode()
+    {
+        // s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+        int hash = 0;
+        int n = Value.Length;
+        int pow = 0;
+
+        if (n > 0)
+        {
+            hash = Value[n - 1];
+            pow = 1;
+        }
+
+        for (int i = n - 2; i >= 0; i--)
+        {
+            pow *= 31;
+            hash += pow * Value[i];
+        }
+
+        return hash;
     }
 
     public bool equalsIgnoreCase([String] Reference anotherString)
