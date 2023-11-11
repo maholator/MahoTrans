@@ -63,4 +63,12 @@ public class Integer : Object
     }
 
     public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Jvm.ResolveString(str), radix);
+
+    [return: JavaType(typeof(Integer))]
+    public static Reference valueOf([String] Reference str)
+    {
+        var i = Jvm.AllocateObject<Integer>();
+        i.Init(parseInt(str));
+        return i.This;
+    }
 }
