@@ -144,6 +144,10 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
+#if DEBUG
+        if (r.Index >= _heap.Length || r.Index < 0)
+            throw new JavaRuntimeError($"Invalid reference: {r.Index}");
+#endif
         return _heap[r.Index]!;
     }
 

@@ -46,7 +46,7 @@ public class JavaRunner
             Console.WriteLine(thread.CallStack[i]);
         }
 
-        if (HandleException(frame, frame.Pointer, t, state))
+        if (HandleException(frame, frame.Pointer, t))
         {
             // handled
             return;
@@ -60,12 +60,17 @@ public class JavaRunner
             {
                 Console.WriteLine(ex);
                 // no more frames
-                throw new JavaRuntimeError(
-                    $"Unhandled JVM exception {t.JavaClass} at {frame.Method}:{frame.Pointer} in {frame.Method.Method.Class}: {frame.Method.Code[frame.Pointer]}");
+
+                var exMsg = !t.Message.IsNull
+                    ? $"Message: {state.ResolveString(t.Message)}"
+                    : "Exception has no attached message.";
+                var exSource = $"{frame.Method}:{frame.Pointer} ({frame.Method.Code[frame.Pointer]})";
+                var message = $"Unhandled JVM exception {t.JavaClass} at {exSource}\n{exMsg}";
+                throw new JavaRuntimeError(message, ex);
             }
 
             var lf = thread.ActiveFrame;
-            if (HandleException(lf, lf.Pointer - 1, t, state))
+            if (HandleException(lf, lf.Pointer - 1, t))
             {
                 // handled
                 return;
@@ -75,7 +80,7 @@ public class JavaRunner
         }
     }
 
-    private static bool HandleException(Frame frame, int pointer, Throwable t, JvmState state)
+    private static bool HandleException(Frame frame, int pointer, Throwable t)
     {
         var instr = frame.Method.Code[pointer];
 
