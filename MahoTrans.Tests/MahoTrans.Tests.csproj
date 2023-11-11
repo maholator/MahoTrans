@@ -20,4 +20,8 @@
       <ProjectReference Include="..\MahoTrans\MahoTrans.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="*/*.class" />
+      <EmbeddedResource Include="*/*.jar" />
+    </ItemGroup>
 </Project>
