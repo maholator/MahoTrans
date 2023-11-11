@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -26,6 +27,7 @@ public class Object
     /// <see cref="HeapAddress"/> wrapped in <see cref="Reference"/> struct.
     /// </summary>
     [JsonIgnore]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public Reference This => new Reference(HeapAddress);
 
     /// <summary>
@@ -33,6 +35,7 @@ public class Object
     /// Deserialization MUST occur withing JVM context.
     /// </summary>
     [JsonProperty]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string ClassName
     {
         get => JavaClass.Name;
@@ -233,7 +236,8 @@ public class Object
     /// <summary>
     /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public bool Alive;
+    [JavaIgnore] [JsonIgnore] [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public bool Alive;
 
     /// <summary>
     /// GC will call this method to collect objects which are referenced by this object. Override it if objects are stored in hidden form.
