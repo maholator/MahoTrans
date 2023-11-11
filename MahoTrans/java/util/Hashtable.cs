@@ -53,7 +53,7 @@ public class Hashtable : Object
             b.Append(JavaOpcode.swap);
             b.AppendVirtcall(nameof(equals), typeof(bool), typeof(Reference));
 
-            using (b.AppendGoto(JavaOpcode.ifne))
+            using (b.AppendGoto(JavaOpcode.ifeq))
             {
                 b.Append(JavaOpcode.iconst_1);
                 b.AppendReturnInt();
@@ -79,7 +79,6 @@ public class Hashtable : Object
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
         b.AppendVirtcall(nameof(hashCode), "()I");
-        b.Append(JavaOpcode.dup);
         b.AppendVirtcall(nameof(GetList), "(I)Ljava/util/HashtableEntry;");
         b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_2);
@@ -93,7 +92,8 @@ public class Hashtable : Object
         b.Append(JavaOpcode.aload_2);
         b.AppendGetField(nameof(HashtableEntry.Key), typeof(Reference), typeof(HashtableEntry));
         b.Append(JavaOpcode.aload_1);
-        using (b.AppendGoto(JavaOpcode.if_acmpne))
+        b.AppendVirtcall(nameof(equals), typeof(bool), typeof(Reference));
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             b.Append(JavaOpcode.iconst_1);
             b.AppendReturnInt();
@@ -155,7 +155,8 @@ public class Hashtable : Object
         b.Append(JavaOpcode.aload_2);
         b.AppendGetField(nameof(HashtableEntry.Key), typeof(Reference), typeof(HashtableEntry));
         b.Append(JavaOpcode.aload_1);
-        using (b.AppendGoto(JavaOpcode.if_acmpne))
+        b.AppendVirtcall(nameof(equals), typeof(bool), typeof(Reference));
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             b.Append(JavaOpcode.aload_2);
             b.AppendGetField(nameof(HashtableEntry.Value), typeof(Reference), typeof(HashtableEntry));
@@ -228,7 +229,8 @@ public class Hashtable : Object
         b.Append(JavaOpcode.aload_3);
         b.AppendGetField(nameof(HashtableEntry.Key), typeof(Reference), typeof(HashtableEntry));
         b.Append(JavaOpcode.aload_1);
-        using (b.AppendGoto(JavaOpcode.if_acmpne))
+        b.AppendVirtcall(nameof(equals), typeof(bool), typeof(Reference));
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             // if key is equal to passed, save old value, put new and return old
             b.Append(JavaOpcode.aload_3);
@@ -250,16 +252,18 @@ public class Hashtable : Object
         }
 
         b.Append(JavaOpcode.pop);
+
+        // entry.Next = new Entry(var1, var2)
         b.Append(JavaOpcode.aload_3);
         b.AppendNewObject<HashtableEntry>();
         b.Append(JavaOpcode.dup);
+        b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.aload_2);
-        b.Append(JavaOpcode.aload_3);
         b.AppendVirtcall("<init>", typeof(void), typeof(Reference), typeof(Reference));
         b.AppendPutField(nameof(HashtableEntry.Next), typeof(HashtableEntry), typeof(HashtableEntry));
         b.Append(JavaOpcode.aconst_null);
         b.AppendReturnReference();
-        return b.Build(4, 5);
+        return b.Build(5, 5);
     }
 
 #pragma warning disable CA1822
@@ -314,7 +318,14 @@ public class Hashtable : Object
         b.AppendThis();
         b.Append(JavaOpcode.aload_2);
         b.AppendVirtcall(nameof(GetList), "(I)Ljava/util/HashtableEntry;");
+        b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_3);
+
+        // root existence check
+        using (b.AppendGoto(JavaOpcode.ifnonnull))
+        {
+            b.AppendReturnNull();
+        }
 
         // root key check
 
