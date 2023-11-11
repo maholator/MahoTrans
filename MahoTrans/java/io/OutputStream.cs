@@ -4,5 +4,4 @@ namespace java.io;
 
 public class OutputStream : Object
 {
-    
 }

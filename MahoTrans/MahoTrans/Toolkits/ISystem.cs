@@ -9,7 +9,7 @@ public interface ISystem : IToolkit
 
     void PrintException(Throwable t);
 
-    void PrintOut(string s);
+    void PrintOut(byte b);
 
     string? GetProperty(string name);
 }

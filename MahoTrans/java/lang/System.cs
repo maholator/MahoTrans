@@ -12,8 +12,13 @@ public class System : Object
     [ClassInit]
     public static void Clinit()
     {
-        @out = Jvm.AllocateObject<SystemPrintStream>().This;
-        err = Jvm.AllocateObject<SystemPrintStream>().This;
+        var outPrinter = Jvm.AllocateObject<PrintStream>();
+        outPrinter.Init(Jvm.AllocateObject<StdOut>().This);
+        @out = outPrinter.This;
+
+        var errPrinter = Jvm.AllocateObject<PrintStream>();
+        errPrinter.Init(Jvm.AllocateObject<StdErr>().This);
+        err = errPrinter.This;
     }
 
     public static int identityHashCode(Reference x)
