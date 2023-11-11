@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
@@ -17,6 +18,8 @@ public struct Reference : IEquatable<Reference>
 
     public bool IsNull => Index == 0;
     public static Reference Null => new Reference(0);
+
+    [JsonIgnore] public Object? Value => IsNull ? null : Object.Jvm.ResolveObject(Index);
 
     public override int GetHashCode()
     {
