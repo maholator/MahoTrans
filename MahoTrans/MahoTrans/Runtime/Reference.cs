@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
 
 namespace MahoTrans.Runtime;
 
 [JsonConverter(typeof(ReferenceJsonConverter))]
+[DebuggerDisplay("Reference to {Index}")]
 public struct Reference : IEquatable<Reference>
 {
     public readonly int Index;
