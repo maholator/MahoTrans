@@ -96,7 +96,7 @@ public class PrintStream : OutputStream
             b.Append(JavaOpcode.arraylength);
         }
 
-        return b.Build(2, 3);
+        return b.Build(3, 3);
     }
 
     [JavaDescriptor("(D)V")]
