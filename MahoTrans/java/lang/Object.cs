@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -209,6 +210,29 @@ public class Object
     {
         //TODO
         return Jvm.AllocateString($"Object {JavaClass} @ {GetHashCode()}");
+    }
+
+    [JavaDescriptor("()Ljava/lang/String;")]
+    public JavaMethodBody toString(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<StringBuffer>();
+        b.Append(JavaOpcode.dup);
+        b.AppendVirtcall("<init>", "()V");
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getClass), "()Ljava/lang/Class;");
+        b.AppendVirtcall(nameof(Class.getName), "()Ljava/lang/String;");
+        b.AppendVirtcall(nameof(StringBuffer.append), "(Ljava/lang/String;)Ljava/lang/StringBuffer;");
+        b.AppendConstant('@');
+        b.AppendVirtcall(nameof(StringBuffer.append), "(C)Ljava/lang/StringBuffer;");
+        b.AppendThis();
+        b.AppendVirtcall(nameof(hashCode), typeof(int));
+        b.AppendStaticCall<Integer>(nameof(Integer.toHexString), typeof(String), typeof(int));
+        b.AppendVirtcall(nameof(StringBuffer.append), "(Ljava/lang/String;)Ljava/lang/StringBuffer;");
+        b.AppendVirtcall(nameof(StringBuffer.toString), "()Ljava/lang/String;");
+        b.AppendReturnReference();
+        b.AppendReturn();
+        return b.Build(2, 1);
     }
 
     public bool equals(Reference r)

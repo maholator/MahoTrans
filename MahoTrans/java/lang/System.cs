@@ -23,7 +23,8 @@ public class System : Object
 
     public static int identityHashCode(Reference x)
     {
-        return Toolkit.System.GetHashCode(Jvm.ResolveObject(x));
+        var obj = Jvm.ResolveObject(x);
+        return obj.HeapAddress;
     }
 
     [return: String]
