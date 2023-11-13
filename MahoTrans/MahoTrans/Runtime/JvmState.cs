@@ -11,6 +11,7 @@ namespace MahoTrans.Runtime;
 public partial class JvmState
 {
     public Toolkit Toolkit;
+    private readonly ExecutionManner _executionManner;
 
     private bool _running;
 
@@ -24,9 +25,10 @@ public partial class JvmState
 
     public event Action<long>? BetweenBunches;
 
-    public JvmState(Toolkit toolkit)
+    public JvmState(Toolkit toolkit, ExecutionManner executionManner)
     {
         Toolkit = toolkit;
+        _executionManner = executionManner;
     }
 
     public void RunInContext(Action action)
@@ -63,46 +65,18 @@ public partial class JvmState
     {
         RunInContext(() =>
         {
-            long clrTicks = DateTime.UtcNow.Ticks;
-            do
+            switch (_executionManner)
             {
-                do
-                {
-                    for (int i = AliveThreads.Count - 1; i >= 0; i--)
-                    {
-                        JavaRunner.Step(AliveThreads[i], this);
-                    }
-
-                    _cycleNumber++;
-
-                    if (_cycleNumber % CYCLES_PER_BUNCH == 0)
-                    {
-                        break;
-                    }
-                } while (_running);
-
-                // synchronize with externals
-                BetweenBunches?.Invoke(_cycleNumber);
-
-                // attaching threads who want to attach
-                CheckWakeups();
-
-                // gc
-                if (_gcPending)
-                {
-                    _gcPending = false;
-                    RunGarbageCollector();
-                }
-
-                // this will be positive if we are running faster than needed
-                var target = Toolkit.Clock.GetTicksPerCycleBunch();
-                while (target - (DateTime.UtcNow.Ticks - clrTicks) > 0)
-                {
-                    Thread.SpinWait(50);
-                }
-
-                clrTicks += target;
-            } while (_running);
+                case ExecutionManner.Unlocked:
+                    ExecuteInternalUnlocked();
+                    break;
+                case ExecutionManner.Strict:
+                    ExecuteInternalStrict();
+                    break;
+                case ExecutionManner.Weak:
+                    ExecuteInternalWeak();
+                    break;
+            }
         });
     }
 
@@ -158,7 +132,7 @@ public partial class JvmState
     public void Dispose()
     {
         var assemblies = Classes.Values.Select(x => x.ClrType?.Assembly)
-            .Where(x => x != null && x.IsDynamic && x.FullName.StartsWith("jar")).Distinct();
+            .Where(x => x != null && x.IsDynamic && (x.FullName?.StartsWith("jar") ?? false)).Distinct();
         Console.WriteLine($"Assemblies count: {assemblies.Count()}");
         foreach (var cls in Classes.Values)
         {

@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using java.lang;
 using MahoTrans.Runtime;
 
@@ -25,6 +26,7 @@ public interface IClock : IToolkit
     /// Gets CLR time in which ticks bunch must be done. Ticks count is set by <see cref="JvmState.CYCLES_PER_BUNCH"/>
     /// </summary>
     /// <returns>CLR ticks.</returns>
+    [Pure]
     long GetTicksPerCycleBunch();
 
     /// <summary>
@@ -39,11 +41,13 @@ public interface IClock : IToolkit
     /// <summary>
     /// Gets current time of the system. Returned time is in CLR format.
     /// </summary>
+    [Pure]
     long CurrentTime { get; }
 
     /// <summary>
     /// Gets current time of the system since JVM start. Returned time is in CLR format.
     /// </summary>
+    [Pure]
     long PassedTime { get; }
 
     #endregion

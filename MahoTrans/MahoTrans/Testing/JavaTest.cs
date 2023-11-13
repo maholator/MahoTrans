@@ -27,7 +27,7 @@ public class JavaTest
             new InMemoryRms(),
             new ConsoleLogger(),
             new ConsoleLogger());
-        _jvm = new JvmState(tk);
+        _jvm = new JvmState(tk, ExecutionManner.Unlocked);
         _jvm.AddClrClasses(typeof(JavaRunner).Assembly);
         var cl = new ClassLoader(new ConsoleLogger());
         var cls = cl.ReadJarFile(jarFile, true);
