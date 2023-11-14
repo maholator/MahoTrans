@@ -1,3 +1,9 @@
+using java.lang;
+using MahoTrans;
+using MahoTrans.Builder;
+using MahoTrans.Native;
+using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 
 namespace java.io;
@@ -12,6 +18,24 @@ public class InputStream : Object
     }
 
     public bool markSupported() => false;
+
+    public int read()
+    {
+        throw new AbstractJavaMethodCallError();
+    }
+
+    [JavaDescriptor("([B)I")]
+    public JavaMethodBody read(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.iconst_0);
+        b.Append(JavaOpcode.aload_1);
+        b.AppendVirtcall("read", "([BII)I");
+        b.AppendReturnInt();
+        return b.Build(4, 2);
+    }
 
     public void mark(int readlimit)
     {
