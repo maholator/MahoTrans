@@ -110,7 +110,15 @@ public static class NativeLinker
         }
 
 
-        jc.Methods = javaMethods.ToDictionary(x => x.Descriptor, x => x);
+        try
+        {
+            jc.Methods = javaMethods.ToDictionary(x => x.Descriptor, x => x);
+        }
+        catch (ArgumentException e)
+        {
+            throw new JavaLinkageException($"Dublicate method in class {name}", e);
+        }
+
         jc.Fields = nativeFields.Select(x =>
         {
             var d = new NameDescriptor(x.Name, Parameter.FromField(x).ToString());
