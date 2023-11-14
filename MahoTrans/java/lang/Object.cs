@@ -205,13 +205,6 @@ public class Object
         Waiters.Clear();
     }
 
-    [return: JavaType(typeof(String))]
-    public virtual Reference toString()
-    {
-        //TODO
-        return Jvm.AllocateString($"Object {JavaClass} @ {GetHashCode()}");
-    }
-
     [JavaDescriptor("()Ljava/lang/String;")]
     public JavaMethodBody toString(JavaClass cls)
     {
