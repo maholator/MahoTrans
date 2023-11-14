@@ -46,7 +46,7 @@ public sealed class String : Object
     }
 
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
         Value = string.Empty;
     }
@@ -65,6 +65,12 @@ public sealed class String : Object
         Value = new string(Jvm.ResolveArray<char>(charArr), from, len);
     }
 
+    [InitMethod]
+    public void InitCopy([String] Reference value)
+    {
+        Value = new string(Jvm.ResolveString(value));
+    }
+
     #endregion
 
     public int length()
@@ -76,6 +82,12 @@ public sealed class String : Object
     {
         var other = Jvm.ResolveString(s);
         return Value.StartsWith(other);
+    }
+
+    public bool startsWith([String] Reference prefix, int from)
+    {
+        var other = Jvm.ResolveString(prefix);
+        return Value.IndexOf(other, from, StringComparison.Ordinal) == from;
     }
 
     public bool endsWith([JavaType(typeof(String))] Reference s)
@@ -111,7 +123,7 @@ public sealed class String : Object
     }
 
     [return: JavaType(typeof(String))]
-    public new Reference toString() => This;
+    public Reference toString() => This;
 
     public new bool equals(Reference r)
     {
@@ -231,10 +243,10 @@ public sealed class String : Object
         Jvm.AllocateString(new string(Jvm.ResolveArray<char>(charArr), from, count));
 
     [return: String]
-    public static Reference valueOf(double v) => Jvm.AllocateString(v.ToString());
+    public static Reference valueOf(double v) => Jvm.AllocateString(v.ToString(CultureInfo.InvariantCulture));
 
     [return: String]
-    public static Reference valueOf(float v) => Jvm.AllocateString(v.ToString());
+    public static Reference valueOf(float v) => Jvm.AllocateString(v.ToString(CultureInfo.InvariantCulture));
 
     [return: String]
     public static Reference valueOf(int v) => Jvm.AllocateString(v.ToString());
@@ -251,11 +263,11 @@ public sealed class String : Object
             StackSize = 1,
             Code = new Instruction[]
             {
-                new Instruction(0, JavaOpcode.aload_0),
-                new Instruction(1, JavaOpcode.invokevirtual,
+                new (0, JavaOpcode.aload_0),
+                new (1, JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
                         .Split()),
-                new Instruction(4, JavaOpcode.areturn)
+                new (4, JavaOpcode.areturn)
             }
         };
     }
