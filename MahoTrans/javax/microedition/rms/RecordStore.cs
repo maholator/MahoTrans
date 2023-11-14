@@ -96,8 +96,10 @@ public class RecordStore : Object
         }
     }
 
-    void deleteRecord()
+    void deleteRecord(int id)
     {
+        CheckNotClosed();
+        Toolkit.RecordStore.DeleteRecord(Jvm.ResolveString(StoreName), id);
     }
 
     public static void deleteRecordStore([String] Reference str)
