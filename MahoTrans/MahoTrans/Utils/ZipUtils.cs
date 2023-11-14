@@ -72,6 +72,8 @@ public static class ZipUtils
     public static byte[] ReadEntry(this ZipArchive zip, string name)
     {
         var entry = zip.GetEntry(name);
+        if (entry == null)
+            throw new FileNotFoundException();
         using var stream = entry.Open();
         using var memoryStream = new MemoryStream();
         stream.CopyTo(memoryStream);
@@ -81,6 +83,8 @@ public static class ZipUtils
     public static string ReadTextEntry(this ZipArchive zip, string name)
     {
         var entry = zip.GetEntry(name);
+        if (entry == null)
+            throw new FileNotFoundException();
         using var stream = entry.Open();
         using var sw = new StreamReader(stream, Encoding.UTF8);
         return sw.ReadToEnd();
