@@ -126,6 +126,12 @@ public class JavaMethodBuilder
         Append(new Instruction(JavaOpcode.newobject, c));
     }
 
+    public void AppendConstant(string str)
+    {
+        var c = _class.PushConstant(str).Split();
+        Append(new Instruction(JavaOpcode.ldc_w, c));
+    }
+
     #region Labels and jumps
 
     public JavaLabel PlaceLabel()

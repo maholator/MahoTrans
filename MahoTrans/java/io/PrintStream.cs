@@ -71,7 +71,7 @@ public class PrintStream : OutputStream
         b.Append(JavaOpcode.iload_1);
         b.AppendVirtcall("write", "(I)V");
         b.AppendReturn();
-        return b.Build(2, 2);
+        return b.Build(3, 2);
     }
 
     [JavaDescriptor("([C)V")]
@@ -95,6 +95,8 @@ public class PrintStream : OutputStream
             b.Append(JavaOpcode.aload_1);
             b.Append(JavaOpcode.arraylength);
         }
+
+        b.AppendReturn();
 
         return b.Build(3, 3);
     }
@@ -164,6 +166,14 @@ public class PrintStream : OutputStream
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        using (b.AppendGoto(JavaOpcode.ifnonnull))
+        {
+            b.AppendConstant("null");
+            b.AppendVirtcall("print", "(Ljava/lang/String;)V");
+            b.AppendReturn();
+        }
+
         b.Append(JavaOpcode.aload_1);
         b.AppendVirtcall(nameof(String.toCharArray), "()[C");
         b.AppendVirtcall("print", "([C)V");
