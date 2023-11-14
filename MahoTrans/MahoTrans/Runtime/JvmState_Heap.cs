@@ -366,7 +366,7 @@ public partial class JvmState
             }
 
             // threads
-            foreach (var thread in AliveThreads.Concat(WaitingThreads.Values))
+            foreach (var thread in AliveThreads.Concat(WaitingThreads.Values).Concat(_wakeingUpQueue))
             {
                 roots.Add(thread.Model);
                 var frames = thread.CallStack.Take(thread.ActiveFrameIndex + 1);
