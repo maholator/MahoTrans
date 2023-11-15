@@ -6,7 +6,23 @@ namespace MahoTrans.Utils;
 public static class JavaConversions
 {
     public static byte[] ToUnsigned(this sbyte[] arr) => (byte[])(Array)arr;
+
+    /// <summary>
+    /// Force-casts byte[] to sbyte[]. This does not change actual data. Consider using <see cref="ConvertToSigned"/> instead.
+    /// </summary>
+    /// <param name="arr">Array to cast.</param>
+    /// <returns>byte[] taken as sbyte[].</returns>
     public static sbyte[] ToSigned(this byte[] arr) => (sbyte[])(Array)arr;
+
+    /// <summary>
+    /// Converts unsigned bytes to signed bytes. This creates a new array and actually casts each byte to sbyte.
+    /// </summary>
+    /// <param name="arr">Array to convert.</param>
+    /// <returns>Converted array.</returns>
+    public static sbyte[] ConvertToSigned(this byte[] arr)
+    {
+        return Array.ConvertAll(arr, x => (sbyte)x);
+    }
 
     public static string DecodeJavaUnicode(this byte[] data)
     {
