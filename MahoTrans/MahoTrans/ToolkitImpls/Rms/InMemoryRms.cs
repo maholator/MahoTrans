@@ -75,7 +75,7 @@ public class InMemoryRms : IRecordStore
     {
         var els = _storage[name].Keys.ToArray();
         if (els.Length == 0)
-            return 0;
+            return 1;
 
         return els.Max() + 1;
     }
