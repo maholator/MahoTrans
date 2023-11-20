@@ -10,6 +10,7 @@ public partial class JvmState
 {
     private Object?[] _heap = new Object?[1024 * 16];
     private int _nextObjectId = 1;
+    public int ObjectsOnFly = 0;
     private Dictionary<string, int> _internalizedStrings = new();
 
     private int _bytesAllocated;
@@ -243,6 +244,7 @@ public partial class JvmState
             if (_nextObjectId == _heap.Length)
                 _nextObjectId = 1;
 
+            ObjectsOnFly++;
             Toolkit.HeapDebugger?.ObjectCreated(obj);
 
             return r;
@@ -328,6 +330,7 @@ public partial class JvmState
                     if (obj.OnObjectDelete())
                         continue;
                     deletedCount++;
+                    ObjectsOnFly--;
                     _bytesAllocated -= obj.JavaClass.Size;
                     _heap[i] = null;
                     Toolkit.HeapDebugger?.ObjectDeleted(obj);
