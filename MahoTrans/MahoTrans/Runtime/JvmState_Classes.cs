@@ -179,7 +179,7 @@ public partial class JvmState
         if (_resources.TryGetValue(name, out var blob))
         {
             Console.WriteLine($"Returning buffer of {blob.Length} bytes.");
-            var copy = blob.ToSigned().ToArray();
+            var copy = blob.ConvertToSigned();
             return copy;
         }
 

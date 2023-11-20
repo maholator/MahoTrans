@@ -104,7 +104,7 @@ public sealed class String : Object
     [JavaDescriptor("()[B")]
     public Reference getBytes()
     {
-        var data = Value.EncodeDefault().ToSigned();
+        var data = Value.EncodeDefault().ConvertToSigned();
         return Jvm.AllocateArray(data, "[B");
     }
 
@@ -112,7 +112,7 @@ public sealed class String : Object
     public Reference getBytes(Reference enc)
     {
         //TODO
-        var data = Value.EncodeUTF8().ToSigned();
+        var data = Value.EncodeUTF8().ConvertToSigned();
         return Jvm.AllocateArray(data, "[B");
     }
 

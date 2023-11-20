@@ -199,7 +199,7 @@ public class DataOutputStream : OutputStream
     [JavaDescriptor("(Ljava/lang/String;)[B")]
     public static Reference encodeUTF(Reference r)
     {
-        var data = Jvm.ResolveString(r).EncodeJavaUnicode().ToSigned();
+        var data = Jvm.ResolveString(r).EncodeJavaUnicode().ConvertToSigned();
         return Jvm.AllocateArray(data, "[B");
     }
 
