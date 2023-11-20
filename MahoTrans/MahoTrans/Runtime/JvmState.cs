@@ -17,6 +17,8 @@ public partial class JvmState
 
     private EventQueue? _eventQueue;
 
+    public Reference MidletObject;
+
     private long _cycleNumber;
 
     public long CycleNumber => _cycleNumber;

@@ -346,6 +346,8 @@ public partial class JvmState
     {
         List<Reference> roots = new List<Reference>();
 
+        roots.Add(MidletObject);
+
         // building roots list
         {
             // statics
