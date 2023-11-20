@@ -84,10 +84,13 @@ public partial class JvmState
 
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
+#if DEBUG
         if (data == null!)
-        {
             throw new JavaRuntimeError("Attempt to convert null array");
-        }
+
+        if (typeof(T) == typeof(byte))
+            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
+#endif
 
         return PutToHeap(new Array<T>
         {

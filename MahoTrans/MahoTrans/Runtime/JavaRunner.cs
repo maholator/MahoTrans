@@ -1754,7 +1754,7 @@ public class JavaRunner
         else if (array is Array<sbyte> s)
             frame.PushByte(s.Value[index]);
         else
-            throw new JavaRuntimeError();
+            throw new JavaRuntimeError($"Unknown byte array type: {array.GetType()}");
     }
 
     #endregion
