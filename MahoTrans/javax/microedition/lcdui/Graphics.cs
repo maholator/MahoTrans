@@ -165,6 +165,11 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
     }
 
+    public void fillPolygon([JavaType("[I")] Reference q, int w, [JavaType("[I")] Reference e, int r, int t, int y)
+    {
+        //TODO
+    }
+
     public override bool OnObjectDelete()
     {
         Toolkit.Images.ReleaseGraphics(Handle);
