@@ -1,3 +1,4 @@
+using System.Text;
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -16,10 +17,11 @@ public class PrintStream : OutputStream
     public void Init([JavaType(typeof(OutputStream))] Reference r) => Output = r;
 
     [return: JavaType("[B")]
-    public Reference ToBytes([String] Reference r)
+    public static Reference ToBytes(char c)
     {
-        var buf = Jvm.ResolveString(r).EncodeUTF8();
-        return Jvm.AllocateArray(buf, "[B");
+        char[] chars = new char[] { c };
+        var bytes = Encoding.UTF8.GetBytes(chars).ConvertToSigned();
+        return Jvm.AllocateArray(bytes, "[B");
     }
 
     public bool checkError() => false;
@@ -61,17 +63,34 @@ public class PrintStream : OutputStream
     [JavaDescriptor("(C)V")]
     public JavaMethodBody print___char(JavaClass cls)
     {
+        // locals: this > char > i > []buf
         var b = new JavaMethodBuilder(cls);
-        b.AppendThis();
+
         b.Append(JavaOpcode.iload_1);
-        b.AppendConstant(8);
-        b.Append(JavaOpcode.ishr);
-        b.AppendVirtcall("write", "(I)V");
-        b.AppendThis();
-        b.Append(JavaOpcode.iload_1);
-        b.AppendVirtcall("write", "(I)V");
+        b.AppendStaticCall(new NameDescriptorClass(nameof(ToBytes), "(C)[B", typeof(PrintStream)));
+        b.Append(JavaOpcode.astore_3);
+
+        b.Append(JavaOpcode.iconst_0);
+        b.Append(JavaOpcode.istore_2);
+
+        using (var loop = b.BeginLoop(JavaOpcode.if_icmplt))
+        {
+            b.AppendThis();
+            b.Append(JavaOpcode.aload_3);
+            b.Append(JavaOpcode.iload_2);
+            b.Append(JavaOpcode.baload);
+            b.AppendVirtcall("write", "(I)V");
+            b.AppendInc(2, 1);
+
+            loop.ConditionSection();
+
+            b.Append(JavaOpcode.iload_2);
+            b.Append(JavaOpcode.aload_3);
+            b.Append(JavaOpcode.arraylength);
+        }
+
         b.AppendReturn();
-        return b.Build(3, 2);
+        return b.Build(3, 4);
     }
 
     [JavaDescriptor("([C)V")]
