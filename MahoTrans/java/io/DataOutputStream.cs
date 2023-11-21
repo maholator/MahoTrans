@@ -176,7 +176,7 @@ public class DataOutputStream : OutputStream
             RawCode = new Instruction[]
             {
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.iload_1),
+                new(JavaOpcode.aload_1),
                 new(JavaOpcode.invokestatic, encode),
                 // this, arr
                 new(JavaOpcode.dup),
