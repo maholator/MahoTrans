@@ -122,7 +122,7 @@ public class Object
     }
 
     [JavaDescriptor("()V")]
-    public static JavaMethodBody wait___zero(JavaClass @class)
+    public JavaMethodBody wait___zero(JavaClass @class)
     {
         return new JavaMethodBody
         {
@@ -142,7 +142,7 @@ public class Object
     //TODO nanoseconds precision
 
     [JavaDescriptor("(J)V")]
-    public static JavaMethodBody wait(JavaClass @class)
+    public JavaMethodBody wait(JavaClass @class)
     {
         return new JavaMethodBody
         {
