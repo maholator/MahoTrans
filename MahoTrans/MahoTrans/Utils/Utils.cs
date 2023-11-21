@@ -69,4 +69,18 @@ public static class Utils
         var ba = md5.ComputeHash(stream);
         return string.Join("", ba.Select(x => $"{x:X2}"));
     }
+
+    public static uint GetSnapshotHash(this string s)
+    {
+        if (s.Length == 0)
+            return 0;
+        uint h = s[0];
+        for (int i = 1; i < s.Length; i++)
+        {
+            uint uc = s[i];
+            h ^= uc << ((i % 4) * 8);
+        }
+
+        return h;
+    }
 }

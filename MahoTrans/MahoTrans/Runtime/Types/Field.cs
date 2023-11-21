@@ -36,4 +36,6 @@ public class Field
     public override string ToString() => Descriptor.ToString();
 
     public override int GetHashCode() => Descriptor.GetHashCode();
+
+    public uint GetSnapshotHash() => Descriptor.GetSnapshotHash();
 }

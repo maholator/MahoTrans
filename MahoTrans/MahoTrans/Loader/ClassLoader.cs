@@ -482,8 +482,8 @@ public class ClassLoader
 
                 return new JavaMethodBody
                 {
-                    StackSize = stack,
-                    LocalsCount = locals,
+                    StackSize = (ushort)stack,
+                    LocalsCount = (ushort)locals,
                     Code = instrs.ToArray(),
                     Catches = exs,
                     Attrs = attrs

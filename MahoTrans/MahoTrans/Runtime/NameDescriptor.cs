@@ -1,3 +1,5 @@
+using MahoTrans.Utils;
+
 namespace MahoTrans.Runtime;
 
 public readonly struct NameDescriptor : IEquatable<NameDescriptor>
@@ -10,6 +12,7 @@ public readonly struct NameDescriptor : IEquatable<NameDescriptor>
         Name = name;
         Descriptor = descriptor;
     }
+
     public override string ToString() => $"{Descriptor}+{Name}";
 
     public static implicit operator string(NameDescriptor descriptor) => descriptor.ToString();
@@ -26,7 +29,12 @@ public readonly struct NameDescriptor : IEquatable<NameDescriptor>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, Descriptor);
+        return (int)GetSnapshotHash();
+    }
+
+    public uint GetSnapshotHash()
+    {
+        return Name.GetSnapshotHash() ^ Descriptor.GetSnapshotHash();
     }
 
     public static bool operator ==(NameDescriptor left, NameDescriptor right)

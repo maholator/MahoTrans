@@ -7,8 +7,8 @@ namespace MahoTrans.Runtime;
 public class JavaMethodBody
 {
     public Method Method = null!;
-    public short StackSize;
-    public short LocalsCount;
+    public ushort StackSize;
+    public ushort LocalsCount;
 
     /// <summary>
     /// Bytecode of this method. If your bytecode has no calculated offsets, use <see cref="RawCode"/> instead.
@@ -29,8 +29,8 @@ public class JavaMethodBody
 
     public JavaMethodBody(int stack, int locals)
     {
-        StackSize = (short)stack;
-        LocalsCount = (short)locals;
+        StackSize = (ushort)stack;
+        LocalsCount = (ushort)locals;
     }
 
     /// <summary>
@@ -95,23 +95,24 @@ public class JavaMethodBody
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(TryStart, TryEnd, CatchStart);
+            int trys = (TryStart << 16) | (ushort)TryEnd;
+            return trys ^ CatchStart;
         }
     }
 
-    public int GetSnapshotHash()
+    public uint GetSnapshotHash()
     {
-        int acc = 0;
+        uint acc = 0;
         foreach (var instruction in Code)
         {
-            acc = HashCode.Combine(acc, instruction);
+            acc ^= (uint)instruction.GetHashCode();
         }
 
         foreach (var @catch in Catches)
         {
-            acc = HashCode.Combine(acc, @catch);
+            acc ^= (uint)@catch.GetHashCode();
         }
 
-        return HashCode.Combine(StackSize, LocalsCount, acc);
+        return acc ^ ((uint)(StackSize << 16) | LocalsCount);
     }
 }

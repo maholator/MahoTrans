@@ -47,9 +47,9 @@ public class Method : IDisposable
         return s;
     }
 
-    public int GetSnapshotHash()
+    public uint GetSnapshotHash()
     {
-        return HashCode.Combine(Flags, Descriptor, (_methodBody as JavaMethodBody)?.GetSnapshotHash() ?? 0);
+        return Descriptor.GetSnapshotHash() ^ ((_methodBody as JavaMethodBody)?.GetSnapshotHash() ?? 0U) ^ (uint)Flags;
     }
 
     public void Dispose()

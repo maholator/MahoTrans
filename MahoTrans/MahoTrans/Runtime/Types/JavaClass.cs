@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using MahoTrans.Toolkits;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime.Types;
@@ -27,26 +28,26 @@ public class JavaClass
 
     public uint GetSnapshotHash()
     {
-        var interfacesHash = Interfaces.Length;
+        uint interfacesHash = (uint)Interfaces.Length;
         foreach (var inter in Interfaces.OrderBy(x => x))
         {
-            interfacesHash = HashCode.Combine(interfacesHash, inter.GetHashCode());
+            interfacesHash ^= inter.GetSnapshotHash();
         }
 
-        var fieldsHash = 0;
+        uint fieldsHash = 0;
         foreach (var value in Fields.Values)
         {
-            fieldsHash = HashCode.Combine(fieldsHash, value.GetHashCode());
+            fieldsHash ^= value.GetSnapshotHash();
         }
 
-        var methodsHash = 0;
+        uint methodsHash = 0;
         foreach (var value in Methods.Values.OrderBy(x => x.Descriptor.Name).ThenBy(x => x.Descriptor.Descriptor))
         {
-            methodsHash = HashCode.Combine(methodsHash, value.GetSnapshotHash());
+            methodsHash ^= value.GetSnapshotHash();
         }
 
-        //TODO constants are not checked because they are different each compilation
-        return (uint)HashCode.Combine(fieldsHash, methodsHash, interfacesHash, Constants.Length, SuperName);
+        //TODO constants are not checked because they may be different each compilation
+        return fieldsHash ^ methodsHash ^ interfacesHash ^ SuperName.GetSnapshotHash() ^ (uint)Constants.Length;
     }
 
     public TypeAttributes ClrFlags
