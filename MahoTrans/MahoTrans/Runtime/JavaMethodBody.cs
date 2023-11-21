@@ -90,6 +90,11 @@ public class JavaMethodBody
                 return false;
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(TryStart, TryEnd, CatchStart);
+        }
     }
 
     public int GetSnapshotHash()

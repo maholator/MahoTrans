@@ -22,7 +22,6 @@ public partial class JvmState
         SerializationBinder = new Binder(this),
     };
 
-
     private const string cycle_number_txt = "cycle_number.txt";
     private const string classes_txt = "classes.txt";
     private const string virtp_table_json = "virtp_table.json";
@@ -124,9 +123,12 @@ public partial class JvmState
             _cycleNumber = long.Parse(zip.ReadTextEntry(cycle_number_txt));
             //classes
             {
-                var classesList = zip.ReadTextEntry(classes_txt).Split('\n', 3, (StringSplitOptions)3);
-                var classesDict = classesList.Select(x => x.Split(' '))
+                var classesList = zip.ReadTextEntry(classes_txt).Split('\n',
+                    StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                var classesDict = classesList
+                    .Select(x => x.Split(' '))
                     .ToDictionary(x => x[2], x => (x[0][0] == '1', x[1]));
+
                 foreach (var cls in Classes.Values)
                 {
                     if (!classesDict.TryGetValue(cls.Name, out var sn))
@@ -134,9 +136,14 @@ public partial class JvmState
                         throw new JavaRuntimeError($"Class {cls.Name} is not found in snapshot.");
                     }
 
-                    if (cls.GetSnapshotHash().ToString() != sn.Item2)
+                    var existingHash = cls.GetSnapshotHash().ToString();
+
+                    if (existingHash != sn.Item2)
                     {
-                        throw new JavaRuntimeError($"Class hash for {cls.Name} doesn't match snapshoted one");
+                        throw new JavaRuntimeError($"Class hash for {cls.Name} doesn't match snapshoted one.\n" +
+                                                   $"Snapshoted hash: {sn.Item2}\n" +
+                                                   $"Hash of existing class: {existingHash}\n" +
+                                                   $"Class code or members may have changed.");
                     }
 
                     cls.PendingInitializer = sn.Item1;
@@ -156,6 +163,7 @@ public partial class JvmState
             {
                 AliveThreads.Clear();
                 AliveThreads.AddRange(Restore(zip, threads_alive_json));
+
                 foreach (var thread in AliveThreads)
                 {
                     for (int i = 0; i <= thread.ActiveFrameIndex; i++)
@@ -165,6 +173,7 @@ public partial class JvmState
                 }
 
                 WaitingThreads.Clear();
+
                 foreach (var thread in Restore(zip, threads_waiting_json))
                 {
                     for (int i = 0; i <= thread.ActiveFrameIndex; i++)
@@ -204,6 +213,7 @@ public partial class JvmState
         _eventQueue = _heap.OfType<EventQueue>().FirstOrDefault();
         if (_eventQueue != null)
             _eventQueue.OwningJvm = this;
+
         foreach (var thread in AliveThreads.Concat(WaitingThreads.Values).Concat(_wakeingUpQueue))
         {
             var t = (Thread)_heap[thread.Model.Index]!;
@@ -220,6 +230,7 @@ public partial class JvmState
         {
             var jt = new JavaThread(x.Model, x.Id);
             List<Frame> frames = new();
+
             foreach (var sh in x.Frames)
             {
                 var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;

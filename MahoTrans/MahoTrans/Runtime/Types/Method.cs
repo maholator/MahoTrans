@@ -49,11 +49,7 @@ public class Method : IDisposable
 
     public int GetSnapshotHash()
     {
-        var baseHash = HashCode.Combine(Flags, Descriptor);
-        if (IsNative)
-            return baseHash;
-
-        return HashCode.Combine(baseHash, JavaBody);
+        return HashCode.Combine(Flags, Descriptor, (_methodBody as JavaMethodBody)?.GetSnapshotHash() ?? 0);
     }
 
     public void Dispose()

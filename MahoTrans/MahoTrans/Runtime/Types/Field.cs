@@ -24,6 +24,7 @@ public class Field
     /// Bridge method to get field value. Pops object reference and value from the frame. No extra actions are required from the interpreter.
     /// </summary>
     public Action<Frame>? SetValue;
+
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
 
     public Field(NameDescriptor descriptor, FieldFlags flags)
@@ -34,8 +35,5 @@ public class Field
 
     public override string ToString() => Descriptor.ToString();
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Flags, Descriptor);
-    }
+    public override int GetHashCode() => Descriptor.GetHashCode();
 }

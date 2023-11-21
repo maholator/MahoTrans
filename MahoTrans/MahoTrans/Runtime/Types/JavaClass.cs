@@ -25,7 +25,11 @@ public class JavaClass
 
     public uint GetSnapshotHash()
     {
-        var baseHash = HashCode.Combine(Constants, Flags, SuperName, Interfaces);
+        var interfacesHash = Interfaces.Length;
+        foreach (var inter in Interfaces.OrderBy(x => x))
+        {
+            interfacesHash = HashCode.Combine(interfacesHash, inter.GetHashCode());
+        }
 
         var fieldsHash = 0;
         foreach (var value in Fields.Values)
@@ -34,12 +38,13 @@ public class JavaClass
         }
 
         var methodsHash = 0;
-        foreach (var value in Methods.Values)
+        foreach (var value in Methods.Values.OrderBy(x => x.Descriptor.Name).ThenBy(x => x.Descriptor.Descriptor))
         {
             methodsHash = HashCode.Combine(methodsHash, value.GetSnapshotHash());
         }
 
-        return (uint)HashCode.Combine(baseHash, fieldsHash, methodsHash);
+        //TODO constants are not checked because they are different each compilation
+        return (uint)HashCode.Combine(fieldsHash, methodsHash, interfacesHash, Constants.Length, SuperName);
     }
 
     public TypeAttributes ClrFlags

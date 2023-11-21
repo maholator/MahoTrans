@@ -58,7 +58,11 @@ public readonly struct Instruction : IEquatable<Instruction>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Offset, (int)Opcode, Args);
+        int argsHash = 0;
+        foreach (var arg in Args)
+            argsHash = HashCode.Combine(argsHash, arg);
+
+        return HashCode.Combine(Offset, (int)Opcode, argsHash);
     }
 
     public static bool operator ==(Instruction left, Instruction right)
