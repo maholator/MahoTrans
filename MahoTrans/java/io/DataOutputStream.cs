@@ -31,18 +31,13 @@ public class DataOutputStream : OutputStream
     [JavaDescriptor("(I)V")]
     public JavaMethodBody write___byte(JavaClass @class)
     {
-        byte[] streamWrite = @class.PushConstant(_write).Split();
-        return new JavaMethodBody(2, 2)
-        {
-            RawCode = new Instruction[]
-            {
-                new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
-                new(JavaOpcode.iload_1),
-                new(JavaOpcode.invokevirtual, streamWrite),
-                new(JavaOpcode.@return),
-            }
-        };
+        JavaMethodBuilder j = new JavaMethodBuilder(@class);
+        j.AppendThis();
+        j.AppendGetLocalField("out", typeof(OutputStream));
+        j.Append(JavaOpcode.iload_1);
+        j.AppendVirtcall("write", "(I)V");
+        j.AppendReturn();
+        return j.Build(2, 2);
     }
 
     [JavaDescriptor("([B)V")]
@@ -170,7 +165,9 @@ public class DataOutputStream : OutputStream
     [JavaDescriptor("(Ljava/lang/String;)V")]
     public JavaMethodBody writeUTF(JavaClass cls)
     {
-        byte[] encode = cls.PushConstant(_write).Split();
+        byte[] encode = cls
+            .PushConstant(
+                new NameDescriptorClass(nameof(encodeUTF), "(Ljava/lang/String;)[B", typeof(DataOutputStream))).Split();
         byte[] writeShort =
             cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(OutputStream))).Split();
         byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(OutputStream))).Split();
