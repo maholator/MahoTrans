@@ -1,3 +1,5 @@
+using MahoTrans.Toolkits;
+
 namespace MahoTrans.Runtime;
 
 public partial class JvmState
@@ -40,7 +42,7 @@ public partial class JvmState
         if (thread is null)
             throw new NullReferenceException("Attempt to register null thread.");
 
-        Console.WriteLine("Thread registered!");
+        Toolkit.Logger.LogDebug(DebugMessageCategory.Threading, $"Thread {thread.ThreadId} registered and will start soon");
         lock (_threadPoolLock)
         {
             _wakeingUpQueue.Enqueue(thread);

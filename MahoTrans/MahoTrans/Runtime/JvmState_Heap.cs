@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -183,7 +184,11 @@ public partial class JvmState
     #region Exceptions
 
     [DoesNotReturn]
-    public void Throw<T>() where T : Throwable => throw new JavaThrowable(AllocateObject<T>().This);
+    public void Throw<T>() where T : Throwable
+    {
+        Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
+        throw new JavaThrowable(AllocateObject<T>().This);
+    }
 
     #endregion
 
@@ -339,8 +344,8 @@ public partial class JvmState
 
             sw.Stop();
             GcCount++;
-            Console.WriteLine(
-                $"GC collected {deletedCount} objects in {sw.ElapsedTicks / 1000} us, {sw.ElapsedMilliseconds} ms");
+            Toolkit.Logger.LogDebug(DebugMessageCategory.Gc,
+                $"Deleted {deletedCount} objects in {sw.ElapsedMilliseconds} ms");
         }
     }
 

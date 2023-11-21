@@ -1,5 +1,6 @@
 using java.lang;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Thread = java.lang.Thread;
 
@@ -39,7 +40,7 @@ public class JavaRunner
     {
         var frame = thread.ActiveFrame!;
         var t = state.Resolve<Throwable>(ex.Throwable);
-        Console.WriteLine($"Catching {t.JavaClass.Name}");
+        state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"Exception {t.JavaClass.Name} is caught");
         Console.WriteLine("Call stack:");
         for (int i = thread.ActiveFrameIndex; i >= 0; i--)
         {
@@ -1312,7 +1313,11 @@ public class JavaRunner
                 if (ex.IsNull)
                     state.Throw<NullPointerException>();
                 else
+                {
+                    state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"athrow opcode executed");
                     throw new JavaThrowable(ex);
+                }
+
                 break;
             }
             case JavaOpcode.checkcast:

@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using MahoTrans.Toolkits;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime.Types;
 
@@ -224,6 +226,8 @@ public class JavaClass
 
         if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
         {
+            Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.ClassInitializer,
+                $"Class {Name} initialized via <clinit> method");
             if (m.Bridge != null)
             {
                 m.Bridge(null!);
@@ -233,6 +237,11 @@ public class JavaClass
                 m.JavaBody.EnsureBytecodeLinked();
                 thread.Push(m.JavaBody);
             }
+        }
+        else
+        {
+            Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.ClassInitializer,
+                $"Class {Name} has no initialization method");
         }
     }
 }

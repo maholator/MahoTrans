@@ -1,5 +1,4 @@
 using javax.microedition.ams;
-using MahoTrans.Loader;
 using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
@@ -104,38 +103,18 @@ public partial class JvmState
                 return _eventQueue;
             RunInContextIfNot(() =>
             {
-                Console.WriteLine("Starting queue processor...");
                 _eventQueue = AllocateObject<EventQueue>();
                 _eventQueue.OwningJvm = this;
                 _eventQueue.start();
+                Toolkit.Logger.LogDebug(DebugMessageCategory.Threading,
+                    $"Event queue created in thread {_eventQueue.JavaThread.ThreadId}");
             });
             return _eventQueue!;
         }
     }
 
-    public void LogOpcodeStats()
-    {
-        var d = ClassLoader.CountOpcodes(Classes.Values);
-
-        foreach (var kvp in d.Where(x => x.Value != 0).OrderByDescending(x => x.Value))
-        {
-            Console.WriteLine($"{kvp.Key.ToString(),-16} {kvp.Value}");
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("Unused:");
-
-        foreach (var kvp in d.Where(x => x.Value == 0))
-        {
-            Console.WriteLine($"{kvp.Key}");
-        }
-    }
-
     public void Dispose()
     {
-        var assemblies = Classes.Values.Select(x => x.ClrType?.Assembly)
-            .Where(x => x != null && x.IsDynamic && (x.FullName?.StartsWith("jar") ?? false)).Distinct();
-        Console.WriteLine($"Assemblies count: {assemblies.Count()}");
         foreach (var cls in Classes.Values)
         {
             cls.VirtualTable?.Clear();

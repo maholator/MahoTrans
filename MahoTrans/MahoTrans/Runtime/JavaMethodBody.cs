@@ -1,4 +1,5 @@
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -61,6 +62,7 @@ public class JavaMethodBody
     {
         if (LinkedCode != null!)
             return;
+        Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Jit, $"{Method} will be linked");
         LinkedCode = BytecodeLinker.Link(this, Object.Jvm, Code);
     }
 

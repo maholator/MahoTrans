@@ -2,6 +2,7 @@ using System.Reflection;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -170,7 +171,6 @@ public partial class JvmState
 
     public sbyte[]? GetResource(string name)
     {
-        Console.WriteLine($"Looking for resource {name}...");
         if (name.StartsWith('/'))
         {
             name = name.Substring(1);
@@ -178,12 +178,13 @@ public partial class JvmState
 
         if (_resources.TryGetValue(name, out var blob))
         {
-            Console.WriteLine($"Returning buffer of {blob.Length} bytes.");
+            Toolkit.Logger.LogDebug(DebugMessageCategory.Resources,
+                $"Resource {name} accessed, {blob.Length} bytes");
             var copy = blob.ConvertToSigned();
             return copy;
         }
 
-        Console.WriteLine("Returning null!");
+        Toolkit.Logger.LogDebug(DebugMessageCategory.Resources, $"Resource {name} not found");
         return null;
     }
 
