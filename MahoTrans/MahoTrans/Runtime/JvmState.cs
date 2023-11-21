@@ -1,4 +1,5 @@
 using javax.microedition.ams;
+using JetBrains.Annotations;
 using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
@@ -20,7 +21,7 @@ public partial class JvmState
 
     private long _cycleNumber;
 
-    public long CycleNumber => _cycleNumber;
+    [PublicAPI] public long CycleNumber => _cycleNumber;
 
     public const int CYCLES_PER_BUNCH = 1024;
 

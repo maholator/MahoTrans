@@ -21,16 +21,16 @@ public class RecordStore : Object
     [JsonProperty] private int _version;
     [JsonProperty] private long _modifiedAt;
 
-    [JavaIgnore] public static Dictionary<string, Reference> openedStores = new();
+    [JavaIgnore] [JsonProperty] public static Dictionary<string, Reference> OpenedStores = new();
 
     [ClassInit]
     public static void ClInit()
     {
-        openedStores.Clear();
+        OpenedStores = new Dictionary<string, Reference>();
     }
 
     [StaticFieldsAnnouncer]
-    public static void Statics(List<Reference> list) => list.AddRange(openedStores.Values);
+    public static void Statics(List<Reference> list) => list.AddRange(OpenedStores.Values);
 
 
     [JavaDescriptor("([BII)I")]
@@ -106,7 +106,7 @@ public class RecordStore : Object
     {
         var name = Jvm.ResolveString(str);
 
-        if (openedStores.TryGetValue(name, out var storeRef))
+        if (OpenedStores.TryGetValue(name, out var storeRef))
         {
             var store = Jvm.Resolve<RecordStore>(storeRef);
             if (store._openCount > 0)
@@ -220,7 +220,7 @@ public class RecordStore : Object
             return Reference.Null;
         }
 
-        if (openedStores.TryGetValue(nameStr, out var opened))
+        if (OpenedStores.TryGetValue(nameStr, out var opened))
         {
             var s = Jvm.Resolve<RecordStore>(opened);
             s._openCount++;
@@ -233,7 +233,7 @@ public class RecordStore : Object
         var vec = Jvm.AllocateObject<Vector>();
         vec.Init();
         store.Listeners = vec.This;
-        openedStores.Add(nameStr, store.This);
+        OpenedStores.Add(nameStr, store.This);
         return store.This;
     }
 

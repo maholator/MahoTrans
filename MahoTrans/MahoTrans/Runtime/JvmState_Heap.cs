@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
+using JetBrains.Annotations;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using Object = java.lang.Object;
@@ -11,20 +12,20 @@ public partial class JvmState
 {
     private Object?[] _heap = new Object?[1024 * 16];
     private int _nextObjectId = 1;
-    public int ObjectsOnFly = 0;
+    [PublicAPI] public int ObjectsOnFly;
     private Dictionary<string, int> _internalizedStrings = new();
 
     private int _bytesAllocated;
 
-    public int BytesAllocated => _bytesAllocated;
+    [PublicAPI] public int BytesAllocated => _bytesAllocated;
 
     //TODO
     public int TotalMemory { get; } = 1024 * 1024 * 4;
     public int FreeMemory => TotalMemory - BytesAllocated;
 
-    public int GcCount = 0;
+    [PublicAPI] public int GcCount;
 
-    private bool _gcPending = false;
+    private bool _gcPending;
 
     #region Allocation
 
