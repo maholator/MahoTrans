@@ -1,4 +1,5 @@
 using javax.microedition.lcdui;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.Toolkits;
 
@@ -20,6 +21,8 @@ public interface IDisplay : IToolkit
     void SetFullscreen(DisplayableHandle handle, bool state);
 
     void SetTitle(DisplayableHandle handle, string title);
+
+    void CommandsRefreshed(DisplayableHandle handle, List<Reference> commands);
 
     GraphicsHandle GetGraphics(DisplayableHandle handle);
 
