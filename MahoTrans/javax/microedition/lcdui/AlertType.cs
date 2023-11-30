@@ -28,10 +28,10 @@ public class AlertType : Object
     public void Init(int type)
     {
         base.Init();
-        Type = type;
+        Type = (AlertTypeEnum)type;
     }
 
-    public int Type;
+    [JavaIgnore] public AlertTypeEnum Type;
 
     [ClassInit]
     public static void ClInit()
