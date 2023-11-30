@@ -172,6 +172,14 @@ public partial class JvmState
         return obj.Value;
     }
 
+    public string? ResolveStringOrDefault(Reference r)
+    {
+        if (r.IsNull)
+            return null;
+        var obj = (java.lang.String)_heap[r.Index]!;
+        return obj.Value;
+    }
+
     public T[] ResolveArray<T>(Reference r) where T : struct
     {
         if (r.IsNull)
