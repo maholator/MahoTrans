@@ -10,6 +10,16 @@ public class Alert : Screen
 {
     public static int FOREVER = -2;
 
+    [JavaType(typeof(Command))] public static Reference DISMISS_COMMAND;
+
+    [ClassInit]
+    public static void ClInit()
+    {
+        var dismiss = Jvm.AllocateObject<Command>();
+        dismiss.Init(Jvm.AllocateString(""), Command.OK, 0);
+        DISMISS_COMMAND = dismiss.This;
+    }
+
     [InitMethod]
     public void Init([String] Reference title)
     {
