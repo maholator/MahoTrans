@@ -13,5 +13,5 @@ public abstract class JarTestBase
         return new JavaTest(file, ClassName, method);
     }
 
-    protected static void DetachHeap() => Object.DetachHeap();
+    protected static void DetachHeap() => Object.JvmUnchecked = null;
 }

@@ -55,21 +55,29 @@ public class Object
     {
         get
         {
+#if DEBUG
             if (_jvm == null)
                 throw new JavaRuntimeError("Heap is not attached to this thread!");
             return _jvm;
+#else
+            return _jvm!;
+#endif
         }
+    }
+
+    /// <summary>
+    /// Direct access to context slot. Use <see cref="Jvm"/> instead.
+    /// </summary>
+    [JsonIgnore]
+    public static JvmState? JvmUnchecked
+    {
+        get => _jvm;
+        set => _jvm = value;
     }
 
     [JsonIgnore] public static bool JvmAttached => _jvm != null;
 
     [JsonIgnore] protected static Toolkit Toolkit => Jvm.Toolkit;
-
-    [JavaIgnore]
-    public static void AttachHeap(JvmState heap) => _jvm = heap;
-
-    [JavaIgnore]
-    public static void DetachHeap() => _jvm = null;
 
     #endregion
 
@@ -82,7 +90,7 @@ public class Object
     [JavaIgnore] [JsonProperty] public List<MonitorWait>? Waiters;
 
     /// <summary>
-    /// For internal usage. Called by <see cref="wait()"/> to detach from monitor and scheduler.
+    /// For internal usage. Called by wait() to detach from monitor and scheduler.
     /// </summary>
     /// <returns>Waiter object to store on stack.</returns>
     public long WaitMonitor(long timeout)

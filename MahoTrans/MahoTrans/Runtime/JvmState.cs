@@ -35,30 +35,22 @@ public partial class JvmState
 
     public void RunInContext(Action action)
     {
-        if (Object.JvmAttached)
-            throw new JavaRuntimeError("This thread already has attached context!");
-
+        var previous = Object.JvmUnchecked;
         try
         {
-            Object.AttachHeap(this);
+            Object.JvmUnchecked = this;
             action();
         }
         finally
         {
-            Object.DetachHeap();
+            Object.JvmUnchecked = previous;
         }
     }
 
-    public void RunInContextIfNot(Action action)
-    {
-        if (Object.JvmAttached)
-        {
-            action();
-            return;
-        }
-
-        RunInContext(action);
-    }
+    /// <summary>
+    /// Alias for <see cref="Object"/>.<see cref="Object.Jvm"/>.
+    /// </summary>
+    public static JvmState Context => Object.Jvm;
 
     /// <summary>
     /// Runs all registered threads in cycle.
@@ -102,7 +94,7 @@ public partial class JvmState
         {
             if (_eventQueue != null)
                 return _eventQueue;
-            RunInContextIfNot(() =>
+            RunInContext(() =>
             {
                 _eventQueue = AllocateObject<EventQueue>();
                 _eventQueue.OwningJvm = this;
