@@ -8,6 +8,6 @@ public class TextBox : Screen
     [InitMethod]
     public void Init([String] Reference title, [String] Reference text, int maxSize, int constraints)
     {
-        
+        base.Init();
     }
 }

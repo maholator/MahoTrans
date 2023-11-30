@@ -20,6 +20,7 @@ public class Displayable : Object
     [InitMethod]
     public override void Init()
     {
+        base.Init();
         Handle = Toolkit.Display.Register(this);
     }
 
@@ -51,7 +52,7 @@ public class Displayable : Object
         if (Commands.Contains(cmd))
             return;
         Commands.Add(cmd);
-        //TODO notify toolkit
+        Toolkit.Display.CommandsUpdated(Handle, Commands);
     }
 
     public void removeCommand([JavaType(typeof(Command))] Reference cmd)
@@ -59,7 +60,7 @@ public class Displayable : Object
         if (cmd.IsNull)
             return;
         Commands.Remove(cmd);
-        //TODO notify toolkit
+        Toolkit.Display.CommandsUpdated(Handle, Commands);
     }
 
     public void setCommandListener([JavaType(typeof(CommandListener))] Reference l)
@@ -71,5 +72,11 @@ public class Displayable : Object
     {
         queue.Enqueue(Commands);
         base.AnnounceHiddenReferences(queue);
+    }
+
+    public override bool OnObjectDelete()
+    {
+        Toolkit.Display.Release(Handle);
+        return base.OnObjectDelete();
     }
 }

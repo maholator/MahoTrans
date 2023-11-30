@@ -11,6 +11,7 @@ public class List : Screen
     [InitMethod]
     public void Init([String] Reference title, int listType)
     {
+        base.Init();
         setTitle(title);
 
         //todo check and assign listType
@@ -26,7 +27,9 @@ public class List : Screen
         {
             foreach (var str in strings)
             {
-                append(str, Reference.Null);
+                if (str.IsNull)
+                    Jvm.Throw<NullPointerException>();
+                Items.Add(new ListItem(str, Reference.Null));
             }
 
             return;
@@ -38,7 +41,10 @@ public class List : Screen
 
         for (var i = 0; i < strings.Length; i++)
         {
-            append(strings[i], images[i]);
+            var str = strings[i];
+            if (str.IsNull)
+                Jvm.Throw<NullPointerException>();
+            Items.Add(new ListItem(str, images[i]));
         }
     }
 
@@ -48,6 +54,7 @@ public class List : Screen
             Jvm.Throw<NullPointerException>();
         var index = Items.Count;
         Items.Add(new ListItem(stringPart, imagePart));
+        Toolkit.Display.ContentUpdated(Handle);
         return index;
     }
 
@@ -56,11 +63,13 @@ public class List : Screen
         if (elementNum < 0 || elementNum >= Items.Count)
             Jvm.Throw<IndexOutOfBoundsException>();
         Items.RemoveAt(elementNum);
+        Toolkit.Display.ContentUpdated(Handle);
     }
 
     public void deleteAll()
     {
         Items.Clear();
+        Toolkit.Display.ContentUpdated(Handle);
     }
 
 

@@ -30,6 +30,7 @@ public class Alert : Screen
     public void Init([String] Reference title, [String] Reference alertText,
         [JavaType(typeof(Image))] Reference alertImage, [JavaType(typeof(AlertType))] Reference alertType)
     {
+        base.Init();
         setTitle(title);
         Text = alertText;
         Image = alertImage;
@@ -63,17 +64,26 @@ public class Alert : Screen
     public void setType([JavaType(typeof(AlertType))] Reference type)
     {
         Type = type;
+        Toolkit.Display.ContentUpdated(Handle);
     }
 
     [return: String]
     public Reference getString() => Text;
 
-    public void setString([String] Reference text) => Text = text;
+    public void setString([String] Reference text)
+    {
+        Text = text;
+        Toolkit.Display.ContentUpdated(Handle);
+    }
 
     [return: JavaType(typeof(Image))]
     public Reference getImage() => Image;
 
-    public void setImage([JavaType(typeof(Image))] Reference image) => Image = image;
+    public void setImage([JavaType(typeof(Image))] Reference image)
+    {
+        Image = image;
+        Toolkit.Display.ContentUpdated(Handle);
+    }
 
     //TODO set/get Indicator
 
