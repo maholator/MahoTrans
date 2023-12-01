@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -18,31 +19,29 @@ public sealed class String : Object
     public void InitBytes(Reference arr)
     {
         var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned();
-        Value = buf.DecodeDefault();
+        Value = Encoding.UTF8.GetString(buf);
     }
 
     [InitMethod]
     [JavaDescriptor("([BII)V")]
     public void InitBytes(Reference arr, int from, int len)
     {
-        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
-        Value = buf.DecodeDefault();
+        var span = new ReadOnlySpan<byte>(Jvm.ResolveArray<sbyte>(arr).ToUnsigned(), from, len);
+        Value = Encoding.UTF8.GetString(span);
     }
 
     [InitMethod]
     public void InitBytes([JavaType("[B")] Reference arr, int from, int len, [String] Reference enc)
     {
-        //TODO
-        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().Skip(from).Take(len).ToArray();
-        Value = buf.DecodeUTF8();
+        var span = new ReadOnlySpan<byte>(Jvm.ResolveArray<sbyte>(arr).ToUnsigned(), from, len);
+        Value = Jvm.ResolveString(enc).GetEncodingByName().GetString(span);
     }
 
     [InitMethod]
     public void InitBytes([JavaType("[B")] Reference arr, [String] Reference enc)
     {
-        //TODO
-        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned().ToArray();
-        Value = buf.DecodeUTF8();
+        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned();
+        Value = Jvm.ResolveString(enc).GetEncodingByName().GetString(buf);
     }
 
     [InitMethod]
@@ -104,16 +103,15 @@ public sealed class String : Object
     [JavaDescriptor("()[B")]
     public Reference getBytes()
     {
-        var data = Value.EncodeDefault().ConvertToSigned();
+        var data = Encoding.UTF8.GetBytes(Value).ConvertToSigned();
         return Jvm.AllocateArray(data, "[B");
     }
 
     [JavaDescriptor("(Ljava/lang/String;)[B")]
     public Reference getBytes(Reference enc)
     {
-        //TODO
-        var data = Value.EncodeUTF8().ConvertToSigned();
-        return Jvm.AllocateArray(data, "[B");
+        byte[] data = Jvm.ResolveString(enc).GetEncodingByName().GetBytes(Value);
+        return Jvm.AllocateArray(data.ConvertToSigned(), "[B");
     }
 
     [return: JavaType("[C")]
@@ -263,11 +261,11 @@ public sealed class String : Object
             StackSize = 1,
             Code = new Instruction[]
             {
-                new (0, JavaOpcode.aload_0),
-                new (1, JavaOpcode.invokevirtual,
+                new(0, JavaOpcode.aload_0),
+                new(1, JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
                         .Split()),
-                new (4, JavaOpcode.areturn)
+                new(4, JavaOpcode.areturn)
             }
         };
     }

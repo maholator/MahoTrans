@@ -1,3 +1,4 @@
+using System.Text;
 using javax.microedition.ams;
 using JetBrains.Annotations;
 using MahoTrans.Toolkits;
@@ -29,6 +30,7 @@ public partial class JvmState
 
     public JvmState(Toolkit toolkit, ExecutionManner executionManner)
     {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Toolkit = toolkit;
         _executionManner = executionManner;
     }

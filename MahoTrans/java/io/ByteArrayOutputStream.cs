@@ -1,3 +1,4 @@
+using System.Text;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
@@ -33,7 +34,7 @@ public class ByteArrayOutputStream : OutputStream
     [return: String]
     public Reference toString()
     {
-        return Jvm.AllocateString(buf.ToArray().ToUnsigned().DecodeDefault());
+        return Jvm.AllocateString(Encoding.UTF8.GetString(buf.ToArray().ToUnsigned()));
     }
 
     public void write([JavaType("[B")] Reference b, int off, int len)

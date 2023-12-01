@@ -12,6 +12,7 @@ public static class JavaConversions
     /// </summary>
     /// <param name="arr">Array to cast.</param>
     /// <returns>byte[] taken as sbyte[].</returns>
+    [Obsolete("Use ConvertToSigned instead.")]
     public static sbyte[] ToSigned(this byte[] arr) => (sbyte[])(Array)arr;
 
     /// <summary>
@@ -79,21 +80,62 @@ public static class JavaConversions
         return data.ToArray();
     }
 
-    public static string DecodeDefault(this byte[] data)
+    public static Encoding GetEncodingByName(this string name)
     {
-        // TODO iso8859-1
-        return data.DecodeUTF8();
+        name = name.ToUpper();
+        switch (name)
+        {
+            case "UTF8":
+            case "UTF-8":
+                return Encoding.UTF8;
+
+            case "8859-1":
+            case "ISO8859-1":
+            case "ISO-8859-1":
+            case "ISO-8859-1:1987":
+            case "ISO-IR-100":
+            case "LATIN1":
+            case "CSISOLATIN1":
+            case "CP819":
+            case "IBM-819":
+            case "IBM819":
+            case "L1":
+            case "ISO_8859_1":
+                return Encoding.Latin1;
+
+            case "IBM-1251":
+            case "WINDOWS-1251":
+            case "CP1251":
+                return Encoding.GetEncoding("windows-1251");
+
+            case "IBM-1252":
+            case "WINDOWS-1252":
+            case "CP1252":
+                return Encoding.GetEncoding("windows-1252");
+
+            case "646":
+            case "ANSI_X3.4-1968":
+            case "ANSI_X3.4-1986":
+            case "CP367":
+            case "ISO-646.IRV:1991":
+            case "ISO646-US":
+            case "US-ASCII":
+            case "ASCII7":
+            case "CSASCII":
+            case "DEFAULT":
+            case "DIRECT":
+            case "IBM-367":
+            case "ISO-646.IRV:1983":
+            case "ISO-IR-6":
+            case "US":
+            case "ASCII":
+                return Encoding.ASCII;
+
+            default:
+                //TODO throw java exception
+                throw new JavaRuntimeError($"Unsupported encoding: {name}");
+        }
     }
-
-    public static byte[] EncodeDefault(this string data)
-    {
-        // TODO iso8859-1
-        return data.EncodeUTF8();
-    }
-
-    public static string DecodeUTF8(this byte[] data) => Encoding.UTF8.GetString(data);
-
-    public static byte[] EncodeUTF8(this string data) => Encoding.UTF8.GetBytes(data);
 
     public static Reference ToHeap(this string[] list, JvmState heap)
     {
