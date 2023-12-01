@@ -20,6 +20,15 @@ public class Graphics : Object, DirectGraphics
     [JavaIgnore] [JsonProperty] private int _tx;
     [JavaIgnore] [JsonProperty] private int _ty;
 
+    [JavaType(typeof(Font))] public Reference Font;
+
+    [InitMethod]
+    public override void Init()
+    {
+        base.Init();
+        setFont(lcdui.Font.getDefaultFont());
+    }
+
     #region Color / font
 
     public void setColor(int argb)
@@ -39,11 +48,15 @@ public class Graphics : Object, DirectGraphics
 
     public void setFont([JavaType(typeof(Font))] Reference r)
     {
+        Font = r;
         var f = Jvm.Resolve<Font>(r);
         _style = f.Style;
         _face = f.Face;
         _size = f.Height;
     }
+
+    [return: JavaType(typeof(Font))]
+    public Reference getFont() => Font;
 
     #endregion
 

@@ -24,6 +24,7 @@ public class Canvas : Displayable
     public Reference ObtainGraphics()
     {
         var g = Jvm.AllocateObject<Graphics>();
+        g.Init();
         g.Handle = Toolkit.Display.GetGraphics(Handle);
         return g.This;
     }

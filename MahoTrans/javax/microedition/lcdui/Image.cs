@@ -67,6 +67,7 @@ public class Image : Object
         if (!isMutable())
             Jvm.Throw<IllegalStateException>();
         var g = Jvm.AllocateObject<Graphics>();
+        g.Init();
         g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;
     }
