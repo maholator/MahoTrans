@@ -45,6 +45,7 @@ public static class BytecodeLinker
             }
 
             VerifyClassReferences(code, cls, jvm, logger);
+            CheckLocalsBounds(code, method.Descriptor.ToString(), method.JavaBody.LocalsCount, cls, logger);
         }
     }
 
@@ -211,6 +212,54 @@ public static class BytecodeLinker
 
                     break;
                 }
+            }
+        }
+    }
+
+
+    private static void CheckLocalsBounds(Instruction[] code, string methodName, int localsCount, JavaClass cls,
+        ILoadTimeLogger logger)
+    {
+        List<char>[] locals = new List<char>[localsCount];
+        for (int i = 0; i < localsCount; i++)
+            locals[i] = new List<char>();
+
+        for (int i = 0; i < code.Length; i++)
+        {
+            var opcode = code[i].Opcode.ToString();
+            if (opcode.IndexOf("load", StringComparison.Ordinal) == 1 ||
+                opcode.IndexOf("store", StringComparison.Ordinal) == 1)
+            {
+                char type = opcode[0];
+                int index;
+                if (opcode.IndexOf('_') != -1)
+                {
+                    index = int.Parse(opcode.Split('_')[1]);
+                }
+                else
+                {
+                    index = code[i].Args[0];
+                }
+
+                if (index >= localsCount)
+                {
+                    logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls.Name,
+                        $"Local variable {index} of type \"{type}\" is out of bounds at {methodName}:{i}");
+                }
+
+                if (!locals[index].Contains(type))
+                {
+                    locals[index].Add(type);
+                }
+            }
+        }
+
+        for (int i = 0; i < localsCount; i++)
+        {
+            if (locals[i].Count > 1)
+            {
+                logger.Log(LoadIssueType.MultitypeLocalVariable, cls.Name,
+                    $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
             }
         }
     }

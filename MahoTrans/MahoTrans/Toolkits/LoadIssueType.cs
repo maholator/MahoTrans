@@ -32,4 +32,9 @@ public enum LoadIssueType
     MissingClassSuper,
 
     MissingClassField,
+
+    LocalVariableIndexOutOfBounds,
+
+    MultitypeLocalVariable,
+
 }
