@@ -12,7 +12,7 @@ public class Byte : Object
 
     public sbyte byteValue() => Value;
 
-    public static int parseByte([String] Reference str)
+    public static sbyte parseByte([String] Reference str)
     {
         if (!int.TryParse(Jvm.ResolveString(str), out var i))
             Jvm.Throw<NumberFormatException>();
@@ -23,7 +23,7 @@ public class Byte : Object
         return (sbyte)i;
     }
 
-    public static int parseByte([String] Reference str, int radix)
+    public static sbyte parseByte([String] Reference str, int radix)
     {
         try
         {

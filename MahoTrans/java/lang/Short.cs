@@ -15,6 +15,17 @@ public class Short : Object
 
     public short shortValue() => Value;
 
+    public static short parseShort([String] Reference str)
+    {
+        if (!int.TryParse(Jvm.ResolveString(str), out var i))
+            Jvm.Throw<NumberFormatException>();
+
+        if (i < short.MinValue || i > short.MaxValue)
+            Jvm.Throw<NumberFormatException>();
+
+        return (short)i;
+    }
+
     public bool equals(Reference r)
     {
         if (r.IsNull)
