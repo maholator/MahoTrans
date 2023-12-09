@@ -37,4 +37,5 @@ public enum LoadIssueType
 
     MultitypeLocalVariable,
 
+    MethodWithoutReturn
 }

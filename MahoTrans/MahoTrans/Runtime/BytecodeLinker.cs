@@ -45,7 +45,8 @@ public static class BytecodeLinker
             }
 
             VerifyClassReferences(code, cls, jvm, logger);
-            CheckLocalsBounds(code, method.Descriptor.ToString(), method.JavaBody.LocalsCount, cls, logger);
+            CheckLocalsBounds(code, method.Descriptor.ToString(), method.JavaBody.LocalsCount, cls.Name, logger);
+            CheckMethodExit(code, method.Descriptor.ToString(), cls.Name, logger);
         }
     }
 
@@ -217,7 +218,7 @@ public static class BytecodeLinker
     }
 
 
-    private static void CheckLocalsBounds(Instruction[] code, string methodName, int localsCount, JavaClass cls,
+    private static void CheckLocalsBounds(Instruction[] code, string method, int localsCount, string cls,
         ILoadTimeLogger logger)
     {
         List<char>[] locals = new List<char>[localsCount];
@@ -243,8 +244,8 @@ public static class BytecodeLinker
 
                 if (index >= localsCount)
                 {
-                    logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls.Name,
-                        $"Local variable {index} of type \"{type}\" is out of bounds at {methodName}:{i}");
+                    logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
+                        $"Local variable {index} of type \"{type}\" is out of bounds at {method}:{i}");
                 }
 
                 if (!locals[index].Contains(type))
@@ -258,10 +259,38 @@ public static class BytecodeLinker
         {
             if (locals[i].Count > 1)
             {
-                logger.Log(LoadIssueType.MultitypeLocalVariable, cls.Name,
-                    $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
+                logger.Log(LoadIssueType.MultitypeLocalVariable, cls,
+                    $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {method}");
             }
         }
+    }
+
+    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadTimeLogger logger)
+    {
+        var lastOpcode = code[^1].Opcode;
+
+        switch (lastOpcode)
+        {
+            case JavaOpcode.@goto:
+            case JavaOpcode.jsr:
+            case JavaOpcode.ret:
+            case JavaOpcode.tableswitch:
+            case JavaOpcode.lookupswitch:
+            case JavaOpcode.ireturn:
+            case JavaOpcode.lreturn:
+            case JavaOpcode.freturn:
+            case JavaOpcode.dreturn:
+            case JavaOpcode.areturn:
+            case JavaOpcode.@return:
+            case JavaOpcode.athrow:
+            case JavaOpcode.goto_w:
+            case JavaOpcode.jsr_w:
+            case JavaOpcode._inplacereturn:
+                return;
+        }
+
+        logger.Log(LoadIssueType.MethodWithoutReturn, cls,
+            $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
     }
 
     private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code, bool isClinit)
