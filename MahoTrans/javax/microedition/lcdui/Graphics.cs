@@ -99,7 +99,7 @@ public class Graphics : Object, DirectGraphics
         drawLine(x, y, x + w, y);
         drawLine(x + w, y, x + w, y + h);
         drawLine(x + w, y + h, x, y + h);
-        drawLine(x, y + h, x, y);
+        drawLine(x, y, x, y + h);
     }
 
     public void drawRoundRect(int x, int y, int w, int h, int arcWidth, int arcHeight)
@@ -136,6 +136,13 @@ public class Graphics : Object, DirectGraphics
     {
         var text = Jvm.ResolveString(str);
         Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+    }
+
+    public void drawSubstring([String] Reference str, int offset, int len, int x, int y, int a)
+    {
+        var text = Jvm.ResolveString(str);
+        Implementation.DrawString(text.Substring(offset, len), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face,
+            _style, _size);
     }
 
     public void drawChar(char c, int x, int y, int a)

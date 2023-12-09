@@ -34,6 +34,12 @@ public class Canvas : Displayable
         Jvm.EventQueue.Enqueue<RepaintEvent>(x => x.Target = This);
     }
 
+    public void repaint(int x, int y, int w, int h)
+    {
+        //TODO rect
+        Jvm.EventQueue.Enqueue<RepaintEvent>(s => s.Target = This);
+    }
+
     public void flushGraphics() => Toolkit.Display.Flush(Handle);
 
     [JavaDescriptor("()V")]
