@@ -94,29 +94,63 @@ public class JavaMethodBuilder
         AppendStaticCall(new NameDescriptorClass(name, descriptor, typeof(T)));
     }
 
+    /// <summary>
+    /// Gets field from type, where the method is creating.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
     public void AppendGetLocalField(string name, string type)
     {
         var c = _class.PushConstant(new NameDescriptorClass(name, type, _class.Name)).Split();
         Append(new Instruction(JavaOpcode.getfield, c));
     }
 
+    /// <summary>
+    /// Gets field from type, where the method is creating.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
     public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
 
+    /// <summary>
+    /// Gets field from arbitrary type.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <param name="cls">Type that contains the field.</param>
     public void AppendGetField(string name, string type, Type cls)
     {
         var c = _class.PushConstant(new NameDescriptorClass(name, type, cls)).Split();
         Append(new Instruction(JavaOpcode.getfield, c));
     }
 
+    /// <summary>
+    /// Gets field from arbitrary type.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <param name="cls">Type that contains the field.</param>
     public void AppendGetField(string name, Type type, Type cls) =>
         AppendGetField(name, type.ToJavaDescriptorNative(), cls);
 
+    /// <summary>
+    /// Puts field to arbitrary type.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <param name="cls">Type that contains the field.</param>
     public void AppendPutField(string name, string type, Type cls)
     {
         var c = _class.PushConstant(new NameDescriptorClass(name, type, cls)).Split();
         Append(new Instruction(JavaOpcode.putfield, c));
     }
 
+    /// <summary>
+    /// Puts field to arbitrary type.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <param name="cls">Type that contains the field.</param>
     public void AppendPutField(string name, Type type, Type cls) =>
         AppendPutField(name, type.ToJavaDescriptorNative(), cls);
 
