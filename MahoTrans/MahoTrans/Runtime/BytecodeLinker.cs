@@ -97,8 +97,14 @@ public static class BytecodeLinker
                     {
                         ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                     }
+                    else if (consts[Combine(args[0], args[1])] is NameDescriptor)
+                    {
+                        break;
+                    }
                     else
                     {
+                        logger.Log(LoadIssueType.BrokenConstant, cls.Name,
+                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
                         break;
                     }
 
@@ -120,6 +126,87 @@ public static class BytecodeLinker
                     {
                         logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its method {ndc.Descriptor} will be used");
+                    }
+
+                    break;
+                }
+                case JavaOpcode.getfield:
+                case JavaOpcode.putfield:
+                {
+                    NameDescriptorClass ndc;
+                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
+                    {
+                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
+                    }
+                    else
+                    {
+                        logger.Log(LoadIssueType.BrokenConstant, cls.Name,
+                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
+                        break;
+                    }
+
+                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+                    {
+                        try
+                        {
+                            var f = c.GetFieldRecursive(ndc.Descriptor);
+                            if (f.Flags.HasFlag(FieldFlags.Static))
+                            {
+                                logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                    $"\"{ndc.ClassName}\" has field {ndc.Descriptor}, but it is static");
+                            }
+                        }
+                        catch
+                        {
+                            logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                $"\"{ndc.ClassName}\" has no field {ndc.Descriptor}");
+                        }
+                    }
+                    else
+                    {
+                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                            $"\"{ndc.ClassName}\" can't be found but its field {ndc.Descriptor} will be used");
+                    }
+
+                    break;
+                }
+                case JavaOpcode.getstatic:
+                case JavaOpcode.putstatic:
+                {
+                    NameDescriptorClass ndc;
+
+                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
+                    {
+                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
+                    }
+                    else
+                    {
+                        logger.Log(LoadIssueType.BrokenConstant, cls.Name,
+                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
+                        break;
+                    }
+
+                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+                    {
+                        try
+                        {
+                            var f = c.GetFieldRecursive(ndc.Descriptor);
+                            if (!f.Flags.HasFlag(FieldFlags.Static))
+                            {
+                                logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                    $"\"{ndc.ClassName}\" has field {ndc.Descriptor}, but it is not static");
+                            }
+                        }
+                        catch
+                        {
+                            logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                $"\"{ndc.ClassName}\" has no field {ndc.Descriptor}");
+                        }
+                    }
+                    else
+                    {
+                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                            $"\"{ndc.ClassName}\" can't be found but its field {ndc.Descriptor} will be used");
                     }
 
                     break;
