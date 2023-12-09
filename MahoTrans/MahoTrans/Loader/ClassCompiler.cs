@@ -61,7 +61,7 @@ public static class ClassCompiler
                     }
                     else
                     {
-                        logger.Log(LogLevel.Error, cls.Name,
+                        logger.Log(LoadIssueType.MissingClassSuper, cls.Name,
                             $"The class has super \"{cls.SuperName}\" which can't be found. lang.Object will be set as super.");
                         cls.SuperName = "java/lang/Object";
                         ready = false;
@@ -91,7 +91,7 @@ public static class ClassCompiler
                             }
                             else
                             {
-                                logger.Log(LogLevel.Error, cls.Name,
+                                logger.Log(LoadIssueType.MissingClassSuper, cls.Name,
                                     $"The class has interface \"{inter}\" which can't be found. Dummy interface will be used instead.");
                                 cls.Interfaces[i] = typeof(DummyInterface).ToJavaName();
                                 c.Interfaces.Remove(inter);
@@ -157,7 +157,7 @@ public static class ClassCompiler
                         {
                             if (!queuedDict.ContainsKey(clsName) && !loaded.ContainsKey(clsName))
                             {
-                                logger.Log(LogLevel.Warning, cls.Name,
+                                logger.Log(LoadIssueType.MissingClassField, cls.Name,
                                     $"There is a field of type {clsName} which can't be found");
                             }
                         }

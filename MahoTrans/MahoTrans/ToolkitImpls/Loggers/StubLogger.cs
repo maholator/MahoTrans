@@ -16,7 +16,7 @@ public class StubLogger : ILogger, ILoadTimeLogger, IHeapDebugger
     {
     }
 
-    public void Log(LogLevel level, string className, string message)
+    public void Log(LoadIssueType level, string className, string message)
     {
     }
 

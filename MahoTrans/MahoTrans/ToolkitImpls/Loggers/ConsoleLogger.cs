@@ -7,14 +7,11 @@ namespace MahoTrans.ToolkitImpls.Loggers;
 /// </summary>
 public class ConsoleLogger : ILogger, ILoadTimeLogger
 {
-    public void Log(LogLevel level, string className, string message)
+    public void Log(LoadIssueType level, string className, string message)
     {
         Console.Write(className);
         Console.Write(": ");
-        var c = Console.ForegroundColor;
-        SetConsoleColor(level);
         Console.Write(message);
-        Console.ForegroundColor = c;
         Console.WriteLine();
     }
 

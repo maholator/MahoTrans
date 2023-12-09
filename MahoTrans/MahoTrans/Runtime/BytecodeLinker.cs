@@ -25,32 +25,35 @@ public static class BytecodeLinker
 #endif
     }
 
-    public static void VerifyCalls(JavaClass cls, JvmState jvm)
+    public static void VerifyBytecode(JavaClass cls, JvmState jvm)
     {
+        var logger = jvm.Toolkit.LoadLogger;
         foreach (var method in cls.Methods.Values)
         {
-            VerifyCalls(method, cls, jvm);
+            if (method.IsNative)
+                continue;
+
+            Instruction[] code;
+
+            try
+            {
+                code = method.JavaBody.Code;
+            }
+            catch
+            {
+                continue;
+            }
+
+            VerifyClassReferences(code, cls, jvm, logger);
         }
     }
 
-    private static void VerifyCalls(Method m, JavaClass cls, JvmState jvm)
+    /// <summary>
+    /// Checks that there is no broken references.
+    /// </summary>
+    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadTimeLogger logger)
     {
-        if (m.IsNative)
-            return;
-
         var consts = cls.Constants;
-        var logger = jvm.Toolkit.LoadLogger;
-
-        Instruction[] code;
-
-        try
-        {
-            code = m.JavaBody.Code;
-        }
-        catch
-        {
-            return;
-        }
 
         foreach (var instruction in code)
         {
@@ -62,7 +65,7 @@ public static class BytecodeLinker
                     var type = (string)consts[Combine(args[0], args[1])];
                     if (!jvm.Classes.ContainsKey(type))
                     {
-                        logger.Log(LogLevel.Warning, cls.Name,
+                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{type}\" can't be found but going to be instantiated");
                     }
 
@@ -78,7 +81,7 @@ public static class BytecodeLinker
                     }
                     catch
                     {
-                        logger.Log(LogLevel.Warning, cls.Name,
+                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{type}\" can't be found but going to be casted into");
                     }
 
@@ -109,13 +112,13 @@ public static class BytecodeLinker
                         }
                         catch
                         {
-                            logger.Log(LogLevel.Warning, cls.Name,
+                            logger.Log(LoadIssueType.MissingMethodAccess, cls.Name,
                                 $"\"{ndc.ClassName}\" has no method {ndc.Descriptor}");
                         }
                     }
                     else
                     {
-                        logger.Log(LogLevel.Warning, cls.Name,
+                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its method {ndc.Descriptor} will be used");
                     }
 

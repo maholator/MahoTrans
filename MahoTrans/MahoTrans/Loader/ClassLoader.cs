@@ -23,8 +23,6 @@ public class ClassLoader
         _logger = logger;
     }
 
-    private void Log(LogLevel level, string message) => _logger.Log(level, _classFileName, message);
-
     /// <summary>
     /// Reads JAR package.
     /// </summary>
@@ -81,7 +79,7 @@ public class ClassLoader
 
             if (manifest == null)
             {
-                _logger.Log(LogLevel.Error, "META-INF/MANIFEST.MF", "Manifest file was not found");
+                _logger.Log(LoadIssueType.NoMetaInf, "META-INF/MANIFEST.MF", "Manifest file was not found");
                 manifest = new()
                 {
                     { "MIDlet-Version", "1.0.0" }
@@ -129,7 +127,8 @@ public class ClassLoader
         uint magic = (uint)reader.ReadInt32();
         if (magic != 0xCAFEBABE)
         {
-            Log(LogLevel.Error, $"Class has invalid magic {magic:X}, must be 0xCAFEBABE");
+            string message = $"Class has invalid magic {magic:X}, must be 0xCAFEBABE";
+            _logger.Log(LoadIssueType.InvalidClassMagicCode, _classFileName, message);
         }
 
         c.MinorVersion = reader.ReadInt16();
@@ -214,7 +213,7 @@ public class ClassLoader
                 if (ntb is not NameDescriptor nt)
                 {
                     nt = new NameDescriptor("", "");
-                    _logger.Log(LogLevel.Error, _classFileName,
+                    _logger.Log(LoadIssueType.BrokenConstant, _classFileName,
                         $"Constant #{mr.NameTypeIndex} must be ND, but it is {ntb?.GetType().Name ?? "null"}");
                 }
 
@@ -235,7 +234,7 @@ public class ClassLoader
         var obj = consts[at];
         if (obj is string s)
             return s;
-        _logger.Log(LogLevel.Error, _classFileName,
+        _logger.Log(LoadIssueType.BrokenConstant, _classFileName,
             $"Constant #{at} must be string, but it is {obj?.GetType().Name ?? "null"}");
         return string.Empty;
     }
