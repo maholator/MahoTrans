@@ -7,6 +7,12 @@ public class Runtime : Object
 {
     public static Reference Instance;
 
+    [ClassInit]
+    public static void ClInit()
+    {
+        Instance = 0;
+    }
+
     [return: JavaType(typeof(Runtime))]
     public static Reference getRuntime()
     {
