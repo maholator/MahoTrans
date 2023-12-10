@@ -1,5 +1,8 @@
 namespace MahoTrans.Runtime;
 
+/// <summary>
+/// Type of things on frame's stack or locals. Members starting with "is" are attributes. Their combination leads to actual primitive type.
+/// </summary>
 [Flags]
 public enum PrimitiveType : byte
 {

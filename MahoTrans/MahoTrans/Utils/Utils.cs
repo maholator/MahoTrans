@@ -61,6 +61,14 @@ public static class Utils
         return string.Join(separator, sequence);
     }
 
+    public static void Pop<T>(this Stack<T> stack, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            stack.Pop();
+        }
+    }
+
     public static string CalcFileMD5(this string filePath)
     {
         using var md5 = MD5.Create();

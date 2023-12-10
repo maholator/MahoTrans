@@ -63,7 +63,7 @@ public class JavaMethodBody
         if (LinkedCode != null!)
             return;
         Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Jit, $"{Method} will be linked");
-        LinkedCode = BytecodeLinker.Link(this, Object.Jvm, Code);
+        LinkedCode = BytecodeLinker.Link(this, Object.Jvm);
     }
 
     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract

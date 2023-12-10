@@ -6,16 +6,16 @@ namespace MahoTrans.Runtime;
 
 public static class BytecodeLinker
 {
-    public static LinkedInstruction[] Link(JavaMethodBody method, JvmState jvm, Instruction[] code)
+    public static LinkedInstruction[] Link(JavaMethodBody method, JvmState jvm)
     {
         var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
         var cls = method.Method.Class;
 #if DEBUG
-        return LinkInternal(cls, jvm, code, isClinit);
+        return LinkInternal(method, cls, jvm, isClinit);
 #else
         try
         {
-            return LinkInternal(cls, jvm, code, isClinit);
+            return LinkInternal(method, cls, jvm, isClinit);
         }
         catch (Exception e)
         {
@@ -293,14 +293,16 @@ public static class BytecodeLinker
             $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
     }
 
-    private static LinkedInstruction[] LinkInternal(JavaClass cls, JvmState jvm, Instruction[] code, bool isClinit)
+    private static LinkedInstruction[] LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
     {
+        var code = method.Code;
+        var consts = cls.Constants;
+        var output = new LinkedInstruction[code.Length];
         Dictionary<int, int> offsets = new Dictionary<int, int>();
         for (int i = 0; i < code.Length; i++)
             offsets[code[i].Offset] = i;
 
-        var consts = cls.Constants;
-        var output = new LinkedInstruction[code.Length];
+
         for (int instrIndex = 0; instrIndex < code.Length; instrIndex++)
         {
             var instruction = code[instrIndex];
