@@ -213,7 +213,7 @@ public class ClassLoader
                 if (ntb is not NameDescriptor nt)
                 {
                     nt = new NameDescriptor("", "");
-                    _logger.Log(LoadIssueType.BrokenConstant, _classFileName,
+                    _logger.Log(LoadIssueType.InvalidConstant, _classFileName,
                         $"Constant #{mr.NameTypeIndex} must be ND, but it is {ntb?.GetType().Name ?? "null"}");
                 }
 
@@ -234,7 +234,7 @@ public class ClassLoader
         var obj = consts[at];
         if (obj is string s)
             return s;
-        _logger.Log(LoadIssueType.BrokenConstant, _classFileName,
+        _logger.Log(LoadIssueType.InvalidConstant, _classFileName,
             $"Constant #{at} must be string, but it is {obj?.GetType().Name ?? "null"}");
         return string.Empty;
     }

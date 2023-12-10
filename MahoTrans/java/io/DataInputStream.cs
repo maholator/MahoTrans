@@ -55,7 +55,7 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.getfield, @class.PushConstant(StreamDescriptor).Split()),
                 new(JavaOpcode.aload_1),
                 new(JavaOpcode.iconst_0),
-                new(JavaOpcode.iload_1),
+                new(JavaOpcode.aload_1),
                 new(JavaOpcode.arraylength),
                 new(JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("read", "([BII)I", input_stream)).Split()),
@@ -381,6 +381,7 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.getfield, @class.PushConstant(StreamDescriptor).Split()),
                 new(JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass(nameof(available), "()I", input_stream)).Split()),
+                new(JavaOpcode.i2l),
                 new(JavaOpcode.lreturn)
             }
         };

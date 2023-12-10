@@ -56,10 +56,11 @@ public class Thread : Object, Runnable
                     @class.PushConstant(new NameDescriptorClass("_target", "Ljava/lang/Runnable;", "java/lang/Thread"))
                         .Split()),
                 new Instruction(4, JavaOpcode.dup),
-                new Instruction(5, JavaOpcode.ifnull, new byte[] { 0, 6 }),
+                new Instruction(5, JavaOpcode.ifnull, new byte[] { 0, 7 }),
                 new Instruction(8, JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("run", "()V", "java/lang/Runnable")).Split()),
                 new Instruction(11, JavaOpcode.@return),
+                new Instruction(12, JavaOpcode.@return),
             }
         };
     }

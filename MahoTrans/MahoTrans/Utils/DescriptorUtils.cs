@@ -75,6 +75,36 @@ public static class DescriptorUtils
         }
     }
 
+    public static PrimitiveType ParseDescriptor(char c)
+    {
+        switch (c)
+        {
+            case 'B':
+            case 'C':
+            case 'S':
+            case 'Z':
+            case 'I':
+                return PrimitiveType.Int;
+            case 'J':
+                return PrimitiveType.Long;
+            case 'F':
+                return PrimitiveType.Float;
+            case 'D':
+                return PrimitiveType.Double;
+            default:
+                return PrimitiveType.Reference;
+        }
+    }
+
+    public static PrimitiveType? GetMethodReturnType(string descriptor)
+    {
+        var cb = descriptor.IndexOf(')');
+        var c = descriptor[cb + 1];
+        if (c == 'V')
+            return null;
+        return ParseDescriptor(c);
+    }
+
     public static (object returnType, object[] args) ParseMethodDescriptor(string descriptor)
     {
         if (descriptor[0] != '(')

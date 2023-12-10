@@ -350,7 +350,7 @@ public class RecordStore : Object
             new Instruction(JavaOpcode.istore, new byte[] { 7 }), // size = vector.size()
             new Instruction(JavaOpcode.astore, new byte[] { 6 }), // vector = vector
             new Instruction(JavaOpcode.iconst_0),
-            new Instruction(JavaOpcode.astore, new byte[] { 8 }), // i = 0
+            new Instruction(JavaOpcode.istore, new byte[] { 8 }), // i = 0
             // stack is empty
             new Instruction(JavaOpcode.@goto, 19.Split()), // while (i<size)
             // loop begin
