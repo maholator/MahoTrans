@@ -1823,7 +1823,7 @@ public class JavaRunner
 
         // native check is omitted because why not
 
-        var argsLength = DescriptorUtils.ParseMethodArgsCount(m.Descriptor.Descriptor);
+        var argsLength = m.ArgsCount;
         argsLength += (@static ? 0 : 1);
         m.JavaBody.EnsureBytecodeLinked();
         var f = thread.Push(m.JavaBody);

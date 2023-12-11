@@ -1,4 +1,5 @@
 using System.Reflection;
+using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime.Types;
 
@@ -12,11 +13,17 @@ public class Method : IDisposable
     public Action<Frame>? Bridge;
     public readonly JavaClass Class;
 
+    /// <summary>
+    /// Number of method's self args. If method is non-static, this does not include "this" arg.
+    /// </summary>
+    public readonly int ArgsCount;
+
     public Method(NameDescriptor descriptor, MethodFlags flags, JavaClass @class)
     {
         Descriptor = descriptor;
         Flags = flags;
         Class = @class;
+        ArgsCount = DescriptorUtils.ParseMethodArgsCount(descriptor.Descriptor);
     }
 
     public bool IsStatic => Flags.HasFlag(MethodFlags.Static);
