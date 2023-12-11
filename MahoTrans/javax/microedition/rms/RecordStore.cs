@@ -47,9 +47,10 @@ public class RecordStore : Object
             new Instruction(JavaOpcode.iload_3),
             new Instruction(JavaOpcode.invokespecial, impl.Split()),
             // ID will be here at the stack root
-            // it didn't fail? Now events:
-            new Instruction(JavaOpcode.iload_1),
+            // save it to local 5 for events and leaving on stack for ireturn in the end
+            new Instruction(JavaOpcode.dup),
             new Instruction(JavaOpcode.istore, new byte[] { 5 }),
+            // all the above didn't fail? Now events:
         };
         return new JavaMethodBody(5, 9)
         {

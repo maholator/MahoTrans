@@ -169,8 +169,8 @@ public class DataOutputStream : OutputStream
             .PushConstant(
                 new NameDescriptorClass(nameof(encodeUTF), "(Ljava/lang/String;)[B", typeof(DataOutputStream))).Split();
         byte[] writeShort =
-            cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(OutputStream))).Split();
-        byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(OutputStream))).Split();
+            cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(DataOutputStream))).Split();
+        byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(DataOutputStream))).Split();
         return new JavaMethodBody(4, 2)
         {
             RawCode = new Instruction[]

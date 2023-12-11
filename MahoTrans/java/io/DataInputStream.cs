@@ -360,12 +360,12 @@ public class DataInputStream : InputStream
             {
                 new(JavaOpcode.aload_0),
                 new(JavaOpcode.getfield, @class.PushConstant(StreamDescriptor).Split()),
-                new(JavaOpcode.lload_1),
+                new(JavaOpcode.iload_1),
                 new(JavaOpcode.i2l),
                 new(JavaOpcode.invokevirtual,
                     @class.PushConstant(new NameDescriptorClass("skip", "(J)J", input_stream)).Split()),
                 new(JavaOpcode.l2i),
-                new(JavaOpcode.lreturn)
+                new(JavaOpcode.ireturn)
             }
         };
     }
