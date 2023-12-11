@@ -143,7 +143,7 @@ public partial class JvmState
     {
         var obj = ResolveObject(target);
 
-        if (obj.JavaClass.VirtualTable!.TryGetValue(pointer, out var mt))
+        if (obj.JavaClass.VirtualTableMap!.TryGetValue(pointer, out var mt))
             return mt;
 
         throw new JavaRuntimeError("No virt method found");

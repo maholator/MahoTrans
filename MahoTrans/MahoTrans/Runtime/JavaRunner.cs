@@ -1797,7 +1797,11 @@ public class JavaRunner
         var i = frame.StackTop - (pointer.ArgsCount + 1);
         var obj = state.ResolveObject(frame.Stack[i]);
 
-        if (!obj.JavaClass.VirtualTable!.TryGetValue(pointer.Pointer, out var m))
+        var virtTable = obj.JavaClass.VirtualTable!;
+        if (pointer.Pointer >= virtTable.Length)
+            ThrowUnresolvedVirtual(pointer, state, obj);
+        var m = virtTable[pointer.Pointer];
+        if (m == null)
             ThrowUnresolvedVirtual(pointer, state, obj);
 
         CallMethod(m, false, frame, thread);

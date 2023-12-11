@@ -18,7 +18,8 @@ public class JavaClass
     public string[] Interfaces = Array.Empty<string>();
     public Dictionary<NameDescriptor, Field> Fields = new();
     public Dictionary<NameDescriptor, Method> Methods = new();
-    public Dictionary<int, Method>? VirtualTable;
+    public Method?[]? VirtualTable;
+    public Dictionary<int, Method>? VirtualTableMap;
     public Type? ClrType;
     public bool PendingInitializer = true;
     public Action<List<Reference>>? StaticAnnouncer;
@@ -132,7 +133,7 @@ public class JavaClass
         {
             if (Super.VirtualTable == null)
                 Super.GenerateVirtualTable(jvm);
-            dict = new Dictionary<int, Method>(Super.VirtualTable);
+            dict = new Dictionary<int, Method>(Super.VirtualTableMap!);
         }
 
         dict ??= new Dictionary<int, Method>();
@@ -142,7 +143,21 @@ public class JavaClass
             dict[jvm.GetVirtualPointer(method.Key)] = method.Value;
         }
 
-        VirtualTable = dict;
+        VirtualTableMap = dict;
+
+        if (dict.Count == 0)
+        {
+            VirtualTable = Array.Empty<Method>();
+            return;
+        }
+
+        var arr = new Method?[dict.Keys.Max() + 1];
+        foreach (var kvp in dict)
+        {
+            arr[kvp.Key] = kvp.Value;
+        }
+
+        VirtualTable = arr;
     }
 
     public void RecalculateSize()
