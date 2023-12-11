@@ -366,6 +366,7 @@ public static class BytecodeLinker
                 var args = instruction.Args;
                 object data;
                 int intData = 0;
+                ushort shortData = 0;
                 var opcode = instruction.Opcode;
 
                 switch (instruction.Opcode)
@@ -1004,7 +1005,9 @@ public static class BytecodeLinker
                         SetNextStack();
                         break;
                     case JavaOpcode.iinc:
-                        data = new int[] { args[0], args[1] };
+                        intData = args[1];
+                        shortData = args[0];
+                        data = null!;
                         // no changes on stack
                         SetNextStack();
                         break;
@@ -1173,7 +1176,7 @@ public static class BytecodeLinker
                         data = null!;
                         SetStack(target);
                         entryPoints.Push(target);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1214,7 +1217,7 @@ public static class BytecodeLinker
 
                         data = d;
                         entryPoints.Push(d[0]);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1248,38 +1251,38 @@ public static class BytecodeLinker
 
                         data = d;
                         entryPoints.Push(d[0]);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
                     case JavaOpcode.ireturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Int);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.lreturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Long);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.freturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Float);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.dreturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Double);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.areturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Reference);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.@return:
@@ -1287,7 +1290,7 @@ public static class BytecodeLinker
                         if (isClinit)
                             opcode = JavaOpcode._inplacereturn;
                         data = null!;
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1340,10 +1343,12 @@ public static class BytecodeLinker
                     case JavaOpcode.invokevirtual:
                     {
                         var vp = LinkVirtualCall(jvm, consts, args);
-                        data = vp;
-                        emulatedStack.Pop(vp.ArgsCount); //TODO check args
+                        intData = vp.Item1;
+                        shortData = vp.Item2;
+                        data = null!;
+                        emulatedStack.Pop(vp.Item2); //TODO check args
                         PopWithAssert(PrimitiveType.Reference);
-                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Pointer).Descriptor);
+                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Item1).Descriptor);
                         if (ret.HasValue) emulatedStack.Push(ret.Value);
                         SetNextStack();
                         break;
@@ -1368,10 +1373,12 @@ public static class BytecodeLinker
                     case JavaOpcode.invokeinterface:
                     {
                         var vp = LinkVirtualCall(jvm, consts, args);
-                        data = vp;
-                        emulatedStack.Pop(vp.ArgsCount); //TODO check args
+                        intData = vp.Item1;
+                        shortData = vp.Item2;
+                        data = null!;
+                        emulatedStack.Pop(vp.Item2); //TODO check args
                         PopWithAssert(PrimitiveType.Reference);
-                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Pointer).Descriptor);
+                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Item1).Descriptor);
                         if (ret.HasValue) emulatedStack.Push(ret.Value);
                         SetNextStack();
                         break;
@@ -1419,7 +1426,7 @@ public static class BytecodeLinker
                     case JavaOpcode.athrow:
                         data = null!;
                         PopWithAssert(PrimitiveType.Reference);
-                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.checkcast:
@@ -1531,7 +1538,7 @@ public static class BytecodeLinker
                         throw new ArgumentOutOfRangeException();
                 }
 
-                output[instrIndex] = new LinkedInstruction(opcode, intData, data);
+                output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                 isLinked[instrIndex] = true;
 
                 void PushUnknown(object o)
@@ -1591,7 +1598,7 @@ public static class BytecodeLinker
         return output;
     }
 
-    private static VirtualPointer LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
+    private static (int, ushort) LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
     {
         var ndc = consts[Combine(args[0], args[1])];
         NameDescriptor nd;
@@ -1609,7 +1616,7 @@ public static class BytecodeLinker
         }
 
         var argsCount = DescriptorUtils.ParseMethodArgsCount(nd.Descriptor);
-        return new VirtualPointer(jvm.GetVirtualPointer(nd), argsCount);
+        return (jvm.GetVirtualPointer(nd), (ushort)argsCount);
     }
 
     public static int Combine(byte indexByte1, byte indexByte2)

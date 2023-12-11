@@ -146,7 +146,6 @@ public class JavaRunner
         }
 #endif
         var instr = code[pointer];
-        var args = instr.Data;
         switch (instr.Opcode)
         {
             case JavaOpcode.nop:
@@ -226,7 +225,7 @@ public class JavaRunner
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
             {
-                state.PushClassConstant(frame, args);
+                state.PushClassConstant(frame, instr.Data);
                 pointer++;
                 break;
             }
@@ -892,11 +891,10 @@ public class JavaRunner
             case JavaOpcode.iinc:
                 unsafe
                 {
-                    var ia = (int[])args;
-                    long val = frame.LocalVariables[ia[0]];
+                    long val = frame.LocalVariables[instr.ShortData];
                     var i = (int)val;
-                    i += (sbyte)ia[1];
-                    frame.LocalVariables[ia[0]] = i;
+                    i += (sbyte)instr.IntData;
+                    frame.LocalVariables[instr.ShortData] = i;
                     pointer++;
                     break;
                 }
@@ -1122,7 +1120,7 @@ public class JavaRunner
                 throw new NotImplementedException("No ret opcode");
             case JavaOpcode.tableswitch:
             {
-                var ia = (int[])args;
+                var ia = (int[])instr.Data;
                 int low = ia[1];
                 int high = ia[2];
 
@@ -1142,7 +1140,7 @@ public class JavaRunner
             }
             case JavaOpcode.lookupswitch:
             {
-                var ia = (int[])args;
+                var ia = (int[])instr.Data;
                 int count = ia[1];
 
                 var i = 2;
@@ -1246,7 +1244,7 @@ public class JavaRunner
             case JavaOpcode.getfield:
             case JavaOpcode.putfield:
             {
-                var p = (FieldPointer)args;
+                var p = (FieldPointer)instr.Data;
                 if (p.Class.PendingInitializer)
                 {
                     p.Class.Initialize(thread);
@@ -1258,22 +1256,22 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.invokevirtual:
-                CallVirtual((VirtualPointer)args, frame, thread, state);
+                CallVirtual(instr.IntData, instr.ShortData, frame, thread, state);
                 break;
             case JavaOpcode.invokespecial:
-                CallMethod((Method)args, false, frame, thread);
+                CallMethod((Method)instr.Data, false, frame, thread);
                 break;
             case JavaOpcode.invokestatic:
-                CallMethod((Method)args, true, frame, thread);
+                CallMethod((Method)instr.Data, true, frame, thread);
                 break;
             case JavaOpcode.invokeinterface:
-                CallVirtual((VirtualPointer)args, frame, thread, state);
+                CallVirtual(instr.IntData, instr.ShortData, frame, thread, state);
                 break;
             case JavaOpcode.invokedynamic:
                 throw new JavaRuntimeError("Dynamic invoke is not supported");
             case JavaOpcode.newobject:
             {
-                var type = (JavaClass)args;
+                var type = (JavaClass)instr.Data;
                 var r = state.AllocateObject(type);
                 frame.PushReference(r);
                 pointer++;
@@ -1289,7 +1287,7 @@ public class JavaRunner
             case JavaOpcode.anewarray:
             {
                 int len = frame.PopInt();
-                var type = (JavaClass)args;
+                var type = (JavaClass)instr.Data;
                 frame.PushReference(state.AllocateReferenceArray(len, type));
                 pointer++;
                 break;
@@ -1317,7 +1315,7 @@ public class JavaRunner
             case JavaOpcode.checkcast:
                 unsafe
                 {
-                    var type = (JavaClass)args;
+                    var type = (JavaClass)instr.Data;
                     var obj = (Reference)frame.Stack[frame.StackTop - 1];
                     if (obj.IsNull)
                     {
@@ -1337,7 +1335,7 @@ public class JavaRunner
                 }
             case JavaOpcode.instanceof:
             {
-                var type = (JavaClass)args;
+                var type = (JavaClass)instr.Data;
 
                 var obj = frame.PopReference();
                 if (obj.IsNull)
@@ -1375,7 +1373,7 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.wide:
-                var aargs = (byte[])args;
+                var aargs = (byte[])instr.Data;
                 var op = (JavaOpcode)aargs[0];
                 if (op == JavaOpcode.iinc)
                 {
@@ -1431,7 +1429,7 @@ public class JavaRunner
                 break;
             case JavaOpcode.multianewarray:
             {
-                var d = (MultiArrayInitializer)args;
+                var d = (MultiArrayInitializer)instr.Data;
                 var dims = d.dimensions;
                 int[] count = new int[dims];
                 for (int i = 0; i < count.Length; i++)
@@ -1789,18 +1787,19 @@ public class JavaRunner
         frame.Discard(2);
 
         // call
-        CallVirtual(new VirtualPointer(virtPoint, argsCount), frame, thread, state);
+        CallVirtual(virtPoint, (ushort)argsCount, frame, thread, state);
     }
 
-    private static unsafe void CallVirtual(VirtualPointer pointer, Frame frame, JavaThread thread, JvmState state)
+    private static unsafe void CallVirtual(int pointer, ushort argsCount, Frame frame, JavaThread thread,
+        JvmState state)
     {
-        var i = frame.StackTop - (pointer.ArgsCount + 1);
+        var i = frame.StackTop - (argsCount + 1);
         var obj = state.ResolveObject(frame.Stack[i]);
 
         var virtTable = obj.JavaClass.VirtualTable!;
-        if (pointer.Pointer >= virtTable.Length)
+        if (pointer >= virtTable.Length)
             ThrowUnresolvedVirtual(pointer, state, obj);
-        var m = virtTable[pointer.Pointer];
+        var m = virtTable[pointer];
         if (m == null)
             ThrowUnresolvedVirtual(pointer, state, obj);
 
@@ -1808,10 +1807,10 @@ public class JavaRunner
     }
 
     [DoesNotReturn]
-    private static void ThrowUnresolvedVirtual(VirtualPointer pointer, JvmState state, Object obj)
+    private static void ThrowUnresolvedVirtual(int pointer, JvmState state, Object obj)
     {
         throw new JavaRuntimeError(
-            $"No virtual method {state.DecodeVirtualPointer(pointer.Pointer)} found on object {obj.JavaClass.Name}");
+            $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
     }
 
     private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread)
