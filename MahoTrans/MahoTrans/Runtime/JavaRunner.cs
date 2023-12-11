@@ -214,12 +214,12 @@ public class JavaRunner
                 break;
             case JavaOpcode.bipush:
             {
-                frame.PushInt((int)args);
+                frame.PushInt(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.sipush:
-                frame.PushInt((int)args);
+                frame.PushInt(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.ldc:
@@ -232,31 +232,31 @@ public class JavaRunner
             }
             case JavaOpcode.iload:
             {
-                frame.PushFromLocal((int)args, PrimitiveType.Int);
+                frame.PushFromLocal(instr.IntData, PrimitiveType.Int);
                 pointer++;
                 break;
             }
             case JavaOpcode.lload:
             {
-                frame.PushFromLocal((int)args, PrimitiveType.Long);
+                frame.PushFromLocal(instr.IntData, PrimitiveType.Long);
                 pointer++;
                 break;
             }
             case JavaOpcode.fload:
             {
-                frame.PushFromLocal((int)args, PrimitiveType.Float);
+                frame.PushFromLocal(instr.IntData, PrimitiveType.Float);
                 pointer++;
                 break;
             }
             case JavaOpcode.dload:
             {
-                frame.PushFromLocal((int)args, PrimitiveType.Double);
+                frame.PushFromLocal(instr.IntData, PrimitiveType.Double);
                 pointer++;
                 break;
             }
             case JavaOpcode.aload:
             {
-                frame.PushFromLocal((int)args, PrimitiveType.Reference);
+                frame.PushFromLocal(instr.IntData, PrimitiveType.Reference);
                 pointer++;
                 break;
             }
@@ -373,23 +373,23 @@ public class JavaRunner
                 pointer++;
                 break;
             case JavaOpcode.istore:
-                frame.PopToLocal((int)args);
+                frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.lstore:
-                frame.PopToLocal((int)args);
+                frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.fstore:
-                frame.PopToLocal((int)args);
+                frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.dstore:
-                frame.PopToLocal((int)args);
+                frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.astore:
-                frame.PopToLocal((int)args);
+                frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
             case JavaOpcode.istore_0:
@@ -1024,97 +1024,97 @@ public class JavaRunner
             case JavaOpcode.ifeq:
             {
                 var val = frame.PopInt();
-                pointer = val == 0 ? (int)args : pointer + 1;
+                pointer = val == 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.ifne:
             {
                 var val = frame.PopInt();
-                pointer = val != 0 ? (int)args : pointer + 1;
+                pointer = val != 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.iflt:
             {
                 var val = frame.PopInt();
-                pointer = val < 0 ? (int)args : pointer + 1;
+                pointer = val < 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.ifge:
             {
                 var val = frame.PopInt();
-                pointer = val >= 0 ? (int)args : pointer + 1;
+                pointer = val >= 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.ifgt:
             {
                 var val = frame.PopInt();
-                pointer = val > 0 ? (int)args : pointer + 1;
+                pointer = val > 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.ifle:
             {
                 var val = frame.PopInt();
-                pointer = val <= 0 ? (int)args : pointer + 1;
+                pointer = val <= 0 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmpeq:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 == val2 ? (int)args : pointer + 1;
+                pointer = val1 == val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmpne:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 != val2 ? (int)args : pointer + 1;
+                pointer = val1 != val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmplt:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 < val2 ? (int)args : pointer + 1;
+                pointer = val1 < val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmpge:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 >= val2 ? (int)args : pointer + 1;
+                pointer = val1 >= val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmpgt:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 > val2 ? (int)args : pointer + 1;
+                pointer = val1 > val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_icmple:
             {
                 var val2 = frame.PopInt();
                 var val1 = frame.PopInt();
-                pointer = val1 <= val2 ? (int)args : pointer + 1;
+                pointer = val1 <= val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_acmpeq:
             {
                 var val1 = frame.PopReference();
                 var val2 = frame.PopReference();
-                pointer = val1 == val2 ? (int)args : pointer + 1;
+                pointer = val1 == val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.if_acmpne:
             {
                 var val1 = frame.PopReference();
                 var val2 = frame.PopReference();
-                pointer = val1 != val2 ? (int)args : pointer + 1;
+                pointer = val1 != val2 ? instr.IntData : pointer + 1;
                 break;
             }
             case JavaOpcode.@goto:
-                pointer = (int)args;
+                pointer = instr.IntData;
                 break;
             case JavaOpcode.jsr:
                 throw new NotImplementedException("No jsr opcode");
@@ -1282,7 +1282,7 @@ public class JavaRunner
             case JavaOpcode.newarray:
             {
                 int len = frame.PopInt();
-                frame.PushReference(state.AllocateArray((ArrayType)args, len));
+                frame.PushReference(state.AllocateArray((ArrayType)instr.IntData, len));
                 pointer++;
                 break;
             }
@@ -1459,10 +1459,10 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.ifnull:
-                pointer = frame.PopReference().IsNull ? (int)args : pointer + 1;
+                pointer = frame.PopReference().IsNull ? instr.IntData : pointer + 1;
                 break;
             case JavaOpcode.ifnonnull:
-                pointer = frame.PopReference().IsNull == false ? (int)args : pointer + 1;
+                pointer = frame.PopReference().IsNull == false ? instr.IntData : pointer + 1;
                 break;
             case JavaOpcode.goto_w:
                 throw new NotImplementedException("No goto opcode");

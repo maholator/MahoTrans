@@ -365,6 +365,7 @@ public static class BytecodeLinker
                 var instruction = code[instrIndex];
                 var args = instruction.Args;
                 object data;
+                int intData = 0;
                 var opcode = instruction.Opcode;
 
                 switch (instruction.Opcode)
@@ -410,14 +411,15 @@ public static class BytecodeLinker
                         break;
                     case JavaOpcode.bipush:
                     {
-                        sbyte b = unchecked((sbyte)args[0]);
-                        data = (int)b;
+                        intData = unchecked((sbyte)args[0]);
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Int);
                         SetNextStack();
                         break;
                     }
                     case JavaOpcode.sipush:
-                        data = Combine(args[0], args[1]);
+                        intData = Combine(args[0], args[1]);
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Int);
                         SetNextStack();
                         break;
@@ -434,27 +436,32 @@ public static class BytecodeLinker
                         SetNextStack();
                         break;
                     case JavaOpcode.iload:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Int);
                         SetNextStack();
                         break;
                     case JavaOpcode.lload:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Long);
                         SetNextStack();
                         break;
                     case JavaOpcode.fload:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Float);
                         SetNextStack();
                         break;
                     case JavaOpcode.dload:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Double);
                         SetNextStack();
                         break;
                     case JavaOpcode.aload:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         emulatedStack.Push(PrimitiveType.Reference);
                         SetNextStack();
                         break;
@@ -543,27 +550,32 @@ public static class BytecodeLinker
                         SetNextStack();
                         break;
                     case JavaOpcode.istore:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Int);
                         SetNextStack();
                         break;
                     case JavaOpcode.lstore:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Long);
                         SetNextStack();
                         break;
                     case JavaOpcode.fstore:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Float);
                         SetNextStack();
                         break;
                     case JavaOpcode.dstore:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Double);
                         SetNextStack();
                         break;
                     case JavaOpcode.astore:
-                        data = (int)args[0];
+                        intData = args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Reference);
                         SetNextStack();
                         break;
@@ -1117,7 +1129,8 @@ public static class BytecodeLinker
                     {
                         PopWithAssert(PrimitiveType.Int);
                         int target = CalcTargetInstruction();
-                        data = target;
+                        intData = target;
+                        data = null!;
                         SetNextStack();
                         SetStack(target);
                         entryPoints.Push(target);
@@ -1133,7 +1146,8 @@ public static class BytecodeLinker
                         PopWithAssert(PrimitiveType.Int);
                         PopWithAssert(PrimitiveType.Int);
                         int target = CalcTargetInstruction();
-                        data = target;
+                        intData = target;
+                        data = null!;
                         SetNextStack();
                         SetStack(target);
                         entryPoints.Push(target);
@@ -1145,7 +1159,8 @@ public static class BytecodeLinker
                         PopWithAssert(PrimitiveType.Reference);
                         PopWithAssert(PrimitiveType.Reference);
                         int target = CalcTargetInstruction();
-                        data = target;
+                        intData = target;
+                        data = null!;
                         SetNextStack();
                         SetStack(target);
                         entryPoints.Push(target);
@@ -1154,10 +1169,11 @@ public static class BytecodeLinker
                     case JavaOpcode.@goto:
                     {
                         int target = CalcTargetInstruction();
-                        data = target;
+                        intData = target;
+                        data = null!;
                         SetStack(target);
                         entryPoints.Push(target);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1198,7 +1214,7 @@ public static class BytecodeLinker
 
                         data = d;
                         entryPoints.Push(d[0]);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1232,38 +1248,38 @@ public static class BytecodeLinker
 
                         data = d;
                         entryPoints.Push(d[0]);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
                     case JavaOpcode.ireturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Int);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.lreturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Long);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.freturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Float);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.dreturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Double);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.areturn:
                         data = null!;
                         PopWithAssert(PrimitiveType.Reference);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.@return:
@@ -1271,7 +1287,7 @@ public static class BytecodeLinker
                         if (isClinit)
                             opcode = JavaOpcode._inplacereturn;
                         data = null!;
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     }
@@ -1374,7 +1390,8 @@ public static class BytecodeLinker
                         break;
                     }
                     case JavaOpcode.newarray:
-                        data = (ArrayType)args[0];
+                        intData = (int)(ArrayType)args[0];
+                        data = null!;
                         PopWithAssert(PrimitiveType.Int);
                         emulatedStack.Push(PrimitiveType.Reference);
                         SetNextStack();
@@ -1402,7 +1419,7 @@ public static class BytecodeLinker
                     case JavaOpcode.athrow:
                         data = null!;
                         PopWithAssert(PrimitiveType.Reference);
-                        output[instrIndex] = new LinkedInstruction(opcode, data);
+                        output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                         isLinked[instrIndex] = true;
                         goto entryPointsLoop;
                     case JavaOpcode.checkcast:
@@ -1490,7 +1507,8 @@ public static class BytecodeLinker
                     {
                         PopWithAssert(PrimitiveType.Reference);
                         int target = CalcTargetInstruction();
-                        data = target;
+                        intData = target;
+                        data = null!;
                         SetNextStack();
                         SetStack(target);
                         entryPoints.Push(target);
@@ -1513,7 +1531,7 @@ public static class BytecodeLinker
                         throw new ArgumentOutOfRangeException();
                 }
 
-                output[instrIndex] = new LinkedInstruction(opcode, data);
+                output[instrIndex] = new LinkedInstruction(opcode, intData, data);
                 isLinked[instrIndex] = true;
 
                 void PushUnknown(object o)
