@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace MahoTrans.Runtime;
 
 public partial class JvmState
@@ -78,6 +80,7 @@ public partial class JvmState
         } while (_running);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private void ExecuteInternalUnlocked()
     {
         do

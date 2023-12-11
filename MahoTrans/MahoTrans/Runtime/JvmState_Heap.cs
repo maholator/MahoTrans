@@ -362,7 +362,7 @@ public partial class JvmState
     /// Helper for GC. Collects all references to objects which must stay alive.
     /// </summary>
     /// <returns>List of references. This may contain null and invalid references (i.e. random numbers which point to nowhere).</returns>
-    public List<Reference> CollectObjectGraphRoots()
+    public unsafe List<Reference> CollectObjectGraphRoots()
     {
         List<Reference> roots = new List<Reference>();
 
@@ -398,7 +398,7 @@ public partial class JvmState
                     if (frame == null)
                         continue;
 
-                    var top = frame.Stack.Length;
+                    var top = frame.Method.StackSize;
 
                     for (int i = 0; i < top; i++)
                     {
@@ -408,8 +408,9 @@ public partial class JvmState
                         }
                     }
 
-                    foreach (var variable in frame.LocalVariables)
+                    for (int i = 0; i < frame.Method.LocalsCount; i++)
                     {
+                        long variable = frame.LocalVariables[i];
                         //TODO push only references
                         if (variable != 0)
                             roots.Add(variable);

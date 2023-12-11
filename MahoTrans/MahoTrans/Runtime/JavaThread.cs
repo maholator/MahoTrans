@@ -136,7 +136,7 @@ public class JavaThread
     /// <param name="state"></param>
     /// <returns></returns>
     /// <exception cref="JavaRuntimeError"></exception>
-    public static JavaThread CreateReal(Thread thread)
+    public static unsafe JavaThread CreateReal(Thread thread)
     {
         if (thread.This.IsNull)
             throw new JavaRuntimeError("Attempt to launch thread which is created not in java heap.");

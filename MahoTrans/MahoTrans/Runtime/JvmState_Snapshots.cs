@@ -221,7 +221,7 @@ public partial class JvmState
         }
     }
 
-    private SnapshotedThread[] SnapshotThreads(IEnumerable<JavaThread> threads) =>
+    private static SnapshotedThread[] SnapshotThreads(IEnumerable<JavaThread> threads) =>
         threads.Select(SnapshotedThread.Create).ToArray();
 
     private JavaThread[] Restore(SnapshotedThread[] snapshotedThreads)
@@ -234,14 +234,34 @@ public partial class JvmState
             foreach (var sh in x.Frames)
             {
                 var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
-                frames.Add(new Frame(method)
+                var f = new Frame(method)
                 {
                     Pointer = sh.Pointer,
-                    LocalVariables = sh.LocalVariables.ToArray(),
-                    Stack = sh.Stack.ToArray(),
-                    StackTypes = sh.StackTypes.ToArray(),
                     StackTop = sh.StackTop
-                });
+                };
+                unsafe
+                {
+                    fixed (long* ptr = sh.Stack)
+                    {
+                        var len = sh.Stack.Length * sizeof(long);
+                        Buffer.MemoryCopy(ptr, f.Stack, len, len);
+                    }
+
+                    fixed (PrimitiveType* ptr = sh.StackTypes)
+                    {
+                        var len = sh.StackTypes.Length * sizeof(PrimitiveType);
+                        Buffer.MemoryCopy(ptr, f.StackTypes, len,
+                            len);
+                    }
+
+                    fixed (long* ptr = sh.LocalVariables)
+                    {
+                        var bytes = sh.LocalVariables.Length * sizeof(long);
+                        Buffer.MemoryCopy(ptr, f.LocalVariables, bytes, bytes);
+                    }
+                }
+
+                frames.Add(f);
             }
 
             jt.CallStack = frames.ToArray();
@@ -269,12 +289,13 @@ public partial class JvmState
             s.Model = jt.Model;
             s.Frames = jt.CallStack.Take(jt.ActiveFrameIndex + 1).Select(x =>
             {
+                var stack = x.DumpStack();
                 return new SnapshotedFrame
                 {
                     Pointer = x.Pointer,
-                    LocalVariables = x.LocalVariables.ToArray(),
-                    Stack = x.Stack.ToArray(),
-                    StackTypes = x.StackTypes.ToArray(),
+                    LocalVariables = x.DumpLocalVariables(),
+                    Stack = stack.stack,
+                    StackTypes = stack.types,
                     StackTop = x.StackTop,
                     MethodDescriptor = x.Method.Method.Descriptor,
                     ClassName = x.Method.Method.Class.Name,

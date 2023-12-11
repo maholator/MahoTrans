@@ -1,16 +1,18 @@
+using System.Runtime.InteropServices;
+
 namespace MahoTrans.Runtime;
 
-public class Frame
+public unsafe class Frame
 {
     public JavaMethodBody Method;
     public int Pointer;
-    public long[] LocalVariables;
-    public long[] Stack;
+    public long* LocalVariables;
+    public long* Stack = null;
 
     /// <summary>
     /// Types of values on stack.
     /// </summary>
-    public PrimitiveType[] StackTypes;
+    public PrimitiveType* StackTypes;
 
     /// <summary>
     /// Pointer to stack top. Stack contains topmost operand at this index-1 (if zero, stack is empty). Stack length is equal to this field.
@@ -20,9 +22,7 @@ public class Frame
     public Frame(JavaMethodBody method)
     {
         Method = method;
-        LocalVariables = new long[method.LocalsCount];
-        Stack = new long[method.StackSize];
-        StackTypes = new PrimitiveType[method.StackSize];
+        AllocateBuffers(method.LocalsCount, method.StackSize);
     }
 
     public void Reinitialize(JavaMethodBody method)
@@ -33,10 +33,59 @@ public class Frame
         if (Method != method)
         {
             Method = method;
-            Stack = new long[method.StackSize];
-            StackTypes = new PrimitiveType[method.StackSize];
-            LocalVariables = new long[method.LocalsCount];
+            DeallocateBuffers();
+            AllocateBuffers(method.LocalsCount, method.StackSize);
         }
+    }
+
+    private void AllocateBuffers(ushort locals, ushort stack)
+    {
+        Stack = (long*)NativeMemory.Alloc(stack, sizeof(long));
+        StackTypes = (PrimitiveType*)NativeMemory.Alloc(stack, sizeof(PrimitiveType));
+        LocalVariables = (long*)NativeMemory.Alloc(locals, sizeof(long));
+    }
+
+    private void DeallocateBuffers()
+    {
+        if (Stack == null)
+            return;
+
+        NativeMemory.Free(Stack);
+        NativeMemory.Free(StackTypes);
+        NativeMemory.Free(LocalVariables);
+    }
+
+    ~Frame()
+    {
+        DeallocateBuffers();
+    }
+
+    public (long[] stack, PrimitiveType[] types) DumpStack()
+    {
+        var s = new long[Method.StackSize];
+        var t = new PrimitiveType[Method.StackSize];
+        fixed (long* sPtr = s)
+        {
+            Buffer.MemoryCopy(Stack, sPtr, s.Length * sizeof(long), s.Length * sizeof(long));
+        }
+
+        fixed (PrimitiveType* tPtr = t)
+        {
+            Buffer.MemoryCopy(StackTypes, tPtr, t.Length * sizeof(PrimitiveType), t.Length * sizeof(PrimitiveType));
+        }
+
+        return (s, t);
+    }
+
+    public long[] DumpLocalVariables()
+    {
+        var s = new long[Method.LocalsCount];
+        fixed (long* sPtr = s)
+        {
+            Buffer.MemoryCopy(LocalVariables, sPtr, s.Length * sizeof(long), s.Length * sizeof(long));
+        }
+
+        return s;
     }
 
     public void DiscardAll() => StackTop = 0;
@@ -47,7 +96,7 @@ public class Frame
     /// Pushes value into the stack.
     /// </summary>
     /// <param name="value">Value to push.</param>
-    /// <param name="size">True if value is long or double.</param>
+    /// <param name="type">Value type.</param>
     public void PushUnchecked(long value, PrimitiveType type)
     {
         Stack[StackTop] = value;

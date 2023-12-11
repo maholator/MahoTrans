@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
@@ -8,6 +9,7 @@ namespace MahoTrans.Runtime;
 
 public class JavaRunner
 {
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static void Step(JavaThread thread, JvmState state)
     {
         //var frame = thread.ActiveFrame;
@@ -129,6 +131,7 @@ public class JavaRunner
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static void StepInternal(JavaThread thread, JvmState state)
     {
         var frame = thread.ActiveFrame!;
@@ -525,13 +528,14 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.dup:
-            {
-                frame.Stack[frame.StackTop] = frame.Stack[frame.StackTop - 1];
-                frame.StackTypes[frame.StackTop] = frame.StackTypes[frame.StackTop - 1];
-                frame.StackTop++;
-                pointer++;
-                break;
-            }
+                unsafe
+                {
+                    frame.Stack[frame.StackTop] = frame.Stack[frame.StackTop - 1];
+                    frame.StackTypes[frame.StackTop] = frame.StackTypes[frame.StackTop - 1];
+                    frame.StackTop++;
+                    pointer++;
+                    break;
+                }
             case JavaOpcode.dup_x1:
             {
                 var v1 = frame.Pop();
@@ -884,14 +888,16 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.iinc:
-            {
-                var ia = (int[])args;
-                var i = (int)frame.LocalVariables[ia[0]];
-                i += (sbyte)ia[1];
-                frame.LocalVariables[ia[0]] = i;
-                pointer++;
-                break;
-            }
+                unsafe
+                {
+                    var ia = (int[])args;
+                    long val = frame.LocalVariables[ia[0]];
+                    var i = (int)val;
+                    i += (sbyte)ia[1];
+                    frame.LocalVariables[ia[0]] = i;
+                    pointer++;
+                    break;
+                }
             case JavaOpcode.i2l:
                 frame.PushLong(frame.PopInt());
                 pointer++;
@@ -1371,10 +1377,13 @@ public class JavaRunner
                 var op = (JavaOpcode)aargs[0];
                 if (op == JavaOpcode.iinc)
                 {
-                    var index = BytecodeLinker.Combine(aargs[1], aargs[2]);
-                    var i = (int)frame.LocalVariables[index];
-                    i += BytecodeLinker.Combine(aargs[3], aargs[4]);
-                    frame.LocalVariables[index] = i;
+                    unsafe
+                    {
+                        var index = BytecodeLinker.Combine(aargs[1], aargs[2]);
+                        var i = (int)frame.LocalVariables[index];
+                        i += BytecodeLinker.Combine(aargs[3], aargs[4]);
+                        frame.LocalVariables[index] = i;
+                    }
                 }
                 else
                 {
@@ -1766,7 +1775,7 @@ public class JavaRunner
 
         // resolving object to check <clinit>
         var obj = state.ResolveObject(frame.PopReferenceFrom());
-        var callClass = obj.JavaClass.VirtualTable[virtPoint].Class;
+        var callClass = obj.JavaClass.VirtualTable![virtPoint].Class;
         if (callClass.PendingInitializer)
         {
             callClass.Initialize(thread);
@@ -1821,7 +1830,10 @@ public class JavaRunner
         frame.SetFrom(argsLength);
         for (var arg = 0; arg < argsLength; arg++)
         {
-            f.LocalVariables[arg] = frame.PopUnknownFrom();
+            unsafe
+            {
+                f.LocalVariables[arg] = frame.PopUnknownFrom();
+            }
         }
 
         frame.Discard(argsLength);
