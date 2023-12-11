@@ -1,3 +1,4 @@
+using MahoTrans.Native;
 using Object = java.lang.Object;
 
 namespace javax.microedition.ams;
@@ -7,4 +8,5 @@ namespace javax.microedition.ams;
 /// </summary>
 public class Event : Object
 {
+    public void invoke() => throw new AbstractJavaMethodCallError();
 }
