@@ -8,17 +8,32 @@ public class List : Screen
 {
     [JavaIgnore] public List<ListItem> Items = new();
 
+    public ChoiceType Type;
+
+    [JavaType(typeof(Command))] public static Reference SELECT_COMMAND;
+
+    [ClassInit]
+    public static void ClInit()
+    {
+        var select = Jvm.AllocateObject<Command>();
+        select.Init(Jvm.AllocateString(""), Command.SCREEN, 0);
+        SELECT_COMMAND = select.This;
+    }
+
     [InitMethod]
     public void Init([String] Reference title, int listType)
     {
         base.Init();
         setTitle(title);
-
-        //todo check and assign listType
+        if (listType < 1 || listType > 3)
+            Jvm.Throw<IllegalArgumentException>();
+        Type = (ChoiceType)listType;
     }
 
     [InitMethod]
-    public void Init([String] Reference title, int listType, Reference stringElements, Reference imageElements)
+    public void Init([String] Reference title, int listType, [JavaType("[Ljava/lang/String;")] Reference stringElements,
+        [JavaType("[Ljavax/microedition/lcdui/Image;")]
+        Reference imageElements)
     {
         Init(title, listType);
 
