@@ -260,7 +260,7 @@ public static class BytecodeLinker
             if (locals[i].Count > 1)
             {
                 locals[i].Sort();
-                logger.Log(LoadIssueType.MultitypeLocalVariable, cls,
+                logger.Log(LoadIssueType.MultiTypeLocalVariable, cls,
                     $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {method}");
             }
         }

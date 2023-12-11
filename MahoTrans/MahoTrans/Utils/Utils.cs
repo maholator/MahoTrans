@@ -92,7 +92,7 @@ public static class Utils
             LoadIssueType.MissingClassSuper => LogLevel.Error,
             LoadIssueType.MissingClassField => LogLevel.Warning,
             LoadIssueType.LocalVariableIndexOutOfBounds => LogLevel.Error,
-            LoadIssueType.MultitypeLocalVariable => LogLevel.Info,
+            LoadIssueType.MultiTypeLocalVariable => LogLevel.Info,
             LoadIssueType.MethodWithoutReturn => LogLevel.Error,
             _ => 0
         };
