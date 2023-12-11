@@ -65,13 +65,15 @@ public class Thread : Object, Runnable
         };
     }
 
+    [return: JavaType(typeof(Thread))]
+    public static Reference currentThread() => CurrentThread!.Model;
+
     public void setPriority(int p)
     {
     }
 
     public static void sleep(long time)
     {
-        //return;
         if (CurrentThread != null)
             Jvm.Detach(CurrentThread, time);
     }
