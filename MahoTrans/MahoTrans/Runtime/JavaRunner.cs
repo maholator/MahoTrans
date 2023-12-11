@@ -511,30 +511,24 @@ public class JavaRunner
                 break;
             case JavaOpcode.pop:
             {
-                frame.Pop();
-                // no check
+                frame.StackTop--;
                 pointer++;
                 break;
             }
             case JavaOpcode.pop2:
             {
-                frame.Pop();
+                frame.StackTop--;
                 if (!frame.IsDoubleSizedPopped())
-                {
-                    frame.Pop();
-                    // no check
-                }
+                    frame.StackTop--;
 
                 pointer++;
                 break;
             }
             case JavaOpcode.dup:
             {
-                var v = frame.Pop();
-                var t = frame.GetPoppedType();
-                // no checks
-                frame.PushUnchecked(v, t);
-                frame.PushUnchecked(v, t);
+                frame.Stack[frame.StackTop] = frame.Stack[frame.StackTop - 1];
+                frame.StackTypes[frame.StackTop] = frame.StackTypes[frame.StackTop - 1];
+                frame.StackTop++;
                 pointer++;
                 break;
             }
@@ -542,11 +536,8 @@ public class JavaRunner
             {
                 var v1 = frame.Pop();
                 var t1 = frame.GetPoppedType();
-                if ((t1 & PrimitiveType.IsDouble) != 0)
-                    throw new JavaRuntimeError();
                 var v2 = frame.Pop();
                 var t2 = frame.GetPoppedType();
-                // no checks
                 frame.PushUnchecked(v1, t1);
                 frame.PushUnchecked(v2, t2);
                 frame.PushUnchecked(v1, t1);
@@ -557,8 +548,6 @@ public class JavaRunner
             {
                 var v1 = frame.Pop();
                 var t1 = frame.GetPoppedType();
-                if ((t1 & PrimitiveType.IsDouble) != 0)
-                    throw new JavaRuntimeError();
                 var v2 = frame.Pop();
                 var t2 = frame.GetPoppedType();
                 if ((t2 & PrimitiveType.IsDouble) != 0)
@@ -571,7 +560,6 @@ public class JavaRunner
                 {
                     var v3 = frame.Pop();
                     var t3 = frame.GetPoppedType();
-                    // no checks
                     frame.PushUnchecked(v1, t1);
                     frame.PushUnchecked(v3, t3);
                     frame.PushUnchecked(v2, t2);
@@ -595,7 +583,6 @@ public class JavaRunner
 
                 var v2 = frame.Pop();
                 var t2 = frame.GetPoppedType();
-                // no checks
                 frame.PushUnchecked(v2, t2);
                 frame.PushUnchecked(v, t);
                 frame.PushUnchecked(v2, t2);
@@ -633,7 +620,6 @@ public class JavaRunner
                 throw new NotImplementedException("No dup2_x2 opcode");
             case JavaOpcode.swap:
             {
-                // assuming that all are not double-sized
                 var v1 = frame.Pop();
                 var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
