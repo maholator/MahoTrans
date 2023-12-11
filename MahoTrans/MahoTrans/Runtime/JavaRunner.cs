@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
@@ -1790,17 +1792,22 @@ public class JavaRunner
         CallVirtual(new VirtualPointer(virtPoint, argsCount), frame, thread, state);
     }
 
-    private static void CallVirtual(VirtualPointer pointer, Frame frame, JavaThread thread, JvmState state)
+    private static unsafe void CallVirtual(VirtualPointer pointer, Frame frame, JavaThread thread, JvmState state)
     {
-        frame.SetFrom(pointer.ArgsCount + 1);
-        var r = frame.PopReferenceFrom();
-        var obj = state.ResolveObject(r);
+        var i = frame.StackTop - (pointer.ArgsCount + 1);
+        var obj = state.ResolveObject(frame.Stack[i]);
 
         if (!obj.JavaClass.VirtualTable!.TryGetValue(pointer.Pointer, out var m))
-            throw new JavaRuntimeError(
-                $"No virt method {state.DecodeVirtualPointer(pointer.Pointer)} found on object {obj.JavaClass.Name}");
+            ThrowUnresolvedVirtual(pointer, state, obj);
 
         CallMethod(m, false, frame, thread);
+    }
+
+    [DoesNotReturn]
+    private static void ThrowUnresolvedVirtual(VirtualPointer pointer, JvmState state, Object obj)
+    {
+        throw new JavaRuntimeError(
+            $"No virtual method {state.DecodeVirtualPointer(pointer.Pointer)} found on object {obj.JavaClass.Name}");
     }
 
     private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread)
