@@ -221,9 +221,9 @@ public static class BytecodeLinker
     private static void CheckLocalsBounds(Instruction[] code, string method, int localsCount, string cls,
         ILoadTimeLogger logger)
     {
-        List<char>[] locals = new List<char>[localsCount];
+        List<LocalType>[] locals = new List<LocalType>[localsCount];
         for (int i = 0; i < localsCount; i++)
-            locals[i] = new List<char>();
+            locals[i] = new List<LocalType>();
 
         for (int i = 0; i < code.Length; i++)
         {
@@ -248,9 +248,9 @@ public static class BytecodeLinker
                         $"Local variable {index} of type \"{type}\" is out of bounds at {method}:{i}");
                 }
 
-                if (!locals[index].Contains(type))
+                if (!locals[index].Contains((LocalType)type))
                 {
-                    locals[index].Add(type);
+                    locals[index].Add((LocalType)type);
                 }
             }
         }
@@ -259,10 +259,20 @@ public static class BytecodeLinker
         {
             if (locals[i].Count > 1)
             {
+                locals[i].Sort();
                 logger.Log(LoadIssueType.MultitypeLocalVariable, cls,
                     $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {method}");
             }
         }
+    }
+
+    public enum LocalType : ushort
+    {
+        Int = 'i',
+        Long = 'l',
+        Float = 'f',
+        Double = 'd',
+        Reference = 'a',
     }
 
     private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadTimeLogger logger)

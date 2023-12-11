@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using MahoTrans.Toolkits;
 
 namespace MahoTrans.Utils;
 
@@ -76,6 +77,25 @@ public static class Utils
 
         var ba = md5.ComputeHash(stream);
         return string.Join("", ba.Select(x => $"{x:X2}"));
+    }
+
+    public static LogLevel GetSeverity(this LoadIssueType type)
+    {
+        return type switch
+        {
+            LoadIssueType.MissingClassAccess => LogLevel.Warning,
+            LoadIssueType.MissingMethodAccess => LogLevel.Error,
+            LoadIssueType.MissingFieldAccess => LogLevel.Error,
+            LoadIssueType.InvalidConstant => LogLevel.Error,
+            LoadIssueType.NoMetaInf => LogLevel.Error,
+            LoadIssueType.InvalidClassMagicCode => LogLevel.Error,
+            LoadIssueType.MissingClassSuper => LogLevel.Error,
+            LoadIssueType.MissingClassField => LogLevel.Warning,
+            LoadIssueType.LocalVariableIndexOutOfBounds => LogLevel.Error,
+            LoadIssueType.MultitypeLocalVariable => LogLevel.Info,
+            LoadIssueType.MethodWithoutReturn => LogLevel.Error,
+            _ => 0
+        };
     }
 
     public static uint GetSnapshotHash(this string s)
