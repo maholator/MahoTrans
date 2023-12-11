@@ -245,7 +245,8 @@ public static class BytecodeLinker
                 if (index >= localsCount)
                 {
                     logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
-                        $"Local variable {index} of type \"{type}\" is out of bounds at {method}:{i}");
+                        $"Local variable {index} of type \"{(LocalType)type}\" is out of bounds at {method}:{i}");
+                    continue;
                 }
 
                 if (!locals[index].Contains((LocalType)type))
@@ -277,6 +278,8 @@ public static class BytecodeLinker
 
     private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadTimeLogger logger)
     {
+        if (code.Length == 0)
+            return;
         var lastOpcode = code[^1].Opcode;
 
         switch (lastOpcode)

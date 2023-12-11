@@ -12,7 +12,6 @@ public class CommandEvent : Event
     [JavaType(typeof(Displayable))] public Reference Target;
     [JavaType(typeof(Command))] public Reference Command;
 
-
     [JavaDescriptor("()V")]
     public JavaMethodBody invoke(JavaClass cls)
     {

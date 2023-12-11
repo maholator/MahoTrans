@@ -52,6 +52,8 @@ public partial class JvmState
         }
 
         RefreshState(classes);
+        foreach (var cls in classes)
+            BytecodeLinker.VerifyBytecode(cls, this);
     }
 
     /// <summary>

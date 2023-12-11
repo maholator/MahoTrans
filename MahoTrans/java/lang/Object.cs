@@ -134,7 +134,7 @@ public class Object
     {
         return new JavaMethodBody
         {
-            LocalsCount = 0,
+            LocalsCount = 1,
             StackSize = 2,
             RawCode = new Instruction[]
             {
@@ -154,7 +154,7 @@ public class Object
     {
         return new JavaMethodBody
         {
-            LocalsCount = 1,
+            LocalsCount = 2,
             StackSize = 2,
             RawCode = new Instruction[]
             {

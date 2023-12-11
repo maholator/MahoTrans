@@ -317,7 +317,7 @@ public class Hashtable : Object
 
         // list
         b.AppendThis();
-        b.Append(JavaOpcode.aload_2);
+        b.Append(JavaOpcode.iload_2);
         b.AppendVirtcall(nameof(GetList), "(I)Ljava/util/HashtableEntry;");
         b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_3);
