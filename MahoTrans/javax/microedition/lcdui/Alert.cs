@@ -36,6 +36,7 @@ public class Alert : Screen
         Image = alertImage;
         Type = alertType;
         Timeout = getDefaultTimeout();
+        Commands.Add(DISMISS_COMMAND);
     }
 
     [String] public Reference Text;
@@ -87,5 +88,27 @@ public class Alert : Screen
 
     //TODO set/get Indicator
 
-    //TODO commands
+    public void addCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd == DISMISS_COMMAND)
+            return;
+        base.addCommand(cmd);
+        if (Commands.Contains(DISMISS_COMMAND) && Commands.Count != 1)
+        {
+            Commands.Remove(DISMISS_COMMAND);
+            Toolkit.Display.CommandsUpdated(Handle, Commands);
+        }
+    }
+
+    public void removeCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd == DISMISS_COMMAND)
+            return;
+        base.removeCommand(cmd);
+        if (Commands.Count == 0)
+        {
+            Commands.Add(DISMISS_COMMAND);
+            Toolkit.Display.CommandsUpdated(Handle, Commands);
+        }
+    }
 }
