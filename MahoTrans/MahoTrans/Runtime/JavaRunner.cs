@@ -1315,26 +1315,26 @@ public class JavaRunner
                 break;
             }
             case JavaOpcode.checkcast:
-            {
-                var type = (JavaClass)args;
-                var obj = frame.PopReference();
-                if (obj.IsNull)
+                unsafe
                 {
-                    // ok
-                }
-                else if (state.ResolveObject(obj).JavaClass.Is(type))
-                {
-                    // ok
-                }
-                else
-                {
-                    state.Throw<ClassCastException>();
-                }
+                    var type = (JavaClass)args;
+                    var obj = (Reference)frame.Stack[frame.StackTop - 1];
+                    if (obj.IsNull)
+                    {
+                        // ok
+                    }
+                    else if (state.ResolveObject(obj).JavaClass.Is(type))
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        state.Throw<ClassCastException>();
+                    }
 
-                frame.PushReference(obj);
-                pointer++;
-                break;
-            }
+                    pointer++;
+                    break;
+                }
             case JavaOpcode.instanceof:
             {
                 var type = (JavaClass)args;
