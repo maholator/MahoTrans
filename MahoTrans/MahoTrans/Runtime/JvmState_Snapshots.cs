@@ -24,7 +24,6 @@ public partial class JvmState
 
     private const string cycle_number_txt = "cycle_number.txt";
     private const string classes_txt = "classes.txt";
-    private const string virtp_table_json = "virtp_table.json";
     private const string threads_alive_json = "threads/alive.json";
     private const string threads_waiting_json = "threads/waiting.json";
     private const string threads_queue_json = "threads/queue.json";
@@ -56,11 +55,6 @@ public partial class JvmState
                     s.Write(cls.Name);
                     s.Write('\n');
                 }
-            });
-            zip.AddTextEntry(virtp_table_json, s =>
-            {
-                var t = JsonConvert.SerializeObject(_virtualPointers);
-                s.Write(t);
             });
             zip.AddTextEntry(threads_alive_json, s =>
             {
@@ -99,7 +93,7 @@ public partial class JvmState
                     .Where(x => !x.IsInterface && x.ClrType != null && !x.ClrType.IsAbstract)
                     .Select(x =>
                     {
-                        var obj = (Object)Activator.CreateInstance(x.ClrType!);
+                        var obj = (Object)Activator.CreateInstance(x.ClrType!)!;
                         obj.JavaClass = x;
                         return obj;
                     })
@@ -120,7 +114,6 @@ public partial class JvmState
     {
         using (var zip = new ZipArchive(stream, ZipArchiveMode.Read, true, Encoding.UTF8))
         {
-            _cycleNumber = long.Parse(zip.ReadTextEntry(cycle_number_txt));
             //classes
             {
                 var classesList = zip.ReadTextEntry(classes_txt).Split('\n',
@@ -133,17 +126,17 @@ public partial class JvmState
                 {
                     if (!classesDict.TryGetValue(cls.Name, out var sn))
                     {
-                        throw new JavaRuntimeError($"Class {cls.Name} is not found in snapshot.");
+                        throw new SnapshotLoadError($"Class {cls.Name} isn't presented in snapshot. Probably, it was not loaded in previous run.");
                     }
 
                     var existingHash = cls.GetSnapshotHash().ToString();
 
                     if (existingHash != sn.Item2)
                     {
-                        throw new JavaRuntimeError($"Class hash for {cls.Name} doesn't match snapshoted one.\n" +
-                                                   $"Snapshoted hash: {sn.Item2}\n" +
-                                                   $"Hash of existing class: {existingHash}\n" +
-                                                   $"Class code or members may have changed.");
+                        throw new SnapshotLoadError($"Class hash for {cls.Name} doesn't match snapshoted one.\n" +
+                                                    $"Snapshoted hash: {sn.Item2}\n" +
+                                                    $"Hash of existing class: {existingHash}\n" +
+                                                    $"Class code or members may have changed.");
                     }
 
                     cls.PendingInitializer = sn.Item1;
@@ -152,12 +145,12 @@ public partial class JvmState
 
                 if (classesDict.Count != 0)
                 {
-                    throw new JavaRuntimeError(
-                        $"Classes {string.Join(", ", classesDict.Values)} are not loaded but present in snapshot.");
+                    throw new SnapshotLoadError(
+                        $"Classes {string.Join(", ", classesDict.Keys)} are not loaded but present in snapshot.");
                 }
             }
 
-            //TODO check virttable
+            _cycleNumber = long.Parse(zip.ReadTextEntry(cycle_number_txt));
 
             // threads
             {
@@ -280,7 +273,7 @@ public partial class JvmState
     {
         public int Id;
         public Reference Model;
-        public SnapshotedFrame[] Frames;
+        public SnapshotedFrame[] Frames = Array.Empty<SnapshotedFrame>();
 
         public static SnapshotedThread Create(JavaThread jt)
         {
