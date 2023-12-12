@@ -1,6 +1,7 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json;
 
 namespace javax.microedition.lcdui;
 
@@ -10,7 +11,8 @@ public class List : Screen
 
     public ChoiceType Type;
 
-    [JavaType(typeof(Command))] public static Reference SELECT_COMMAND;
+    [JsonProperty] [JavaType(typeof(Command))]
+    public static Reference SELECT_COMMAND;
 
     [ClassInit]
     public static void ClInit()

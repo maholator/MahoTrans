@@ -1,13 +1,17 @@
 using java.io;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
 public class System : Object
 {
-    [JavaType(typeof(PrintStream))] public static Reference @out;
-    [JavaType(typeof(PrintStream))] public static Reference err;
+    [JsonProperty] [JavaType(typeof(PrintStream))]
+    public static Reference @out;
+
+    [JsonProperty] [JavaType(typeof(PrintStream))]
+    public static Reference err;
 
     [ClassInit]
     public static void Clinit()

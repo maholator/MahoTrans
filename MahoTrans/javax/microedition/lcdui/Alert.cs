@@ -3,6 +3,7 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json;
 
 namespace javax.microedition.lcdui;
 
@@ -10,7 +11,8 @@ public class Alert : Screen
 {
     public static int FOREVER = -2;
 
-    [JavaType(typeof(Command))] public static Reference DISMISS_COMMAND;
+    [JsonProperty] [JavaType(typeof(Command))]
+    public static Reference DISMISS_COMMAND;
 
     [ClassInit]
     public static void ClInit()
