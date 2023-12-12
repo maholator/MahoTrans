@@ -27,6 +27,8 @@ public class JavaClass
 
     public override string ToString() => Name;
 
+    public bool IsArray => Name[0] == '[';
+
     public uint GetSnapshotHash()
     {
         uint interfacesHash = (uint)Interfaces.Length;

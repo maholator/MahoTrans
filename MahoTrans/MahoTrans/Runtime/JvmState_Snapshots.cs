@@ -48,6 +48,8 @@ public partial class JvmState
             {
                 foreach (var cls in Classes.Values)
                 {
+                    if (cls.IsArray)
+                        continue;
                     s.Write(cls.PendingInitializer ? "1" : "0");
                     s.Write(' ');
                     s.Write(cls.GetSnapshotHash());
@@ -124,9 +126,12 @@ public partial class JvmState
 
                 foreach (var cls in Classes.Values)
                 {
+                    if (cls.IsArray)
+                        continue;
                     if (!classesDict.TryGetValue(cls.Name, out var sn))
                     {
-                        throw new SnapshotLoadError($"Class {cls.Name} isn't presented in snapshot. Probably, it was not loaded in previous run.");
+                        throw new SnapshotLoadError(
+                            $"Class {cls.Name} isn't presented in snapshot. Probably, it was not loaded in previous run.");
                     }
 
                     var existingHash = cls.GetSnapshotHash().ToString();
