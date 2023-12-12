@@ -287,7 +287,7 @@ public partial class JvmState
             s.Model = jt.Model;
             s.Frames = jt.CallStack.Take(jt.ActiveFrameIndex + 1).Select(x =>
             {
-                var stack = x.DumpStack();
+                var stack = x!.DumpStack();
                 return new SnapshotedFrame
                 {
                     Pointer = x.Pointer,
@@ -306,12 +306,12 @@ public partial class JvmState
     private class SnapshotedFrame
     {
         public int Pointer;
-        public long[] LocalVariables;
-        public long[] Stack;
-        public PrimitiveType[] StackTypes;
+        public long[] LocalVariables = Array.Empty<long>();
+        public long[] Stack = Array.Empty<long>();
+        public PrimitiveType[] StackTypes = Array.Empty<PrimitiveType>();
         public int StackTop;
         public NameDescriptor MethodDescriptor;
-        public string ClassName;
+        public string ClassName = string.Empty;
     }
 
     private class Binder : ISerializationBinder
