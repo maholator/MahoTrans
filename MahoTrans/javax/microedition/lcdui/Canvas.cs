@@ -89,6 +89,7 @@ public class Canvas : Displayable
     }
 
     public bool hasPointerEvents() => true;
+    public bool isDoubleBuffered() => true;
 
     public void setFullScreenMode(bool mode)
     {

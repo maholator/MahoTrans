@@ -44,6 +44,12 @@ public class Display : Object
         Jvm.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
     }
 
+    public bool isColor() => true;
+
+    public int numAlphaLevels() => 256;
+
+    public int numColors() => 256 * 256 * 256;
+
     public bool vibrate(int dur)
     {
         //TODO
