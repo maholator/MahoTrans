@@ -1,3 +1,4 @@
+using java.lang;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -16,6 +17,7 @@ public class JavaMethodBuilder
 
     private readonly Dictionary<int, int> _loopStates = new();
 
+    private readonly List<JavaTryCatch> _tryCatches = new();
 
     public JavaMethodBuilder(JavaClass cls)
     {
@@ -198,6 +200,22 @@ public class JavaMethodBuilder
         return new JavaLoop(this, id, lb, lc, condition);
     }
 
+    public JavaTryCatch BeginTry<T>() where T : Throwable
+    {
+        return BeginTry(typeof(T).ToJavaName());
+    }
+
+    public JavaTryCatch BeginTry(string exceptionName)
+    {
+        var ex = _class.PushConstant(exceptionName);
+        var tryBegin = PlaceLabel();
+        var catchBegin = PlaceLabel();
+        var catchEnd = PlaceLabel();
+        var tc = new JavaTryCatch(this, ex, tryBegin, catchBegin, catchEnd);
+        _tryCatches.Add(tc);
+        return tc;
+    }
+
     public void BeginLoopCondition(JavaLoop loop)
     {
         if (_loopStates[loop.Number] == 1)
@@ -221,15 +239,7 @@ public class JavaMethodBuilder
 
     public Instruction[] Build()
     {
-        var len = 0;
-        var offsets = new int[_code.Count];
-        for (var i = 0; i < _code.Count; i++)
-        {
-            var entry = _code[i];
-            offsets[i] = len;
-            len++;
-            len += entry.ArgsLength;
-        }
+        var offsets = CalculateOffsets();
 
         var code = new Instruction[_code.Count];
         for (var i = 0; i < _code.Count; i++)
@@ -256,11 +266,46 @@ public class JavaMethodBuilder
         return code;
     }
 
+    public JavaMethodBody.Catch[] BuildTryCatches()
+    {
+        var offsets = CalculateOffsets();
+
+        var result = new JavaMethodBody.Catch[_tryCatches.Count];
+        for (int i = 0; i < _tryCatches.Count; i++)
+        {
+            var tc = _tryCatches[i];
+            // [start; end)
+
+            ushort tryStart = (ushort)offsets[_labels[tc.TryBegin]];
+            ushort catchStart = (ushort)offsets[_labels[tc.CatchBegin]];
+
+            result[i] = new JavaMethodBody.Catch(tryStart, catchStart, catchStart, (ushort)tc.Exception);
+        }
+
+        return result;
+    }
+
     public JavaMethodBody Build(int maxStack, int maxLocals)
     {
         return new JavaMethodBody(maxStack, maxLocals)
         {
-            Code = Build()
+            Code = Build(),
+            Catches = BuildTryCatches(),
         };
+    }
+
+    private int[] CalculateOffsets()
+    {
+        var len = 0;
+        var offsets = new int[_code.Count];
+        for (var i = 0; i < _code.Count; i++)
+        {
+            var entry = _code[i];
+            offsets[i] = len;
+            len++;
+            len += entry.ArgsLength;
+        }
+
+        return offsets;
     }
 }

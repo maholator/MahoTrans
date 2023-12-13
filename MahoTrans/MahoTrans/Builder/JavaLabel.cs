@@ -1,5 +1,9 @@
 namespace MahoTrans.Builder;
 
+/// <summary>
+/// Handle object to manipulate labels in bulding method.
+/// Use <see cref="JavaMethodBuilder.BringLabel"/> to assing an instruction to this label.
+/// </summary>
 public readonly struct JavaLabel : IDisposable
 {
     public readonly int Id;
