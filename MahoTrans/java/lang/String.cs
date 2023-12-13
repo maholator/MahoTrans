@@ -200,6 +200,10 @@ public sealed class String : Object
         return Value.IndexOf(str, from, StringComparison.Ordinal);
     }
 
+    public int lastIndexOf(int c) => Value.LastIndexOf((char)c);
+
+    public int lastIndexOf(int c, int from) => Value.LastIndexOf((char)c, from);
+
     [return: String]
     public Reference substring(int from)
     {
