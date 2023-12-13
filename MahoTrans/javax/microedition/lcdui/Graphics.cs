@@ -1,4 +1,5 @@
 using com.nokia.mid.ui;
+using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Toolkits;
@@ -44,7 +45,28 @@ public class Graphics : Object, DirectGraphics
         _color = (uint)((255UL << 24) | (ur << 16) | (ug << 8) | ub);
     }
 
+    public void setGrayScale(int value)
+    {
+        if (value < 0 || value > 255)
+            Jvm.Throw<IllegalArgumentException>();
+        setColor(value, value, value);
+    }
+
     public int getColor() => (int)_color;
+
+    public int getRedComponent() => (int)((_color >> 16) & 0xFF);
+
+    public int getGreenComponent() => (int)((_color >> 8) & 0xFF);
+
+    public int getBlueComponent() => (int)((_color >> 0) & 0xFF);
+
+    public int getGrayScale()
+    {
+        var r = getRedComponent();
+        var g = getGreenComponent();
+        var b = getBlueComponent();
+        return (r + g + b) / 3;
+    }
 
     public void setFont([JavaType(typeof(Font))] Reference r)
     {
