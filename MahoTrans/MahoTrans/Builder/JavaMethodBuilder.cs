@@ -187,7 +187,7 @@ public class JavaMethodBuilder
     /// </summary>
     /// <param name="condition">
     /// Goto opcode to go to loop's beginning.
-    /// So, if your condition is i &lt; length, you should use <see cref="JavaOpcode.if_icmplt"/>.
+    /// So, if your condition is i &lt; length, you should use <see cref="JavaOpcode.if_icmplt"/>. In condition section, push to stack i then length.
     /// </param>
     /// <returns>Loop handle. Call <see cref="EndLoop"/> to end the loop. Call <see cref="BeginLoopCondition"/> to mark condition start.</returns>
     public JavaLoop BeginLoop(JavaOpcode condition)
