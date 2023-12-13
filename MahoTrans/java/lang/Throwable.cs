@@ -8,14 +8,16 @@ public class Throwable : Object
     [String] public Reference Message;
 
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
+        base.Init();
         Message = Reference.Null;
     }
 
     [InitMethod]
     public void Init([String] Reference message)
     {
+        base.Init();
         Message = message;
     }
 

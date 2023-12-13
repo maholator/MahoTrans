@@ -3,7 +3,7 @@ using MahoTrans.Runtime;
 
 namespace java.lang;
 
-public class NoClassDefFoundError : Error
+public class VirtualMachineError : Error
 {
     [InitMethod]
     public new void Init()
