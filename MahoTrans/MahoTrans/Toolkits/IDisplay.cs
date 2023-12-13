@@ -51,10 +51,14 @@ public interface IDisplay : IToolkit
     /// Notifies toolkit that commands list on the displayable was changed.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
-    /// <param name="commands">New list of commands. List is unsorted.
+    /// <param name="commands">
+    /// New list of commands. List is unsorted.
     /// All objects are guaranteed to be <see cref="Command"/>s.
+    /// Implicit list's select command must not be in this list.
+    /// This list must not contain any commands for items.
     /// </param>
-    void CommandsUpdated(DisplayableHandle handle, List<Reference> commands);
+    /// <param name="selectCommand">For implicit list - select command. For other screens this must be zero.</param>
+    void CommandsUpdated(DisplayableHandle handle, List<Reference> commands, Reference selectCommand);
 
     /// <summary>
     /// Notifies toolkit that screen displayable changed its content (text, subitems, etc.).

@@ -12,7 +12,10 @@ public class List : Screen
     public ChoiceType Type;
 
     [JsonProperty] [JavaType(typeof(Command))]
+    // ReSharper disable once InconsistentNaming
     public static Reference SELECT_COMMAND;
+
+    [JavaIgnore] public Reference ImplicitSelectCommand;
 
     [ClassInit]
     public static void ClInit()
@@ -30,6 +33,9 @@ public class List : Screen
         if (listType < 1 || listType > 3)
             Jvm.Throw<IllegalArgumentException>();
         Type = (ChoiceType)listType;
+        ImplicitSelectCommand = SELECT_COMMAND;
+        // invalidate is necessary to notify toolkit about non-null implicit command
+        Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
     }
 
     [InitMethod]
@@ -89,8 +95,52 @@ public class List : Screen
         Toolkit.Display.ContentUpdated(Handle);
     }
 
+    public void set(int elementNum, [String] Reference stringPart, [JavaType(typeof(Image))] Reference imagePart)
+    {
+        if (elementNum < 0 || elementNum >= Items.Count)
+            Jvm.Throw<IndexOutOfBoundsException>();
+        if (stringPart.IsNull)
+            Jvm.Throw<NullPointerException>();
+        Items[elementNum] = new ListItem(stringPart, imagePart);
+        Toolkit.Display.ContentUpdated(Handle);
+    }
 
     public int size() => Items.Count;
+
+    public new void addCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd.IsNull)
+            Jvm.Throw<NullPointerException>();
+        if (Commands.Contains(cmd))
+            return;
+        Commands.Add(cmd);
+        Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
+    }
+
+    public new void removeCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd.IsNull)
+            return;
+        if (ImplicitSelectCommand == cmd)
+            ImplicitSelectCommand = Reference.Null;
+        Commands.Remove(cmd);
+        Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
+    }
+
+    public void setSelectCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        // adding old command to the main list
+        if (!ImplicitSelectCommand.IsNull)
+            Commands.Add(ImplicitSelectCommand);
+
+        // setting new select command
+        ImplicitSelectCommand = cmd;
+
+        // if it is in main list, it must not be there.
+        Commands.Remove(cmd);
+
+        Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
+    }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {

@@ -52,7 +52,7 @@ public class Displayable : Object
         if (Commands.Contains(cmd))
             return;
         Commands.Add(cmd);
-        Toolkit.Display.CommandsUpdated(Handle, Commands);
+        Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }
 
     public void removeCommand([JavaType(typeof(Command))] Reference cmd)
@@ -60,7 +60,7 @@ public class Displayable : Object
         if (cmd.IsNull)
             return;
         Commands.Remove(cmd);
-        Toolkit.Display.CommandsUpdated(Handle, Commands);
+        Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }
 
     public void setCommandListener([JavaType(typeof(CommandListener))] Reference l)
