@@ -388,7 +388,7 @@ public class ClassLoader
                 var exs = new JavaMethodBody.Catch[exLen];
                 for (int i = 0; i < exLen; i++)
                 {
-                    exs[i] = new JavaMethodBody.Catch(r.ReadInt16(), r.ReadInt16(), r.ReadInt16(), r.ReadInt16());
+                    exs[i] = new JavaMethodBody.Catch((ushort)r.ReadInt16(), (ushort)r.ReadInt16(), (ushort)r.ReadInt16(), (ushort)r.ReadInt16());
                 }
 
                 int attrLen = r.ReadInt16();

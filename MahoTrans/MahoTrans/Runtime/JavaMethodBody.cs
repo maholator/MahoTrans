@@ -71,21 +71,22 @@ public class JavaMethodBody
 
     public struct Catch
     {
-        public short TryStart;
-        public short TryEnd;
-        public short CatchStart;
-        public short Type;
+        public ushort TryStart;
+        public ushort TryEnd;
+        public ushort CatchStart;
+        public ushort Type;
 
-        public Catch(short tryStart, short tryEnd, short catchStart, short type)
+        public Catch(ushort tryStart, ushort tryEnd, ushort catchStart, ushort type)
         {
-            this.TryStart = tryStart;
-            this.TryEnd = tryEnd;
-            this.CatchStart = catchStart;
-            this.Type = type;
+            TryStart = tryStart;
+            TryEnd = tryEnd;
+            CatchStart = catchStart;
+            Type = type;
         }
 
         public bool IsIn(Instruction instruction)
         {
+            // [start; end)
             if (instruction.Offset < TryStart)
                 return false;
             if (instruction.Offset >= TryEnd)
