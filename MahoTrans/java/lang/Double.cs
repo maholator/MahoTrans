@@ -1,3 +1,4 @@
+using System.Globalization;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 
@@ -45,4 +46,24 @@ public class Double : Object
     public long longValue() => (long)Value;
 
     public short shortValue() => (short)Value;
+
+    [return: String]
+    public static Reference toString(double d)
+    {
+        return Jvm.AllocateString(d.ToString(CultureInfo.InvariantCulture));
+    }
+
+    [return: String]
+    public Reference toString()
+    {
+        return Jvm.AllocateString(Value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    public static double parseDouble([String] Reference str)
+    {
+        var s = Jvm.ResolveString(str);
+        if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var d))
+            Jvm.Throw<NumberFormatException>();
+        return d;
+    }
 }

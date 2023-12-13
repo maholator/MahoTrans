@@ -17,6 +17,8 @@ public class Integer : Object
     public short shortValue() => (short)Value;
     public int intValue() => Value;
     public long longValue() => Value;
+    public double doubleValue() => Value;
+    public float floatValue() => Value;
 
 
     public int hashCode()
