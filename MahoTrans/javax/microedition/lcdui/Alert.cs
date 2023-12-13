@@ -90,7 +90,7 @@ public class Alert : Screen
 
     //TODO set/get Indicator
 
-    public void addCommand([JavaType(typeof(Command))] Reference cmd)
+    public new void addCommand([JavaType(typeof(Command))] Reference cmd)
     {
         if (cmd == DISMISS_COMMAND)
             return;
@@ -98,11 +98,11 @@ public class Alert : Screen
         if (Commands.Contains(DISMISS_COMMAND) && Commands.Count != 1)
         {
             Commands.Remove(DISMISS_COMMAND);
-            Toolkit.Display.CommandsUpdated(Handle, Commands);
+            Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
         }
     }
 
-    public void removeCommand([JavaType(typeof(Command))] Reference cmd)
+    public new void removeCommand([JavaType(typeof(Command))] Reference cmd)
     {
         if (cmd == DISMISS_COMMAND)
             return;
@@ -110,7 +110,7 @@ public class Alert : Screen
         if (Commands.Count == 0)
         {
             Commands.Add(DISMISS_COMMAND);
-            Toolkit.Display.CommandsUpdated(Handle, Commands);
+            Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
         }
     }
 }
