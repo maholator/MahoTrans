@@ -17,6 +17,8 @@ public class List : Screen
 
     [JavaIgnore] public Reference ImplicitSelectCommand;
 
+    public int SelectedItem = -1;
+
     [ClassInit]
     public static void ClInit()
     {
@@ -140,6 +142,14 @@ public class List : Screen
         Commands.Remove(cmd);
 
         Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
+    }
+
+    public int getSelectedIndex()
+    {
+        if (Type == ChoiceType.Multiple)
+            return -1;
+
+        return SelectedItem;
     }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
