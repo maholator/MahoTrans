@@ -20,6 +20,13 @@ public readonly struct Instruction : IEquatable<Instruction>
         Args = Array.Empty<byte>();
     }
 
+    public Instruction(int offset, JavaOpcode opcode, byte arg)
+    {
+        Opcode = opcode;
+        Offset = offset;
+        Args = new[] { arg };
+    }
+
     public Instruction(JavaOpcode opcode, byte[] args)
     {
         Opcode = opcode;
@@ -36,6 +43,13 @@ public readonly struct Instruction : IEquatable<Instruction>
         Opcode = opcode;
         Offset = 0;
         Args = Array.Empty<byte>();
+    }
+
+    public Instruction(JavaOpcode opcode, byte arg)
+    {
+        Opcode = opcode;
+        Offset = 0;
+        Args = new[] { arg };
     }
 
     public override string ToString()

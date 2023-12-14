@@ -29,6 +29,11 @@ public class JavaMethodBuilder
         Append(new Instruction(opcode));
     }
 
+    public void Append(JavaOpcode opcode, byte arg)
+    {
+        Append(new Instruction(opcode, arg));
+    }
+
     public void Append(params JavaOpcode[] opcodes)
     {
         foreach (var opcode in opcodes)
