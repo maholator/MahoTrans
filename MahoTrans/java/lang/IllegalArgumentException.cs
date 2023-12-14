@@ -6,13 +6,14 @@ namespace java.lang;
 public class IllegalArgumentException : RuntimeException
 {
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
+        base.Init();
     }
 
     [InitMethod]
-    public new void Init([String] Reference msg)
+    public new void Init([String] Reference message)
     {
-        base.Init(msg);
+        base.Init(message);
     }
 }

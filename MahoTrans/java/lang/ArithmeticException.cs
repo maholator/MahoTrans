@@ -3,7 +3,7 @@ using MahoTrans.Runtime;
 
 namespace java.lang;
 
-public class Exception : Throwable
+public class ArithmeticException : RuntimeException
 {
     [InitMethod]
     public new void Init()

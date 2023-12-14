@@ -6,12 +6,14 @@ namespace java.lang;
 public class IllegalStateException : RuntimeException
 {
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
+        base.Init();
     }
 
     [InitMethod]
-    public void Init([String] Reference msg)
+    public new void Init([String] Reference message)
     {
+        base.Init(message);
     }
 }

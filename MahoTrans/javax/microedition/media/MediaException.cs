@@ -1,9 +1,10 @@
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Exception = java.lang.Exception;
 
-namespace java.lang;
+namespace javax.microedition.media;
 
-public class Exception : Throwable
+public class MediaException : Exception
 {
     [InitMethod]
     public new void Init()
