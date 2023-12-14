@@ -37,6 +37,122 @@ public class InputStream : Object
         return b.Build(4, 2);
     }
 
+    [JavaDescriptor("([BII)I")]
+    public JavaMethodBody read___bounds(JavaClass cls)
+    {
+        // locals: this, buf, off, len, i, value
+        //         0     1    2    3    4  5
+
+        var b = new JavaMethodBuilder(cls);
+
+        // If off is negative...
+        b.Append(JavaOpcode.iload_2);
+        using (b.AppendGoto(JavaOpcode.ifge))
+        {
+            b.AppendNewObject<IndexOutOfBoundsException>();
+            b.Append(JavaOpcode.athrow);
+        }
+
+        // ...or len is negative...
+        b.Append(JavaOpcode.iload_3);
+        using (b.AppendGoto(JavaOpcode.ifge))
+        {
+            b.AppendNewObject<IndexOutOfBoundsException>();
+            b.Append(JavaOpcode.athrow);
+        }
+
+        // ...or off+len is greater than the length of the array b...
+        b.Append(JavaOpcode.iload_2);
+        b.Append(JavaOpcode.iload_3);
+        b.Append(JavaOpcode.iadd);
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.arraylength);
+        using (b.AppendGoto(JavaOpcode.if_icmplt))
+        {
+            b.AppendNewObject<IndexOutOfBoundsException>();
+            b.Append(JavaOpcode.athrow);
+        }
+        // ...then an IndexOutOfBoundsException is thrown.
+
+        // If len is zero, then no bytes are read and 0 is returned.
+        b.Append(JavaOpcode.iload_3);
+        using (b.AppendGoto(JavaOpcode.ifne))
+        {
+            b.Append(JavaOpcode.iconst_0);
+            b.AppendReturnInt();
+        }
+
+        // let's read first byte:
+        b.AppendThis();
+        b.AppendVirtcall(nameof(read), typeof(int));
+        b.Append(JavaOpcode.dup);
+        b.Append(JavaOpcode.istore, 5);
+
+        using (b.AppendGoto(JavaOpcode.ifge)) // if(value<0)
+        {
+            b.Append(JavaOpcode.iconst_m1);
+            b.AppendReturnInt();
+        }
+
+        // read ok? Writing to buffer.
+
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.iload_2);
+        b.Append(JavaOpcode.iload, 5);
+        b.Append(JavaOpcode.bastore);
+
+        // i = off+1
+        b.Append(JavaOpcode.iload_2);
+        b.Append(JavaOpcode.iconst_1);
+        b.Append(JavaOpcode.iadd);
+        b.Append(JavaOpcode.istore, 4);
+
+        using (var loop = b.BeginLoop(JavaOpcode.if_icmplt))
+        {
+            using (var tr = b.BeginTry<IOException>())
+            {
+                b.AppendThis();
+                b.AppendVirtcall(nameof(read), typeof(int));
+                b.Append(JavaOpcode.dup);
+                b.Append(JavaOpcode.istore, 5);
+
+                using (b.AppendGoto(JavaOpcode.ifge)) // if(value<0)
+                {
+                    b.Append(JavaOpcode.iload, 4);
+                    b.Append(JavaOpcode.iload_2);
+                    b.Append(JavaOpcode.isub);
+                    b.AppendReturnInt(); // return i-off;
+                }
+
+                b.Append(JavaOpcode.aload_1);
+                b.Append(JavaOpcode.iload, 4);
+                b.Append(JavaOpcode.iload, 5);
+                b.Append(JavaOpcode.bastore);
+
+                tr.CatchSection();
+
+                b.Append(JavaOpcode.pop);
+
+                b.Append(JavaOpcode.iload, 4);
+                b.Append(JavaOpcode.iload_2);
+                b.Append(JavaOpcode.isub);
+                b.AppendReturnInt(); // return i-off;
+            }
+
+            loop.ConditionSection();
+
+            b.Append(JavaOpcode.iload, 4);
+            b.Append(JavaOpcode.iload_2);
+            b.Append(JavaOpcode.iload_3);
+            b.Append(JavaOpcode.iadd);
+        }
+
+        b.Append(JavaOpcode.iload_3);
+        b.AppendReturnInt();
+
+        return b.Build(3, 6);
+    }
+
     public void mark(int readlimit)
     {
     }
