@@ -32,6 +32,7 @@ public class InputStream : Object
         b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.iconst_0);
         b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.arraylength);
         b.AppendVirtcall("read", "([BII)I");
         b.AppendReturnInt();
         return b.Build(4, 2);
@@ -155,6 +156,7 @@ public class InputStream : Object
 
     public void mark(int readlimit)
     {
+        // does nothing
     }
 
     [JavaDescriptor("(J)J")]
