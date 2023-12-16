@@ -1169,6 +1169,10 @@ public class JavaRunner
                 var returnee = frame.PopInt();
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
@@ -1182,6 +1186,10 @@ public class JavaRunner
                 var returnee = frame.PopLong();
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
@@ -1195,6 +1203,10 @@ public class JavaRunner
                 var returnee = frame.PopFloat();
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
@@ -1208,11 +1220,16 @@ public class JavaRunner
                 var returnee = frame.PopDouble();
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
                     caller.PushDouble(returnee);
                 }
+
 
                 break;
             }
@@ -1221,6 +1238,10 @@ public class JavaRunner
                 var returnee = frame.PopReference();
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
@@ -1233,6 +1254,10 @@ public class JavaRunner
             {
                 thread.Pop();
                 var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
                 if (caller != null)
                 {
                     caller.Pointer++;
@@ -1482,6 +1507,34 @@ public class JavaRunner
         }
     }
 
+    private static unsafe void ExitSynchronizedMethod(Frame frame, Frame? caller, JavaThread thread, JvmState state)
+    {
+        if (caller == null)
+            return;
+        if (frame.Method.Method.IsStatic)
+        {
+            //TODO
+        }
+        else
+        {
+            var r = (Reference)caller.Stack[caller.StackTop];
+            if (r.IsNull)
+                state.Throw<NullPointerException>();
+
+            var obj = state.ResolveObject(r);
+            if (obj.MonitorOwner != thread.ThreadId)
+            {
+                state.Throw<IllegalMonitorStateException>();
+            }
+            else
+            {
+                obj.MonitorReEnterCount--;
+                if (obj.MonitorReEnterCount == 0)
+                    obj.MonitorOwner = 0;
+            }
+        }
+    }
+
     private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP,
         JavaClass typeA)
     {
@@ -1511,6 +1564,7 @@ public class JavaRunner
     /// <param name="thread">Thread to enter.</param>
     /// <param name="state">JVM.</param>
     /// <param name="frame">Current frame.</param>
+    /// <remarks>This api is for <see cref="JavaOpcode.monitorenter"/> opcode.</remarks>
     private static void TryEnterMonitor(JavaThread thread, JvmState state, Frame frame)
     {
         var r = frame.PopReference();
@@ -1535,6 +1589,33 @@ public class JavaRunner
             frame.PushReference(r);
             // not going to next instruction!
         }
+    }
+
+    /// <summary>
+    /// Attempts to enter object's monitor.
+    /// </summary>
+    /// <param name="r">Object to enter.</param>
+    /// <param name="thread">Current thread.</param>
+    /// <param name="state">JVM.</param>
+    /// <returns>Returns true on success. Monitor must be exited then.</returns>
+    /// <remarks>This is for synchronized methods. When false returned, nothing must be done. One more attempt must be attempted.</remarks>
+    private static bool TryEnterInstanceMonitor(Reference r, JavaThread thread, JvmState state)
+    {
+        var obj = state.ResolveObject(r);
+        if (obj.MonitorReEnterCount == 0)
+        {
+            obj.MonitorOwner = thread.ThreadId;
+            obj.MonitorReEnterCount = 1;
+            return true;
+        }
+
+        if (obj.MonitorOwner == thread.ThreadId)
+        {
+            obj.MonitorReEnterCount++;
+            return true;
+        }
+
+        return false;
     }
 
     #region Numbers manipulation
@@ -1776,7 +1857,7 @@ public class JavaRunner
 
         // resolving object to check <clinit>
         var obj = state.ResolveObject(frame.PopReferenceFrom());
-        var callClass = obj.JavaClass.VirtualTable![virtPoint].Class;
+        var callClass = obj.JavaClass.VirtualTable![virtPoint]!.Class;
         if (callClass.PendingInitializer)
         {
             callClass.Initialize(thread);
@@ -1832,10 +1913,28 @@ public class JavaRunner
             return;
         }
 
-        // native check is omitted because why not
-
         var argsLength = m.ArgsCount;
-        argsLength += (@static ? 0 : 1);
+
+        if (@static)
+        {
+            if (m.IsCritical)
+            {
+                //TODO lock
+            }
+        }
+        else
+        {
+            argsLength += 1;
+
+            if (m.IsCritical)
+            {
+                frame.SetFrom(argsLength);
+                var r = frame.PopReferenceFrom();
+                if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
+                    return;
+            }
+        }
+
         m.JavaBody.EnsureBytecodeLinked();
         var f = thread.Push(m.JavaBody);
         frame.SetFrom(argsLength);

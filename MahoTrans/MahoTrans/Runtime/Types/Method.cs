@@ -26,8 +26,11 @@ public class Method : IDisposable
         ArgsCount = DescriptorUtils.ParseMethodArgsCount(descriptor.Descriptor);
     }
 
-    public bool IsStatic => Flags.HasFlag(MethodFlags.Static);
-    public bool IsNative => Flags.HasFlag(MethodFlags.Native);
+    public bool IsStatic => (Flags & MethodFlags.Static) != 0;
+    public bool IsNative => (Flags & MethodFlags.Native) != 0;
+    public bool IsAbstract => (Flags & MethodFlags.Abstract) != 0;
+
+    public bool IsCritical => (Flags & MethodFlags.Synchronized) != 0;
 
     public MethodInfo NativeBody
     {
