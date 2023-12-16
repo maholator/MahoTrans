@@ -21,7 +21,12 @@ public class JavaClass
     public Method?[]? VirtualTable;
     public Dictionary<int, Method>? VirtualTableMap;
     public Type? ClrType;
+
+    /// <summary>
+    /// True, if this class' initializer was not yet executed.
+    /// </summary>
     public bool PendingInitializer = true;
+
     public Action<List<Reference>>? StaticAnnouncer;
     public int Size;
 
