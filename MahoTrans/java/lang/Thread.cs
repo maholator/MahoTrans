@@ -9,6 +9,9 @@ namespace java.lang;
 
 public class Thread : Object, Runnable
 {
+    /// <summary>
+    /// Reference to JVM object of the thread. During wakeup, this is validated by <see cref="JvmState.SyncHeapAfterRestore"/>.
+    /// </summary>
     [JavaIgnore] [JsonIgnore] public JavaThread JavaThread = null!;
 
     [JavaIgnore] [ThreadStatic] [JsonIgnore]
@@ -76,6 +79,14 @@ public class Thread : Object, Runnable
     {
         if (CurrentThread != null)
             Jvm.Detach(CurrentThread, time);
+    }
+
+    public void interrupt()
+    {
+        // throw interrupter
+        Jvm.ThrowAsync<InterruptedException>(JavaThread);
+        // if thread was sleeping, wake it up
+        Jvm.Attach(JavaThread.ThreadId);
     }
 
     public static void yield()
