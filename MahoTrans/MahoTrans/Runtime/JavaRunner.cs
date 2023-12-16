@@ -66,9 +66,10 @@ public class JavaRunner
                 Console.WriteLine(ex);
                 // no more frames
 
-                var exMsg = !t.Message.IsNull
-                    ? $"Message: {state.ResolveString(t.Message)}"
-                    : "Exception has no attached message.";
+                var exRealMsg = state.ResolveStringOrDefault(t.Message);
+                var exMsg = string.IsNullOrEmpty(exRealMsg)
+                    ? "Exception has no attached message."
+                    : $"Message: {exRealMsg}";
                 var exSource = $"{frame.Method}:{frame.Pointer} ({frame.Method.Code[frame.Pointer]})";
                 var message = $"Unhandled JVM exception {t.JavaClass} at {exSource}\n{exMsg}";
                 throw new JavaRuntimeError(message, ex);

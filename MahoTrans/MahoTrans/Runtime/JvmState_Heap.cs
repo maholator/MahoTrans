@@ -164,6 +164,11 @@ public partial class JvmState
         return (T)_heap[r.Index]!;
     }
 
+    /// <summary>
+    /// Resolves a string and gets its value as <see cref="string"/>. Will throw on invalid reference.
+    /// </summary>
+    /// <param name="r">Reference to resolve.</param>
+    /// <returns>String value.</returns>
     public string ResolveString(Reference r)
     {
         if (r.IsNull)
@@ -172,12 +177,17 @@ public partial class JvmState
         return obj.Value;
     }
 
+    /// <summary>
+    /// Resolves a string and gets its value as <see cref="string"/>. If reference is null, broken, or object is not a string, this silently returns null.
+    /// </summary>
+    /// <param name="r">Reference to resolve.</param>
+    /// <returns>String value.</returns>
     public string? ResolveStringOrDefault(Reference r)
     {
         if (r.IsNull)
             return null;
-        var obj = (java.lang.String)_heap[r.Index]!;
-        return obj.Value;
+        var obj = _heap[r.Index] as java.lang.String;
+        return obj?.Value;
     }
 
     public T[] ResolveArray<T>(Reference r) where T : struct
