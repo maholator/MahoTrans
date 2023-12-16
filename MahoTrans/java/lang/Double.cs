@@ -66,4 +66,12 @@ public class Double : Object
             Jvm.Throw<NumberFormatException>();
         return d;
     }
+
+    [return: JavaType(typeof(Double))]
+    public static Reference valueOf([String] Reference str)
+    {
+        var i = Jvm.AllocateObject<Double>();
+        i.Init(parseDouble(str));
+        return i.This;
+    }
 }
