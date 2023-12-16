@@ -19,11 +19,21 @@ public class TimeZone : Object
     public static void ClInit()
     {
         GMT = new SimpleTimeZone(0, "GMT");
+        GMT.JavaClass = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+        Jvm.PutToHeap(GMT);
     }
 
     [MemberNotNull(nameof(AvailableZones))]
     private static void initializeAvailable()
     {
+        //TODO THIS MUST NOT BE A THING
+        var cls = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+        if (cls.PendingInitializer)
+        {
+            ClInit();
+            cls.PendingInitializer = false;
+        }
+
         SimpleTimeZone[] zones = TimeZones.GetTimeZones();
         AvailableZones = new Dictionary<string, SimpleTimeZone>();
         AvailableZones.Add(GMT.ID, GMT);

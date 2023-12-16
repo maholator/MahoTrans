@@ -1,4 +1,5 @@
 using MahoTrans.Native;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace java.util;
@@ -139,8 +140,10 @@ public sealed class TimeZones : Object
                 Calendar.MARCH, -1, Calendar.SUNDAY, 2 * ONE_HOUR, SimpleTimeZone.STANDARD_TIME,
                 ONE_HOUR),
         };
+
         foreach (var zone in zones)
         {
+            zone.JavaClass = Jvm.Classes[typeof(TimeZone).ToJavaName()];
             Jvm.PutToHeap(zone);
         }
 
