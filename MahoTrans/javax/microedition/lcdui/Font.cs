@@ -51,11 +51,17 @@ public class Font : Object
     public int substringWidth([String] Reference str, int from, int len)
     {
         return Toolkit.Fonts.GetCharsWidth(Face, Style, Height,
-            Jvm.ResolveString(str).Skip(from).Take(len).ToArray());
+            Jvm.ResolveString(str).AsSpan(from, len));
     }
 
     public int charWidth(char c)
     {
         return Toolkit.Fonts.GetCharWidth(Face, Style, Height, c);
+    }
+
+    public int charsWidth([JavaType("[C")] Reference str, int from, int len)
+    {
+        return Toolkit.Fonts.GetCharsWidth(Face, Style, Height,
+            Jvm.ResolveArray<char>(str).AsSpan(from, len));
     }
 }
