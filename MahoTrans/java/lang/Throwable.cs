@@ -32,6 +32,9 @@ public class Throwable : Object
     [return: String]
     public Reference toString()
     {
-        return Jvm.AllocateString($"{JavaClass.Name.Replace('/', '.')}: {Jvm.ResolveString(Message)}");
+        if (Message == Reference.Null)
+            return Jvm.AllocateString(JavaClass.Name.Replace('/', '.'));
+        var msg = $"{JavaClass.Name.Replace('/', '.')}: {Jvm.ResolveStringOrDefault(Message)}";
+        return Jvm.AllocateString(msg);
     }
 }
