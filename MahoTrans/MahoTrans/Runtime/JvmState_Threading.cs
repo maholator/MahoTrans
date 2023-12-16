@@ -1,4 +1,6 @@
+using java.lang;
 using MahoTrans.Toolkits;
+using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;
 
@@ -42,7 +44,8 @@ public partial class JvmState
         if (thread is null)
             throw new NullReferenceException("Attempt to register null thread.");
 
-        Toolkit.Logger.LogDebug(DebugMessageCategory.Threading, $"Thread {thread.ThreadId} registered and will start soon");
+        Toolkit.Logger.LogDebug(DebugMessageCategory.Threading,
+            $"Thread {thread.ThreadId} registered and will start soon");
         lock (_threadPoolLock)
         {
             _wakeingUpQueue.Enqueue(thread);
@@ -102,6 +105,29 @@ public partial class JvmState
         lock (_threadPoolLock)
         {
             return AliveThreads.Remove(thread) || WaitingThreads.Remove(thread.ThreadId);
+        }
+    }
+
+    /// <summary>
+    /// Throws an async java exception into arbitrary thread.
+    /// </summary>
+    /// <param name="thread">Thread to throw into.</param>
+    /// <typeparam name="T">Java exception type.</typeparam>
+    /// <remarks>
+    /// This throws an exception and immediately processes it via <see cref="JavaRunner.ProcessThrow"/>.
+    /// No exceptions are thrown outside, this just changes thread's state.
+    /// To throw synchronized exception from a thread during its execution use <see cref="Throw{T}"/>.
+    /// </remarks>
+    public void ThrowAsync<T>(JavaThread thread) where T : Throwable
+    {
+        try
+        {
+            Thread.CurrentThread = thread;
+            Throw<T>();
+        }
+        catch (JavaThrowable ex)
+        {
+            JavaRunner.ProcessThrow(thread, this, ex);
         }
     }
 

@@ -192,6 +192,11 @@ public partial class JvmState
 
     #region Exceptions
 
+    /// <summary>
+    /// Throws a java exception. It's expected that <see cref="JavaRunner.ProcessThrow"/> will catch and process it.
+    /// </summary>
+    /// <typeparam name="T">Type of exception.</typeparam>
+    /// <exception cref="JavaThrowable">Always thrown CLR exception. Contains java exception to be processed by handler.</exception>
     [DoesNotReturn]
     public void Throw<T>() where T : Throwable
     {

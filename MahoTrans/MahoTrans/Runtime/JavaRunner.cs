@@ -40,7 +40,7 @@ public class JavaRunner
         // }
     }
 
-    private static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
+    public static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
     {
         var frame = thread.ActiveFrame!;
         var t = state.Resolve<Throwable>(ex.Throwable);
