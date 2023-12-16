@@ -13,7 +13,12 @@ public readonly struct NameDescriptor : IEquatable<NameDescriptor>
         Descriptor = descriptor;
     }
 
-    public override string ToString() => $"{Descriptor}+{Name}";
+    public override string ToString()
+    {
+        if (Descriptor[0] == '(')
+            return $"{Name} {Descriptor}";
+        return $"{Descriptor}+{Name}";
+    }
 
     public static implicit operator string(NameDescriptor descriptor) => descriptor.ToString();
 

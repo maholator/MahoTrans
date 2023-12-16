@@ -121,13 +121,13 @@ public static class BytecodeLinker
                         catch
                         {
                             logger.Log(LoadIssueType.MissingMethodAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no method {ndc.Descriptor}");
+                                $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
                         logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its method {ndc.Descriptor} will be used");
+                            $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" will be used");
                     }
 
                     break;
@@ -155,19 +155,19 @@ public static class BytecodeLinker
                             if (f.Flags.HasFlag(FieldFlags.Static))
                             {
                                 logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                    $"\"{ndc.ClassName}\" has field {ndc.Descriptor}, but it is static");
+                                    $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is static");
                             }
                         }
                         catch
                         {
                             logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no field {ndc.Descriptor}");
+                                $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
                         logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its field {ndc.Descriptor} will be used");
+                            $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
                     }
 
                     break;
@@ -196,19 +196,19 @@ public static class BytecodeLinker
                             if (!f.Flags.HasFlag(FieldFlags.Static))
                             {
                                 logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                    $"\"{ndc.ClassName}\" has field {ndc.Descriptor}, but it is not static");
+                                    $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is not static");
                             }
                         }
                         catch
                         {
                             logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no field {ndc.Descriptor}");
+                                $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
                         logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its field {ndc.Descriptor} will be used");
+                            $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
                     }
 
                     break;
