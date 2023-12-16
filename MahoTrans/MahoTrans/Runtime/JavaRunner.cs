@@ -1511,27 +1511,23 @@ public class JavaRunner
     {
         if (caller == null)
             return;
+        Reference monitorHost;
+
         if (frame.Method.Method.IsStatic)
+            monitorHost = frame.Method.Method.Class.GetOrInitModel();
+        else
+            monitorHost = caller.Stack[caller.StackTop];
+
+        var obj = state.ResolveObject(monitorHost);
+        if (obj.MonitorOwner != thread.ThreadId)
         {
-            //TODO
+            state.Throw<IllegalMonitorStateException>();
         }
         else
         {
-            var r = (Reference)caller.Stack[caller.StackTop];
-            if (r.IsNull)
-                state.Throw<NullPointerException>();
-
-            var obj = state.ResolveObject(r);
-            if (obj.MonitorOwner != thread.ThreadId)
-            {
-                state.Throw<IllegalMonitorStateException>();
-            }
-            else
-            {
-                obj.MonitorReEnterCount--;
-                if (obj.MonitorReEnterCount == 0)
-                    obj.MonitorOwner = 0;
-            }
+            obj.MonitorReEnterCount--;
+            if (obj.MonitorReEnterCount == 0)
+                obj.MonitorOwner = 0;
         }
     }
 
@@ -1919,7 +1915,9 @@ public class JavaRunner
         {
             if (m.IsCritical)
             {
-                //TODO lock
+                var host = frame.Method.Method.Class.GetOrInitModel();
+                if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
+                    return;
             }
         }
         else

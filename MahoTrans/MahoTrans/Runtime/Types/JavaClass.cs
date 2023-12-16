@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using java.lang;
 using MahoTrans.Toolkits;
 using MahoTrans.Utils;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime.Types;
@@ -271,5 +273,17 @@ public class JavaClass
             Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.ClassInitializer,
                 $"Class {Name} has no initialization method");
         }
+    }
+
+    public Reference GetOrInitModel()
+    {
+        if (ModelObject.IsNull)
+        {
+            var cls = JvmState.Context.AllocateObject<Class>();
+            cls.InternalClass = this;
+            ModelObject = cls.This;
+        }
+
+        return ModelObject;
     }
 }
