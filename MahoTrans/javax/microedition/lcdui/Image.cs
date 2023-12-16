@@ -50,6 +50,14 @@ public class Image : Object
         return image.This;
     }
 
+    [return: JavaType(typeof(Image))]
+    public static Reference createImage___copy([JavaType(typeof(Image))] Reference source)
+    {
+        var image = Jvm.AllocateObject<Image>();
+        image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle);
+        return image.This;
+    }
+
     public bool isMutable() => Toolkit.Images.IsMutable(Handle);
 
     public int getWidth() => Toolkit.Images.GetWidth(Handle);
