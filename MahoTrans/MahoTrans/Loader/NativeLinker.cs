@@ -180,16 +180,23 @@ public static class NativeLinker
             };
         }
 
+        var ms = $"Initialization method {javaType.Name}::{nativeMethod.Name}";
+
         if (isCtor && isClinit)
-            throw new JavaLinkageException("Initialization method must be either instance or static.");
+            throw new JavaLinkageException(
+                $"{ms} must be either instance or static.");
         if (isCtor && ret.Native != typeof(void))
-            throw new JavaLinkageException("Initialization method must return void.");
+            throw new JavaLinkageException(
+                $"{ms} must return void.");
         if (isCtor && nativeMethod.IsStatic)
-            throw new JavaLinkageException("Initialization method can't be static.");
+            throw new JavaLinkageException(
+                $"{ms} can't be static.");
         if (isClinit && !nativeMethod.IsStatic)
-            throw new JavaLinkageException("Initialization method must be static.");
+            throw new JavaLinkageException(
+                $"{ms} must be static.");
         if (isClinit && ret.Native != typeof(void))
-            throw new JavaLinkageException("Initialization method must return void.");
+            throw new JavaLinkageException(
+                $"{ms} must return void.");
 
         descriptor ??= $"({string.Join("", args.Select(x => Parameter.FromParam(x).ToString()))}){ret.ToString()}";
 
@@ -198,7 +205,16 @@ public static class NativeLinker
         flags |= MethodFlags.Native;
         Method java = new Method(new NameDescriptor(name, descriptor), flags, javaType);
         java.NativeBody = nativeMethod;
-        java.BridgeNumber = BuildBridgeMethod(nativeMethod, bridgeBuilder);
+        try
+        {
+            java.BridgeNumber = BuildBridgeMethod(nativeMethod, bridgeBuilder);
+        }
+        catch (Exception e)
+        {
+            throw new JavaLinkageException($"Failed to build native bridges for {javaType.Name}::{nativeMethod.Name}",
+                e);
+        }
+
         return java;
     }
 
