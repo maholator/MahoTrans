@@ -23,6 +23,11 @@ public class JavaClass
     public Type? ClrType;
 
     /// <summary>
+    /// This is set by first call of <see cref="Object.getClass"/>.
+    /// </summary>
+    public Reference ModelObject;
+
+    /// <summary>
     /// True, if this class' initializer was not yet executed.
     /// </summary>
     public bool PendingInitializer = true;

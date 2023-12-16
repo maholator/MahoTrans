@@ -244,8 +244,11 @@ public class Object
     [return: JavaType(typeof(Class))]
     public Reference getClass()
     {
+        if (!JavaClass.ModelObject.IsNull)
+            return JavaClass.ModelObject;
         var cls = Jvm.AllocateObject<Class>();
         cls.InternalClass = JavaClass;
+        JavaClass.ModelObject = cls.This;
         return cls.This;
     }
 

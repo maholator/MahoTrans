@@ -52,6 +52,8 @@ public partial class JvmState
                         continue;
                     s.Write(cls.PendingInitializer ? "1" : "0");
                     s.Write(' ');
+                    s.Write(cls.ModelObject.Index);
+                    s.Write(' ');
                     s.Write(cls.GetSnapshotHash());
                     s.Write(' ');
                     s.Write(cls.Name);
@@ -112,6 +114,20 @@ public partial class JvmState
         }
     }
 
+    private struct SerializedClass
+    {
+        public bool PendingInitializer;
+        public int ModelObject;
+        public string Hash;
+
+        public SerializedClass(string[] line)
+        {
+            PendingInitializer = line[0][0] == '1';
+            ModelObject = int.Parse(line[1]);
+            Hash = line[2];
+        }
+    }
+
     public void RestoreFromSnapshot(Stream stream)
     {
         using (var zip = new ZipArchive(stream, ZipArchiveMode.Read, true, Encoding.UTF8))
@@ -122,7 +138,7 @@ public partial class JvmState
                     StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
                 var classesDict = classesList
                     .Select(x => x.Split(' '))
-                    .ToDictionary(x => x[2], x => (x[0][0] == '1', x[1]));
+                    .ToDictionary(x => x[3], x => new SerializedClass(x));
 
                 foreach (var cls in Classes.Values)
                 {
@@ -136,15 +152,16 @@ public partial class JvmState
 
                     var existingHash = cls.GetSnapshotHash().ToString();
 
-                    if (existingHash != sn.Item2)
+                    if (existingHash != sn.Hash)
                     {
                         throw new SnapshotLoadError($"Class hash for {cls.Name} doesn't match snapshoted one.\n" +
-                                                    $"Snapshoted hash: {sn.Item2}\n" +
+                                                    $"Snapshoted hash: {sn.Hash}\n" +
                                                     $"Hash of existing class: {existingHash}\n" +
                                                     $"Class code or members may have changed.");
                     }
 
-                    cls.PendingInitializer = sn.Item1;
+                    cls.PendingInitializer = sn.PendingInitializer;
+                    cls.ModelObject = sn.ModelObject;
                     classesDict.Remove(cls.Name);
                 }
 

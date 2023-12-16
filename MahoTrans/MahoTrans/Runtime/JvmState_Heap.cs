@@ -451,9 +451,14 @@ public partial class JvmState
 
         // building roots list
         {
-            // statics
+            // statics and classes
             foreach (var cls in Classes.Values)
             {
+                if (!cls.ModelObject.IsNull)
+                {
+                    roots.Add(cls.ModelObject);
+                }
+
                 foreach (var field in cls.Fields.Values)
                 {
                     if ((field.Flags & FieldFlags.Static) != 0)
