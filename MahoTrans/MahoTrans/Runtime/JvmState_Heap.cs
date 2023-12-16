@@ -305,7 +305,8 @@ public partial class JvmState
     /// </summary>
     /// <param name="obj">Object to add into heap.</param>
     /// <returns>Reference to the object.</returns>
-    private Reference PutToHeap(Object obj)
+    /// <remarks>This api should not be used. Allocate objects using <see cref="AllocateObject"/>.</remarks>
+    public Reference PutToHeap(Object obj)
     {
         lock (this)
         {

@@ -9,4 +9,6 @@ public interface ISystem : IToolkit
     void PrintOut(byte b);
 
     string? GetProperty(string name);
+
+    string TimeZone { get; }
 }

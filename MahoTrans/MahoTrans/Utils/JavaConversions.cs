@@ -137,14 +137,15 @@ public static class JavaConversions
         }
     }
 
-    public static Reference ToHeap(this string[] list, JvmState heap)
+    public static Reference AsJavaArray(this string[] list)
     {
+        var jvm = JvmState.Context;
         Reference[] r = new Reference[list.Length];
         for (int i = 0; i < r.Length; i++)
         {
-            r[i] = heap.AllocateString(list[i]);
+            r[i] = jvm.AllocateString(list[i]);
         }
 
-        return heap.AllocateArray(r, "[java/lang/String");
+        return jvm.AllocateArray(r, "[java/lang/String");
     }
 }

@@ -201,7 +201,7 @@ public class RecordStore : Object
         var stores = Toolkit.RecordStore.ListStores();
         if (stores.Length == 0)
             return Reference.Null;
-        return stores.ToHeap(Jvm);
+        return stores.AsJavaArray();
     }
 
     [return: JavaType(typeof(RecordStore))]
