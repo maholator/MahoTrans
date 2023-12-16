@@ -1,3 +1,4 @@
+using java.io;
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -57,6 +58,14 @@ public class Image : Object
         image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle);
         return image.This;
     }
+
+    [return: JavaType(typeof(Image))]
+    public static Reference createImage___stream([JavaType(typeof(InputStream))] Reference stream)
+    {
+        //TODO read all the stream to byte array, then call createImage(byte[])
+        throw new NotImplementedException();
+    }
+
 
     public bool isMutable() => Toolkit.Images.IsMutable(Handle);
 
