@@ -27,7 +27,7 @@ public partial class JvmState
 
     private bool _gcPending;
 
-    #region Allocation
+    #region Object allocation
 
     public Reference AllocateObject(JavaClass @class)
     {
@@ -62,29 +62,25 @@ public partial class JvmState
         return r;
     }
 
-    public Reference AllocateArray<T>(int length) where T : struct
-    {
-        if (typeof(T) == typeof(Reference))
-            throw new JavaRuntimeError("Reference array must have assigned class!");
-        return PutToHeap(new Array<T>
-        {
-            Value = new T[length],
-            JavaClass = PrimitiveToArrayType<T>(),
-        });
-    }
+    #endregion
 
-    public Reference AllocateReferenceArray(int length, JavaClass cls)
-    {
-        return PutToHeap(new Array<Reference>
-        {
-            Value = new Reference[length],
-            JavaClass = cls
-        });
-    }
+    #region Array allocation (for native)
 
+    /// <summary>
+    /// Creates an array. This is for native code.
+    /// </summary>
+    /// <param name="data">CLR array to put it. It won't be copied.</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <returns>Reference to newly created array.</returns>
     public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
         AllocateArray(data, GetClass(cls));
 
+    /// <summary>
+    /// Creates an array. This is for native code.
+    /// </summary>
+    /// <param name="data">CLR array to put it. It won't be copied.</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <returns>Reference to newly created array.</returns>
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
 #if DEBUG
@@ -102,23 +98,83 @@ public partial class JvmState
         });
     }
 
-    public Reference AllocateArray(ArrayType arrayType, int len)
+    /// <summary>
+    /// Creates an array of primitives (ints, chars, etc.). This is for native code.
+    /// </summary>
+    /// <param name="data">CLR array to put it. It won't be copied.</param>
+    /// <returns>Reference to newly created array.</returns>
+    public Reference AllocatePrimitiveArray<T>(T[] data) where T : struct
     {
+        if (typeof(T) == typeof(Reference))
+            throw new JavaRuntimeError("Reference array must have assigned class!");
+        return PutToHeap(new Array<T>
+        {
+            Value = data,
+            JavaClass = PrimitiveToArrayType<T>(),
+        });
+    }
+
+    #endregion
+
+    #region Array allocation (for interpreter)
+
+    /// <summary>
+    /// Creates an array. This is used by interpreter.
+    /// </summary>
+    /// <param name="arrayType">Array type.</param>
+    /// <param name="length">Length of the array. Will be validated.</param>
+    /// <returns>Reference to newly created array.</returns>
+    public Reference AllocateArray(ArrayType arrayType, int length)
+    {
+        if (length < 0)
+            Throw<NegativeArraySizeException>();
         return arrayType switch
         {
-            ArrayType.T_BOOLEAN => AllocateArray<bool>(len),
-            ArrayType.T_CHAR => AllocateArray<char>(len),
-            ArrayType.T_FLOAT => AllocateArray<float>(len),
-            ArrayType.T_DOUBLE => AllocateArray<double>(len),
-            ArrayType.T_BYTE => AllocateArray<sbyte>(len),
-            ArrayType.T_SHORT => AllocateArray<short>(len),
-            ArrayType.T_INT => AllocateArray<int>(len),
-            ArrayType.T_LONG => AllocateArray<long>(len),
-            _ => throw new ArgumentOutOfRangeException(nameof(arrayType), arrayType, null)
+            ArrayType.T_BOOLEAN => AllocateArray<bool>(length),
+            ArrayType.T_CHAR => AllocateArray<char>(length),
+            ArrayType.T_FLOAT => AllocateArray<float>(length),
+            ArrayType.T_DOUBLE => AllocateArray<double>(length),
+            ArrayType.T_BYTE => AllocateArray<sbyte>(length),
+            ArrayType.T_SHORT => AllocateArray<short>(length),
+            ArrayType.T_INT => AllocateArray<int>(length),
+            ArrayType.T_LONG => AllocateArray<long>(length),
+            _ => Reference.Null
         };
     }
 
-    public JavaClass PrimitiveToArrayType<T>()
+    /// <summary>
+    /// Creates an array. This is used by interpreter.
+    /// </summary>
+    /// <param name="length">Length of the array. Will be validated.</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <returns>Reference to newly created array.</returns>
+    public Reference AllocateReferenceArray(int length, JavaClass cls)
+    {
+        if (length < 0)
+            Throw<NegativeArraySizeException>();
+        return PutToHeap(new Array<Reference>
+        {
+            Value = new Reference[length],
+            JavaClass = cls
+        });
+    }
+
+    #endregion
+
+    #region Array allocation (utils)
+
+    private Reference AllocateArray<T>(int length) where T : struct
+    {
+        if (typeof(T) == typeof(Reference))
+            throw new JavaRuntimeError("Reference array must have assigned class!");
+        return PutToHeap(new Array<T>
+        {
+            Value = new T[length],
+            JavaClass = PrimitiveToArrayType<T>(),
+        });
+    }
+
+    private JavaClass PrimitiveToArrayType<T>()
     {
         string name;
         if (typeof(T) == typeof(int))
@@ -138,7 +194,7 @@ public partial class JvmState
         else if (typeof(T) == typeof(sbyte))
             name = "[B";
         else
-            throw new ArgumentException();
+            throw new JavaRuntimeError($"Attempt to allocate an array of non-supported primitive type {typeof(T)}");
         return GetClass(name);
     }
 
@@ -211,10 +267,14 @@ public partial class JvmState
     public void Throw<T>() where T : Throwable
     {
         Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
-        throw new JavaThrowable(AllocateObject<T>().This);
+        var ex = AllocateObject<T>();
+        ex.Init();
+        throw new JavaThrowable(ex.This);
     }
 
     #endregion
+
+    #region Utils
 
     public void PushClassConstant(Frame frame, object o)
     {
@@ -279,6 +339,10 @@ public partial class JvmState
             return r;
         }
     }
+
+    #endregion
+
+    #region GC
 
     /// <summary>
     /// Performs collection in this heap. This must be called only when jvm is stopped!
@@ -442,4 +506,6 @@ public partial class JvmState
 
         return roots;
     }
+
+    #endregion
 }

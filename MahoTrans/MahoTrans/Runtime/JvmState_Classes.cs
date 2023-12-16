@@ -135,6 +135,8 @@ public partial class JvmState
         throw new JavaRuntimeError($"Class {name} is not loaded!");
     }
 
+    public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
+
     #endregion
 
     #region Calls
