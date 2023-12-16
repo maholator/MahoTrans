@@ -228,6 +228,9 @@ public sealed class String : Object
     [return: String]
     public Reference trim() => Jvm.AllocateString(Value.Trim());
 
+    [return: String]
+    public Reference intern() => Jvm.InternalizeString(Value);
+
     #region valueOf
 
     [return: String]
