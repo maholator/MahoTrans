@@ -68,7 +68,7 @@ public class InputStream : Object
         b.Append(JavaOpcode.iadd);
         b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.arraylength);
-        using (b.AppendGoto(JavaOpcode.if_icmplt))
+        using (b.AppendGoto(JavaOpcode.if_icmple))
         {
             b.AppendNewObject<IndexOutOfBoundsException>();
             b.Append(JavaOpcode.athrow);
@@ -121,8 +121,16 @@ public class InputStream : Object
                 {
                     b.Append(JavaOpcode.iload, 4);
                     b.Append(JavaOpcode.iload_2);
-                    b.Append(JavaOpcode.isub);
-                    b.AppendReturnInt(); // return i-off;
+                    b.Append(JavaOpcode.isub); // readCount = i-off;
+                    b.Append(JavaOpcode.dup);
+                    using (b.AppendGoto(JavaOpcode.ifgt))
+                    {
+                        // if read count is zero, return -1 because we read nothing.
+                        b.Append(JavaOpcode.pop);
+                        b.Append(JavaOpcode.iconst_m1);
+                    }
+
+                    b.AppendReturnInt();
                 }
 
                 b.Append(JavaOpcode.aload_1);
@@ -139,6 +147,8 @@ public class InputStream : Object
                 b.Append(JavaOpcode.isub);
                 b.AppendReturnInt(); // return i-off;
             }
+
+            b.AppendInc(4, 1);
 
             loop.ConditionSection();
 
