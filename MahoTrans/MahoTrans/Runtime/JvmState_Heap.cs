@@ -4,6 +4,7 @@ using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -39,7 +40,7 @@ public partial class JvmState
     public T AllocateObject<T>() where T : Object
     {
         var o = Activator.CreateInstance<T>();
-        o.JavaClass = Classes.Values.First(x => x.ClrType == typeof(T));
+        o.JavaClass = Classes[typeof(T).ToJavaName()];
         PutToHeap(o);
         return o;
     }
