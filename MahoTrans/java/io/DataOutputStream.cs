@@ -141,6 +141,65 @@ public class DataOutputStream : OutputStream
         };
     }
 
+    [JavaDescriptor("(J)V")]
+    public JavaMethodBody writeLong(JavaClass cls)
+    {
+        byte[] streamWrite = cls.PushConstant(_write).Split();
+        return new JavaMethodBody(3, 2)
+        {
+            RawCode = new Instruction[]
+            {
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 56 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 48 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 40 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 32 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 24 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 16 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.bipush, new byte[] { 8 }),
+                new(JavaOpcode.lshr),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.l2i),
+                new(JavaOpcode.invokevirtual, streamWrite),
+                new(JavaOpcode.@return),
+            }
+        };
+    }
+
     [JavaDescriptor("(I)V")]
     public JavaMethodBody writeShort(JavaClass cls)
     {
