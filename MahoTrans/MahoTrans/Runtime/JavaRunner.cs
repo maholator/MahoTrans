@@ -1507,6 +1507,13 @@ public class JavaRunner
         }
     }
 
+    /// <summary>
+    /// Exits monitor that was entered using <see cref="TryEnterInstanceMonitor"/>.
+    /// </summary>
+    /// <param name="frame">Frame that was popped. This method will perform exit on this thread.</param>
+    /// <param name="caller">Frame that called the method.</param>
+    /// <param name="thread">Owner of the monitor.</param>
+    /// <param name="state">JVM.</param>
     private static unsafe void ExitSynchronizedMethod(Frame frame, Frame? caller, JavaThread thread, JvmState state)
     {
         if (caller == null)
@@ -1915,7 +1922,7 @@ public class JavaRunner
         {
             if (m.IsCritical)
             {
-                var host = frame.Method.Method.Class.GetOrInitModel();
+                var host = m.Class.GetOrInitModel();
                 if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
                     return;
             }
