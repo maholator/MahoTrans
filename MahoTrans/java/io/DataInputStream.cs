@@ -1,4 +1,5 @@
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -197,6 +198,25 @@ public class DataInputStream : InputStream
                 new(JavaOpcode.ireturn)
             }
         };
+    }
+
+    [JavaDescriptor("()J")]
+    public JavaMethodBody readLong(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.Append(JavaOpcode.dup);
+        b.AppendVirtcall(nameof(readInt), typeof(int));
+        b.Append(JavaOpcode.i2l);
+        b.Append(JavaOpcode.bipush, 32);
+        b.Append(JavaOpcode.lshl);
+        b.Append(JavaOpcode.lstore_1);
+        b.AppendVirtcall(nameof(readInt), typeof(int));
+        b.Append(JavaOpcode.i2l);
+        b.Append(JavaOpcode.lload_1);
+        b.Append(JavaOpcode.lor);
+        b.Append(JavaOpcode.lreturn);
+        return b.Build(3, 2);
     }
 
     [JavaDescriptor("()B")]
