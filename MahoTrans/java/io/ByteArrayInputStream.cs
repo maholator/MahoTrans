@@ -7,7 +7,7 @@ namespace java.io;
 public class ByteArrayInputStream : InputStream
 {
     // as per MIDP docs
-    public Reference buf;
+    [JavaType("[B")] public Reference buf;
     public int count;
     public int mark;
     public int pos;
