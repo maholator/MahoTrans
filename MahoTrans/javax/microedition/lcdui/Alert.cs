@@ -39,6 +39,8 @@ public class Alert : Screen
         Type = alertType;
         Timeout = getDefaultTimeout();
         Commands.Add(DISMISS_COMMAND);
+        // invalidate is necessary to notify toolkit about non-null implicit command
+        Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }
 
     [String] public Reference Text;
