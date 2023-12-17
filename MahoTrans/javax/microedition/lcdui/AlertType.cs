@@ -56,4 +56,10 @@ public class AlertType : Object
         warning.Init(5);
         WARNING = warning.This;
     }
+
+    public bool playSound([JavaType(typeof(Display))] Reference display)
+    {
+        //TODO
+        return false;
+    }
 }
