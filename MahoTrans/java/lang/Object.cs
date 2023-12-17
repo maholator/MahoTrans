@@ -55,8 +55,8 @@ public class Object
     {
         get
         {
-            Debug.Assert(_jvm == null, "Heap is not attached to this thread!");
-            return _jvm!;
+            Debug.Assert(_jvm != null, "Heap is not attached to this thread!");
+            return _jvm;
         }
     }
 

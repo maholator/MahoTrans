@@ -142,8 +142,8 @@ public class JavaRunner
         ref var pointer = ref frame.Pointer;
         var code = frame.Method.LinkedCode;
 
-        Debug.Assert(pointer < 0, $"Instruction pointer underflow in {frame.Method}");
-        Debug.Assert(pointer >= code.Length, $"Instruction pointer overflow in {frame.Method}");
+        Debug.Assert(pointer >= 0, $"Instruction pointer underflow in {frame.Method}");
+        Debug.Assert(pointer < code.Length, $"Instruction pointer overflow in {frame.Method}");
 
         var instr = code[pointer];
         switch (instr.Opcode)
