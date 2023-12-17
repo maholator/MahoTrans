@@ -95,6 +95,8 @@ public class Thread : Object, Runnable
 
     public bool isAlive() => JavaThread.ActiveFrame != null;
 
+    public static int activeCount() => Jvm.AliveThreads.Count + Jvm.WaitingThreads.Count;
+
     public void start()
     {
         if (started)
