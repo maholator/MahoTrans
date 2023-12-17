@@ -46,7 +46,7 @@ public class Thread : Object, Runnable
     }
 
     [JavaDescriptor("()V")]
-    public JavaMethodBody run(JavaClass @class)
+    public JavaMethodBody run(JavaClass cls)
     {
         return new JavaMethodBody
         {
@@ -56,12 +56,12 @@ public class Thread : Object, Runnable
             {
                 new Instruction(0, JavaOpcode.aload_0),
                 new Instruction(1, JavaOpcode.getfield,
-                    @class.PushConstant(new NameDescriptorClass("_target", "Ljava/lang/Runnable;", "java/lang/Thread"))
+                    cls.PushConstant(new NameDescriptorClass("_target", "Ljava/lang/Runnable;", "java/lang/Thread"))
                         .Split()),
                 new Instruction(4, JavaOpcode.dup),
                 new Instruction(5, JavaOpcode.ifnull, new byte[] { 0, 7 }),
                 new Instruction(8, JavaOpcode.invokevirtual,
-                    @class.PushConstant(new NameDescriptorClass("run", "()V", "java/lang/Runnable")).Split()),
+                    cls.PushConstant(new NameDescriptorClass("run", "()V", "java/lang/Runnable")).Split()),
                 new Instruction(11, JavaOpcode.@return),
                 new Instruction(12, JavaOpcode.@return),
             }
