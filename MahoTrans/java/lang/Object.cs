@@ -55,13 +55,8 @@ public class Object
     {
         get
         {
-#if DEBUG
-            if (_jvm == null)
-                throw new JavaRuntimeError("Heap is not attached to this thread!");
-            return _jvm;
-#else
+            Debug.Assert(_jvm == null, "Heap is not attached to this thread!");
             return _jvm!;
-#endif
         }
     }
 

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace MahoTrans.Runtime;
 
 public readonly struct Instruction : IEquatable<Instruction>
@@ -31,11 +33,8 @@ public readonly struct Instruction : IEquatable<Instruction>
     {
         Opcode = opcode;
         Offset = 0;
-#if DEBUG
-        if (args == null!)
-            throw new NullReferenceException("Args must be not null!");
-#endif
-        Args = args;
+        Debug.Assert(args == null!, "Args must be not null!");
+        Args = args!;
     }
 
     public Instruction(JavaOpcode opcode)

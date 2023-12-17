@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
@@ -140,12 +141,10 @@ public class JavaRunner
         var frame = thread.ActiveFrame!;
         ref var pointer = ref frame.Pointer;
         var code = frame.Method.LinkedCode;
-#if DEBUG
-        if (pointer < 0 || pointer >= code.Length)
-        {
-            throw new JavaRuntimeError($"Instruction pointer was out of range ({pointer}) in {frame.Method}");
-        }
-#endif
+
+        Debug.Assert(pointer < 0, $"Instruction pointer underflow in {frame.Method}");
+        Debug.Assert(pointer >= code.Length, $"Instruction pointer overflow in {frame.Method}");
+
         var instr = code[pointer];
         switch (instr.Opcode)
         {

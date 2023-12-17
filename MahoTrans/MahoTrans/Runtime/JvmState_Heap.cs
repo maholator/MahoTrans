@@ -84,13 +84,11 @@ public partial class JvmState
     /// <returns>Reference to newly created array.</returns>
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
-#if DEBUG
         if (data == null!)
             throw new JavaRuntimeError("Attempt to convert null array");
 
         if (typeof(T) == typeof(byte))
             throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
-#endif
 
         return PutToHeap(new Array<T>
         {
@@ -106,6 +104,10 @@ public partial class JvmState
     /// <returns>Reference to newly created array.</returns>
     public Reference AllocatePrimitiveArray<T>(T[] data) where T : struct
     {
+        if (data == null!)
+            throw new JavaRuntimeError("Attempt to convert null array");
+        if (typeof(T) == typeof(byte))
+            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
         return PutToHeap(new Array<T>
@@ -207,10 +209,6 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-#if DEBUG
-        if (r.Index >= _heap.Length || r.Index < 0)
-            throw new JavaRuntimeError($"Invalid reference: {r.Index}");
-#endif
         return _heap[r.Index]!;
     }
 
