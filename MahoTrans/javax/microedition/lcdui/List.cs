@@ -17,7 +17,17 @@ public class List : Screen
 
     [JavaIgnore] public Reference ImplicitSelectCommand;
 
-    public int SelectedItem = -1;
+    public int SelectedItem = 0;
+
+    /// <summary>
+    /// For frontend. Sets selected item.
+    /// </summary>
+    /// <param name="index">Item.</param>
+    public void SetSelected(int index)
+    {
+        SelectedItem = index;
+        //TODO send event back to toolkit
+    }
 
     [ClassInit]
     public static void ClInit()
