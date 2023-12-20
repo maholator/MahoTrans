@@ -26,7 +26,7 @@ public class Short : Object
         return (short)i;
     }
 
-    public bool equals(Reference r)
+    public new bool equals(Reference r)
     {
         if (r.IsNull)
             return false;

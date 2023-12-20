@@ -6,7 +6,7 @@ namespace java.util;
 public class Stack : Vector
 {
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
         base.Init();
     }

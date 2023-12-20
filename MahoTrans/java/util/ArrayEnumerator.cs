@@ -6,20 +6,20 @@ namespace java.util;
 
 public class ArrayEnumerator : Object, Enumeration
 {
-    [JavaIgnore] public Reference[] Value;
-    public int index;
+    [JavaIgnore] public Reference[] Value = null!;
+    public int Index;
 
     public bool hasMoreElements()
     {
-        return index < Value.Length;
+        return Index < Value.Length;
     }
 
     public Reference nextElement()
     {
-        if (index >= Value.Length)
+        if (Index >= Value.Length)
             Jvm.Throw<NoSuchElementException>();
-        var el = Value[index];
-        index++;
+        var el = Value[Index];
+        Index++;
         return el;
     }
 

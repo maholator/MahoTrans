@@ -21,12 +21,12 @@ public class Integer : Object
     public float floatValue() => Value;
 
 
-    public int hashCode()
+    public new int hashCode()
     {
         return Value;
     }
 
-    public bool equals(Reference obj)
+    public new bool equals(Reference obj)
     {
         if (obj.IsNull)
             return false;

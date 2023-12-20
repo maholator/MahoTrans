@@ -355,7 +355,7 @@ public class DataInputStream : InputStream
     }
 
     [JavaDescriptor("(J)J")]
-    public JavaMethodBody skip(JavaClass @class)
+    public new JavaMethodBody skip(JavaClass @class)
     {
         return new JavaMethodBody(2, 2)
         {

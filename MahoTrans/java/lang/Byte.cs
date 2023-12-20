@@ -46,9 +46,9 @@ public class Byte : Object
         return Jvm.AllocateString(Value.ToString());
     }
 
-    public int hashCode() => Value;
+    public new int hashCode() => Value;
 
-    public bool equals(Reference obj)
+    public new bool equals(Reference obj)
     {
         if (obj.IsNull)
             return false;

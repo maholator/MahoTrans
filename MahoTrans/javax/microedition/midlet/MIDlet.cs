@@ -12,7 +12,7 @@ public class MIDlet : Object
     public Reference Display;
 
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
         if (Properties == null!)
         {

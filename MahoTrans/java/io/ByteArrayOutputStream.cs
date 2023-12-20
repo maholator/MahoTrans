@@ -10,7 +10,7 @@ public class ByteArrayOutputStream : OutputStream
     [JavaIgnore] public List<sbyte> buf = new();
 
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
     }
 
@@ -19,7 +19,7 @@ public class ByteArrayOutputStream : OutputStream
     {
     }
 
-    public void close()
+    public new void close()
     {
     }
 
@@ -43,14 +43,14 @@ public class ByteArrayOutputStream : OutputStream
         buf.AddRange(arr.Skip(off).Take(len));
     }
 
-    public void write(int b)
+    public new void write(int b)
     {
         buf.Add((sbyte)(byte)(uint)b);
     }
 
     public int size() => buf.Count;
 
-    public void flush()
+    public new void flush()
     {
         // do nothing
     }

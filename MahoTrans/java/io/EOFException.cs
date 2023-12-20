@@ -6,12 +6,12 @@ namespace java.io;
 public class EOFException : IOException
 {
     [InitMethod]
-    public void Init([String] Reference msg)
+    public new void Init([String] Reference msg)
     {
     }
 
     [InitMethod]
-    public void Init()
+    public new void Init()
     {
     }
 }

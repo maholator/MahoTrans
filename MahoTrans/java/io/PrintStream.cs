@@ -336,7 +336,7 @@ public class PrintStream : OutputStream
     //TODO write([BII)V
 
     [JavaDescriptor("(I)V")]
-    public JavaMethodBody write(JavaClass cls)
+    public new JavaMethodBody write(JavaClass cls)
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();

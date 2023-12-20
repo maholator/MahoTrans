@@ -113,7 +113,7 @@ public class EventQueue : Thread
     }
 
     [JavaDescriptor("()V")]
-    public JavaMethodBody run(JavaClass cls)
+    public new JavaMethodBody run(JavaClass cls)
     {
         var parkMethod = new NameDescriptorClass(nameof(parkIfQueueEmpty), "()V", typeof(EventQueue).ToJavaName());
         var dequeueMethod = new NameDescriptorClass(nameof(dequeue), $"()L{typeof(Event).ToJavaName()};",

@@ -15,7 +15,7 @@ public class Long : Object
 
     public double doubleValue() => Value;
 
-    public bool equals(Reference obj)
+    public new bool equals(Reference obj)
     {
         if (obj.IsNull)
             return false;
@@ -27,7 +27,7 @@ public class Long : Object
 
     public float floatValue() => Value;
 
-    public int hashCode()
+    public new int hashCode()
     {
         return (int)(uint)(((ulong)Value) ^ (((ulong)Value) >> 32));
     }

@@ -9,7 +9,7 @@ public class Random : Object
     public long Seed;
 
     [InitMethod]
-    public void Init() => Init(global::java.lang.System.currentTimeMillis());
+    public new void Init() => Init(global::java.lang.System.currentTimeMillis());
 
     [InitMethod]
     public void Init(long seed) => setSeed(seed);

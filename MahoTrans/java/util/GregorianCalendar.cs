@@ -10,7 +10,7 @@ class GregorianCalendar : Calendar
         BC = 0,
         AD = 1;
 
-    private static readonly long gregorianCutover = -12219292800000l;
+    private static readonly long gregorianCutover = -12219292800000L;
     private static readonly int changeYear = 1582;
 
     private static readonly int julianSkew = ((changeYear - 2000) / 400) + julianError() -

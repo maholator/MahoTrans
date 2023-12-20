@@ -30,7 +30,7 @@ public class ByteArrayInputStream : InputStream
         count = len + offset;
     }
 
-    public int read()
+    public new int read()
     {
         if (pos == count)
             return -1;
@@ -78,9 +78,9 @@ public class ByteArrayInputStream : InputStream
         return read;
     }
 
-    public int available() => count - pos;
+    public new int available() => count - pos;
 
-    public void close()
+    public new void close()
     {
         // do nothing
     }

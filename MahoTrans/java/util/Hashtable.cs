@@ -387,7 +387,7 @@ public class Hashtable : Object
     public int size() => Jvm.Resolve<ArrayEnumerator>(elements()).Value.Length;
 
     [return: String]
-    public new Reference toString()
+    public Reference toString()
     {
         //TODO {key: value, key:value}
         return Jvm.AllocateString($"hashtable, {size()} elements");

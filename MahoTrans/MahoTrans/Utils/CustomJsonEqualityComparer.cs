@@ -7,28 +7,28 @@ public class CustomJsonEqualityComparer : IEqualityComparer
     public static readonly CustomJsonEqualityComparer Instance = new CustomJsonEqualityComparer();
 
     // Use ImmutableHashSet in later .net versions
-    static readonly HashSet<string> naughtyTypes = new HashSet<string>
+    private static readonly HashSet<string> NaughtyTypes = new HashSet<string>
     {
         "System.Reflection.Emit.InternalAssemblyBuilder",
         "System.Reflection.Emit.InternalModuleBuilder"
     };
 
-    static readonly IEqualityComparer baseComparer = EqualityComparer<object>.Default;
+    private static readonly IEqualityComparer BaseComparer = EqualityComparer<object>.Default;
 
     static bool HasBrokenEquals(Type type)
     {
-        return naughtyTypes.Contains(type.FullName);
+        return NaughtyTypes.Contains(type.FullName!);
     }
 
     #region IEqualityComparer Members
 
-    public bool Equals(object x, object y)
+    public new bool Equals(object? x, object? y)
     {
         // Check reference equality
-        if ((object)x == y)
+        if (ReferenceEquals(x, y))
             return true;
         // Check null
-        else if ((object)x == null || (object)y == null)
+        if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
             return false;
 
         var xType = x.GetType();
@@ -46,12 +46,13 @@ public class CustomJsonEqualityComparer : IEqualityComparer
                 return false;
             }
         }
-        return baseComparer.Equals(x, y);
+
+        return BaseComparer.Equals(x, y);
     }
 
     public int GetHashCode(object obj)
     {
-        return baseComparer.GetHashCode(obj);
+        return BaseComparer.GetHashCode(obj);
     }
 
     #endregion
