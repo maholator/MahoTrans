@@ -19,15 +19,7 @@ public class List : Screen
 
     public int SelectedItem = 0;
 
-    /// <summary>
-    /// For frontend. Sets selected item.
-    /// </summary>
-    /// <param name="index">Item.</param>
-    public void SetSelected(int index)
-    {
-        SelectedItem = index;
-        //TODO send event back to toolkit
-    }
+    [JavaIgnore] public List<bool> SelectedMap = new();
 
     [ClassInit]
     public static void ClInit()
@@ -65,6 +57,7 @@ public class List : Screen
                 if (str.IsNull)
                     Jvm.Throw<NullPointerException>();
                 Items.Add(new ListItem(str, Reference.Null));
+                SelectedMap.Add(false);
             }
 
             return;
@@ -80,6 +73,7 @@ public class List : Screen
             if (str.IsNull)
                 Jvm.Throw<NullPointerException>();
             Items.Add(new ListItem(str, images[i]));
+            SelectedMap.Add(false);
         }
     }
 
@@ -89,6 +83,7 @@ public class List : Screen
             Jvm.Throw<NullPointerException>();
         var index = Items.Count;
         Items.Add(new ListItem(stringPart, imagePart));
+        SelectedMap.Add(false);
         Toolkit.Display.ContentUpdated(Handle);
         return index;
     }
@@ -98,12 +93,14 @@ public class List : Screen
         if (elementNum < 0 || elementNum >= Items.Count)
             Jvm.Throw<IndexOutOfBoundsException>();
         Items.RemoveAt(elementNum);
+        SelectedMap.RemoveAt(elementNum);
         Toolkit.Display.ContentUpdated(Handle);
     }
 
     public void deleteAll()
     {
         Items.Clear();
+        SelectedMap.Clear();
         Toolkit.Display.ContentUpdated(Handle);
     }
 
@@ -160,6 +157,39 @@ public class List : Screen
             return -1;
 
         return SelectedItem;
+    }
+
+    public void setSelectedIndex(int index, bool state)
+    {
+        if (Type == ChoiceType.Multiple)
+        {
+            SelectedMap[index] = state;
+            Toolkit.Display.ContentUpdated(Handle);
+            return;
+        }
+
+        if (state)
+        {
+            SelectedItem = index;
+            Toolkit.Display.ContentUpdated(Handle);
+        }
+    }
+
+    [JavaIgnore]
+    public void SetSelectedFlags(bool[] selectedArray)
+    {
+        var count = SelectedMap.Count;
+        if (selectedArray.Length < count)
+            Jvm.Throw<IllegalArgumentException>();
+
+        SelectedMap.Clear();
+        SelectedMap.AddRange(selectedArray.Take(count));
+        Toolkit.Display.ContentUpdated(Handle);
+    }
+
+    public void setSelectedFlags([JavaType("[Z")] Reference flags)
+    {
+        SetSelectedFlags(Jvm.ResolveArray<bool>(flags));
     }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
