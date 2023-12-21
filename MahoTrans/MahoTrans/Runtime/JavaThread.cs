@@ -34,6 +34,11 @@ public class JavaThread
 
     public readonly Reference Model;
 
+    /// <summary>
+    /// List of thread's IDs, waiting at <see cref="Thread.join"/>.
+    /// </summary>
+    public List<int> WaitingForKill = new();
+
     public JavaThread(Reference model)
     {
         Model = model;

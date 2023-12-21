@@ -69,7 +69,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Moves thread from waiting pool to active pool.
+    /// Moves thread from waiting pool to wakeup queue.
     /// </summary>
     /// <param name="id">Thread id to operate on.</param>
     /// <returns>False, if thread was not in waiting pool. Thread state is undefined in such state.</returns>
@@ -104,7 +104,17 @@ public partial class JvmState
     {
         lock (_threadPoolLock)
         {
-            return AliveThreads.Remove(thread) || WaitingThreads.Remove(thread.ThreadId);
+            var killed = AliveThreads.Remove(thread) || WaitingThreads.Remove(thread.ThreadId);
+
+            if (killed)
+            {
+                foreach (var id in thread.WaitingForKill)
+                    Attach(id);
+            }
+
+            thread.WaitingForKill.Clear();
+
+            return killed;
         }
     }
 

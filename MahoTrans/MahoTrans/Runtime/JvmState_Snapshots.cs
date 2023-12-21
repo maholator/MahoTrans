@@ -236,76 +236,82 @@ public partial class JvmState
         }
     }
 
-    private static SnapshotedThread[] SnapshotThreads(IEnumerable<JavaThread> threads) =>
-        threads.Select(SnapshotedThread.Create).ToArray();
+    private static ThreadSnapshot[] SnapshotThreads(IEnumerable<JavaThread> threads) =>
+        threads.Select(ThreadSnapshot.Create).ToArray();
 
-    private JavaThread[] Restore(SnapshotedThread[] snapshotedThreads)
+    private JavaThread[] Restore(ThreadSnapshot[] threads)
     {
-        return snapshotedThreads.Select(x =>
+        var res = new JavaThread[threads.Length];
+        for (int i = 0; i < threads.Length; i++)
         {
-            var jt = new JavaThread(x.Model, x.Id);
-            List<Frame> frames = new();
+            res[i] = Restore(threads[i]);
+        }
 
-            foreach (var sh in x.Frames)
+        return res;
+    }
+
+    private JavaThread Restore(ThreadSnapshot x)
+    {
+        var jt = new JavaThread(x.Model, x.Id);
+        jt.WaitingForKill.AddRange(x.KillWaiters);
+        List<Frame> frames = new();
+
+        foreach (var sh in x.Frames)
+        {
+            var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
+            var f = new Frame(method) { Pointer = sh.Pointer, StackTop = sh.StackTop };
+            unsafe
             {
-                var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
-                var f = new Frame(method)
+                fixed (long* ptr = sh.Stack)
                 {
-                    Pointer = sh.Pointer,
-                    StackTop = sh.StackTop
-                };
-                unsafe
-                {
-                    fixed (long* ptr = sh.Stack)
-                    {
-                        var len = sh.Stack.Length * sizeof(long);
-                        Buffer.MemoryCopy(ptr, f.Stack, len, len);
-                    }
-
-                    fixed (PrimitiveType* ptr = sh.StackTypes)
-                    {
-                        var len = sh.StackTypes.Length * sizeof(PrimitiveType);
-                        Buffer.MemoryCopy(ptr, f.StackTypes, len,
-                            len);
-                    }
-
-                    fixed (long* ptr = sh.LocalVariables)
-                    {
-                        var bytes = sh.LocalVariables.Length * sizeof(long);
-                        Buffer.MemoryCopy(ptr, f.LocalVariables, bytes, bytes);
-                    }
+                    var len = sh.Stack.Length * sizeof(long);
+                    Buffer.MemoryCopy(ptr, f.Stack, len, len);
                 }
 
-                frames.Add(f);
+                fixed (PrimitiveType* ptr = sh.StackTypes)
+                {
+                    var len = sh.StackTypes.Length * sizeof(PrimitiveType);
+                    Buffer.MemoryCopy(ptr, f.StackTypes, len, len);
+                }
+
+                fixed (long* ptr = sh.LocalVariables)
+                {
+                    var bytes = sh.LocalVariables.Length * sizeof(long);
+                    Buffer.MemoryCopy(ptr, f.LocalVariables, bytes, bytes);
+                }
             }
 
-            jt.CallStack = frames.ToArray();
-            jt.ActiveFrameIndex = frames.Count - 1;
-            jt.ActiveFrame = frames.Last();
-            return jt;
-        }).ToArray();
+            frames.Add(f);
+        }
+
+        jt.CallStack = frames.ToArray();
+        jt.ActiveFrameIndex = frames.Count - 1;
+        jt.ActiveFrame = frames.Last();
+        return jt;
     }
 
     private JavaThread[] Restore(ZipArchive zip, string name)
     {
-        return Restore(JsonConvert.DeserializeObject<SnapshotedThread[]>(zip.ReadTextEntry(name))!);
+        return Restore(JsonConvert.DeserializeObject<ThreadSnapshot[]>(zip.ReadTextEntry(name))!);
     }
 
-    private class SnapshotedThread
+    private class ThreadSnapshot
     {
         public int Id;
         public Reference Model;
-        public SnapshotedFrame[] Frames = Array.Empty<SnapshotedFrame>();
+        public int[] KillWaiters = Array.Empty<int>();
+        public FrameSnapshot[] Frames = Array.Empty<FrameSnapshot>();
 
-        public static SnapshotedThread Create(JavaThread jt)
+        public static ThreadSnapshot Create(JavaThread jt)
         {
-            var s = new SnapshotedThread();
+            var s = new ThreadSnapshot();
             s.Id = jt.ThreadId;
             s.Model = jt.Model;
+            s.KillWaiters = jt.WaitingForKill.ToArray();
             s.Frames = jt.CallStack.Take(jt.ActiveFrameIndex + 1).Select(x =>
             {
                 var stack = x!.DumpStack();
-                return new SnapshotedFrame
+                return new FrameSnapshot
                 {
                     Pointer = x.Pointer,
                     LocalVariables = x.DumpLocalVariables(),
@@ -320,7 +326,7 @@ public partial class JvmState
         }
     }
 
-    private class SnapshotedFrame
+    private class FrameSnapshot
     {
         public int Pointer;
         public long[] LocalVariables = Array.Empty<long>();
