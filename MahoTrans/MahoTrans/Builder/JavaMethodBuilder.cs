@@ -95,6 +95,13 @@ public class JavaMethodBuilder
         Append(new Instruction(JavaOpcode.invokestatic, c));
     }
 
+    /// <summary>
+    /// Calls a static method.
+    /// </summary>
+    /// <param name="name">Method's name.</param>
+    /// <param name="returns">Return type.</param>
+    /// <param name="args">Types of the parameters.</param>
+    /// <typeparam name="T">Class, where the static method is hosted.</typeparam>
     public void AppendStaticCall<T>(string name, Type returns, params Type[] args) where T : Object
     {
         var descriptor = DescriptorUtils.BuildMethodDescriptor(returns, args);
