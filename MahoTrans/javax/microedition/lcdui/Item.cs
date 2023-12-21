@@ -13,4 +13,17 @@ public class Item : Object
 
     [return: String]
     public Reference getLabel() => Label;
+
+    public void setLabel([String] Reference label)
+    {
+        Label = label;
+        NotifyToolkit();
+    }
+
+    [JavaIgnore]
+    protected void NotifyToolkit()
+    {
+        if (Owner != default) Toolkit.Display.ContentUpdated(Owner);
+    }
+
 }
