@@ -1,4 +1,5 @@
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -20,6 +21,8 @@ public class Thread : Object, Runnable
     [JavaType(typeof(Runnable))] public Reference _target;
     [String] public Reference _name;
     public bool started;
+
+    public bool Interrupted;
 
     [InitMethod]
     public void InitEmpty()
@@ -75,22 +78,83 @@ public class Thread : Object, Runnable
     {
     }
 
-    public static void sleep(long time)
+    [JavaDescriptor("(J)V")]
+    public static JavaMethodBody sleep(JavaClass cls)
     {
-        if (CurrentThread != null)
-            Jvm.Detach(CurrentThread, time);
+        var b = new JavaMethodBuilder(cls);
+        b.Append(JavaOpcode.lload_0);
+        b.AppendStaticCall<Thread>(nameof(SleepInternal), typeof(void), typeof(long));
+        b.AppendStaticCall<Thread>(nameof(currentThread), typeof(Thread));
+        b.AppendVirtcall(nameof(CheckInterrupt), typeof(void));
+        b.AppendReturn();
+        return b.Build(1, 1);
+    }
+
+    public static void SleepInternal(long time)
+    {
+        var threadToSleep = CurrentThread!;
+
+        Jvm.Resolve<Thread>(threadToSleep.Model).CheckInterrupt();
+
+        Jvm.Detach(threadToSleep, time <= 0 ? 1 : time);
     }
 
     public void interrupt()
     {
-        // throw interrupter
-        Jvm.ThrowAsync<InterruptedException>(JavaThread);
+        // setting interrupt flag - nearest sleep/wait will check for it.
+        Interrupted = true;
         // if thread was sleeping, wake it up
         Jvm.Attach(JavaThread.ThreadId);
     }
 
+    /// <summary>
+    /// Internal method that checks interruption flag. If set, the flag is reset and this throws.
+    /// </summary>
+    public void CheckInterrupt()
+    {
+        if (Interrupted)
+        {
+            Interrupted = false;
+            Jvm.Throw<InterruptedException>();
+        }
+    }
+
+    [JavaDescriptor("()V")]
+    public JavaMethodBody join(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(JoinInternal), typeof(void));
+        b.AppendStaticCall<Thread>(nameof(currentThread), typeof(Thread));
+        b.AppendVirtcall(nameof(CheckInterrupt), typeof(void));
+        b.AppendReturn();
+        return b.Build(1, 1);
+    }
+
+    public void JoinInternal()
+    {
+        // this is who waits
+        var waiter = CurrentThread!;
+        // this is for who we wait
+        var waitFor = JavaThread;
+
+        var currentThreadObject = Jvm.Resolve<Thread>(waiter.Model);
+
+        currentThreadObject.CheckInterrupt();
+
+        if (waitFor.ActiveFrame == null)
+        {
+            // if thread is already dead, we just return.
+            return;
+        }
+
+        waitFor.WaitingForKill.Add(waiter.ThreadId);
+        Jvm.Detach(waiter, 0);
+    }
+
     public static void yield()
     {
+        //when running on interpreter this is a no-op
     }
 
     public bool isAlive() => JavaThread.ActiveFrame != null;

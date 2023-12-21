@@ -29,7 +29,7 @@ public partial class JvmState
     private readonly object _threadPoolLock = new();
 
     /// <summary>
-    /// Threads which we created/attached and waiting to actually do so.
+    /// Threads which were created/attached and waiting to actually do so.
     /// </summary>
     private Queue<JavaThread> _wakeingUpQueue = new();
 
@@ -52,6 +52,12 @@ public partial class JvmState
         }
     }
 
+    /// <summary>
+    /// Moves a thread from active pool to waiting pool.
+    /// </summary>
+    /// <param name="thread">Thread to move.</param>
+    /// <param name="returnAfter">If positive sets up a timeout. If negative or zero, no timeout is set.</param>
+    /// <exception cref="JavaRuntimeError">If the thread was no running.</exception>
     public void Detach(JavaThread thread, long returnAfter)
     {
         lock (_threadPoolLock)

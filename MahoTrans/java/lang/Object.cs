@@ -90,6 +90,12 @@ public class Object
     /// <returns>Waiter object to store on stack.</returns>
     public long WaitMonitor(long timeout)
     {
+        // pending interrupt?
+        Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
+
+        if (timeout < 0)
+            Jvm.Throw<IllegalArgumentException>();
+
         // adding self to waitlist
         var mw = new MonitorWait(MonitorReEnterCount, MonitorOwner);
         Waiters ??= new();
@@ -98,7 +104,7 @@ public class Object
         // detaching from scheduler
         var jvm = Jvm;
         var thread = jvm.AliveThreads.Find(x => x.ThreadId == MonitorOwner);
-        jvm.Detach(thread!, timeout <= 0 ? -1 : timeout);
+        jvm.Detach(thread!, timeout);
 
         // leaving the monitor
         MonitorOwner = 0;
@@ -113,6 +119,9 @@ public class Object
         MonitorReEnterCount = mw.MonitorReEnterCount;
         if (MonitorOwner != mw.MonitorOwner)
             throw new JavaRuntimeError("After wait, thread that owns the object was changed.");
+
+        // pending interrupt?
+        Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
     }
 
     #endregion
@@ -125,8 +134,18 @@ public class Object
     }
 
     [JavaDescriptor("()V")]
-    public JavaMethodBody wait___zero(JavaClass @class)
+    public JavaMethodBody wait___zero(JavaClass cls)
     {
+        /*
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.Append(JavaOpcode.lconst_0);
+        b.AppendVirtcall(nameof(wait), typeof(void), typeof(long));
+        b.AppendReturn();
+
+        return b.Build(2, 1);
+        */
+        //TODO implementation below is broken (areturn in void method) but it somehow worked until now!
         return new JavaMethodBody
         {
             LocalsCount = 1,
@@ -136,7 +155,7 @@ public class Object
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.lconst_0),
                 new Instruction(JavaOpcode.invokespecial,
-                    @class.PushConstant(new NameDescriptorClass("wait", "(J)V", "java/lang/Object")).Split()),
+                    cls.PushConstant(new NameDescriptorClass("wait", "(J)V", "java/lang/Object")).Split()),
                 new Instruction(JavaOpcode.areturn)
             }
         };
