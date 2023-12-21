@@ -11,9 +11,9 @@ namespace java.lang;
 public class Thread : Object, Runnable
 {
     /// <summary>
-    /// Reference to JVM object of the thread. During wakeup, this is validated by <see cref="JvmState.SyncHeapAfterRestore"/>.
+    /// Reference to JVM object of the thread. During wakeup, this is validated by <see cref="JvmState.SyncHeapAfterRestore"/>. This is null if thread was not started yet or was already dead.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JavaThread JavaThread = null!;
+    [JavaIgnore] [JsonIgnore] public JavaThread? JavaThread;
 
     [JavaIgnore] [ThreadStatic] [JsonIgnore]
     public static JavaThread? CurrentThread;
@@ -104,7 +104,8 @@ public class Thread : Object, Runnable
         // setting interrupt flag - nearest sleep/wait will check for it.
         Interrupted = true;
         // if thread was sleeping, wake it up
-        Jvm.Attach(JavaThread.ThreadId);
+        if (JavaThread != null)
+            Jvm.Attach(JavaThread.ThreadId);
     }
 
     /// <summary>
@@ -142,7 +143,7 @@ public class Thread : Object, Runnable
 
         currentThreadObject.CheckInterrupt();
 
-        if (waitFor.ActiveFrame == null)
+        if (waitFor?.ActiveFrame == null)
         {
             // if thread is already dead, we just return.
             return;
@@ -157,7 +158,7 @@ public class Thread : Object, Runnable
         //when running on interpreter this is a no-op
     }
 
-    public bool isAlive() => JavaThread.ActiveFrame != null;
+    public bool isAlive() => JavaThread?.ActiveFrame != null;
 
     public static int activeCount() => Jvm.AliveThreads.Count + Jvm.WaitingThreads.Count;
 
