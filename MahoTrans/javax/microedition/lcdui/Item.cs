@@ -26,4 +26,8 @@ public class Item : Object
         if (Owner != default) Toolkit.Display.ContentUpdated(Owner);
     }
 
+
+    public const int PLAIN = 0;
+    public const int HYPERLINK = 1;
+    public const int BUTTON = 2;
 }
