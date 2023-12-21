@@ -7,16 +7,16 @@ public class Calendar : lang.Object
 {
     public bool areFieldsSet;
 
-    [JavaIgnore] protected int[] fields;
+    [JavaIgnore] protected int[] fields = null!;
 
-    [JavaIgnore] protected bool[] isSet;
+    [JavaIgnore] protected bool[] isSet = null!;
 
     bool isTimeSet;
 
     protected long time;
 
     protected int lastTimeFieldSet;
-    [JavaIgnore] protected TimeZone zone;
+    [JavaType(typeof(TimeZone))] public Reference Zone;
 
     public static readonly int
         JANUARY = 0,
@@ -116,7 +116,7 @@ public class Calendar : lang.Object
         if (r is Calendar cal)
         {
             return getTimeInMillis() == cal.getTimeInMillis() &&
-                   zone.equals(cal.getTimeZone());
+                   Jvm.Resolve<TimeZone>(Zone).equals(cal.getTimeZone());
         }
 
         return false;
@@ -169,14 +169,14 @@ public class Calendar : lang.Object
     [return: JavaType(typeof(TimeZone))]
     public Reference getTimeZone()
     {
-        return zone.This;
+        return Zone;
     }
 
 
     public new int hashCode()
     {
         long t = getTimeInMillis();
-        return zone.hashCode() + (int)(t >> 32) + (int)t;
+        return Jvm.Resolve<TimeZone>(Zone).hashCode() + (int)(t >> 32) + (int)t;
     }
 
     public void set(int field, int value)
@@ -206,6 +206,6 @@ public class Calendar : lang.Object
 
     public void setTimeZone([JavaType(typeof(TimeZone))] Reference timezone)
     {
-        zone = Jvm.Resolve<TimeZone>(timezone);
+        Zone = timezone;
     }
 }

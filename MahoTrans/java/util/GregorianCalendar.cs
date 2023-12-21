@@ -27,7 +27,7 @@ class GregorianCalendar : Calendar
     private static readonly int CACHED_DAY_OF_WEEK = 3;
     private static readonly int CACHED_ZONE_OFFSET = 4;
     private bool isCached = false;
-    [JavaIgnore] private int[] cachedFields;
+    [JavaIgnore] private int[]? cachedFields;
     private long nextMidnightMillis = 0L;
     private long lastMidnightMillis = 0L;
 
@@ -39,14 +39,14 @@ class GregorianCalendar : Calendar
     }
 
     [InitMethod]
-    public new void Init(long milliseconds)
+    public void Init(long milliseconds)
     {
         base.Init();
         setTimeInMillis(milliseconds);
     }
 
     [InitMethod]
-    public new void Init([JavaType(typeof(TimeZone))] Reference timezone)
+    public void Init([JavaType(typeof(TimeZone))] Reference timezone)
     {
         base.Init();
         setTimeZone(timezone);
@@ -86,7 +86,7 @@ class GregorianCalendar : Calendar
         fields[DAY_OF_WEEK] = mod7(days - 3) + 1;
         int dstOffset = fields[YEAR] <= 0
             ? 0
-            : zone.getOffset(AD, fields[YEAR], month, date, fields[DAY_OF_WEEK], millis);
+            : Jvm.Resolve<TimeZone>(Zone).getOffset(AD, fields[YEAR], month, date, fields[DAY_OF_WEEK], millis);
         if (fields[YEAR] > 0) dstOffset -= zoneOffset;
         dst_offset = dstOffset;
         if (dstOffset != 0)
@@ -139,6 +139,7 @@ class GregorianCalendar : Calendar
 
     private void updateCachedFields()
     {
+        cachedFields ??= new[] { 0, 0, 0, 0, 0, 0 }; // this probably will never fire but...
         fields[YEAR] = cachedFields[CACHED_YEAR];
         fields[MONTH] = cachedFields[CACHED_MONTH];
         fields[DATE] = cachedFields[CACHED_DATE];
@@ -154,8 +155,8 @@ class GregorianCalendar : Calendar
 
     private void actualComputeFields()
     {
-        if (cachedFields == null)
-            cachedFields = new int[] { 0, 0, 0, 0, 0, 0 };
+        var zone = Jvm.Resolve<TimeZone>(Zone);
+        cachedFields ??= new int[] { 0, 0, 0, 0, 0, 0 };
         int zoneOffset = zone.getRawOffset();
 
         int millis = (int)(time % 86400000);
@@ -240,7 +241,7 @@ class GregorianCalendar : Calendar
         if (!isCached
             && newTime != 0x7fffffffffffffffL
             && newTime != long.MinValue
-            && (!zone.useDaylightTime() || zone is SimpleTimeZone))
+            && (!zone.useDaylightTime() || Jvm.Resolve<TimeZone>(Zone) is SimpleTimeZone))
         {
             int cacheMillis = 0;
 
@@ -264,7 +265,7 @@ class GregorianCalendar : Calendar
         }
     }
 
-    protected void computeTime()
+    public override void computeTime()
     {
         if (isSet[MONTH] && (fields[MONTH] < 0 || fields[MONTH] > 11))
             Jvm.Throw<IllegalArgumentException>();
@@ -366,7 +367,7 @@ class GregorianCalendar : Calendar
 
     int getOffset(long localTime)
     {
-        TimeZone timeZone = zone;
+        TimeZone timeZone = Jvm.Resolve<TimeZone>(Zone);
         if (!timeZone.useDaylightTime()) return timeZone.getRawOffset();
 
         long dayCount = localTime / 86400000;

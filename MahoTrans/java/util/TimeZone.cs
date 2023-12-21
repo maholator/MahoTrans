@@ -11,19 +11,31 @@ namespace java.util;
 
 public class TimeZone : Object
 {
-    [JavaIgnore] [JsonProperty] private static Dictionary<string, SimpleTimeZone>? AvailableZones;
-    [JavaIgnore] [JsonProperty] private static SimpleTimeZone? Default;
-    [JavaIgnore] [JsonProperty] private static SimpleTimeZone GMT = null!;
+    [JavaIgnore] [JsonProperty] private static Dictionary<string, Reference>? _availableZones;
+
+    [JsonProperty] [JavaType(typeof(SimpleTimeZone))]
+    public static Reference Default;
+
+    [JsonProperty] [JavaType(typeof(SimpleTimeZone))]
+    public static Reference GMT;
 
     [ClassInit]
     public static void ClInit()
     {
-        GMT = new SimpleTimeZone(0, "GMT");
-        GMT.JavaClass = Jvm.Classes[typeof(TimeZone).ToJavaName()];
-        Jvm.PutToHeap(GMT);
+        var gmt = Jvm.AllocateObject<SimpleTimeZone>();
+        gmt.Init(0, Jvm.InternalizeString("GMT"));
+        GMT = gmt.This;
     }
 
-    [MemberNotNull(nameof(AvailableZones))]
+    [StaticFieldsAnnouncer]
+    public static void Statics(List<Reference> list)
+    {
+        if (_availableZones != null)
+            list.AddRange(_availableZones.Values);
+    }
+
+
+    [MemberNotNull(nameof(_availableZones))]
     private static void initializeAvailable()
     {
         //TODO THIS MUST NOT BE A THING
@@ -35,10 +47,10 @@ public class TimeZone : Object
         }
 
         SimpleTimeZone[] zones = TimeZones.GetTimeZones();
-        AvailableZones = new Dictionary<string, SimpleTimeZone>();
-        AvailableZones.Add(GMT.ID, GMT);
+        _availableZones = new Dictionary<string, Reference>();
+        _availableZones.Add("GMT", GMT);
         foreach (var t in zones)
-            AvailableZones.Add(t.ID, t);
+            _availableZones.Add(Jvm.ResolveString(t.ID), t.This);
     }
 
     // for serializer
@@ -49,18 +61,18 @@ public class TimeZone : Object
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference getAvailableIDs()
     {
-        if (AvailableZones == null) initializeAvailable();
-        int length = AvailableZones.Count;
-        string[] result = AvailableZones.Keys.ToArray();
+        if (_availableZones == null) initializeAvailable();
+        int length = _availableZones.Count;
+        string[] result = _availableZones.Keys.ToArray();
         return result.AsJavaArray();
     }
 
     [return: JavaType(typeof(TimeZone))]
     public static Reference getDefault()
     {
-        if (Default == null)
+        if (Default.IsNull)
             setDefault(null);
-        return Default.This;
+        return Default;
     }
 
     [return: String]
@@ -72,62 +84,57 @@ public class TimeZone : Object
     public virtual int getRawOffset() => throw new AbstractJavaMethodCallError();
 
     [return: JavaType(typeof(TimeZone))]
-    public static Reference getTimeZone([String] Reference name)
+    public static Reference getTimeZone([String] Reference nameString)
     {
-        return getTimeZone(Jvm.ResolveString(name)).This;
-    }
+        var name = Jvm.ResolveString(nameString);
 
-    [JavaIgnore]
-    private static SimpleTimeZone getTimeZone(string name)
-    {
-        if (AvailableZones == null) initializeAvailable();
-        var zone = AvailableZones.GetValueOrDefault(name);
-        if (zone == null)
+        if (_availableZones == null) initializeAvailable();
+        if (_availableZones.TryGetValue(name, out var zone))
+            return zone;
+
+        if (name.StartsWith("GMT") && name.Length > 3)
         {
-            if (name.StartsWith("GMT") && name.Length > 3)
+            char sign = name[3];
+            if (sign == '+' || sign == '-')
             {
-                char sign = name[3];
-                if (sign == '+' || sign == '-')
+                int[] position = new int[1];
+                var formattedName = formatTimeZoneName(name, 4);
+                if (formattedName == null)
                 {
-                    int[] position = new int[1];
-                    var formattedName = formatTimeZoneName(name, 4);
-                    if (formattedName == null)
+                    return GMT;
+                }
+
+                int hour = parseNumber(formattedName, 4, position);
+                if (hour < 0 || hour > 23)
+                {
+                    return GMT;
+                }
+
+                int index = position[0];
+                if (index != -1)
+                {
+                    int raw = hour * 3600000;
+                    if (index < formattedName.Length && formattedName[index] == ':')
                     {
-                        return GMT;
+                        int minute = parseNumber(formattedName, index + 1, position);
+                        if (position[0] == -1 || minute < 0 || minute > 59)
+                            return GMT;
+                        raw += minute * 60000;
+                    }
+                    else if (hour >= 30 || index > 6)
+                    {
+                        raw = (hour / 100 * 3600000) + (hour % 100 * 60000);
                     }
 
-                    int hour = parseNumber(formattedName, 4, position);
-                    if (hour < 0 || hour > 23)
-                    {
-                        return GMT;
-                    }
-
-                    int index = position[0];
-                    if (index != -1)
-                    {
-                        int raw = hour * 3600000;
-                        if (index < formattedName.Length && formattedName[index] == ':')
-                        {
-                            int minute = parseNumber(formattedName, index + 1, position);
-                            if (position[0] == -1 || minute < 0 || minute > 59)
-                                return GMT;
-                            raw += minute * 60000;
-                        }
-                        else if (hour >= 30 || index > 6)
-                        {
-                            raw = (hour / 100 * 3600000) + (hour % 100 * 60000);
-                        }
-
-                        if (sign == '-') raw = -raw;
-                        return new SimpleTimeZone(raw, formattedName);
-                    }
+                    if (sign == '-') raw = -raw;
+                    var stz = Jvm.AllocateObject<SimpleTimeZone>();
+                    stz.Init(raw, Jvm.InternalizeString(formattedName));
+                    return stz.This;
                 }
             }
-
-            zone = GMT;
         }
 
-        return zone;
+        return GMT;
     }
 
     private static string? formatTimeZoneName(string name, int offset)
@@ -197,18 +204,17 @@ public class TimeZone : Object
         return result;
     }
 
-
-    [MemberNotNull(nameof(Default))]
     [JavaIgnore]
     private static void setDefault(SimpleTimeZone? timezone)
     {
         if (timezone != null)
         {
-            Default = timezone;
+            Default = timezone.This;
             return;
         }
 
-        Default = getTimeZone(Jvm.Toolkit.System.TimeZone);
+        var systemZone = Jvm.Toolkit.System.TimeZone;
+        Default = getTimeZone(Jvm.InternalizeString(systemZone));
     }
 
     public virtual bool useDaylightTime() => throw new AbstractJavaMethodCallError();

@@ -1,13 +1,12 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using String = System.String;
 
 namespace java.util;
 
 public class SimpleTimeZone : TimeZone
 {
-    public string ID;
+    [String] public Reference ID;
     private int rawOffset;
     private int startYear, startMonth, startDay, startDayOfWeek, startTime;
     private int endMonth, endDay, endDayOfWeek, endTime;
@@ -34,10 +33,17 @@ public class SimpleTimeZone : TimeZone
     {
     }
 
-    public SimpleTimeZone(int offset, String name)
+    public SimpleTimeZone(int offset, string name)
     {
-        ID = name;
+        ID = Jvm.InternalizeString(name);
         rawOffset = offset;
+    }
+
+    [InitMethod]
+    public void Init(int offset, [String] Reference name)
+    {
+        rawOffset = offset;
+        ID = name;
     }
 
     public SimpleTimeZone(int offset, string name, int startMonth, int startDay,
@@ -453,6 +459,6 @@ public class SimpleTimeZone : TimeZone
     [return: String]
     public override Reference getID()
     {
-        return Jvm.InternalizeString(ID);
+        return ID;
     }
 }
