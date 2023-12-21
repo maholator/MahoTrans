@@ -60,6 +60,8 @@ public interface IDisplay : IToolkit
     /// <param name="selectCommand">For implicit list - select command. For other screens this must be zero.</param>
     void CommandsUpdated(DisplayableHandle handle, List<Reference> commands, Reference selectCommand);
 
+    void TickerUpdated();
+
     /// <summary>
     /// Notifies toolkit that screen displayable changed its content (text, subitems, etc.).
     /// </summary>
@@ -69,6 +71,7 @@ public interface IDisplay : IToolkit
     /// Fullscreen mode is set via <see cref="SetFullscreen"/>.<br/>
     /// Commands changes are reported via <see cref="CommandsUpdated"/>.<br/>
     /// Framebuffer changes are reported via <see cref="Flush(MahoTrans.Toolkits.DisplayableHandle)"/>.<br/>
+    /// Ticker changes are reported via <see cref="TickerUpdated"/>.<br/>
     /// This is used only for LCDUI things (alert text/image, list items, form items, textbox content).
     /// </remarks>
     void ContentUpdated(DisplayableHandle handle);

@@ -15,6 +15,8 @@ public class Displayable : Object
 
     [JavaType(typeof(CommandListener))] public Reference Listener;
 
+    [JavaType(typeof(Ticker))] public Reference Ticker;
+
     [JavaIgnore] public List<Reference> Commands = new();
 
     [InitMethod]
@@ -67,6 +69,15 @@ public class Displayable : Object
     {
         Listener = l;
     }
+
+    public void setTicker([JavaType(typeof(Ticker))] Reference ticker)
+    {
+        Ticker = ticker;
+        Toolkit.Display.TickerUpdated();
+    }
+
+    [return: JavaType(typeof(Ticker))]
+    public Reference getTicker() => Ticker;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
