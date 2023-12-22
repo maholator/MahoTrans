@@ -88,6 +88,12 @@ public class Canvas : Displayable
         }
     }
 
+    [return: String]
+    public Reference getKeyName(int keyCode)
+    {
+        return Jvm.AllocateString($"Key {keyCode}");
+    }
+
     public bool hasPointerEvents() => true;
     public bool isDoubleBuffered() => true;
     public bool hasPointerMotionEvents() => true;

@@ -231,6 +231,13 @@ public sealed class String : Object
     [return: String]
     public Reference intern() => Jvm.InternalizeString(Value);
 
+    [return: String]
+    public Reference concat([String] Reference str)
+    {
+        var s = Jvm.ResolveString(str);
+        return Jvm.AllocateString(Value + s);
+    }
+
     #region valueOf
 
     [return: String]

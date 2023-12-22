@@ -70,6 +70,13 @@ public class Vector : Object
         return List[0];
     }
 
+    public Reference lastElement()
+    {
+        if (List.Count == 0)
+            Jvm.Throw<NoSuchElementException>();
+        return List[^1];
+    }
+
     public int size() => List.Count;
 
     public bool isEmpty() => List.Count == 0;
@@ -86,6 +93,13 @@ public class Vector : Object
         if (index < 0 || index >= size())
             Jvm.Throw<ArrayIndexOutOfBoundsException>();
         List[index] = obj;
+    }
+
+    public void insertElementAt(Reference obj, int index)
+    {
+        if (index < 0 || index > size())
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
+        List.Insert(index, obj);
     }
 
     [JavaDescriptor("(Ljava/lang/Object;)I")]

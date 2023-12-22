@@ -102,7 +102,7 @@ public partial class JvmState
                 _eventQueue.OwningJvm = this;
                 _eventQueue.start();
                 Toolkit.Logger.LogDebug(DebugMessageCategory.Threading,
-                    $"Event queue created in thread {_eventQueue.JavaThread.ThreadId}");
+                    $"Event queue created in thread {_eventQueue.JavaThread?.ThreadId}");
             });
             return _eventQueue!;
         }

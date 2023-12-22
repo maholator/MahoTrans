@@ -13,6 +13,8 @@ public class Boolean : Object
         Value = v;
     }
 
+    public bool booleanValue() => Value;
+
     [return: String]
     public Reference toString()
     {
