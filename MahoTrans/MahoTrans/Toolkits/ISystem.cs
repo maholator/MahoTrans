@@ -8,6 +8,8 @@ public interface ISystem : IToolkit
 
     void PrintOut(byte b);
 
+    void PrintErr(byte b);
+
     string? GetProperty(string name);
 
     string TimeZone { get; }

@@ -34,13 +34,11 @@ public class System : Object
     [return: String]
     public static Reference getProperty([String] Reference key)
     {
-        switch (Jvm.ResolveString(key))
-        {
-            case "microedition.platform":
-                return Jvm.AllocateString("Nokia MT-292");
-        }
-
-        return new Reference(0);
+        var keyStr = Jvm.ResolveString(key);
+        var val = Toolkit.System.GetProperty(keyStr);
+        if (val == null)
+            return Reference.Null;
+        return Jvm.InternalizeString(val);
     }
 
     public static long currentTimeMillis() => Toolkit.Clock.GetCurrentMs(Jvm.CycleNumber);
