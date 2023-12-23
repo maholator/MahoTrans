@@ -182,14 +182,58 @@ public class List : Screen
         if (selectedArray.Length < count)
             Jvm.Throw<IllegalArgumentException>();
 
-        SelectedMap.Clear();
-        SelectedMap.AddRange(selectedArray.Take(count));
+        if (Type == ChoiceType.Multiple)
+        {
+            SelectedMap.Clear();
+            SelectedMap.AddRange(selectedArray.Take(count));
+        }
+        else
+        {
+            SelectedItem = 0;
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if (selectedArray[i])
+                {
+                    SelectedItem = i;
+                    break;
+                }
+            }
+        }
+
         Toolkit.Display.ContentUpdated(Handle);
     }
 
     public void setSelectedFlags([JavaType("[Z")] Reference flags)
     {
         SetSelectedFlags(Jvm.ResolveArray<bool>(flags));
+    }
+
+    public int getSelectedFlags([JavaType("[Z")] Reference flags)
+    {
+        var arr = Jvm.ResolveArray<bool>(flags);
+        if (arr.Length < Items.Count)
+            Jvm.Throw<IllegalArgumentException>();
+        if (Type == ChoiceType.Multiple)
+        {
+            var count = 0;
+            for (var i = 0; i < Items.Count; i++)
+            {
+                arr[i] = SelectedMap[i];
+                if (SelectedMap[i])
+                    count++;
+            }
+
+            return count;
+        }
+
+        for (var i = 0; i < arr.Length; i++)
+        {
+            arr[i] = false;
+        }
+
+        arr[SelectedItem] = true;
+
+        return 1;
     }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
