@@ -45,8 +45,17 @@ public class Form : Screen
     public int append___text([String] Reference str)
     {
         var i = Jvm.AllocateObject<StringItem>();
+        i.Init(Reference.Null, str);
         return append(i.This);
     }
+
+    public int append___image([JavaType(typeof(Image))] Reference image)
+    {
+        var i = Jvm.AllocateObject<ImageItem>();
+        i.Init(Reference.Null, image, 0, Reference.Null);
+        return append(i.This);
+    }
+
 
     public void delete(int n)
     {
