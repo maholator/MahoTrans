@@ -9,7 +9,7 @@ public partial class JvmState
     /// <summary>
     /// List of all threads, attached to scheduler.
     /// This list must NOT be modified outside of <see cref="Detach"/>, <see cref="Kill"/> and <see cref="CheckWakeups"/> methods.
-    /// First two must be called ONLY from jvm itself. The lust must be called ONLY when interpereter is suspended.
+    /// First two must be called ONLY from jvm itself. The last must be called ONLY when interpereter is suspended.
     /// </summary>
     public readonly List<JavaThread> AliveThreads = new(256);
 
@@ -134,6 +134,7 @@ public partial class JvmState
     /// No exceptions are thrown outside, this just changes thread's state.
     /// To throw synchronized exception from a thread during its execution use <see cref="Throw{T}"/>.
     /// </remarks>
+    [Obsolete("According to JVM docs, this is used only for stop() which does not exist in CLDC.")]
     public void ThrowAsync<T>(JavaThread thread) where T : Throwable
     {
         try
@@ -147,7 +148,7 @@ public partial class JvmState
         }
     }
 
-    public void CheckWakeups()
+    private void CheckWakeups()
     {
         if (_wakeupHooks.Count != 0)
         {

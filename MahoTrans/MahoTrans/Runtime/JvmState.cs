@@ -24,7 +24,7 @@ public partial class JvmState
 
     [PublicAPI] public long CycleNumber => _cycleNumber;
 
-    public const int CYCLES_PER_BUNCH = 1024;
+    public const long CYCLES_PER_BUNCH = 1024;
 
     public event Action<long>? BetweenBunches;
 
