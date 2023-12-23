@@ -14,6 +14,8 @@ public class Alert : Screen
     [JsonProperty] [JavaType(typeof(Command))]
     public static Reference DISMISS_COMMAND;
 
+    [JavaType(typeof(Displayable))] public Reference Next;
+
     [ClassInit]
     public static void ClInit()
     {
@@ -39,6 +41,7 @@ public class Alert : Screen
         Type = alertType;
         Timeout = getDefaultTimeout();
         Commands.Add(DISMISS_COMMAND);
+        setCommandListener(Jvm.AllocateObject<DefaultAlertHandler>().This);
         // invalidate is necessary to notify toolkit about non-null implicit command
         Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }

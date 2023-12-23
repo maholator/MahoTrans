@@ -32,11 +32,26 @@ public class Display : Object
 
     public void setCurrent([JavaType(typeof(Displayable))] Reference d)
     {
+        if (Jvm.ResolveObject(d) is Alert a)
+            a.Next = Current;
+
         Current = d;
         if (d.IsNull)
             Toolkit.Display.SetNullCurrent();
         else
             Toolkit.Display.SetCurrent(Jvm.Resolve<Displayable>(d).Handle);
+    }
+
+    public void setCurrent([JavaType(typeof(Alert))] Reference alert, [JavaType(typeof(Displayable))] Reference next)
+    {
+        if (next.IsNull)
+            Jvm.Throw<NullPointerException>();
+
+        var a = Jvm.Resolve<Alert>(alert);
+        a.Next = next;
+
+        Current = alert;
+        Toolkit.Display.SetCurrent(a.Handle);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)
