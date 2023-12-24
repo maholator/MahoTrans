@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.Utils;
@@ -28,6 +29,7 @@ public static class Utils
     public static IEnumerable<Type> EnumerateBaseTypes(this Type type)
     {
         var t = type;
+
         while (t != null && t != typeof(object))
         {
             yield return t;
@@ -70,13 +72,19 @@ public static class Utils
         }
     }
 
-    public static string CalcFileMD5(this string filePath)
+    public static string ComputeFileMD5(this string filePath)
     {
         using var md5 = MD5.Create();
         using var stream = File.OpenRead(filePath);
 
         var ba = md5.ComputeHash(stream);
-        return string.Join("", ba.Select(x => $"{x:X2}"));
+        return Convert.ToHexString(ba);
+    }
+
+    public static string ComputeMD5(this string input)
+    {
+        var ba = MD5.HashData(Encoding.UTF8.GetBytes(input));
+        return Convert.ToHexString(ba);
     }
 
     public static LogLevel GetSeverity(this LoadIssueType type)
@@ -103,6 +111,7 @@ public static class Utils
         if (s.Length == 0)
             return 0;
         uint h = s[0];
+
         for (int i = 1; i < s.Length; i++)
         {
             uint uc = s[i];
