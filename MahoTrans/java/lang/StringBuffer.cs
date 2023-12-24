@@ -255,6 +255,12 @@ public class StringBuffer : Object
         _buffer.RemoveRange(newLength, _buffer.Count - newLength);
     }
 
+    [JavaIgnore]
+    public override string ToString()
+    {
+        return new string(_buffer.ToArray());
+    }
+
     [return: String]
     public Reference toString()
     {

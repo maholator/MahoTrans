@@ -70,6 +70,12 @@ public sealed class String : Object
         Value = new string(Jvm.ResolveString(value));
     }
 
+    [InitMethod]
+    public void InitFromBuffer([JavaType(typeof(StringBuffer))] Reference buf)
+    {
+        Value = Jvm.Resolve<StringBuffer>(buf).ToString();
+    }
+
     #endregion
 
     public int length()
@@ -236,6 +242,11 @@ public sealed class String : Object
     {
         var s = Jvm.ResolveString(str);
         return Jvm.AllocateString(Value + s);
+    }
+
+    public void getChars(int srcBegin, int srcEnd, [JavaType("[C")] Reference dest, int destBegin)
+    {
+        Value.CopyTo(srcBegin, Jvm.ResolveArray<char>(dest), destBegin, srcEnd - srcBegin);
     }
 
     #region valueOf
