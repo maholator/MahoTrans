@@ -146,6 +146,6 @@ public static class JavaConversions
             r[i] = jvm.AllocateString(list[i]);
         }
 
-        return jvm.AllocateArray(r, "[java/lang/String");
+        return jvm.AllocateArray(r, "[Ljava/lang/String;");
     }
 }

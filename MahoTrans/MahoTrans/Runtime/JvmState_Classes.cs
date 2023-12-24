@@ -97,6 +97,7 @@ public partial class JvmState
     {
         if (Classes.TryGetValue(name, out var o))
             return o;
+
         if (name.StartsWith('['))
         {
             // it's an array
@@ -114,10 +115,18 @@ public partial class JvmState
                     break;
                 default:
                 {
-                    var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
-                    if (!Classes.ContainsKey(itemClass))
-                        throw new JavaRuntimeError(
-                            $"Class {name} can't be created because items class {itemClass} is not loaded.");
+                    if (itemDescr[0] == 'L' && itemDescr[^1] == ';')
+                    {
+                        var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
+                        if (!Classes.ContainsKey(itemClass))
+                            throw new JavaRuntimeError(
+                                $"Class {name} can't be created because items class {itemClass} is not loaded.");
+                    }
+                    else
+                    {
+                        throw new JavaRuntimeError($"Malformed array descriptor: {name}");
+                    }
+
                     break;
                 }
             }
