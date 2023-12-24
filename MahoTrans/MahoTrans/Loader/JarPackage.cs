@@ -40,7 +40,7 @@ public class JarPackage
 
     public string? GetMidletIcon(int n)
     {
-        var icon = GetMidletInfoLine(n)?[1].Trim();
+        var icon = GetMidletInfoLine(n)?[1].Trim().Trim('/');
         if (string.IsNullOrEmpty(icon))
             return null;
         return icon;
