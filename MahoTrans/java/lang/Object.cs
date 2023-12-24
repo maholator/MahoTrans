@@ -168,7 +168,7 @@ public class Object
     {
         return new JavaMethodBody
         {
-            LocalsCount = 2,
+            LocalsCount = 3,
             StackSize = 2,
             RawCode = new Instruction[]
             {
@@ -184,10 +184,11 @@ public class Object
                 // stack: wait_cache > obj
                 new Instruction(JavaOpcode.monitorenter),
                 // stack: wait_cache
+                new Instruction(JavaOpcode.lstore_2),
                 // we are at monitor, but let's fix it
                 new Instruction(JavaOpcode.aload_0),
-                // stack: wait_cache > obj
-                new Instruction(JavaOpcode.swap),
+                // stack: obj
+                new Instruction(JavaOpcode.lload_2),
                 // stack: obj > wait_cache
                 new Instruction(JavaOpcode.invokespecial,
                     @class.PushConstant(new NameDescriptorClass("FixMonitorAfterWait", "(J)V", "java/lang/Object"))
