@@ -41,7 +41,7 @@ public class Displayable : Object
 
     public bool isShown()
     {
-        var c = Toolkit.Display.GetCurrent();
+        var c = Toolkit.Display.Current;
         if (c.HasValue)
             return Handle == c.Value;
         return false;

@@ -29,8 +29,7 @@ public interface IDisplay : IToolkit
     /// <summary>
     /// Gets current displayable on display.
     /// </summary>
-    /// <returns>Displayable's handle.</returns>
-    DisplayableHandle? GetCurrent();
+    public DisplayableHandle? Current { get; }
 
     int GetWidth(DisplayableHandle handle);
 
