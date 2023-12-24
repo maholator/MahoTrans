@@ -36,10 +36,10 @@ public partial class JvmState
     /// <summary>
     /// Gets snapshot of this JVM.
     /// </summary>
-    /// <returns>File to save.</returns>
-    public byte[] Snapshot()
+    /// <returns>Stream with written snapshot. Position will be zero. Make sure do dispose it.</returns>
+    public MemoryStream Snapshot()
     {
-        using var snapshotStream = new MemoryStream();
+        var snapshotStream = new MemoryStream();
 
         using (var zip = new ZipArchive(snapshotStream, ZipArchiveMode.Create, true, Encoding.UTF8))
         {
@@ -107,11 +107,8 @@ public partial class JvmState
             });
         }
 
-        {
-            snapshotStream.Position = 0;
-            var blob = snapshotStream.ToArray();
-            return blob;
-        }
+        snapshotStream.Position = 0;
+        return snapshotStream;
     }
 
     private struct SerializedClass
