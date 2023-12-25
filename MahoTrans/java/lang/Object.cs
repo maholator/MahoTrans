@@ -168,33 +168,28 @@ public class Object
     {
         return new JavaMethodBody
         {
-            LocalsCount = 3,
-            StackSize = 2,
+            LocalsCount = 2,
+            StackSize = 3,
             RawCode = new Instruction[]
             {
-                new Instruction(JavaOpcode.aload_0),
-                new Instruction(JavaOpcode.aload_1),
-                new Instruction(JavaOpcode.invokespecial,
+                new(JavaOpcode.aload_0),
+                new(JavaOpcode.dup),
+                new(JavaOpcode.lload_1),
+                new(JavaOpcode.invokespecial,
                     @class.PushConstant(new NameDescriptorClass("WaitMonitor", "(J)J", "java/lang/Object")).Split()),
                 // at this point thread is detached
 
                 // running further? seems we have notified.
-                // stack: wait_cache
-                new Instruction(JavaOpcode.aload_0),
-                // stack: wait_cache > obj
-                new Instruction(JavaOpcode.monitorenter),
-                // stack: wait_cache
-                new Instruction(JavaOpcode.lstore_2),
-                // we are at monitor, but let's fix it
-                new Instruction(JavaOpcode.aload_0),
-                // stack: obj
-                new Instruction(JavaOpcode.lload_2),
                 // stack: obj > wait_cache
-                new Instruction(JavaOpcode.invokespecial,
+                new(JavaOpcode.aload_0),
+                // stack: obj > wait_cache > obj
+                new(JavaOpcode.monitorenter),
+                // stack: obj > wait_cache
+                new(JavaOpcode.invokespecial,
                     @class.PushConstant(new NameDescriptorClass("FixMonitorAfterWait", "(J)V", "java/lang/Object"))
                         .Split()),
                 // at this point monitor state is restored and thread is attached.
-                new Instruction(JavaOpcode.@return),
+                new(JavaOpcode.@return),
             }
         };
     }
