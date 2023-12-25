@@ -1370,10 +1370,11 @@ public static class BytecodeLinker
                         intData = vp.Item1;
                         shortData = vp.Item2;
                         data = null!;
-                        emulatedStack.Pop(vp.Item2); //TODO check args
+                        var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(jvm.DecodeVirtualPointer(vp.Item1)
+                            .Descriptor);
+                        foreach (var p in d.args.Reverse()) PopWithAssert(p);
                         PopWithAssert(PrimitiveType.Reference);
-                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Item1).Descriptor);
-                        if (ret.HasValue) emulatedStack.Push(ret.Value);
+                        if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
                         SetNextStack();
                         break;
                     }
@@ -1384,13 +1385,11 @@ public static class BytecodeLinker
                         var @class = jvm.Classes[ndc.ClassName];
                         var m = @class.GetMethodRecursive(ndc.Descriptor);
                         data = m;
-                        emulatedStack.Pop(
-                            DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor)); //TODO check args
+                        var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
+                        foreach (var p in d.args.Reverse()) PopWithAssert(p);
                         if (opcode == JavaOpcode.invokespecial)
                             PopWithAssert(PrimitiveType.Reference);
-                        var ret = DescriptorUtils.GetMethodReturnType(ndc.Descriptor.Descriptor);
-                        if (ret.HasValue)
-                            emulatedStack.Push(ret.Value);
+                        if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
                         SetNextStack();
                         break;
                     }
@@ -1400,10 +1399,11 @@ public static class BytecodeLinker
                         intData = vp.Item1;
                         shortData = vp.Item2;
                         data = null!;
-                        emulatedStack.Pop(vp.Item2); //TODO check args
+                        var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(jvm.DecodeVirtualPointer(vp.Item1)
+                            .Descriptor);
+                        foreach (var p in d.args.Reverse()) PopWithAssert(p);
                         PopWithAssert(PrimitiveType.Reference);
-                        var ret = DescriptorUtils.GetMethodReturnType(jvm.DecodeVirtualPointer(vp.Item1).Descriptor);
-                        if (ret.HasValue) emulatedStack.Push(ret.Value);
+                        if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
                         SetNextStack();
                         break;
                     }

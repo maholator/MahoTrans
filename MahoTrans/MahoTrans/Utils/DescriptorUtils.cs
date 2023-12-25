@@ -96,6 +96,27 @@ public static class DescriptorUtils
         }
     }
 
+    private static PrimitiveType ParseDescriptorAsPrimitive(string descriptor, int from, out int len)
+    {
+        switch (descriptor[from])
+        {
+            case '[':
+            {
+                ParseDescriptorAsPrimitive(descriptor, from + 1, out var l2);
+                len = l2 + 1;
+                return PrimitiveType.Reference;
+            }
+            case 'L':
+            {
+                len = descriptor.IndexOf(';', from) - from + 1;
+                return PrimitiveType.Reference;
+            }
+            default:
+                len = 1;
+                return ParseDescriptor(descriptor[from]);
+        }
+    }
+
     public static PrimitiveType? GetMethodReturnType(string descriptor)
     {
         var cb = descriptor.IndexOf(')');
@@ -103,6 +124,31 @@ public static class DescriptorUtils
         if (c == 'V')
             return null;
         return ParseDescriptor(c);
+    }
+
+    public static (PrimitiveType? returnType, PrimitiveType[] args) ParseMethodDescriptorAsPrimitives(string descriptor)
+    {
+        if (descriptor[0] != '(')
+            throw new ArgumentException();
+        int argsEnd = descriptor.IndexOf(')');
+        string argsD = descriptor.Substring(1, argsEnd - 1);
+        var retD = descriptor[argsEnd + 1];
+        var retPrim = retD == 'V' ? default(PrimitiveType?) : ParseDescriptor(retD);
+
+        if (argsD.Length == 0)
+            return (retPrim, Array.Empty<PrimitiveType>());
+
+        int next = 0;
+        List<PrimitiveType> t = new();
+        while (true)
+        {
+            t.Add(ParseDescriptorAsPrimitive(argsD, next, out int len));
+            next += len;
+            if (next >= argsD.Length)
+                break;
+        }
+
+        return (retPrim, t.ToArray());
     }
 
     public static (object returnType, object[] args) ParseMethodDescriptor(string descriptor)
