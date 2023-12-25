@@ -20,7 +20,7 @@ public static class BytecodeLinker
         catch (Exception e)
         {
             throw new JavaLinkageException(
-                $"Failed to perform JIT linking for method {method} in class {method.Method?.Class}", e);
+                $"Failed to link {method} in JIT manner", e);
         }
 #endif
     }
