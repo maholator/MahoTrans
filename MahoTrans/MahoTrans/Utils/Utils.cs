@@ -87,6 +87,16 @@ public static class Utils
         return Convert.ToHexString(ba);
     }
 
+    public static string AsBase64(this string str)
+    {
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(str));
+    }
+
+    public static string DecodeBase64(this string str)
+    {
+        return Encoding.UTF8.GetString(Convert.FromBase64String(str));
+    }
+
     public static LogLevel GetSeverity(this LoadIssueType type)
     {
         return type switch
