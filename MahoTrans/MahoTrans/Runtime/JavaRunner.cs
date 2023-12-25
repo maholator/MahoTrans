@@ -1462,7 +1462,7 @@ public class JavaRunner
                     count[i] = frame.PopInt();
                 }
 
-                var underlyingType = d.type.Name.Split('[', StringSplitOptions.RemoveEmptyEntries).Single();
+                var underlyingType = d.type.Name.Substring(dims);
                 ArrayType? arrayType = underlyingType switch
                 {
                     "I" => ArrayType.T_INT,

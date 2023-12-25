@@ -1504,7 +1504,12 @@ public static class BytecodeLinker
                         var dims = args[2];
                         var type = (string)consts[Combine(args[0], args[1])];
                         data = new MultiArrayInitializer(dims, jvm.GetClass(type));
-                        emulatedStack.Pop(dims); //todo check types
+                        for (int i = 0; i < dims; i++)
+                        {
+                            if (type[i] != '[')
+                                throw new JavaLinkageException($"Multiarray has invalid type: \"{type}\" for {dims} dimensions");
+                            PopWithAssert(PrimitiveType.Int);
+                        }
                         emulatedStack.Push(PrimitiveType.Reference);
                         SetNextStack();
                         break;
