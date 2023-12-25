@@ -744,7 +744,30 @@ public static class BytecodeLinker
                         break;
                     }
                     case JavaOpcode.dup2_x1:
-                        throw new NotImplementedException("No dup2_x1 opcode");
+                    {
+                        data = null!;
+                        var t1 = PopWithAssertIs32();
+                        var t2 = emulatedStack.Pop();
+
+                        if ((t2 & PrimitiveType.IsDouble) != 0)
+                        {
+                            emulatedStack.Push(t1);
+                            emulatedStack.Push(t2);
+                            emulatedStack.Push(t1);
+                        }
+                        else
+                        {
+                            var t3 = PopWithAssertIs32();
+                            emulatedStack.Push(t2);
+                            emulatedStack.Push(t1);
+                            emulatedStack.Push(t3);
+                            emulatedStack.Push(t2);
+                            emulatedStack.Push(t1);
+                        }
+
+                        SetNextStack();
+                        break;
+                    }
                     case JavaOpcode.dup2_x2:
                         throw new NotImplementedException("No dup2_x2 opcode");
                     case JavaOpcode.swap:
@@ -754,6 +777,7 @@ public static class BytecodeLinker
                         var t2 = PopWithAssertIs32();
                         emulatedStack.Push(t1);
                         emulatedStack.Push(t2);
+                        SetNextStack();
                         break;
                     }
                     case JavaOpcode.iadd:
@@ -1507,9 +1531,11 @@ public static class BytecodeLinker
                         for (int i = 0; i < dims; i++)
                         {
                             if (type[i] != '[')
-                                throw new JavaLinkageException($"Multiarray has invalid type: \"{type}\" for {dims} dimensions");
+                                throw new JavaLinkageException(
+                                    $"Multiarray has invalid type: \"{type}\" for {dims} dimensions");
                             PopWithAssert(PrimitiveType.Int);
                         }
+
                         emulatedStack.Push(PrimitiveType.Reference);
                         SetNextStack();
                         break;
