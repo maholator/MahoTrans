@@ -4,6 +4,7 @@ using MahoTrans.ToolkitImpls.Ams;
 using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.ToolkitImpls.Rms;
+using MahoTrans.ToolkitImpls.Systems;
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.Testing;
@@ -18,7 +19,7 @@ public class JavaTest
             throw new FileNotFoundException();
 
         Toolkit tk = new Toolkit(
-            null!,
+            new DummySystem(),
             new RealTimeClock(),
             null!,
             null!,
