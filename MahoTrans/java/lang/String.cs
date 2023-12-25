@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -278,21 +279,21 @@ public sealed class String : Object
     public static Reference valueOf(long v) => Jvm.AllocateString(v.ToString());
 
     [JavaDescriptor("(Ljava/lang/Object;)Ljava/lang/String;")]
-    public static JavaMethodBody valueOf(JavaClass @class)
+    public static JavaMethodBody valueOf(JavaClass cls)
     {
-        return new JavaMethodBody
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        using (b.AppendGoto(JavaOpcode.ifnonnull))
         {
-            LocalsCount = 1,
-            StackSize = 1,
-            Code = new Instruction[]
-            {
-                new(0, JavaOpcode.aload_0),
-                new(1, JavaOpcode.invokevirtual,
-                    @class.PushConstant(new NameDescriptorClass("toString", "()Ljava/lang/String;", "java/lang/Object"))
-                        .Split()),
-                new(4, JavaOpcode.areturn)
-            }
-        };
+            b.AppendConstant("null");
+            b.AppendReturnReference();
+        }
+
+        b.AppendThis();
+        b.AppendVirtcall("toString", typeof(String));
+        b.AppendReturnReference();
+
+        return b.Build(1, 1);
     }
 
     #endregion
