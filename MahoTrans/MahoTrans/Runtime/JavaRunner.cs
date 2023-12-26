@@ -74,7 +74,7 @@ public class JavaRunner
                     : $"Message: {exRealMsg}";
                 var exSource =
                     $"{throwFrame.Method}:{throwFrame.Pointer} ({throwFrame.Method.Code[throwFrame.Pointer]})";
-                var message = $"Unhandled JVM exception {t.JavaClass} at {exSource}\n{exMsg}";
+                var message = $"Unhandled JVM exception \"{t.JavaClass}\" at {exSource}\n{exMsg}";
                 throw new JavaUnhandledException(message, ex);
             }
 
