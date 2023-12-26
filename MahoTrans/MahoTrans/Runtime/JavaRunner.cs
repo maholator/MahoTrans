@@ -75,7 +75,7 @@ public class JavaRunner
                 var exSource =
                     $"{throwFrame.Method}:{throwFrame.Pointer} ({throwFrame.Method.Code[throwFrame.Pointer]})";
                 var message = $"Unhandled JVM exception {t.JavaClass} at {exSource}\n{exMsg}";
-                throw new JavaRuntimeError(message, ex);
+                throw new JavaUnhandledException(message, ex);
             }
 
             if (frame.Method.Method.IsCritical)
