@@ -43,7 +43,7 @@ public class JavaRunner
 
     public static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
     {
-        var frame = thread.ActiveFrame!;
+        var throwFrame = thread.ActiveFrame!;
         var t = state.Resolve<Throwable>(ex.Throwable);
         state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"Exception {t.JavaClass.Name} is caught");
         Console.WriteLine("Call stack:");
@@ -52,12 +52,13 @@ public class JavaRunner
             Console.WriteLine(thread.CallStack[i]);
         }
 
-        if (HandleException(frame, frame.Pointer, t))
+        if (HandleException(throwFrame, throwFrame.Pointer, t))
         {
             // handled
             return;
         }
 
+        var frame = throwFrame;
         // unhandled
         while (true)
         {
@@ -71,10 +72,15 @@ public class JavaRunner
                 var exMsg = string.IsNullOrEmpty(exRealMsg)
                     ? "Exception has no attached message."
                     : $"Message: {exRealMsg}";
-                var exSource = $"{frame.Method}:{frame.Pointer} ({frame.Method.Code[frame.Pointer]})";
+                var exSource =
+                    $"{throwFrame.Method}:{throwFrame.Pointer} ({throwFrame.Method.Code[throwFrame.Pointer]})";
                 var message = $"Unhandled JVM exception {t.JavaClass} at {exSource}\n{exMsg}";
                 throw new JavaRuntimeError(message, ex);
             }
+
+            if (frame.Method.Method.IsCritical)
+                ExitSynchronizedMethod(frame, thread.ActiveFrame, thread, state);
+            frame = thread.ActiveFrame!;
 
             var lf = thread.ActiveFrame;
             if (HandleException(lf, lf.Pointer - 1, t))
