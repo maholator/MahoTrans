@@ -5,12 +5,14 @@ using JetBrains.Annotations;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using MahoTrans.Utils;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
+    public AllocatorBehaviourOnOverflow OnOverflow;
     private Object?[] _heap = new Object?[1024 * 16];
     private int _nextObjectId = 1;
     [PublicAPI] public int ObjectsOnFly;
@@ -309,6 +311,24 @@ public partial class JvmState
     {
         lock (this)
         {
+            if (ObjectsOnFly == _heap.Length - 1)
+            {
+                switch (OnOverflow)
+                {
+                    case AllocatorBehaviourOnOverflow.Expand:
+                        var newHeap = new Object[_heap.Length * 2];
+                        Array.Copy(_heap, newHeap, _heap.Length);
+                        _heap = newHeap;
+                        break;
+                    case AllocatorBehaviourOnOverflow.ThrowOutOfMem:
+                        Throw<OutOfMemoryError>();
+                        break;
+                    case AllocatorBehaviourOnOverflow.Crash:
+                        throw new JavaRuntimeError(
+                            $"Could not find empty slot for {obj.JavaClass.Name}: {ObjectsOnFly}/{_heap.Length} slots used.");
+                }
+            }
+
             if (_nextObjectId % 2000 == 0)
             {
                 // run GC every 2k object
