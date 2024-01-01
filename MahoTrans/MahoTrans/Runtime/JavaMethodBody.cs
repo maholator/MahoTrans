@@ -31,6 +31,11 @@ public class JavaMethodBody
     /// </summary>
     public PrimitiveType[] LocalTypes = null!;
 
+    /// <summary>
+    /// Types of values on stack. Do not forget to call <see cref="EnsureBytecodeLinked"/> before usage! This reflects stack state BEFORE opcode execution.
+    /// </summary>
+    public PrimitiveType[][] StackTypes = null!;
+
     #endregion
 
     public JavaMethodBody()

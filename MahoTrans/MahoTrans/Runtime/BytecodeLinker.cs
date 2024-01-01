@@ -1629,6 +1629,7 @@ public static class BytecodeLinker
         }
 
         method.LinkedCode = output;
+        method.StackTypes = stackBeforeInstruction!;
     }
 
     private static (int, ushort) LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
