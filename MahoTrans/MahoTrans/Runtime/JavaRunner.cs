@@ -525,7 +525,7 @@ public class JavaRunner
             case JavaOpcode.pop2:
             {
                 frame.StackTop--;
-                if (!frame.IsDoubleSizedPopped())
+                if (instr.IntData != 0)
                     frame.StackTop--;
 
                 pointer++;
@@ -558,7 +558,7 @@ public class JavaRunner
                 var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
                 var t2 = frame.GetPoppedType();
-                if ((t2 & PrimitiveType.IsDouble) != 0)
+                if (instr.IntData != 0)
                 {
                     frame.PushUnchecked(v1, t1);
                     frame.PushUnchecked(v2, t2);
@@ -581,7 +581,7 @@ public class JavaRunner
             {
                 var v = frame.Pop();
                 var t = frame.GetPoppedType();
-                if ((t & PrimitiveType.IsDouble) != 0)
+                if (instr.IntData != 0)
                 {
                     frame.PushUnchecked(v, t);
                     frame.PushUnchecked(v, t);
@@ -604,7 +604,7 @@ public class JavaRunner
                 var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
                 var t2 = frame.GetPoppedType();
-                if ((t1 & PrimitiveType.IsDouble) != 0)
+                if (instr.IntData != 0)
                 {
                     frame.PushUnchecked(v1, t1);
                     frame.PushUnchecked(v2, t2);

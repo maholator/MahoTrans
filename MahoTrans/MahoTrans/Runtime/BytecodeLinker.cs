@@ -681,7 +681,15 @@ public static class BytecodeLinker
                         data = null!;
                         var t = emulatedStack.Pop();
                         if ((t & PrimitiveType.IsDouble) == 0)
+                        {
                             PopWithAssertIs32();
+                            intData = 1;
+                        }
+                        else
+                        {
+                            intData = 0;
+                        }
+
                         SetNextStack();
                         break;
                     }
@@ -715,6 +723,7 @@ public static class BytecodeLinker
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
+                            intData = 1;
                         }
                         else
                         {
@@ -723,6 +732,7 @@ public static class BytecodeLinker
                             emulatedStack.Push(t3);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
+                            intData = 0;
                         }
 
                         SetNextStack();
@@ -736,6 +746,7 @@ public static class BytecodeLinker
                         {
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t1);
+                            intData = 1;
                         }
                         else
                         {
@@ -744,6 +755,7 @@ public static class BytecodeLinker
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
+                            intData = 0;
                         }
 
                         SetNextStack();
@@ -760,6 +772,7 @@ public static class BytecodeLinker
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
+                            intData = 1;
                         }
                         else
                         {
@@ -769,6 +782,7 @@ public static class BytecodeLinker
                             emulatedStack.Push(t3);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
+                            intData = 0;
                         }
 
                         SetNextStack();
