@@ -11,11 +11,11 @@ public static class BytecodeLinker
         var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
         var cls = method.Method.Class;
 #if DEBUG
-        method.LinkedCode = LinkInternal(method, cls, jvm, isClinit);
+        LinkInternal(method, cls, jvm, isClinit);
 #else
         try
         {
-            method.LinkedCode = LinkInternal(method, cls, jvm, isClinit);
+            LinkInternal(method, cls, jvm, isClinit);
         }
         catch (Exception e)
         {
@@ -308,14 +308,14 @@ public static class BytecodeLinker
             $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
     }
 
-    private static LinkedInstruction[] LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
+    private static void LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
     {
         var code = method.Code;
         var consts = cls.Constants;
         var output = new LinkedInstruction[code.Length];
         var isLinked = new bool[code.Length];
-        PrimitiveType[]?[] stackBeforeInsruction = new PrimitiveType[]?[code.Length];
-        stackBeforeInsruction[0] = Array.Empty<PrimitiveType>(); // we enter with empty stack
+        PrimitiveType[]?[] stackBeforeInstruction = new PrimitiveType[]?[code.Length];
+        stackBeforeInstruction[0] = Array.Empty<PrimitiveType>(); // we enter with empty stack
 
         // offsets cache
         Dictionary<int, int> offsets = new Dictionary<int, int>();
@@ -330,7 +330,7 @@ public static class BytecodeLinker
         foreach (var methodCatch in method.Catches)
         {
             entryPoints.Push(offsets[methodCatch.CatchStart]);
-            stackBeforeInsruction[offsets[methodCatch.CatchStart]] = new[] { PrimitiveType.Reference };
+            stackBeforeInstruction[offsets[methodCatch.CatchStart]] = new[] { PrimitiveType.Reference };
         }
 
         entryPoints.Push(0);
@@ -338,9 +338,9 @@ public static class BytecodeLinker
         void SetStack(int target)
         {
             var now = emulatedStack.ToArray();
-            var was = stackBeforeInsruction[target];
+            var was = stackBeforeInstruction[target];
             if (was == null)
-                stackBeforeInsruction[target] = now;
+                stackBeforeInstruction[target] = now;
             else if (!was.SequenceEqual(now))
                 throw new JavaLinkageException($"Stack mismatch at instruction {target}");
         }
@@ -356,7 +356,7 @@ public static class BytecodeLinker
 
             // bringing stack to valid state
             emulatedStack.Clear();
-            var stackOnEntry = stackBeforeInsruction[entryPoint];
+            var stackOnEntry = stackBeforeInstruction[entryPoint];
             if (stackOnEntry == null)
                 throw new JavaLinkageException($"Method can't be entered at {entryPoint}");
             foreach (var el in stackOnEntry.Reverse())
@@ -1628,7 +1628,7 @@ public static class BytecodeLinker
             }
         }
 
-        return output;
+        method.LinkedCode = output;
     }
 
     private static (int, ushort) LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
