@@ -269,9 +269,13 @@ public static class BytecodeLinker
                     $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
                 types[i] = default;
             }
-            else
+            else if (locals[i].Count == 1)
             {
                 types[i] = LocalToPrimitive(locals[i][0]);
+            }
+            else
+            {
+                types[i] = default;
             }
         }
 
