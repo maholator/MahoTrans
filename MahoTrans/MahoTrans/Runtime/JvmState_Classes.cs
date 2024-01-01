@@ -39,7 +39,7 @@ public partial class JvmState
 
         RefreshState(classes);
         foreach (var cls in classes)
-            BytecodeLinker.VerifyBytecode(cls, this);
+            BytecodeLinker.Verify(cls, this);
     }
 
     public void AddClrClasses(IEnumerable<Type> types)
@@ -53,7 +53,7 @@ public partial class JvmState
 
         RefreshState(classes);
         foreach (var cls in classes)
-            BytecodeLinker.VerifyBytecode(cls, this);
+            BytecodeLinker.Verify(cls, this);
     }
 
     /// <summary>

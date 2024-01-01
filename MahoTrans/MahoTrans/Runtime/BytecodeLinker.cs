@@ -6,16 +6,16 @@ namespace MahoTrans.Runtime;
 
 public static class BytecodeLinker
 {
-    public static LinkedInstruction[] Link(JavaMethodBody method, JvmState jvm)
+    public static void Link(JavaMethodBody method, JvmState jvm)
     {
         var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
         var cls = method.Method.Class;
 #if DEBUG
-        return LinkInternal(method, cls, jvm, isClinit);
+        method.LinkedCode = LinkInternal(method, cls, jvm, isClinit);
 #else
         try
         {
-            return LinkInternal(method, cls, jvm, isClinit);
+            method.LinkedCode = LinkInternal(method, cls, jvm, isClinit);
         }
         catch (Exception e)
         {
@@ -25,7 +25,7 @@ public static class BytecodeLinker
 #endif
     }
 
-    public static void VerifyBytecode(JavaClass cls, JvmState jvm)
+    public static void Verify(JavaClass cls, JvmState jvm)
     {
         var logger = jvm.Toolkit.LoadLogger;
         foreach (var method in cls.Methods.Values)
@@ -45,7 +45,7 @@ public static class BytecodeLinker
             }
 
             VerifyClassReferences(code, cls, jvm, logger);
-            CheckLocalsBounds(code, method.Descriptor.ToString(), method.JavaBody.LocalsCount, cls.Name, logger);
+            VerifyLocals(method.JavaBody, cls.Name, logger);
             CheckMethodExit(code, method.Descriptor.ToString(), cls.Name, logger);
         }
     }
@@ -218,12 +218,14 @@ public static class BytecodeLinker
     }
 
 
-    private static void CheckLocalsBounds(Instruction[] code, string method, int localsCount, string cls,
-        ILoadTimeLogger logger)
+    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadTimeLogger logger)
     {
-        List<LocalType>[] locals = new List<LocalType>[localsCount];
-        for (int i = 0; i < localsCount; i++)
-            locals[i] = new List<LocalType>();
+        var code = method.Code;
+        var methodName = method.Method.Descriptor.ToString();
+        List<LocalVariableType>[] locals = new List<LocalVariableType>[method.LocalsCount];
+
+        for (int i = 0; i < method.LocalsCount; i++)
+            locals[i] = new List<LocalVariableType>();
 
         for (int i = 0; i < code.Length; i++)
         {
@@ -242,38 +244,38 @@ public static class BytecodeLinker
                     index = code[i].Args[0];
                 }
 
-                if (index >= localsCount)
+                if (index >= method.LocalsCount)
                 {
                     logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
-                        $"Local variable {index} of type \"{(LocalType)type}\" is out of bounds at {method}:{i}");
+                        $"Local variable {index} of type \"{(LocalVariableType)type}\" is out of bounds at {methodName}:{i}");
                     continue;
                 }
 
-                if (!locals[index].Contains((LocalType)type))
+                if (!locals[index].Contains((LocalVariableType)type))
                 {
-                    locals[index].Add((LocalType)type);
+                    locals[index].Add((LocalVariableType)type);
                 }
             }
         }
 
-        for (int i = 0; i < localsCount; i++)
+        PrimitiveType[] types = new PrimitiveType[method.LocalsCount];
+
+        for (int i = 0; i < method.LocalsCount; i++)
         {
             if (locals[i].Count > 1)
             {
                 locals[i].Sort();
                 logger.Log(LoadIssueType.MultiTypeLocalVariable, cls,
-                    $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {method}");
+                    $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
+                types[i] = default;
+            }
+            else
+            {
+                types[i] = LocalToPrimitive(locals[i][0]);
             }
         }
-    }
 
-    public enum LocalType : ushort
-    {
-        Int = 'i',
-        Long = 'l',
-        Float = 'f',
-        Double = 'd',
-        Reference = 'a',
+        method.LocalTypes = types;
     }
 
     private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadTimeLogger logger)
@@ -1655,5 +1657,27 @@ public static class BytecodeLinker
         var u = (ushort)((indexByte1 << 8) | indexByte2);
         var s = (short)u;
         return s;
+    }
+
+    private enum LocalVariableType : ushort
+    {
+        Int = 'i',
+        Long = 'l',
+        Float = 'f',
+        Double = 'd',
+        Reference = 'a',
+    }
+
+    private static PrimitiveType LocalToPrimitive(LocalVariableType t)
+    {
+        return t switch
+        {
+            LocalVariableType.Int => PrimitiveType.Int,
+            LocalVariableType.Long => PrimitiveType.Long,
+            LocalVariableType.Float => PrimitiveType.Float,
+            LocalVariableType.Double => PrimitiveType.Double,
+            LocalVariableType.Reference => PrimitiveType.Reference,
+            _ => default
+        };
     }
 }

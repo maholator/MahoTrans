@@ -15,13 +15,23 @@ public class JavaMethodBody
     /// </summary>
     public Instruction[] Code = Array.Empty<Instruction>();
 
+    public Catch[] Catches = Array.Empty<Catch>();
+
+    public JavaAttribute[] Attrs = Array.Empty<JavaAttribute>();
+
+    #region Caches
+
     /// <summary>
     /// Linked bytecode of this method. Do not forget to call <see cref="EnsureBytecodeLinked"/> before usage!
     /// </summary>
     public LinkedInstruction[] LinkedCode = null!;
 
-    public Catch[] Catches = Array.Empty<Catch>();
-    public JavaAttribute[] Attrs = Array.Empty<JavaAttribute>();
+    /// <summary>
+    /// Types of local variables. This method must be verified.
+    /// </summary>
+    public PrimitiveType[] LocalTypes = null!;
+
+    #endregion
 
     public JavaMethodBody()
     {
@@ -63,7 +73,7 @@ public class JavaMethodBody
         if (LinkedCode != null!)
             return;
         Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Jit, $"{Method} will be linked");
-        LinkedCode = BytecodeLinker.Link(this, Object.Jvm);
+        BytecodeLinker.Link(this, Object.Jvm);
     }
 
     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
