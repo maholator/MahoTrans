@@ -218,15 +218,12 @@ public class JavaRunner
                 pointer++;
                 break;
             case JavaOpcode.bipush:
+            case JavaOpcode.sipush:
             {
                 frame.PushInt(instr.IntData);
                 pointer++;
                 break;
             }
-            case JavaOpcode.sipush:
-                frame.PushInt(instr.IntData);
-                pointer++;
-                break;
             case JavaOpcode.ldc:
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
