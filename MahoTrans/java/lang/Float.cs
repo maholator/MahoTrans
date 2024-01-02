@@ -21,7 +21,9 @@ public class Float : Object
 
     public double doubleValue() => Value;
 
-    static int floatToIntBits(float v) => BitConverter.SingleToInt32Bits(v);
+    public static int floatToIntBits(float v) => BitConverter.SingleToInt32Bits(v);
+
+    public static float intBitsToFloat(int v) => BitConverter.Int32BitsToSingle(v);
 
     [return: String]
     public static Reference toString(float f)
