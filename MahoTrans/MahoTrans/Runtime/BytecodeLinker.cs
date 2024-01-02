@@ -229,7 +229,17 @@ public static class BytecodeLinker
 
         for (int i = 0; i < code.Length; i++)
         {
-            var opcode = code[i].Opcode.ToString();
+            string opcode;
+            if (code[i].Opcode == JavaOpcode.wide)
+            {
+                JavaOpcode real = (JavaOpcode)code[i].Args[0];
+                opcode = real.ToString();
+            }
+            else
+            {
+                opcode = code[i].Opcode.ToString();
+            }
+
             if (opcode.IndexOf("load", StringComparison.Ordinal) == 1 ||
                 opcode.IndexOf("store", StringComparison.Ordinal) == 1)
             {
@@ -238,6 +248,10 @@ public static class BytecodeLinker
                 if (opcode.IndexOf('_') != -1)
                 {
                     index = int.Parse(opcode.Split('_')[1]);
+                }
+                else if (code[i].Opcode == JavaOpcode.wide)
+                {
+                    index = Combine(code[i].Args[1], code[i].Args[2]);
                 }
                 else
                 {
