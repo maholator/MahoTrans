@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MahoTrans.Runtime;
@@ -25,7 +26,12 @@ public unsafe class Frame
         StackTop = 0;
         Pointer = 0;
 
-        if (Method != method)
+        if (Method == method)
+        {
+            Unsafe.InitBlock(Stack, 0, (uint)(method.StackSize * sizeof(long)));
+            Unsafe.InitBlock(LocalVariables, 0, (uint)(method.LocalsCount * sizeof(long)));
+        }
+        else
         {
             Method = method;
             DeallocateBuffers();
@@ -36,7 +42,9 @@ public unsafe class Frame
     private void AllocateBuffers(ushort locals, ushort stack)
     {
         Stack = (long*)NativeMemory.Alloc(stack, sizeof(long));
+        Unsafe.InitBlock(Stack, 0, (uint)(stack * sizeof(long)));
         LocalVariables = (long*)NativeMemory.Alloc(locals, sizeof(long));
+        Unsafe.InitBlock(LocalVariables, 0, (uint)(locals * sizeof(long)));
     }
 
     private void DeallocateBuffers()
