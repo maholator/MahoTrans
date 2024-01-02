@@ -33,7 +33,12 @@ public static class BytecodeLinker
         var logger = jvm.Toolkit.LoadLogger;
         foreach (var method in cls.Methods.Values)
         {
+            // we don't have bytecode at all.
             if (method.IsNative)
+                continue;
+
+            // we don't have bytecode because we have no implementation.
+            if (method.IsAbstract)
                 continue;
 
             Instruction[] code;
