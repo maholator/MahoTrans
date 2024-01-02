@@ -2005,22 +2005,6 @@ public static class BytecodeLinker
                 output[instrIndex] = new LinkedInstruction(opcode, shortData, intData, data);
                 isLinked[instrIndex] = true;
 
-                void PushUnknown(object o)
-                {
-                    if (o is int)
-                        emulatedStack.Push(PrimitiveType.Int);
-                    else if (o is long)
-                        emulatedStack.Push(PrimitiveType.Long);
-                    else if (o is float)
-                        emulatedStack.Push(PrimitiveType.Float);
-                    else if (o is double)
-                        emulatedStack.Push(PrimitiveType.Double);
-                    else if (o is string)
-                        emulatedStack.Push(PrimitiveType.Reference);
-                    else
-                        throw new JavaLinkageException($"Unsupported constant type: {o.GetType()}");
-                }
-
                 int CalcTargetInstruction()
                 {
                     var ros = Combine(args[0], args[1]);
