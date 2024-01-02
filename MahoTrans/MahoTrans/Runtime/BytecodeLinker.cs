@@ -1958,7 +1958,8 @@ public static class BytecodeLinker
                         opcode = MTOpcode.new_multi_arr;
                         var dims = args[2];
                         var type = (string)consts[Combine(args[0], args[1])];
-                        data = new MultiArrayInitializer(dims, jvm.GetClass(type));
+                        intData = dims;
+                        data = jvm.GetClass(type);
                         for (int i = 0; i < dims; i++)
                         {
                             if (type[i] != '[')

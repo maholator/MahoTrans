@@ -1122,15 +1122,15 @@ public class JavaRunner
 
             case MTOpcode.new_multi_arr:
             {
-                var d = (MultiArrayInitializer)instr.Data;
-                var dims = d.dimensions;
+                var cls = (JavaClass)instr.Data;
+                var dims = instr.IntData;
                 int[] count = new int[dims];
                 for (int i = 0; i < count.Length; i++)
                 {
                     count[i] = frame.PopInt();
                 }
 
-                var underlyingType = d.type.Name.Substring(dims);
+                var underlyingType = cls.Name.Substring(dims);
                 ArrayType? arrayType = underlyingType switch
                 {
                     "I" => ArrayType.T_INT,
@@ -1144,7 +1144,7 @@ public class JavaRunner
                     _ => null
                 };
 
-                frame.PushReference(CreateMultiSubArray(dims - 1, count, jvm, arrayType, d.type));
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, jvm, arrayType, cls));
 
                 pointer++;
                 break;
