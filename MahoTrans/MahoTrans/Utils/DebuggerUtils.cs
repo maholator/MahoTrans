@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using JetBrains.Annotations;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using Array = java.lang.Array;
@@ -12,6 +13,7 @@ namespace MahoTrans.Utils;
 /// <summary>
 ///     Various tools for debuggers.
 /// </summary>
+[PublicAPI]
 public static class DebuggerUtils
 {
     /// <summary>
@@ -305,7 +307,7 @@ public static class DebuggerUtils
     }
 
     /// <summary>
-    /// Pretty-prints instruction to show it in debugger.
+    ///     Pretty-prints instruction to show it in debugger.
     /// </summary>
     /// <param name="linked">Linked version of instruction.</param>
     /// <param name="raw">Raw version of instruction.</param>
