@@ -1344,7 +1344,7 @@ public static class BytecodeLinker
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
                         var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                        data = new FieldPointer(b, c);
+                        data = new ClassBoundBridge(b, c);
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
@@ -1356,7 +1356,7 @@ public static class BytecodeLinker
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
                         var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                        data = new FieldPointer(b, c);
+                        data = new ClassBoundBridge(b, c);
                         SetNextStack();
                         break;
                     }
@@ -1367,7 +1367,7 @@ public static class BytecodeLinker
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
                         var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                        data = new FieldPointer(b, c);
+                        data = new ClassBoundBridge(b, c);
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
@@ -1380,7 +1380,7 @@ public static class BytecodeLinker
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
                         var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                        data = new FieldPointer(b, c);
+                        data = new ClassBoundBridge(b, c);
                         SetNextStack();
                         break;
                     }

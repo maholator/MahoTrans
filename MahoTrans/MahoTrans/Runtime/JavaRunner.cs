@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
-using MahoTrans.Utils;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -1259,7 +1258,7 @@ public class JavaRunner
             case JavaOpcode.getfield:
             case JavaOpcode.putfield:
             {
-                var p = (FieldPointer)instr.Data;
+                var p = (ClassBoundBridge)instr.Data;
                 if (p.Class.PendingInitializer)
                 {
                     p.Class.Initialize(thread);
@@ -1488,11 +1487,1091 @@ public class JavaRunner
                 break;
             case JavaOpcode._invokeany:
             {
-                CallAny(thread, state, frame);
+                CallVirtBySig(thread, state, frame);
                 break;
             }
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static void StepInternalV2(JavaThread thread, JvmState state)
+    {
+        var frame = thread.ActiveFrame!;
+        ref var pointer = ref frame.Pointer;
+        var code = frame.Method.LinkedCode;
+
+        Debug.Assert(pointer >= 0, $"Instruction pointer underflow in {frame.Method}");
+        Debug.Assert(pointer < code.Length, $"Instruction pointer overflow in {frame.Method}");
+
+        var instr = code[pointer];
+        var opcode = (MTOpcode)instr.Opcode; //TODO
+        switch (opcode)
+        {
+            case MTOpcode.nop:
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_m1:
+                frame.PushInt(-1);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_0:
+                frame.PushInt(0);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_1:
+                frame.PushInt(1);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_2:
+                frame.PushInt(2);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_3:
+                frame.PushInt(3);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_4:
+                frame.PushInt(4);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst_5:
+                frame.PushInt(5);
+                pointer++;
+                break;
+
+            case MTOpcode.lconst_0:
+                frame.PushLong(0);
+                pointer++;
+                break;
+
+            case MTOpcode.lconst_1:
+                frame.PushLong(1);
+                pointer++;
+                break;
+
+            case MTOpcode.lconst_2:
+                frame.PushLong(2);
+                pointer++;
+                break;
+
+            case MTOpcode.fconst_0:
+                frame.PushFloat(0);
+                pointer++;
+                break;
+
+            case MTOpcode.fconst_1:
+                frame.PushFloat(1);
+                pointer++;
+                break;
+
+            case MTOpcode.fconst_2:
+                frame.PushFloat(2);
+                pointer++;
+                break;
+
+            case MTOpcode.dconst_0:
+                frame.PushDouble(0);
+                pointer++;
+                break;
+
+            case MTOpcode.dconst_1:
+                frame.PushDouble(1);
+                pointer++;
+                break;
+
+            case MTOpcode.dconst_2:
+                frame.PushDouble(2);
+                pointer++;
+                break;
+
+            case MTOpcode.iconst:
+                frame.PushInt(instr.IntData);
+                pointer++;
+                break;
+
+            case MTOpcode.mconst:
+                state.PushClassConstant(frame, instr.Data);
+                pointer++;
+                break;
+
+            case MTOpcode.load:
+                frame.PushFromLocal(instr.IntData);
+                pointer++;
+                break;
+
+            case MTOpcode.load_0:
+                frame.PushFromLocal(0);
+                pointer++;
+                break;
+
+            case MTOpcode.load_1:
+                frame.PushFromLocal(1);
+                pointer++;
+                break;
+
+            case MTOpcode.load_2:
+                frame.PushFromLocal(2);
+                pointer++;
+                break;
+
+            case MTOpcode.load_3:
+                frame.PushFromLocal(3);
+                pointer++;
+                break;
+
+            case MTOpcode.store:
+                frame.PopToLocal(instr.IntData);
+                pointer++;
+                break;
+
+            case MTOpcode.store_0:
+                frame.PopToLocal(0);
+                pointer++;
+                break;
+
+            case MTOpcode.store_1:
+                frame.PopToLocal(1);
+                pointer++;
+                break;
+
+            case MTOpcode.store_2:
+                frame.PopToLocal(2);
+                pointer++;
+                break;
+
+            case MTOpcode.store_3:
+                frame.PopToLocal(3);
+                pointer++;
+                break;
+
+            case MTOpcode.iinc:
+                unsafe
+                {
+                    long val = frame.LocalVariables[instr.ShortData];
+                    var i = (int)val;
+                    i += (sbyte)instr.IntData;
+                    frame.LocalVariables[instr.ShortData] = i;
+                    pointer++;
+                    break;
+                }
+
+            case MTOpcode.iaload:
+                PushFromIntArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.laload:
+                PushFromLongArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.faload:
+                PushFromFloatArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.daload:
+                PushFromDoubleArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.aaload:
+                PushFromRefArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.baload:
+                PushFromByteArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.caload:
+                PushFromCharArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.saload:
+                PushFromShortArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.iastore:
+                PopToIntArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.lastore:
+                PopToLongArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.fastore:
+                PopToFloatArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.dastore:
+                PopToDoubleArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.aastore:
+                PopToRefArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.bastore:
+                PopToByteArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.castore:
+                PopToCharArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.sastore:
+                PopToShortArray(frame, state);
+                pointer++;
+                break;
+
+            case MTOpcode.array_length:
+            {
+                var arr = state.Resolve<java.lang.Array>(frame.PopReference());
+                frame.PushInt(arr.BaseValue.Length);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.pop:
+                frame.StackTop--;
+                pointer++;
+                break;
+
+            case MTOpcode.pop2:
+                frame.StackTop -= 2;
+                pointer++;
+                break;
+
+            case MTOpcode.swap:
+            {
+                var v1 = frame.Pop();
+                var v2 = frame.Pop();
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dup:
+                unsafe
+                {
+                    frame.Stack[frame.StackTop] = frame.Stack[frame.StackTop - 1];
+                    frame.StackTop++;
+                    pointer++;
+                    break;
+                }
+
+            case MTOpcode.dup2:
+            {
+                var v = frame.Pop();
+                var v2 = frame.Pop();
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dup_x1:
+            {
+                var v1 = frame.Pop();
+                var v2 = frame.Pop();
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v1);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dup_x2:
+            {
+                var v1 = frame.Pop();
+                var v2 = frame.Pop();
+                var v3 = frame.Pop();
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v3);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v1);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dup2_x1:
+            {
+                var v1 = frame.Pop();
+                var v2 = frame.Pop();
+                var v3 = frame.Pop();
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v3);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v1);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.iadd:
+                frame.PushInt(frame.PopInt() + frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.ladd:
+                frame.PushLong(frame.PopLong() + frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.fadd:
+                frame.PushFloat(frame.PopFloat() + frame.PopFloat());
+                pointer++;
+                break;
+
+            case MTOpcode.dadd:
+                frame.PushDouble(frame.PopDouble() + frame.PopDouble());
+                pointer++;
+                break;
+
+            case MTOpcode.isub:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                frame.PushInt(val1 - val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lsub:
+            {
+                var val2 = frame.PopLong();
+                var val1 = frame.PopLong();
+                frame.PushLong(val1 - val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.fsub:
+            {
+                var val2 = frame.PopFloat();
+                var val1 = frame.PopFloat();
+                frame.PushFloat(val1 - val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dsub:
+            {
+                var val2 = frame.PopDouble();
+                var val1 = frame.PopDouble();
+                frame.PushDouble(val1 - val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.imul:
+                frame.PushInt(frame.PopInt() * frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.lmul:
+                frame.PushLong(frame.PopLong() * frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.fmul:
+                frame.PushFloat(frame.PopFloat() * frame.PopFloat());
+                pointer++;
+                break;
+
+            case MTOpcode.dmul:
+                frame.PushDouble(frame.PopDouble() * frame.PopDouble());
+                pointer++;
+                break;
+
+            case MTOpcode.idiv:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                frame.PushInt(val1 / val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ldiv:
+            {
+                var val2 = frame.PopLong();
+                var val1 = frame.PopLong();
+                frame.PushLong(val1 / val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.fdiv:
+            {
+                var val2 = frame.PopFloat();
+                var val1 = frame.PopFloat();
+                frame.PushFloat(val1 / val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ddiv:
+            {
+                var val2 = frame.PopDouble();
+                var val1 = frame.PopDouble();
+                frame.PushDouble(val1 / val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.irem:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                frame.PushInt(val1 % val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lrem:
+            {
+                var val2 = frame.PopLong();
+                var val1 = frame.PopLong();
+                frame.PushLong(val1 % val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.frem:
+            {
+                var val2 = frame.PopFloat();
+                var val1 = frame.PopFloat();
+                frame.PushFloat(val1 % val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.drem:
+            {
+                var val2 = frame.PopDouble();
+                var val1 = frame.PopDouble();
+                frame.PushDouble(val1 % val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ineg:
+            {
+                var v = frame.PopInt();
+                frame.PushInt(-v);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lneg:
+            {
+                var v = frame.PopLong();
+                frame.PushLong(-v);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.fneg:
+            {
+                var v = frame.PopFloat();
+                frame.PushFloat(-v);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dneg:
+            {
+                var v = frame.PopDouble();
+                frame.PushDouble(-v);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ishl:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                frame.PushInt(val1 << val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lshl:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopLong();
+                frame.PushLong(val1 << val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ishr:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                frame.PushInt(val1 >> val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lshr:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopLong();
+                frame.PushLong(val1 >> val2);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.iushr:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                var r = (uint)val1 >> val2;
+                frame.PushInt((int)r);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lushr:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopLong();
+                var r = (ulong)val1 >> val2;
+                frame.PushLong((long)r);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.iand:
+                frame.PushInt(frame.PopInt() & frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.land:
+                frame.PushLong(frame.PopLong() & frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.ior:
+                frame.PushInt(frame.PopInt() | frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.lor:
+                frame.PushLong(frame.PopLong() | frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.ixor:
+                frame.PushInt(frame.PopInt() ^ frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.lxor:
+                frame.PushLong(frame.PopLong() ^ frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.i2l:
+                frame.PushLong(frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.i2f:
+                frame.PushFloat(frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.i2d:
+                frame.PushDouble(frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.l2i:
+            {
+                ulong ul = ((ulong)frame.PopLong()) & 0xFF_FF_FF_FF;
+                frame.PushInt((int)(uint)ul);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.l2f:
+                frame.PushFloat(frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.l2d:
+                frame.PushDouble(frame.PopLong());
+                pointer++;
+                break;
+
+            case MTOpcode.f2i:
+                FloatToInt(frame);
+                pointer++;
+                break;
+
+            case MTOpcode.f2l:
+                FloatToLong(frame);
+                pointer++;
+                break;
+
+            case MTOpcode.f2d:
+                frame.PushDouble(frame.PopFloat());
+                pointer++;
+                break;
+
+            case MTOpcode.d2i:
+                DoubleToInt(frame);
+                pointer++;
+                break;
+
+            case MTOpcode.d2l:
+                DoubleToLong(frame);
+                pointer++;
+                break;
+
+            case MTOpcode.d2f:
+                frame.PushFloat((float)frame.PopDouble());
+                pointer++;
+                break;
+
+            case MTOpcode.i2b:
+            {
+                var val = frame.PopInt() & 0xFF;
+                frame.PushInt((sbyte)(byte)val);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.i2c:
+                frame.PushInt((char)frame.PopInt());
+                pointer++;
+                break;
+
+            case MTOpcode.i2s:
+            {
+                var b = (int)(short)(ushort)(uint)frame.PopInt();
+                frame.PushInt(b);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.lcmp:
+            {
+                var val2 = frame.PopLong();
+                var val1 = frame.PopLong();
+                frame.PushInt(val1.CompareTo(val2));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.fcmpl:
+            {
+                var val2 = frame.PopFloat();
+                var val1 = frame.PopFloat();
+                if (float.IsNaN(val1) || float.IsNaN(val2))
+                    frame.PushInt(-1);
+                else
+                    frame.PushInt(val1.CompareTo(val2));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.fcmpg:
+            {
+                var val2 = frame.PopFloat();
+                var val1 = frame.PopFloat();
+                if (float.IsNaN(val1) || float.IsNaN(val2))
+                    frame.PushInt(1);
+                else
+                    frame.PushInt(val1.CompareTo(val2));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dcmpl:
+            {
+                var val2 = frame.PopDouble();
+                var val1 = frame.PopDouble();
+                if (double.IsNaN(val1) || double.IsNaN(val2))
+                    frame.PushInt(-1);
+                else
+                    frame.PushInt(val1.CompareTo(val2));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.dcmpg:
+            {
+                var val2 = frame.PopDouble();
+                var val1 = frame.PopDouble();
+                if (double.IsNaN(val1) || double.IsNaN(val2))
+                    frame.PushInt(1);
+                else
+                    frame.PushInt(val1.CompareTo(val2));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.ifeq:
+                pointer = frame.PopInt() == 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.ifne:
+                pointer = frame.PopInt() != 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.iflt:
+                pointer = frame.PopInt() < 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.ifge:
+                pointer = frame.PopInt() >= 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.ifgt:
+                pointer = frame.PopInt() > 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.ifle:
+                pointer = frame.PopInt() <= 0 ? instr.IntData : pointer + 1;
+                break;
+
+            case MTOpcode.if_cmpeq:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 == val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.if_cmpne:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 != val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.if_cmplt:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 < val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.if_cmpge:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 >= val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.if_cmpgt:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 > val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.if_cmple:
+            {
+                var val2 = frame.PopInt();
+                var val1 = frame.PopInt();
+                pointer = val1 <= val2 ? instr.IntData : pointer + 1;
+                break;
+            }
+
+            case MTOpcode.tableswitch:
+            {
+                var ia = (int[])instr.Data;
+                int low = ia[1];
+                int high = ia[2];
+
+                var value = frame.PopInt();
+                if (value < low || value > high)
+                {
+                    pointer = ia[0];
+                }
+                else
+                {
+                    int branchNum = value - low;
+                    int offset = ia[branchNum + 3];
+                    pointer = offset;
+                }
+
+                break;
+            }
+
+            case MTOpcode.lookupswitch:
+            {
+                var ia = (int[])instr.Data;
+                int count = ia[1];
+
+                var i = 2;
+                var value = frame.PopInt();
+                for (int j = 0; j < count; j++)
+                {
+                    if (ia[i] == value)
+                    {
+                        // this branch
+                        pointer = ia[i + 1];
+                        goto lookupExit;
+                    }
+
+                    // not this branch
+                    i += 2;
+                }
+
+                pointer = ia[0];
+
+                lookupExit: ;
+                break;
+            }
+
+            case MTOpcode.jump:
+                pointer = instr.IntData;
+                break;
+
+            case MTOpcode.return_value:
+            {
+                var returnValue = frame.Pop();
+                thread.Pop();
+                var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                    caller.PushUnchecked(returnValue);
+                }
+
+                break;
+            }
+
+            case MTOpcode.return_void:
+            {
+                thread.Pop();
+                var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
+                if (caller != null)
+                {
+                    caller.Pointer++;
+                }
+
+                break;
+            }
+
+            case MTOpcode.return_void_inplace:
+            {
+                thread.Pop();
+                var caller = thread.ActiveFrame;
+
+                if (frame.Method.Method.IsCritical)
+                    ExitSynchronizedMethod(frame, caller, thread, state);
+
+                break;
+            }
+
+            case MTOpcode.athrow:
+            {
+                var ex = frame.PopReference();
+                if (ex.IsNull)
+                    state.Throw<NullPointerException>();
+                else
+                {
+                    state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
+                    throw new JavaThrowable(ex);
+                }
+
+                break;
+            }
+
+            case MTOpcode.invoke_virt:
+                CallVirtual(instr.IntData, instr.ShortData, frame, thread, state);
+                break;
+
+            case MTOpcode.invoke_static:
+                CallMethod((Method)instr.Data, true, frame, thread);
+                break;
+
+            case MTOpcode.invoke_instance:
+                CallMethod((Method)instr.Data, false, frame, thread);
+                break;
+
+            case MTOpcode.invoke_instance_void_no_args_bysig:
+                CallVirtBySig(thread, state, frame);
+                break;
+
+            case MTOpcode.new_obj:
+            {
+                var type = (JavaClass)instr.Data;
+                frame.PushReference(state.AllocateObject(type));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.new_prim_arr:
+            {
+                int len = frame.PopInt();
+                frame.PushReference(state.AllocateArray((ArrayType)instr.IntData, len));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.new_arr:
+            {
+                int len = frame.PopInt();
+                var type = (JavaClass)instr.Data;
+                frame.PushReference(state.AllocateReferenceArray(len, type));
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.new_multi_arr:
+            {
+                var d = (MultiArrayInitializer)instr.Data;
+                var dims = d.dimensions;
+                int[] count = new int[dims];
+                for (int i = 0; i < count.Length; i++)
+                {
+                    count[i] = frame.PopInt();
+                }
+
+                var underlyingType = d.type.Name.Substring(dims);
+                ArrayType? arrayType = underlyingType switch
+                {
+                    "I" => ArrayType.T_INT,
+                    "J" => ArrayType.T_LONG,
+                    "C" => ArrayType.T_CHAR,
+                    "S" => ArrayType.T_SHORT,
+                    "Z" => ArrayType.T_BOOLEAN,
+                    "B" => ArrayType.T_BYTE,
+                    "F" => ArrayType.T_FLOAT,
+                    "D" => ArrayType.T_DOUBLE,
+                    _ => null
+                };
+
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
+
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.monitor_enter:
+                TryEnterMonitor(thread, state, frame);
+                break;
+
+            case MTOpcode.monitor_exit:
+            {
+                var r = frame.PopReference();
+                if (r.IsNull)
+                    state.Throw<NullPointerException>();
+
+                var obj = state.ResolveObject(r);
+                if (obj.MonitorOwner != thread.ThreadId)
+                {
+                    state.Throw<IllegalMonitorStateException>();
+                }
+                else
+                {
+                    obj.MonitorReEnterCount--;
+                    if (obj.MonitorReEnterCount == 0)
+                        obj.MonitorOwner = 0;
+                }
+
+                pointer++;
+
+                break;
+            }
+
+            case MTOpcode.checkcast:
+                unsafe
+                {
+                    var type = (JavaClass)instr.Data;
+                    var obj = (Reference)frame.Stack[frame.StackTop - 1];
+                    if (obj.IsNull)
+                    {
+                        // ok
+                    }
+                    else if (state.ResolveObject(obj).JavaClass.Is(type))
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        state.Throw<ClassCastException>();
+                    }
+
+                    pointer++;
+                    break;
+                }
+
+            case MTOpcode.instanceof:
+            {
+                var type = (JavaClass)instr.Data;
+
+                var obj = frame.PopReference();
+                if (obj.IsNull)
+                    frame.PushInt(0);
+                else
+                    frame.PushInt(state.ResolveObject(obj).JavaClass.Is(type) ? 1 : 0);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.bridge:
+            {
+                ((Action<Frame>)instr.Data)(frame);
+                pointer++;
+                break;
+            }
+            case MTOpcode.bridge_init_class:
+            {
+                var p = (ClassBoundBridge)instr.Data;
+                if (p.Class.PendingInitializer)
+                {
+                    p.Class.Initialize(thread);
+                    return;
+                }
+
+                p.Bridge(frame);
+                pointer++;
+                break;
+            }
         }
     }
 
@@ -1833,7 +2912,7 @@ public class JavaRunner
 
     #endregion
 
-    private static void CallAny(JavaThread thread, JvmState state, Frame frame)
+    private static void CallVirtBySig(JavaThread thread, JvmState state, Frame frame)
     {
         // taking name & descriptor
         frame.SetFrom(2);
@@ -1842,10 +2921,9 @@ public class JavaRunner
 
         // resolving pointer
         var virtPoint = state.GetVirtualPointer(new NameDescriptor(name, descr));
-        var argsCount = DescriptorUtils.ParseMethodArgsCount(descr);
 
-        // target (1), args (var), name (1), decr (1)
-        frame.SetFrom(2 + argsCount + 1);
+        // target (1), name (1), decr (1)
+        frame.SetFrom(3);
 
         // resolving object to check <clinit>
         var obj = state.ResolveObject(frame.PopReferenceFrom());
@@ -1861,7 +2939,7 @@ public class JavaRunner
         frame.Discard(2);
 
         // call
-        CallVirtual(virtPoint, (ushort)argsCount, frame, thread, state);
+        CallVirtual(virtPoint, 0, frame, thread, state);
     }
 
     private static unsafe void CallVirtual(int pointer, ushort argsCount, Frame frame, JavaThread thread,

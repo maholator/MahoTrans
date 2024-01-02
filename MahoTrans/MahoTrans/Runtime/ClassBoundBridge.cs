@@ -2,12 +2,12 @@ using MahoTrans.Runtime.Types;
 
 namespace MahoTrans.Runtime;
 
-public class FieldPointer
+public class ClassBoundBridge
 {
     public readonly Action<Frame> Bridge;
     public readonly JavaClass Class;
 
-    public FieldPointer(Action<Frame> bridge, JavaClass @class)
+    public ClassBoundBridge(Action<Frame> bridge, JavaClass @class)
     {
         Bridge = bridge;
         Class = @class;
