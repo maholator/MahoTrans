@@ -54,4 +54,8 @@ public class System : Object
         var arr2 = Jvm.Resolve<Array>(dst).BaseValue;
         global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
     }
+
+    public static void exit(int s)
+    {
+    }
 }

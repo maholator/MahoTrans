@@ -136,7 +136,6 @@ public class Object
     [JavaDescriptor("()V")]
     public JavaMethodBody wait___zero(JavaClass cls)
     {
-        /*
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
         b.Append(JavaOpcode.lconst_0);
@@ -144,21 +143,6 @@ public class Object
         b.AppendReturn();
 
         return b.Build(2, 1);
-        */
-        //TODO implementation below is broken (areturn in void method) but it somehow worked until now!
-        return new JavaMethodBody
-        {
-            LocalsCount = 1,
-            StackSize = 2,
-            RawCode = new Instruction[]
-            {
-                new Instruction(JavaOpcode.aload_0),
-                new Instruction(JavaOpcode.lconst_0),
-                new Instruction(JavaOpcode.invokespecial,
-                    cls.PushConstant(new NameDescriptorClass("wait", "(J)V", "java/lang/Object")).Split()),
-                new Instruction(JavaOpcode.areturn)
-            }
-        };
     }
 
     //TODO nanoseconds precision
