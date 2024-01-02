@@ -363,6 +363,9 @@ public static class DebuggerUtils
                 return $"{rawOpcode} ({linked.IntData})";
 
             case JavaOpcode.putfield:
+            case JavaOpcode.getfield:
+            case JavaOpcode.putstatic:
+            case JavaOpcode.getstatic:
                 var i = BytecodeLinker.Combine(raw.Args[0], raw.Args[1]);
                 var ndc = (NameDescriptorClass)method.Class.Constants[i];
                 return $"{rawOpcode} {ndc}";
