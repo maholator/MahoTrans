@@ -1,12 +1,18 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using Array = java.lang.Array;
+using String = java.lang.String;
 
 namespace MahoTrans.Utils;
 
-public static class OpcodeExtensions
+/// <summary>
+///     Various tools for debuggers.
+/// </summary>
+public static class DebuggerUtils
 {
     /// <summary>
     ///     Returns how many values are popped from stack by this instruction.
@@ -261,6 +267,132 @@ public static class OpcodeExtensions
 
             default:
                 return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Pretty-prints value of a reference to show it in debugger.
+    /// </summary>
+    /// <param name="value">Pointer to print.</param>
+    /// <param name="jvm">JVM.</param>
+    /// <returns>String in format "pointer (description of reference value)".</returns>
+    public static string PrettyPrintReference(Reference value, JvmState jvm)
+    {
+        if (value.IsNull)
+            return "null reference";
+        try
+        {
+            var obj = jvm.ResolveObject(value);
+            switch (obj)
+            {
+                case String s:
+                    return $"string \"{s.Value}\"";
+                case Array a:
+                {
+                    var nativeArrayElementType = a.BaseValue.GetType().GetElementType()!.Name;
+                    return $"{nativeArrayElementType}[{a.BaseValue.Length}] array, {obj.JavaClass}";
+                }
+                case Class cls:
+                    return $"class \"{cls.InternalClass.Name}\"";
+                default:
+                    return $"object of {obj.JavaClass.Name}";
+            }
+        }
+        catch
+        {
+            return "failed to evaluate";
+        }
+    }
+
+    /// <summary>
+    /// Pretty-prints instruction to show it in debugger.
+    /// </summary>
+    /// <param name="linked">Linked version of instruction.</param>
+    /// <param name="raw">Raw version of instruction.</param>
+    /// <param name="method">Method that contains the instruction.</param>
+    /// <param name="jvm">JVM.</param>
+    /// <returns>Opcode and additional info for it.</returns>
+    public static string PrettyPrintInstruction(LinkedInstruction linked, Instruction raw, Method method,
+        JvmState jvm)
+    {
+        var rawOpcode = raw.Opcode;
+
+        switch (rawOpcode)
+        {
+            case JavaOpcode.bipush:
+            case JavaOpcode.sipush:
+            case JavaOpcode.ldc:
+            case JavaOpcode.ldc_w:
+            case JavaOpcode.ldc2_w:
+                if (linked.Opcode == MTOpcode.iconst)
+                    return $"{rawOpcode} ({linked.IntData})";
+
+                return $"{rawOpcode} ({linked.Data}";
+
+            case JavaOpcode.iload:
+            case JavaOpcode.lload:
+            case JavaOpcode.fload:
+            case JavaOpcode.dload:
+            case JavaOpcode.aload:
+            case JavaOpcode.istore:
+            case JavaOpcode.lstore:
+            case JavaOpcode.fstore:
+            case JavaOpcode.dstore:
+            case JavaOpcode.astore:
+                return $"{rawOpcode} ({linked.IntData})";
+
+            case JavaOpcode.ifeq:
+            case JavaOpcode.ifne:
+            case JavaOpcode.iflt:
+            case JavaOpcode.ifge:
+            case JavaOpcode.ifgt:
+            case JavaOpcode.ifle:
+            case JavaOpcode.if_icmpeq:
+            case JavaOpcode.if_icmpne:
+            case JavaOpcode.if_icmplt:
+            case JavaOpcode.if_icmpge:
+            case JavaOpcode.if_icmpgt:
+            case JavaOpcode.if_icmple:
+            case JavaOpcode.if_acmpeq:
+            case JavaOpcode.if_acmpne:
+            case JavaOpcode.@goto:
+            case JavaOpcode.ifnull:
+            case JavaOpcode.ifnonnull:
+                return $"{rawOpcode} ({linked.IntData})";
+
+            case JavaOpcode.putfield:
+                var i = BytecodeLinker.Combine(raw.Args[0], raw.Args[1]);
+                var ndc = (NameDescriptorClass)method.Class.Constants[i];
+                return $"{rawOpcode} {ndc}";
+
+            case JavaOpcode.invokeinterface:
+            case JavaOpcode.invokevirtual:
+                var nd = jvm.DecodeVirtualPointer(linked.IntData);
+                return $"{rawOpcode} {nd.Name} {nd.Descriptor}";
+
+            case JavaOpcode.invokespecial:
+            case JavaOpcode.invokestatic:
+                return $"{rawOpcode} {linked.Data}";
+
+            case JavaOpcode.newobject:
+            case JavaOpcode.anewarray:
+                return $"{rawOpcode} {linked.Data}";
+
+            case JavaOpcode.newarray:
+                return $"{rawOpcode} {(ArrayType)linked.IntData}";
+
+            case JavaOpcode.checkcast:
+            case JavaOpcode.instanceof:
+                return $"{rawOpcode} {linked.Data}";
+
+            case JavaOpcode.wide:
+                return $"{rawOpcode} {(JavaOpcode)raw.Args[0]}";
+
+            case JavaOpcode.multianewarray:
+                return $"{rawOpcode} {linked.IntData} {linked.Data}";
+
+            default:
+                return $"{rawOpcode}";
         }
     }
 }
