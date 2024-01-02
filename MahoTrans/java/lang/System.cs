@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using Newtonsoft.Json;
@@ -56,5 +57,12 @@ public class System : Object
         var arr1 = Jvm.Resolve<Array>(src).BaseValue;
         var arr2 = Jvm.Resolve<Array>(dst).BaseValue;
         global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
+    }
+
+    public static void exit(int status)
+    {
+        // afaik, midlets can't call this method.
+        // If it's called, midlet doesn't want to work further anyway, so throw.
+        throw new JavaRuntimeError("Attempt to call System.exit()");
     }
 }
