@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -96,7 +99,7 @@ public class JavaMethodBuilder
     }
 
     /// <summary>
-    /// Calls a static method.
+    ///     Calls a static method.
     /// </summary>
     /// <param name="name">Method's name.</param>
     /// <param name="returns">Return type.</param>
@@ -109,7 +112,7 @@ public class JavaMethodBuilder
     }
 
     /// <summary>
-    /// Gets field from type, where the method is creating.
+    ///     Gets field from type, where the method is creating.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
@@ -120,14 +123,14 @@ public class JavaMethodBuilder
     }
 
     /// <summary>
-    /// Gets field from type, where the method is creating.
+    ///     Gets field from type, where the method is creating.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
     public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
 
     /// <summary>
-    /// Gets field from arbitrary type.
+    ///     Gets field from arbitrary type.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
@@ -139,7 +142,7 @@ public class JavaMethodBuilder
     }
 
     /// <summary>
-    /// Gets field from arbitrary type.
+    ///     Gets field from arbitrary type.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
@@ -148,7 +151,7 @@ public class JavaMethodBuilder
         AppendGetField(name, type.ToJavaDescriptorNative(), cls);
 
     /// <summary>
-    /// Puts field to arbitrary type.
+    ///     Puts field to arbitrary type.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
@@ -160,7 +163,7 @@ public class JavaMethodBuilder
     }
 
     /// <summary>
-    /// Puts field to arbitrary type.
+    ///     Puts field to arbitrary type.
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
@@ -197,13 +200,18 @@ public class JavaMethodBuilder
     #region Loops
 
     /// <summary>
-    /// Begins while(condition) { body } loop. Append your body first, then call <see cref="BeginLoopCondition"/> then append the condition.
+    ///     Begins while(condition) { body } loop. Append your body first, then call <see cref="BeginLoopCondition" /> then
+    ///     append the condition.
     /// </summary>
     /// <param name="condition">
-    /// Goto opcode to go to loop's beginning.
-    /// So, if your condition is i &lt; length, you should use <see cref="JavaOpcode.if_icmplt"/>. In condition section, push to stack i then length.
+    ///     Goto opcode to go to loop's beginning.
+    ///     So, if your condition is i &lt; length, you should use <see cref="JavaOpcode.if_icmplt" />. In condition section,
+    ///     push to stack i then length.
     /// </param>
-    /// <returns>Loop handle. Call <see cref="EndLoop"/> to end the loop. Call <see cref="BeginLoopCondition"/> to mark condition start.</returns>
+    /// <returns>
+    ///     Loop handle. Call <see cref="EndLoop" /> to end the loop. Call <see cref="BeginLoopCondition" /> to mark
+    ///     condition start.
+    /// </returns>
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
         var id = _loopStates.Push(1, 1);

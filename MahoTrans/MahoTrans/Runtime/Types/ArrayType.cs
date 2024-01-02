@@ -1,7 +1,11 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 // ReSharper disable InconsistentNaming
+
 namespace MahoTrans.Runtime.Types;
 
-public enum ArrayType : int
+public enum ArrayType
 {
     T_BOOLEAN = 4,
     T_CHAR = 5,

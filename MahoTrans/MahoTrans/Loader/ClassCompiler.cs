@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
@@ -9,9 +12,9 @@ using Newtonsoft.Json;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// This class exposes tools to build CLR types from JVM types.
+///     This class exposes tools to build CLR types from JVM types.
 /// </summary>
-/// <seealso cref="NativeLinker"/>
+/// <seealso cref="NativeLinker" />
 public static class ClassCompiler
 {
     public static void CompileTypes(Dictionary<string, JavaClass> loaded, JavaClass[] queued,

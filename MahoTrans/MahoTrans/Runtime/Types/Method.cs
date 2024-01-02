@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Reflection;
 using MahoTrans.Utils;
 
@@ -14,7 +17,7 @@ public class Method : IDisposable
     public readonly JavaClass Class;
 
     /// <summary>
-    /// Number of method's self args. If method is non-static, this does not include "this" arg.
+    ///     Number of method's self args. If method is non-static, this does not include "this" arg.
     /// </summary>
     public readonly int ArgsCount;
 

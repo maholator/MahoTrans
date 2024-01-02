@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace MahoTrans.Builder;
 
 public readonly struct JavaLoop : IDisposable
@@ -19,7 +22,7 @@ public readonly struct JavaLoop : IDisposable
     }
 
     /// <summary>
-    /// Calls <see cref="JavaMethodBuilder.BeginLoopCondition"/>. This looks better with using-styled usage.
+    ///     Calls <see cref="JavaMethodBuilder.BeginLoopCondition" />. This looks better with using-styled usage.
     /// </summary>
     public void ConditionSection() => _builder.BeginLoopCondition(this);
 

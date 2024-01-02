@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Text;
 using MahoTrans;
 using MahoTrans.Builder;
@@ -19,7 +22,7 @@ public class PrintStream : OutputStream
     [return: JavaType("[B")]
     public static Reference ToBytes(char c)
     {
-        char[] chars = new char[] { c };
+        char[] chars = { c };
         var bytes = Encoding.UTF8.GetBytes(chars).ConvertToSigned();
         return Jvm.AllocateArray(bytes, "[B");
     }

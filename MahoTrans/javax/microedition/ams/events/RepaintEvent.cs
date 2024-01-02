@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using javax.microedition.lcdui;
 using MahoTrans;
 using MahoTrans.Native;
@@ -17,7 +20,7 @@ public class RepaintEvent : Event
         var thisName = typeof(RepaintEvent).ToJavaName();
         return new JavaMethodBody(3, 1)
         {
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,
@@ -25,7 +28,8 @@ public class RepaintEvent : Event
                 new Instruction(JavaOpcode.dup),
                 new Instruction(JavaOpcode.dup),
                 new Instruction(JavaOpcode.invokevirtual,
-                    cls.PushConstant(new NameDescriptor("ObtainGraphics", "()Ljavax/microedition/lcdui/Graphics;")).Split()),
+                    cls.PushConstant(new NameDescriptor("ObtainGraphics", "()Ljavax/microedition/lcdui/Graphics;"))
+                        .Split()),
                 new Instruction(JavaOpcode.invokevirtual,
                     cls.PushConstant(new NameDescriptor("paint", "(Ljavax/microedition/lcdui/Graphics;)V")).Split()),
                 new Instruction(JavaOpcode.invokevirtual,

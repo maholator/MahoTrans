@@ -1,8 +1,11 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace MahoTrans.Builder;
 
 /// <summary>
-/// Handle object to manipulate labels in bulding method.
-/// Use <see cref="JavaMethodBuilder.BringLabel"/> to assing an instruction to this label.
+///     Handle object to manipulate labels in bulding method.
+///     Use <see cref="JavaMethodBuilder.BringLabel" /> to assing an instruction to this label.
 /// </summary>
 public readonly struct JavaLabel : IDisposable
 {

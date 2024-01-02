@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
@@ -29,22 +32,22 @@ public enum MTOpcode : byte
     dconst_2,
 
     /// <summary>
-    /// Pushes integer from <see cref="LinkedInstruction.IntData"/>.
+    ///     Pushes integer from <see cref="LinkedInstruction.IntData" />.
     /// </summary>
     iconst,
 
     /// <summary>
-    /// Pushes <see cref="LinkedInstruction.Data"/> as a string.
+    ///     Pushes <see cref="LinkedInstruction.Data" /> as a string.
     /// </summary>
     strconst,
 
     /// <summary>
-    /// Pushes <see cref="LinkedInstruction.Data"/> as a long.
+    ///     Pushes <see cref="LinkedInstruction.Data" /> as a long.
     /// </summary>
     lconst,
 
     /// <summary>
-    /// Pushes <see cref="LinkedInstruction.Data"/> as a double.
+    ///     Pushes <see cref="LinkedInstruction.Data" /> as a double.
     /// </summary>
     dconst,
 
@@ -238,16 +241,18 @@ public enum MTOpcode : byte
     #region Bridges
 
     /// <summary>
-    /// <see cref="LinkedInstruction.Data"/> is an <see cref="Action"/> that takes <see cref="Frame"/> and does something on it.
-    /// <see cref="LinkedInstruction.IntData"/> must contain count of taken values.
-    /// For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData"/> will be equal to 2.
+    ///     <see cref="LinkedInstruction.Data" /> is an <see cref="Action" /> that takes <see cref="Frame" /> and does
+    ///     something on it.
+    ///     <see cref="LinkedInstruction.IntData" /> must contain count of taken values.
+    ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.
     /// </summary>
     bridge,
 
     /// <summary>
-    /// <see cref="LinkedInstruction.Data"/> is an <see cref="ClassBoundBridge"/>. It contains class to init and a bridge to run.
-    /// <see cref="LinkedInstruction.IntData"/> must contain count of taken values.
-    /// For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData"/> will be equal to 2.
+    ///     <see cref="LinkedInstruction.Data" /> is an <see cref="ClassBoundBridge" />. It contains class to init and a bridge
+    ///     to run.
+    ///     <see cref="LinkedInstruction.IntData" /> must contain count of taken values.
+    ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.
     /// </summary>
     bridge_init_class,
 

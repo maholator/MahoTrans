@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.io;
 using MahoTrans;
 using MahoTrans.Native;
@@ -11,13 +14,14 @@ namespace java.lang;
 public class Class : Object
 {
     /// <summary>
-    /// JVM-side version of this object.
+    ///     JVM-side version of this object.
     /// </summary>
     [JavaIgnore] [JsonIgnore] public JavaClass InternalClass = null!;
 
     /// <summary>
-    /// Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass"/> to take object's class.
-    /// Deserialization MUST occur withing JVM context.
+    ///     Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass" /> to take object's
+    ///     class.
+    ///     Deserialization MUST occur withing JVM context.
     /// </summary>
     [JsonProperty]
     public string? InternalClassName

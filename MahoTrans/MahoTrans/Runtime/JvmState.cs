@@ -1,13 +1,17 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Text;
 using javax.microedition.ams;
 using JetBrains.Annotations;
 using MahoTrans.Toolkits;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
 /// <summary>
-/// Object which holds all information about JVM - threads, objects, classes, etc.
+///     Object which holds all information about JVM - threads, objects, classes, etc.
 /// </summary>
 public partial class JvmState
 {
@@ -50,12 +54,12 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Alias for <see cref="Object"/>.<see cref="Object.Jvm"/>.
+    ///     Alias for <see cref="java.lang.Object" />.<see cref="java.lang.Object.Jvm" />.
     /// </summary>
     public static JvmState Context => Object.Jvm;
 
     /// <summary>
-    /// Runs all registered threads in cycle.
+    ///     Runs all registered threads in cycle.
     /// </summary>
     public void Execute()
     {
@@ -83,7 +87,8 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Attempts to interrupt this jvm, if it was launched using <see cref="Execute"/>. Returns instantly. Jvm may stop its work after some time.
+    ///     Attempts to interrupt this jvm, if it was launched using <see cref="Execute" />. Returns instantly. Jvm may stop
+    ///     its work after some time.
     /// </summary>
     public void Stop()
     {

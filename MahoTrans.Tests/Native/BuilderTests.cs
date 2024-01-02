@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using java.util;
 using MahoTrans.Builder;
@@ -19,7 +22,7 @@ public class BuilderTests
 
     private readonly Instruction[] _vectorLoopEq;
 
-    private readonly Instruction[] _vectorLoopEqUncalced = new Instruction[]
+    private readonly Instruction[] _vectorLoopEqUncalced =
     {
         new(JavaOpcode.aload_0),
         new(JavaOpcode.invokevirtual, new byte[] { 0, 0 }),
@@ -64,13 +67,13 @@ public class BuilderTests
         b.AppendVirtcall("field", typeof(bool));
         var @if = b.AppendGoto(JavaOpcode.ifeq);
         b.Append(JavaOpcode.iconst_2);
-        var @else = b.AppendGoto(JavaOpcode.@goto);
+        var @else = b.AppendGoto();
         b.BringLabel(@if);
         b.Append(JavaOpcode.iconst_3);
         b.BringLabel(@else);
         b.Append(JavaOpcode.ireturn);
 
-        Instruction[] res = new[]
+        Instruction[] res =
         {
             new Instruction(0, JavaOpcode.aload_0),
             new Instruction(1, JavaOpcode.invokevirtual, new byte[] { 0, 0 }),

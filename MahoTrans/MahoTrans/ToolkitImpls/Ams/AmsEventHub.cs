@@ -1,10 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.ToolkitImpls.Ams;
 
 /// <summary>
-/// Ams implementation which redirects all events from midlet to event listeners in the object.
-/// Frontend must subscribe to events and do appropriate things.
+///     Ams implementation which redirects all events from midlet to event listeners in the object.
+///     Frontend must subscribe to events and do appropriate things.
 /// </summary>
 public class AmsEventHub : IAms
 {

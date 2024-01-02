@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Globalization;
 using MahoTrans.Native;
 using MahoTrans.Runtime;

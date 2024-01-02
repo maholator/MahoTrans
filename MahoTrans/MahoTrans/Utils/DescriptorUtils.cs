@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Text;
 using MahoTrans.Runtime;
 
@@ -233,24 +236,24 @@ public static class DescriptorUtils
     }
 
     /// <summary>
-    /// Gets full type name in java style.
+    ///     Gets full type name in java style.
     /// </summary>
     /// <param name="t">Type to get name from.</param>
     /// <returns>Name where dots are replaced with slashes.</returns>
     public static string ToJavaName(this Type t) => t.FullName!.Replace('.', '/');
 
     /// <summary>
-    /// Gets full type name as descriptor, i.e. Lpkg/obj;.
-    /// If you want to convert native primitives like bool->Z, use <see cref="ToJavaDescriptorNative"/> instead.
+    ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
+    ///     If you want to convert native primitives like bool->Z, use <see cref="ToJavaDescriptorNative" /> instead.
     /// </summary>
     /// <param name="t">Type to get name from.</param>
     /// <returns>Name with dots replaced by slashes int L; form.</returns>
     public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
 
     /// <summary>
-    /// Gets full type name as descriptor, i.e. Lpkg/obj;.
-    /// If the type if a native primitive, handles it correctly, i.e. bool->Z, void->V and so on.
-    /// If the type is guaranteed to be a java class, use <see cref="ToJavaDescriptor"/> directly.
+    ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
+    ///     If the type if a native primitive, handles it correctly, i.e. bool->Z, void->V and so on.
+    ///     If the type is guaranteed to be a java class, use <see cref="ToJavaDescriptor" /> directly.
     /// </summary>
     /// <param name="t">Type to get name from.</param>
     /// <returns>Type descriptor.</returns>

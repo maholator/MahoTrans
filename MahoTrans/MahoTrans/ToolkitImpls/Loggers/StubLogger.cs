@@ -1,10 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace MahoTrans.ToolkitImpls.Loggers;
 
 /// <summary>
-/// Logger that does nothing with incoming messages.
+///     Logger that does nothing with incoming messages.
 /// </summary>
 public class StubLogger : ILogger, ILoadTimeLogger, IHeapDebugger
 {

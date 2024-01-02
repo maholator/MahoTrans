@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -11,7 +14,8 @@ public unsafe class Frame
     public long* Stack = null;
 
     /// <summary>
-    /// Pointer to stack top. Stack contains topmost operand at this index-1 (if zero, stack is empty). Stack length is equal to this field.
+    ///     Pointer to stack top. Stack contains topmost operand at this index-1 (if zero, stack is empty). Stack length is
+    ///     equal to this field.
     /// </summary>
     public int StackTop;
 
@@ -88,7 +92,7 @@ public unsafe class Frame
     #region Basic stack operations
 
     /// <summary>
-    /// Pushes value into the stack.
+    ///     Pushes value into the stack.
     /// </summary>
     /// <param name="value">Value to push.</param>
     public void PushUnchecked(long value)
@@ -306,7 +310,7 @@ public unsafe class Frame
     #region Locals
 
     /// <summary>
-    /// Pops a value from stack and stores into local variable.
+    ///     Pops a value from stack and stores into local variable.
     /// </summary>
     /// <param name="index">Local index.</param>
     public void PopToLocal(int index)
@@ -316,7 +320,7 @@ public unsafe class Frame
     }
 
     /// <summary>
-    /// Pushes value from local variables. No checks are performed.
+    ///     Pushes value from local variables. No checks are performed.
     /// </summary>
     /// <param name="index">Index of local variable.</param>
     public void PushFromLocal(int index) => PushUnchecked(LocalVariables[index]);

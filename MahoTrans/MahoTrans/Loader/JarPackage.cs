@@ -1,9 +1,12 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Runtime.Types;
 
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// Created by <see cref="ClassLoader.ReadJarFile"/>.
+///     Created by <see cref="ClassLoader.ReadJarFile" />.
 /// </summary>
 public class JarPackage
 {
@@ -22,7 +25,7 @@ public class JarPackage
 
     public int GetMidletsCount()
     {
-        for (int i = 1; true; i++)
+        for (int i = 1;; i++)
         {
             var key = GetMidletKey(i);
 

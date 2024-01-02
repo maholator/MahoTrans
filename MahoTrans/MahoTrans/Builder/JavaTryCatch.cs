@@ -1,9 +1,12 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace MahoTrans.Builder;
 
 /// <summary>
-/// Stores try-catch construction.
-/// Intended usage:
-/// <code>
+///     Stores try-catch construction.
+///     Intended usage:
+///     <code>
 /// TryBegin:
 ///     try code
 ///     goto CatchEnd

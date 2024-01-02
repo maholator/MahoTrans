@@ -1,29 +1,36 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+using System.Reflection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace MahoTrans.Utils;
 
-public class CustomConvertorAssembly : Newtonsoft.Json.JsonConverter
+public class CustomConvertorAssembly : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {
         return
             objectType.FullName == "System.Reflection.Assembly"
             || objectType.FullName == "System.Reflection.Emit.InternalAssemblyBuilder"
-            || objectType.IsSubclassOf(typeof(System.Reflection.Assembly))
-            || objectType.IsAssignableFrom(typeof(System.Reflection.Assembly));
+            || objectType.IsSubclassOf(typeof(Assembly))
+            || objectType.IsAssignableFrom(typeof(Assembly));
     }
 
-    public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object? existingValue,
-        Newtonsoft.Json.JsonSerializer serializer)
+    public override object ReadJson(JsonReader reader, Type objectType, object? existingValue,
+        JsonSerializer serializer)
     {
         throw new NotImplementedException();
     }
 
-    public override void WriteJson(Newtonsoft.Json.JsonWriter writer, object? value,
-        Newtonsoft.Json.JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, object? value,
+        JsonSerializer serializer)
     {
-        if (value is System.Reflection.Assembly ass)
+        if (value is Assembly ass)
         {
             var safeAss = new SafeAssembly(ass);
-            var objectToken = Newtonsoft.Json.Linq.JObject.FromObject(safeAss);
+            var objectToken = JObject.FromObject(safeAss);
             objectToken.WriteTo(writer);
         }
     }

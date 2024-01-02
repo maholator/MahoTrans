@@ -1,7 +1,10 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace javax.microedition.lcdui;
 
 [Flags]
-public enum GraphicsAnchor : int
+public enum GraphicsAnchor
 {
     HCenter = 1,
     VCenter = 2,

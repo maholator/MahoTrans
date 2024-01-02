@@ -1,9 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
+using Array = java.lang.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
@@ -401,7 +405,7 @@ public class JavaRunner
 
             case MTOpcode.array_length:
             {
-                var arr = jvm.Resolve<java.lang.Array>(frame.PopReference());
+                var arr = jvm.Resolve<Array>(frame.PopReference());
                 frame.PushInt(arr.BaseValue.Length);
                 pointer++;
                 break;
@@ -1231,7 +1235,7 @@ public class JavaRunner
     }
 
     /// <summary>
-    /// Exits monitor that was entered using <see cref="TryEnterInstanceMonitor"/>.
+    ///     Exits monitor that was entered using <see cref="TryEnterInstanceMonitor" />.
     /// </summary>
     /// <param name="frame">Frame that was popped. This method will perform exit on this thread.</param>
     /// <param name="caller">Frame that called the method.</param>
@@ -1285,12 +1289,13 @@ public class JavaRunner
     }
 
     /// <summary>
-    /// Attempts to enter object's monitor. Enters if possible. If not, this is no-op. Frame won't go to next instruction if entrance failed.
+    ///     Attempts to enter object's monitor. Enters if possible. If not, this is no-op. Frame won't go to next instruction
+    ///     if entrance failed.
     /// </summary>
     /// <param name="thread">Thread to enter.</param>
     /// <param name="state">JVM.</param>
     /// <param name="frame">Current frame.</param>
-    /// <remarks>This api is for <see cref="JavaOpcode.monitorenter"/> opcode.</remarks>
+    /// <remarks>This api is for <see cref="JavaOpcode.monitorenter" /> opcode.</remarks>
     private static void TryEnterMonitor(JavaThread thread, JvmState state, Frame frame)
     {
         var r = frame.PopReference();
@@ -1318,13 +1323,16 @@ public class JavaRunner
     }
 
     /// <summary>
-    /// Attempts to enter object's monitor.
+    ///     Attempts to enter object's monitor.
     /// </summary>
     /// <param name="r">Object to enter.</param>
     /// <param name="thread">Current thread.</param>
     /// <param name="state">JVM.</param>
     /// <returns>Returns true on success. Monitor must be exited then.</returns>
-    /// <remarks>This is for synchronized methods. When false returned, nothing must be done. One more attempt must be attempted.</remarks>
+    /// <remarks>
+    ///     This is for synchronized methods. When false returned, nothing must be done. One more attempt must be
+    ///     attempted.
+    /// </remarks>
     private static bool TryEnterInstanceMonitor(Reference r, JavaThread thread, JvmState state)
     {
         var obj = state.ResolveObject(r);
@@ -1471,7 +1479,7 @@ public class JavaRunner
         var value = frame.PopByte();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<java.lang.Array>(reference);
+        var array = state.Resolve<Array>(reference);
         if (array is Array<bool> b)
             b.Value[index] = value != 0;
         else if (array is Array<sbyte> s)
@@ -1554,7 +1562,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<java.lang.Array>(reference);
+        var array = state.Resolve<Array>(reference);
         if (index < 0 || index >= array.BaseValue.Length)
             state.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)

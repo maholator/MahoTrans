@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using MahoTrans.Utils;
@@ -51,7 +54,7 @@ public static class BytecodeLinker
     }
 
     /// <summary>
-    /// Checks that there is no broken references.
+    ///     Checks that there is no broken references.
     /// </summary>
     private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadTimeLogger logger)
     {

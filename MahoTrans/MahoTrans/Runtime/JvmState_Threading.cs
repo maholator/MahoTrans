@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Toolkits;
 using Thread = java.lang.Thread;
@@ -7,36 +10,37 @@ namespace MahoTrans.Runtime;
 public partial class JvmState
 {
     /// <summary>
-    /// List of all threads, attached to scheduler.
-    /// This list must NOT be modified outside of <see cref="Detach"/>, <see cref="Kill"/> and <see cref="CheckWakeups"/> methods.
-    /// First two must be called ONLY from jvm itself. The last must be called ONLY when interpereter is suspended.
+    ///     List of all threads, attached to scheduler.
+    ///     This list must NOT be modified outside of <see cref="Detach" />, <see cref="Kill" /> and
+    ///     <see cref="CheckWakeups" /> methods.
+    ///     First two must be called ONLY from jvm itself. The last must be called ONLY when interpereter is suspended.
     /// </summary>
     public readonly List<JavaThread> AliveThreads = new(256);
 
     /// <summary>
-    /// Threads which are detached from scheduler. For example, waiting for object notify or timeout.
+    ///     Threads which are detached from scheduler. For example, waiting for object notify or timeout.
     /// </summary>
     public readonly Dictionary<int, JavaThread> WaitingThreads = new();
 
     /// <summary>
-    /// Additional storage for threads from <see cref="WaitingThreads"/> who want to wakeup after some time.
+    ///     Additional storage for threads from <see cref="WaitingThreads" /> who want to wakeup after some time.
     /// </summary>
     private List<ThreadWakeupHook> _wakeupHooks = new();
 
     /// <summary>
-    /// This is used to synchronize thread modifications.
+    ///     This is used to synchronize thread modifications.
     /// </summary>
     private readonly object _threadPoolLock = new();
 
     /// <summary>
-    /// Threads which were created/attached and waiting to actually do so.
+    ///     Threads which were created/attached and waiting to actually do so.
     /// </summary>
     private Queue<JavaThread> _wakeingUpQueue = new();
 
     #region Threads management
 
     /// <summary>
-    /// Registers a thread in this JVM.
+    ///     Registers a thread in this JVM.
     /// </summary>
     /// <param name="thread">Thread, ready to run.</param>
     public void RegisterThread(JavaThread? thread)
@@ -53,7 +57,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Moves a thread from active pool to waiting pool.
+    ///     Moves a thread from active pool to waiting pool.
     /// </summary>
     /// <param name="thread">Thread to move.</param>
     /// <param name="returnAfter">If positive sets up a timeout. If negative or zero, no timeout is set.</param>
@@ -75,7 +79,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Moves thread from waiting pool to wakeup queue.
+    ///     Moves thread from waiting pool to wakeup queue.
     /// </summary>
     /// <param name="id">Thread id to operate on.</param>
     /// <returns>False, if thread was not in waiting pool. Thread state is undefined in such state.</returns>
@@ -102,7 +106,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Removes passed thread from JVM completely. Use this if thread finished its work.
+    ///     Removes passed thread from JVM completely. Use this if thread finished its work.
     /// </summary>
     /// <param name="thread">Thread to remove.</param>
     /// <returns>False, if this thread was not in jvm.</returns>
@@ -125,14 +129,14 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Throws an async java exception into arbitrary thread.
+    ///     Throws an async java exception into arbitrary thread.
     /// </summary>
     /// <param name="thread">Thread to throw into.</param>
     /// <typeparam name="T">Java exception type.</typeparam>
     /// <remarks>
-    /// This throws an exception and immediately processes it via <see cref="JavaRunner.ProcessThrow"/>.
-    /// No exceptions are thrown outside, this just changes thread's state.
-    /// To throw synchronized exception from a thread during its execution use <see cref="Throw{T}"/>.
+    ///     This throws an exception and immediately processes it via <see cref="JavaRunner.ProcessThrow" />.
+    ///     No exceptions are thrown outside, this just changes thread's state.
+    ///     To throw synchronized exception from a thread during its execution use <see cref="Throw{T}" />.
     /// </remarks>
     [Obsolete("According to JVM docs, this is used only for stop() which does not exist in CLDC.")]
     public void ThrowAsync<T>(JavaThread thread) where T : Throwable

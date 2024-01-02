@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.IO.Compression;
 using System.Text;
 using javax.microedition.ams;
@@ -34,7 +37,7 @@ public partial class JvmState
     private const string heap_statics_json = "heap/statics.json";
 
     /// <summary>
-    /// Gets snapshot of this JVM.
+    ///     Gets snapshot of this JVM.
     /// </summary>
     /// <returns>Stream with written snapshot. Position will be zero. Make sure do dispose it.</returns>
     public MemoryStream Snapshot()
@@ -218,7 +221,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Called from <see cref="RestoreFromSnapshot"/>. Links things to each other.
+    ///     Called from <see cref="RestoreFromSnapshot" />. Links things to each other.
     /// </summary>
     private void SyncHeapAfterRestore()
     {

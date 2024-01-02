@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using javax.microedition.rms;
 
 namespace MahoTrans.Toolkits;
@@ -7,17 +10,20 @@ public interface IRecordStore : IToolkit
     string[] ListStores();
 
     /// <summary>
-    /// Checks can the store be opened.
+    ///     Checks can the store be opened.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="createIfNotExists"></param>
-    /// <returns>False if createIfNotExist=false and there is no such store. Throw <see cref="RecordStoreNotFoundException"/> in such case.</returns>
+    /// <returns>
+    ///     False if createIfNotExist=false and there is no such store. Throw <see cref="RecordStoreNotFoundException" />
+    ///     in such case.
+    /// </returns>
     bool OpenStore(string name, bool createIfNotExists);
 
     void CloseStore(string name);
 
     /// <summary>
-    /// Deletes record store. MIDP-side code must validate the operation before calling this method.
+    ///     Deletes record store. MIDP-side code must validate the operation before calling this method.
     /// </summary>
     /// <param name="name">Name of store.</param>
     /// <returns>False, if there is no such store.</returns>

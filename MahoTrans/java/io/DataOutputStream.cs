@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -24,7 +27,7 @@ public class DataOutputStream : OutputStream
     }
 
     /// <summary>
-    /// Writes one byte into <see cref="@out"/>. Do all operations via this method.
+    ///     Writes one byte into <see cref="@out" />. Do all operations via this method.
     /// </summary>
     /// <param name="class"></param>
     /// <returns></returns>
@@ -228,7 +231,8 @@ public class DataOutputStream : OutputStream
             .PushConstant(
                 new NameDescriptorClass(nameof(encodeUTF), "(Ljava/lang/String;)[B", typeof(DataOutputStream))).Split();
         byte[] writeShort =
-            cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(DataOutputStream))).Split();
+            cls.PushConstant(new NameDescriptorClass(nameof(this.writeShort), "(I)V", typeof(DataOutputStream)))
+                .Split();
         byte[] writeBuf = cls.PushConstant(new NameDescriptorClass("write", "([B)V", typeof(DataOutputStream))).Split();
         return new JavaMethodBody(4, 2)
         {

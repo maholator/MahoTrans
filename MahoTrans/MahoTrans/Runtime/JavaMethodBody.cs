@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Runtime.Types;
 using MahoTrans.Toolkits;
 using Object = java.lang.Object;
@@ -11,7 +14,7 @@ public class JavaMethodBody
     public ushort LocalsCount;
 
     /// <summary>
-    /// Bytecode of this method. If your bytecode has no calculated offsets, use <see cref="RawCode"/> instead.
+    ///     Bytecode of this method. If your bytecode has no calculated offsets, use <see cref="RawCode" /> instead.
     /// </summary>
     public Instruction[] Code = Array.Empty<Instruction>();
 
@@ -22,17 +25,18 @@ public class JavaMethodBody
     #region Caches
 
     /// <summary>
-    /// Linked bytecode of this method. Do not forget to call <see cref="EnsureBytecodeLinked"/> before usage!
+    ///     Linked bytecode of this method. Do not forget to call <see cref="EnsureBytecodeLinked" /> before usage!
     /// </summary>
     public LinkedInstruction[] LinkedCode = null!;
 
     /// <summary>
-    /// Types of local variables. This method must be verified.
+    ///     Types of local variables. This method must be verified.
     /// </summary>
     public PrimitiveType[] LocalTypes = null!;
 
     /// <summary>
-    /// Types of values on stack. Do not forget to call <see cref="EnsureBytecodeLinked"/> before usage! This reflects stack state BEFORE opcode execution.
+    ///     Types of values on stack. Do not forget to call <see cref="EnsureBytecodeLinked" /> before usage! This reflects
+    ///     stack state BEFORE opcode execution.
     /// </summary>
     public PrimitiveType[][] StackTypes = null!;
 
@@ -49,7 +53,7 @@ public class JavaMethodBody
     }
 
     /// <summary>
-    /// Assign bytecode using this property to automatically calculate offsets.
+    ///     Assign bytecode using this property to automatically calculate offsets.
     /// </summary>
     public Instruction[] RawCode
     {
@@ -71,7 +75,7 @@ public class JavaMethodBody
     }
 
     /// <summary>
-    /// Ensures that method's bytecode is linked. Links if not. This must be called inside JVM context.
+    ///     Ensures that method's bytecode is linked. Links if not. This must be called inside JVM context.
     /// </summary>
     public void EnsureBytecodeLinked()
     {
@@ -111,7 +115,7 @@ public class JavaMethodBody
 
         public override int GetHashCode()
         {
-            int trys = (TryStart << 16) | (ushort)TryEnd;
+            int trys = (TryStart << 16) | TryEnd;
             return trys ^ CatchStart;
         }
     }

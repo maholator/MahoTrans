@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -14,6 +17,7 @@ public class OutputStream : Object
     {
         base.Init();
     }
+
     public void close()
     {
     }

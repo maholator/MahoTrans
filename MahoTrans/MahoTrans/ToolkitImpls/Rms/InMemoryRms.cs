@@ -1,9 +1,12 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.ToolkitImpls.Rms;
 
 /// <summary>
-/// Record store implementation which holds all the data in a dictionary. There is no way to import/export the data.
+///     Record store implementation which holds all the data in a dictionary. There is no way to import/export the data.
 /// </summary>
 public class InMemoryRms : IRecordStore
 {

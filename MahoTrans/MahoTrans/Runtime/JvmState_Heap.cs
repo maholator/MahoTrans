@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
@@ -7,6 +10,7 @@ using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
+using String = java.lang.String;
 
 namespace MahoTrans.Runtime;
 
@@ -49,7 +53,7 @@ public partial class JvmState
 
     public Reference AllocateString(string str)
     {
-        return PutToHeap(new java.lang.String
+        return PutToHeap(new String
         {
             Value = str,
             JavaClass = Classes["java/lang/String"]
@@ -70,7 +74,7 @@ public partial class JvmState
     #region Array allocation (for native)
 
     /// <summary>
-    /// Creates an array. This is for native code.
+    ///     Creates an array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
     /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
@@ -79,7 +83,7 @@ public partial class JvmState
         AllocateArray(data, GetClass(cls));
 
     /// <summary>
-    /// Creates an array. This is for native code.
+    ///     Creates an array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
     /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
@@ -100,7 +104,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Creates an array of primitives (ints, chars, etc.). This is for native code.
+    ///     Creates an array of primitives (ints, chars, etc.). This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
     /// <returns>Reference to newly created array.</returns>
@@ -124,7 +128,7 @@ public partial class JvmState
     #region Array allocation (for interpreter)
 
     /// <summary>
-    /// Creates an array. This is used by interpreter.
+    ///     Creates an array. This is used by interpreter.
     /// </summary>
     /// <param name="arrayType">Array type.</param>
     /// <param name="length">Length of the array. Will be validated.</param>
@@ -148,7 +152,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Creates an array. This is used by interpreter.
+    ///     Creates an array. This is used by interpreter.
     /// </summary>
     /// <param name="length">Length of the array. Will be validated.</param>
     /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
@@ -222,7 +226,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Resolves a string and gets its value as <see cref="string"/>. Will throw on invalid reference.
+    ///     Resolves a string and gets its value as <see cref="string" />. Will throw on invalid reference.
     /// </summary>
     /// <param name="r">Reference to resolve.</param>
     /// <returns>String value.</returns>
@@ -230,12 +234,13 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (java.lang.String)_heap[r.Index]!;
+        var obj = (String)_heap[r.Index]!;
         return obj.Value;
     }
 
     /// <summary>
-    /// Resolves a string and gets its value as <see cref="string"/>. If reference is null, broken, or object is not a string, this silently returns null.
+    ///     Resolves a string and gets its value as <see cref="string" />. If reference is null, broken, or object is not a
+    ///     string, this silently returns null.
     /// </summary>
     /// <param name="r">Reference to resolve.</param>
     /// <returns>String value.</returns>
@@ -243,7 +248,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             return null;
-        var obj = _heap[r.Index] as java.lang.String;
+        var obj = _heap[r.Index] as String;
         return obj?.Value;
     }
 
@@ -260,7 +265,7 @@ public partial class JvmState
     #region Exceptions
 
     /// <summary>
-    /// Throws a java exception. It's expected that <see cref="JavaRunner.ProcessThrow"/> will catch and process it.
+    ///     Throws a java exception. It's expected that <see cref="JavaRunner.ProcessThrow" /> will catch and process it.
     /// </summary>
     /// <typeparam name="T">Type of exception.</typeparam>
     /// <exception cref="JavaThrowable">Always thrown CLR exception. Contains java exception to be processed by handler.</exception>
@@ -302,11 +307,11 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Takes place in the heap. Assigns taken address to passed object. Adds passed object to heap.
+    ///     Takes place in the heap. Assigns taken address to passed object. Adds passed object to heap.
     /// </summary>
     /// <param name="obj">Object to add into heap.</param>
     /// <returns>Reference to the object.</returns>
-    /// <remarks>This api should not be used. Allocate objects using <see cref="AllocateObject"/>.</remarks>
+    /// <remarks>This api should not be used. Allocate objects using <see cref="AllocateObject" />.</remarks>
     public Reference PutToHeap(Object obj)
     {
         lock (this)
@@ -365,7 +370,7 @@ public partial class JvmState
     #region GC
 
     /// <summary>
-    /// Performs collection in this heap. This must be called only when jvm is stopped!
+    ///     Performs collection in this heap. This must be called only when jvm is stopped!
     /// </summary>
     public void RunGarbageCollector()
     {
@@ -458,7 +463,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Helper for GC. Collects all references to objects which must stay alive.
+    ///     Helper for GC. Collects all references to objects which must stay alive.
     /// </summary>
     /// <returns>List of references. This may contain null and invalid references (i.e. random numbers which point to nowhere).</returns>
     public unsafe List<Reference> CollectObjectGraphRoots()

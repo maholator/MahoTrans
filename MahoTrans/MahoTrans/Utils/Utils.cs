@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Security.Cryptography;
 using System.Text;
 using MahoTrans.Toolkits;
@@ -7,7 +10,7 @@ namespace MahoTrans.Utils;
 public static class Utils
 {
     /// <summary>
-    /// Returns byte[2] with 2 low bytes of passed number. I.e. for 258 returns [0x01,0x02].
+    ///     Returns byte[2] with 2 low bytes of passed number. I.e. for 258 returns [0x01,0x02].
     /// </summary>
     /// <param name="i">Number to split.</param>
     /// <returns>Splitted bytes.</returns>
@@ -17,7 +20,7 @@ public static class Utils
     }
 
     /// <summary>
-    /// Returns byte[2] with bytes of passed number. I.e. for 258 returns [0x01,0x02].
+    ///     Returns byte[2] with bytes of passed number. I.e. for 258 returns [0x01,0x02].
     /// </summary>
     /// <param name="s">Number to split.</param>
     /// <returns>Splitted bytes.</returns>

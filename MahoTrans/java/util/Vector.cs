@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans;
 using MahoTrans.Native;
@@ -114,7 +117,7 @@ public class Vector : Object
         return new JavaMethodBody(2, 4)
         {
             // locals: this > target > enum > index
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new(JavaOpcode.aload_0),
                 new(JavaOpcode.invokevirtual, els),

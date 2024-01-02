@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using Array = System.Array;
 using Object = java.lang.Object;
@@ -6,27 +9,29 @@ using Thread = java.lang.Thread;
 namespace MahoTrans.Runtime;
 
 /// <summary>
-/// JVM thread. Create it via static methods.
-/// Then run it using <see cref="Execute"/> or add to jvm pool using <see cref="JvmState.RegisterThread"/>.
+///     JVM thread. Create it via static methods.
+///     Then run it using <see cref="Execute" /> or add to jvm pool using <see cref="JvmState.RegisterThread" />.
 /// </summary>
 public class JavaThread
 {
     private static int _roller = 1;
 
     /// <summary>
-    /// Frames stack on this thread. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead.
+    ///     Frames stack on this thread. Do not touch it, use <see cref="Push" /> and <see cref="Pop" /> instead.
     /// </summary>
     public Frame?[] CallStack = new Frame?[16];
 
     /// <summary>
-    /// Index at which <see cref="ActiveFrame"/> is in <see cref="CallStack"/>. To push a frame, increase this and write new frame at the index.
+    ///     Index at which <see cref="ActiveFrame" /> is in <see cref="CallStack" />. To push a frame, increase this and write
+    ///     new frame at the index.
     /// </summary>
     public int ActiveFrameIndex = -1;
 
     /// <summary>
-    /// This field stores running frame. Do not touch it, use <see cref="Push"/> and <see cref="Pop"/> instead.
-    /// This may be null if thread is dead.
-    /// There must not be a situation when this is null and thread is running, use <see cref="JvmState.Kill"/> before clearing.
+    ///     This field stores running frame. Do not touch it, use <see cref="Push" /> and <see cref="Pop" /> instead.
+    ///     This may be null if thread is dead.
+    ///     There must not be a situation when this is null and thread is running, use <see cref="JvmState.Kill" /> before
+    ///     clearing.
     /// </summary>
     public Frame? ActiveFrame;
 
@@ -35,7 +40,7 @@ public class JavaThread
     public readonly Reference Model;
 
     /// <summary>
-    /// List of thread's IDs, waiting at <see cref="Thread.join"/>.
+    ///     List of thread's IDs, waiting at <see cref="java.lang.Thread.join" />.
     /// </summary>
     public List<int> WaitingForKill = new();
 
@@ -88,7 +93,7 @@ public class JavaThread
     }
 
     /// <summary>
-    /// Pops thread's frame. If thread is finishing its work, this must be called from JVM context.
+    ///     Pops thread's frame. If thread is finishing its work, this must be called from JVM context.
     /// </summary>
     public void Pop()
     {
@@ -103,7 +108,8 @@ public class JavaThread
     }
 
     /// <summary>
-    /// Spins thread until it ends. It is not guaranteed that this method will ever return. This must be called inside jvm context.
+    ///     Spins thread until it ends. It is not guaranteed that this method will ever return. This must be called inside jvm
+    ///     context.
     /// </summary>
     public void Execute()
     {
@@ -116,8 +122,8 @@ public class JavaThread
     }
 
     /// <summary>
-    /// Creates synthetic thread, i.e. thread that executes specified method. Uses <see cref="AnyCallBridge"/>.
-    /// Only creates java-side model object and sets it up. Call <see cref="Thread.start"/> on it to continue.
+    ///     Creates synthetic thread, i.e. thread that executes specified method. Uses <see cref="AnyCallBridge" />.
+    ///     Only creates java-side model object and sets it up. Call <see cref="Thread.start" /> on it to continue.
     /// </summary>
     /// <param name="nd">Method's descriptor.</param>
     /// <param name="target">Object to call the method on.</param>
@@ -135,7 +141,7 @@ public class JavaThread
     }
 
     /// <summary>
-    /// Creates thread for passed java model. Does nothing with the created thread.
+    ///     Creates thread for passed java model. Does nothing with the created thread.
     /// </summary>
     /// <param name="thread"></param>
     /// <param name="state"></param>

@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
@@ -210,14 +213,15 @@ public enum JavaOpcode : byte
     breakpoint = 202,
 
     /// <summary>
-    /// Special internal opcode. Performs method return but does not touch caller's frame. Used for clinit methods.
+    ///     Special internal opcode. Performs method return but does not touch caller's frame. Used for clinit methods.
     /// </summary>
     _inplacereturn = 240,
 
     /// <summary>
-    /// Special internal opcode. Works like <see cref="invokevirtual"/>, but method name and descriptor are popped from stack.
-    /// They should be placed after object and argument. Name comes first.
-    /// For example, to call method abc(I)V on object OBJ with 292 as arg, push to the stack [OBJ, 292, "abc", "(I)V"].
+    ///     Special internal opcode. Works like <see cref="invokevirtual" />, but method name and descriptor are popped from
+    ///     stack.
+    ///     They should be placed after object and argument. Name comes first.
+    ///     For example, to call method abc(I)V on object OBJ with 292 as arg, push to the stack [OBJ, 292, "abc", "(I)V"].
     /// </summary>
     _invokeany = 241,
 }

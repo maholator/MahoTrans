@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -18,18 +21,18 @@ class GregorianCalendar : Calendar
 
     private int dst_offset;
 
-    [JavaIgnore] public static sbyte[] DaysInMonth = new sbyte[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    [JavaIgnore] private static int[] DaysInYear = new int[] { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+    [JavaIgnore] public static sbyte[] DaysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    [JavaIgnore] private static int[] DaysInYear = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     private static readonly int CACHED_YEAR = 0;
     private static readonly int CACHED_MONTH = 1;
     private static readonly int CACHED_DATE = 2;
     private static readonly int CACHED_DAY_OF_WEEK = 3;
     private static readonly int CACHED_ZONE_OFFSET = 4;
-    private bool isCached = false;
+    private bool isCached;
     [JavaIgnore] private int[]? cachedFields;
-    private long nextMidnightMillis = 0L;
-    private long lastMidnightMillis = 0L;
+    private long nextMidnightMillis;
+    private long lastMidnightMillis;
 
 
     [InitMethod]
@@ -50,7 +53,7 @@ class GregorianCalendar : Calendar
     {
         base.Init();
         setTimeZone(timezone);
-        setTimeInMillis(java.lang.System.currentTimeMillis());
+        setTimeInMillis(lang.System.currentTimeMillis());
     }
 
     private void fullFieldsCalc(long time, int orgMillis, int zoneOffset)
@@ -120,13 +123,13 @@ class GregorianCalendar : Calendar
             }
         }
 
-        fields[MILLISECOND] = (int)(millis % 1000);
+        fields[MILLISECOND] = millis % 1000;
         millis /= 1000;
-        fields[SECOND] = (int)(millis % 60);
+        fields[SECOND] = millis % 60;
         millis /= 60;
-        fields[MINUTE] = (int)(millis % 60);
+        fields[MINUTE] = millis % 60;
         millis /= 60;
-        fields[HOUR_OF_DAY] = (int)(millis % 24);
+        fields[HOUR_OF_DAY] = millis % 24;
         millis /= 24;
         fields[AM_PM] = fields[HOUR_OF_DAY] > 11 ? 1 : 0;
         fields[HOUR] = fields[HOUR_OF_DAY] % 12;
@@ -156,14 +159,14 @@ class GregorianCalendar : Calendar
     private void actualComputeFields()
     {
         var zone = Jvm.Resolve<TimeZone>(Zone);
-        cachedFields ??= new int[] { 0, 0, 0, 0, 0, 0 };
+        cachedFields ??= new[] { 0, 0, 0, 0, 0, 0 };
         int zoneOffset = zone.getRawOffset();
 
         int millis = (int)(time % 86400000);
         int savedMillis = millis;
         int dstOffset = dst_offset;
         int offset = zoneOffset + dstOffset; // compute without a change in daylight saving time
-        long newTime = time + (long)offset;
+        long newTime = time + offset;
 
         if (time > 0L && newTime < 0L && offset > 0)
             newTime = 0x7fffffffffffffffL;
@@ -218,13 +221,13 @@ class GregorianCalendar : Calendar
             {
                 updateCachedFields();
                 millis += dstOffset;
-                fields[MILLISECOND] = (int)(millis % 1000);
+                fields[MILLISECOND] = millis % 1000;
                 millis /= 1000;
-                fields[SECOND] = (int)(millis % 60);
+                fields[SECOND] = millis % 60;
                 millis /= 60;
-                fields[MINUTE] = (int)(millis % 60);
+                fields[MINUTE] = millis % 60;
                 millis /= 60;
-                fields[HOUR_OF_DAY] = (int)(millis % 24);
+                fields[HOUR_OF_DAY] = millis % 24;
                 millis /= 24;
                 fields[AM_PM] = fields[HOUR_OF_DAY] > 11 ? 1 : 0;
                 fields[HOUR] = fields[HOUR_OF_DAY] % 12;
@@ -254,12 +257,12 @@ class GregorianCalendar : Calendar
             cacheMillis += (23 - fields[HOUR_OF_DAY]) * 60 * 60 * 1000;
             cacheMillis += (59 - fields[MINUTE]) * 60 * 1000;
             cacheMillis += (59 - fields[SECOND]) * 1000;
-            nextMidnightMillis = newTime + (long)cacheMillis;
+            nextMidnightMillis = newTime + cacheMillis;
 
             cacheMillis = fields[HOUR_OF_DAY] * 60 * 60 * 1000;
             cacheMillis += fields[MINUTE] * 60 * 1000;
             cacheMillis += fields[SECOND] * 1000;
-            lastMidnightMillis = newTime - (long)cacheMillis;
+            lastMidnightMillis = newTime - cacheMillis;
 
             isCached = true;
         }
@@ -344,7 +347,8 @@ class GregorianCalendar : Calendar
             else days += julianSkew;
             return days;
         }
-        else if (year <= changeYear)
+
+        if (year <= changeYear)
         {
             return (year - 1970) * (long)365 + ((year - 1972) / 4) + julianSkew;
         }
@@ -356,13 +360,13 @@ class GregorianCalendar : Calendar
     private int daysInMonth(bool leapYear, int month)
     {
         if (leapYear && month == FEBRUARY) return DaysInMonth[month] + 1;
-        else return DaysInMonth[month];
+        return DaysInMonth[month];
     }
 
     private int daysInYear(bool leapYear, int month)
     {
         if (leapYear && month > FEBRUARY) return DaysInYear[month] + 1;
-        else return DaysInYear[month];
+        return DaysInYear[month];
     }
 
     int getOffset(long localTime)
@@ -418,8 +422,7 @@ class GregorianCalendar : Calendar
     {
         if (year > changeYear)
             return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
-        else
-            return year % 4 == 0;
+        return year % 4 == 0;
     }
 
     private static int julianError()

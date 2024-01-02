@@ -1,10 +1,16 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+using System.Reflection;
+
 namespace MahoTrans.Utils;
 
 public class SafeAssembly
 {
     public string? FullName;
-    public SafeAssembly ( System.Reflection.Assembly ass )
+
+    public SafeAssembly(Assembly ass)
     {
-        this.FullName = ass.FullName;
+        FullName = ass.FullName;
     }
 }

@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -17,7 +20,7 @@ public class List : Screen
 
     [JavaIgnore] public Reference ImplicitSelectCommand;
 
-    public int SelectedItem = 0;
+    public int SelectedItem;
 
     [JavaIgnore] public List<bool> SelectedMap = new();
 

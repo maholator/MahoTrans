@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using javax.microedition.ams.events;
 using MahoTrans;
 using MahoTrans.Native;
@@ -5,13 +8,12 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
-using Object = java.lang.Object;
 using Thread = java.lang.Thread;
 
 namespace javax.microedition.ams;
 
 /// <summary>
-/// Special thread that always works in JVM's background and handles events sent from AMS to midlet.
+///     Special thread that always works in JVM's background and handles events sent from AMS to midlet.
 /// </summary>
 public class EventQueue : Thread
 {
@@ -21,14 +23,14 @@ public class EventQueue : Thread
     [JsonIgnore] public int Length => _events.Count;
 
     /// <summary>
-    /// JVM this event queue working in. This is used to allow calling event queueing from anywhere.
+    ///     JVM this event queue working in. This is used to allow calling event queueing from anywhere.
     /// </summary>
     [JavaIgnore] [JsonIgnore] public JvmState OwningJvm = null!;
 
     [JavaIgnore] public Dictionary<int, bool> QueuedRepaints = new();
 
     /// <summary>
-    /// For snapshots.
+    ///     For snapshots.
     /// </summary>
     public Reference[] Events
     {
@@ -102,7 +104,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
                 return Reference.Null;
             var e = _events.Dequeue();
-            if (Object.Jvm.ResolveObject(e) is RepaintEvent re)
+            if (Jvm.ResolveObject(e) is RepaintEvent re)
             {
                 QueuedRepaints[re.Target.Index] = false;
             }
@@ -156,7 +158,7 @@ public class EventQueue : Thread
             for (int i = 0; i < list.Count; i++)
             {
                 var evRef = list[i];
-                if (Object.Jvm.ResolveObject(evRef) is RepaintEvent re)
+                if (Jvm.ResolveObject(evRef) is RepaintEvent re)
                 {
                     QueuedRepaints[re.Target.Index] = false;
                     list.RemoveAt(i);
@@ -183,7 +185,7 @@ public class EventQueue : Thread
         var invokeMethod = new NameDescriptorClass("invoke", "()V", typeof(Event).ToJavaName());
         return new JavaMethodBody(2, 1)
         {
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.monitorenter),

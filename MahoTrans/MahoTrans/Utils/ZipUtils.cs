@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.IO.Compression;
 using System.Text;
 
@@ -6,7 +9,7 @@ namespace MahoTrans.Utils;
 public static class ZipUtils
 {
     /// <summary>
-    /// Adds content to archive.
+    ///     Adds content to archive.
     /// </summary>
     /// <param name="zip">Zip archive to work with.</param>
     /// <param name="name">Name of the entry.</param>
@@ -22,7 +25,7 @@ public static class ZipUtils
     }
 
     /// <summary>
-    /// Adds content to archive.
+    ///     Adds content to archive.
     /// </summary>
     /// <param name="zip">Zip archive to work with.</param>
     /// <param name="name">Name of the entry.</param>
@@ -36,7 +39,7 @@ public static class ZipUtils
     }
 
     /// <summary>
-    /// Adds content to archive.
+    ///     Adds content to archive.
     /// </summary>
     /// <param name="zip">Zip archive to work with.</param>
     /// <param name="name">Name of the entry.</param>
@@ -55,7 +58,7 @@ public static class ZipUtils
     }
 
     /// <summary>
-    /// Adds content to archive.
+    ///     Adds content to archive.
     /// </summary>
     /// <param name="zip">Zip archive to work with.</param>
     /// <param name="name">Name of the entry.</param>

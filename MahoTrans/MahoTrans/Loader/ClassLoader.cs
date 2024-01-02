@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using System.Reflection;
@@ -11,7 +14,7 @@ using MahoTrans.Utils;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// Set of tools to take useful things from JAR file. This must be used from one thread.
+///     Set of tools to take useful things from JAR file. This must be used from one thread.
 /// </summary>
 public class ClassLoader
 {
@@ -24,7 +27,7 @@ public class ClassLoader
     }
 
     /// <summary>
-    /// Reads JAR package.
+    ///     Reads JAR package.
     /// </summary>
     /// <param name="file">Actual file stream.</param>
     /// <param name="leaveOpen">True to leave stream opened.</param>
@@ -388,7 +391,8 @@ public class ClassLoader
                 var exs = new JavaMethodBody.Catch[exLen];
                 for (int i = 0; i < exLen; i++)
                 {
-                    exs[i] = new JavaMethodBody.Catch((ushort)r.ReadInt16(), (ushort)r.ReadInt16(), (ushort)r.ReadInt16(), (ushort)r.ReadInt16());
+                    exs[i] = new JavaMethodBody.Catch((ushort)r.ReadInt16(), (ushort)r.ReadInt16(),
+                        (ushort)r.ReadInt16(), (ushort)r.ReadInt16());
                 }
 
                 int attrLen = r.ReadInt16();

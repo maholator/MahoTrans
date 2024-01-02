@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics;
 using MahoTrans;
 using MahoTrans.Builder;
@@ -15,25 +18,27 @@ public class Object
     #region Object properties
 
     /// <summary>
-    /// Address of this object in attached heap. The following is always true: <code>this.Jvm.ResolveObject(this.HeapAddress) == this</code>
+    ///     Address of this object in attached heap. The following is always true:
+    ///     <code>this.Jvm.ResolveObject(this.HeapAddress) == this</code>
     /// </summary>
     [JavaIgnore] [JsonProperty] public int HeapAddress;
 
     /// <summary>
-    /// Reference to java class, which this object is instance of.
+    ///     Reference to java class, which this object is instance of.
     /// </summary>
     [JavaIgnore] [JsonIgnore] public JavaClass JavaClass = null!;
 
     /// <summary>
-    /// <see cref="HeapAddress"/> wrapped in <see cref="Reference"/> struct.
+    ///     <see cref="HeapAddress" /> wrapped in <see cref="Reference" /> struct.
     /// </summary>
     [JsonIgnore]
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public Reference This => new Reference(HeapAddress);
 
     /// <summary>
-    /// Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass"/> to take object's class.
-    /// Deserialization MUST occur withing JVM context.
+    ///     Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass" /> to take object's
+    ///     class.
+    ///     Deserialization MUST occur withing JVM context.
     /// </summary>
     [JsonProperty]
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -61,7 +66,7 @@ public class Object
     }
 
     /// <summary>
-    /// Direct access to context slot. Use <see cref="Jvm"/> instead.
+    ///     Direct access to context slot. Use <see cref="Jvm" /> instead.
     /// </summary>
     [JsonIgnore]
     public static JvmState? JvmUnchecked
@@ -85,7 +90,7 @@ public class Object
     [JavaIgnore] [JsonProperty] public List<MonitorWait>? Waiters;
 
     /// <summary>
-    /// For internal usage. Called by wait() to detach from monitor and scheduler.
+    ///     For internal usage. Called by wait() to detach from monitor and scheduler.
     /// </summary>
     /// <returns>Waiter object to store on stack.</returns>
     public long WaitMonitor(long timeout)
@@ -150,7 +155,7 @@ public class Object
         {
             LocalsCount = 1,
             StackSize = 2,
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.lconst_0),
@@ -264,20 +269,23 @@ public class Object
     #region GC
 
     /// <summary>
-    /// This will be false most of the time. When GC starts going through heap, it will set this field to true on objects which will survive in the pending collection. After collection is finished, this will be changed to false again.
+    ///     This will be false most of the time. When GC starts going through heap, it will set this field to true on objects
+    ///     which will survive in the pending collection. After collection is finished, this will be changed to false again.
     /// </summary>
     [JavaIgnore] [JsonIgnore] [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Alive;
 
     /// <summary>
-    /// GC will call this method to collect objects which are referenced by this object. Override it if objects are stored in hidden form.
+    ///     GC will call this method to collect objects which are referenced by this object. Override it if objects are stored
+    ///     in hidden form.
     /// </summary>
     public virtual void AnnounceHiddenReferences(Queue<Reference> queue)
     {
     }
 
     /// <summary>
-    /// GC will call this method right before object deletion from the heap. Return true to make the object survive in this collection.
+    ///     GC will call this method right before object deletion from the heap. Return true to make the object survive in this
+    ///     collection.
     /// </summary>
     public virtual bool OnObjectDelete()
     {

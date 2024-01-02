@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -7,7 +10,7 @@ using MahoTrans.Utils;
 namespace java.lang;
 
 /// <summary>
-/// Use this runnable to call any virtual method on any object. Supports only ()V for now.
+///     Use this runnable to call any virtual method on any object. Supports only ()V for now.
 /// </summary>
 public class AnyCallBridge : Object, Runnable
 {
@@ -28,7 +31,7 @@ public class AnyCallBridge : Object, Runnable
     {
         return new JavaMethodBody(3, 1)
         {
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new(JavaOpcode.aload_0),
                 new(JavaOpcode.getfield, cls.PushConstant(new NameDescriptorClass(

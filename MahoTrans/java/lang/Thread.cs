@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -11,7 +14,8 @@ namespace java.lang;
 public class Thread : Object, Runnable
 {
     /// <summary>
-    /// Reference to JVM object of the thread. During wakeup, this is validated by <see cref="JvmState.SyncHeapAfterRestore"/>. This is null if thread was not started yet or was already dead.
+    ///     Reference to JVM object of the thread. During wakeup, this is validated by
+    ///     <see cref="JvmState.SyncHeapAfterRestore" />. This is null if thread was not started yet or was already dead.
     /// </summary>
     [JavaIgnore] [JsonIgnore] public JavaThread? JavaThread;
 
@@ -55,7 +59,7 @@ public class Thread : Object, Runnable
         {
             LocalsCount = 1,
             StackSize = 2,
-            Code = new Instruction[]
+            Code = new[]
             {
                 new Instruction(0, JavaOpcode.aload_0),
                 new Instruction(1, JavaOpcode.getfield,
@@ -109,7 +113,7 @@ public class Thread : Object, Runnable
     }
 
     /// <summary>
-    /// Internal method that checks interruption flag. If set, the flag is reset and this throws.
+    ///     Internal method that checks interruption flag. If set, the flag is reset and this throws.
     /// </summary>
     public void CheckInterrupt()
     {

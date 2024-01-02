@@ -1,9 +1,12 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.ToolkitImpls.Clocks;
 
 /// <summary>
-/// Simple clock. Allows midlet to run as fast as possible and gives it real time information.
+///     Simple clock. Allows midlet to run as fast as possible and gives it real time information.
 /// </summary>
 public class RealTimeClock : IClock
 {

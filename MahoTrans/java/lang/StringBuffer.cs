@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -214,7 +217,7 @@ public class StringBuffer : Object
         b.Append(JavaOpcode.iload_1);
         b.Append(JavaOpcode.aload_2);
         b.AppendVirtcall("toString", typeof(String));
-        b.AppendVirtcall(nameof(StringBuffer.insert), "(ILjava/lang/String;)Ljava/lang/StringBuffer;");
+        b.AppendVirtcall(nameof(insert), "(ILjava/lang/String;)Ljava/lang/StringBuffer;");
         b.AppendThis();
         b.AppendReturnReference();
 

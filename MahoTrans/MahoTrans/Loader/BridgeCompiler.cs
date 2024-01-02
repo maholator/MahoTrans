@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
@@ -113,7 +116,9 @@ public static class BridgeCompiler
 
     public static string GetFieldName(NameDescriptor descriptor, JavaClass cls) => $"{cls.Name}_{descriptor}";
 
-    public static string GetFieldGetterName(NameDescriptor descriptor, JavaClass cls) => GetFieldName(descriptor, cls) + "_bridge_get";
+    public static string GetFieldGetterName(NameDescriptor descriptor, JavaClass cls) =>
+        GetFieldName(descriptor, cls) + "_bridge_get";
 
-    public static string GetFieldSetterName(NameDescriptor descriptor, JavaClass cls) => GetFieldName(descriptor, cls) + "_bridge_set";
+    public static string GetFieldSetterName(NameDescriptor descriptor, JavaClass cls) =>
+        GetFieldName(descriptor, cls) + "_bridge_set";
 }

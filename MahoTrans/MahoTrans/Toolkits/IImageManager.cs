@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace MahoTrans.Toolkits;
 
 public interface IImageManager : IToolkit
@@ -23,10 +26,10 @@ public interface IImageManager : IToolkit
     void ReleaseImage(ImageHandle image);
 
     /// <summary>
-    /// Creates a graphics object for specified buffer.
+    ///     Creates a graphics object for specified buffer.
     /// </summary>
     /// <param name="image">Buffer to bind with. Must be mutable.</param>
-    /// <returns>Handle of created object. Use <see cref="ResolveGraphics"/> to get it.</returns>
+    /// <returns>Handle of created object. Use <see cref="ResolveGraphics" /> to get it.</returns>
     GraphicsHandle GetGraphics(ImageHandle image);
 
     IGraphics ResolveGraphics(GraphicsHandle handle);

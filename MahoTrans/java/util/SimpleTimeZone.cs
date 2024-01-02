@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -303,8 +306,7 @@ public class SimpleTimeZone : TimeZone
     {
         if (year > 1582)
             return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
-        else
-            return year % 4 == 0;
+        return year % 4 == 0;
     }
 
     private int mod7(int num1)

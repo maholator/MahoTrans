@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using javax.microedition.lcdui;
 using MahoTrans;
 using MahoTrans.Native;
@@ -19,7 +22,7 @@ public class DisplayableShownEvent : Event
     {
         return new JavaMethodBody(1, 1)
         {
-            RawCode = new Instruction[]
+            RawCode = new[]
             {
                 new Instruction(JavaOpcode.aload_0),
                 new Instruction(JavaOpcode.getfield,

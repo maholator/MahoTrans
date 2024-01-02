@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using java.util;
 using MahoTrans;
@@ -38,7 +41,7 @@ public class RecordStore : Object
     {
         var impl = cls.PushConstant(new NameDescriptorClass(nameof(AddRecordInternal), "([BII)I",
             typeof(RecordStore).ToJavaName()));
-        var code = new Instruction[]
+        var code = new[]
         {
             // calling actual method
             new Instruction(JavaOpcode.aload_0),
@@ -274,7 +277,7 @@ public class RecordStore : Object
     {
         var impl = cls.PushConstant(new NameDescriptorClass(nameof(SetRecordInternal), "(I[BII)V",
             typeof(RecordStore).ToJavaName()));
-        var code = new Instruction[]
+        var code = new[]
         {
             // calling actual method
             new Instruction(JavaOpcode.aload_0),
@@ -312,27 +315,27 @@ public class RecordStore : Object
     }
 
     /// <summary>
-    /// Generates code for calling listeners. Embed this directly to record operation.
-    /// This expects store object at slot 0 and record index at slot 5.
-    /// Slot 6, 7 and 8 will be used - do not touch them.
+    ///     Generates code for calling listeners. Embed this directly to record operation.
+    ///     This expects store object at slot 0 and record index at slot 5.
+    ///     Slot 6, 7 and 8 will be used - do not touch them.
     /// </summary>
     /// <param name="cls">Class from bytecode generator.</param>
     /// <param name="eventName">Event to invoke.</param>
     /// <returns>Code fragment.</returns>
     /// <remarks>
-    /// <list type="bullet">
-    /// <listheader>Locals:</listheader>
-    /// <item>0 - this</item>
-    /// <item>1 - free</item>
-    /// <item>2 - free</item>
-    /// <item>3 - free</item>
-    /// <item>4 - free</item>
-    /// <item>5 - record ID</item>
-    /// <item>6 - used (vector)</item>
-    /// <item>7 - used (vector size)</item>
-    /// <item>8 - used (index)</item>
-    /// </list>
-    /// This must enter with <b>empty</b> stack. This fragment does not return. Stack will be left empty.
+    ///     <list type="bullet">
+    ///         <listheader>Locals:</listheader>
+    ///         <item>0 - this</item>
+    ///         <item>1 - free</item>
+    ///         <item>2 - free</item>
+    ///         <item>3 - free</item>
+    ///         <item>4 - free</item>
+    ///         <item>5 - record ID</item>
+    ///         <item>6 - used (vector)</item>
+    ///         <item>7 - used (vector size)</item>
+    ///         <item>8 - used (index)</item>
+    ///     </list>
+    ///     This must enter with <b>empty</b> stack. This fragment does not return. Stack will be left empty.
     /// </remarks>
     private Instruction[] GenerateListenersCalls(JavaClass cls, string eventName)
     {
@@ -340,7 +343,7 @@ public class RecordStore : Object
         var vs = cls.PushConstant(new NameDescriptor(nameof(Vector.size), "()I"));
         var vg = cls.PushConstant(new NameDescriptor(nameof(Vector.elementAt), "(I)Ljava/lang/Object;"));
         var ev = cls.PushConstant(new NameDescriptor(eventName, $"({typeof(RecordStore).ToJavaDescriptor()}I)V"));
-        return new Instruction[]
+        return new[]
         {
             // stack is empty
             new Instruction(JavaOpcode.aload_0),

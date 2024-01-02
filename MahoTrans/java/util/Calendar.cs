@@ -1,9 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Object = java.lang.Object;
 
 namespace java.util;
 
-public class Calendar : lang.Object
+public class Calendar : Object
 {
     public bool areFieldsSet;
 
@@ -62,7 +66,7 @@ public class Calendar : lang.Object
         isSet = new bool[FIELD_COUNT];
         fields = new int[FIELD_COUNT];
         setTimeZone(TimeZone.getDefault());
-        setTimeInMillis(java.lang.System.currentTimeMillis());
+        setTimeInMillis(lang.System.currentTimeMillis());
     }
 
     public bool after(Reference calendar)

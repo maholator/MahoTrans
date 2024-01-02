@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Native;
@@ -9,9 +12,9 @@ using Object = java.lang.Object;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// This class exposes tools to build JVM types from CLR types.
+///     This class exposes tools to build JVM types from CLR types.
 /// </summary>
-/// <seealso cref="ClassCompiler"/>
+/// <seealso cref="ClassCompiler" />
 public static class NativeLinker
 {
     private static int _bridgeCounter = 1;

@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using java.lang;
@@ -25,12 +28,12 @@ public class JavaClass
     public Type? ClrType;
 
     /// <summary>
-    /// This is set by first call of <see cref="Object.getClass"/>.
+    ///     This is set by first call of <see cref="java.lang.Object.getClass" />.
     /// </summary>
     public Reference ModelObject;
 
     /// <summary>
-    /// True, if this class' initializer was not yet executed.
+    ///     True, if this class' initializer was not yet executed.
     /// </summary>
     public bool PendingInitializer = true;
 
@@ -209,7 +212,7 @@ public class JavaClass
     }
 
     /// <summary>
-    /// Gets field defined on this class or one of its supers. This assumes that class tree already built.
+    ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
     /// <returns>Field object.</returns>
@@ -227,7 +230,7 @@ public class JavaClass
     }
 
     /// <summary>
-    /// Gets method defined on this class or one of its supers. This assumes that class tree already built.
+    ///     Gets method defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
     /// <returns>Method object.</returns>
@@ -247,7 +250,8 @@ public class JavaClass
     public void AddMethod(Method m) => Methods.Add(m.Descriptor, m);
 
     /// <summary>
-    /// Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle. This must be called inside JVM context.
+    ///     Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle.
+    ///     This must be called inside JVM context.
     /// </summary>
     /// <param name="thread">Thread to run initialization on.</param>
     public void Initialize(JavaThread thread)

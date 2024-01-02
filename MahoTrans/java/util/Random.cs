@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using java.lang;
 using MahoTrans.Native;
 using Object = java.lang.Object;
@@ -9,7 +12,7 @@ public class Random : Object
     public long Seed;
 
     [InitMethod]
-    public new void Init() => Init(global::java.lang.System.currentTimeMillis());
+    public new void Init() => Init(lang.System.currentTimeMillis());
 
     [InitMethod]
     public void Init(long seed) => setSeed(seed);

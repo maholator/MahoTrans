@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using java.lang;
@@ -54,9 +57,6 @@ public class TimeZone : Object
     }
 
     // for serializer
-    public TimeZone()
-    {
-    }
 
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference getAvailableIDs()

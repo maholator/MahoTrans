@@ -1,7 +1,10 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 namespace MahoTrans.Toolkits;
 
 /// <summary>
-/// Object which holds all implementations needed for JVM to work.
+///     Object which holds all implementations needed for JVM to work.
 /// </summary>
 public sealed class Toolkit
 {

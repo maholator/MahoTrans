@@ -1,10 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans.Runtime;
 using MahoTrans.Toolkits;
 
 namespace MahoTrans.ToolkitImpls.Clocks;
 
 /// <summary>
-/// Clock that locks JVM to specific tickrate and provides time based on it.
+///     Clock that locks JVM to specific tickrate and provides time based on it.
 /// </summary>
 public class StrictClock : IClock
 {
@@ -16,10 +19,13 @@ public class StrictClock : IClock
     private long _passedTime;
 
     /// <summary>
-    /// Initializes the clock.
+    ///     Initializes the clock.
     /// </summary>
     /// <param name="ticksPerBunch">CLR ticks for each cycles bunch.</param>
-    /// <param name="startTicks">CLR ticks of JVM start. To start right now, pass <see cref="DateTime.Now"/>.<see cref="DateTime.Ticks"/>.</param>
+    /// <param name="startTicks">
+    ///     CLR ticks of JVM start. To start right now, pass <see cref="DateTime.Now" />.
+    ///     <see cref="DateTime.Ticks" />.
+    /// </param>
     public StrictClock(int ticksPerBunch, long startTicks)
     {
         TicksPerBunch = ticksPerBunch;

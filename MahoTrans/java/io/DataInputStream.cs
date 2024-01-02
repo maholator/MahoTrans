@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -251,7 +254,7 @@ public class DataInputStream : InputStream
     }
 
     /// <summary>
-    /// Reads one byte from <see cref="@in"/>. Performs EOF check. Always read using this method.
+    ///     Reads one byte from <see cref="@in" />. Performs EOF check. Always read using this method.
     /// </summary>
     /// <param name="class"></param>
     /// <returns></returns>

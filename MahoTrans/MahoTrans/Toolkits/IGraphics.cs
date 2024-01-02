@@ -1,9 +1,13 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using javax.microedition.lcdui;
 
 namespace MahoTrans.Toolkits;
 
 /// <summary>
-/// Toolkit which encapsulates image and tools to paint on it. This must be inaccessible from JVM! Get it using <see cref="IImageManager.ResolveGraphics"/> when you need it and abandon once done.
+///     Toolkit which encapsulates image and tools to paint on it. This must be inaccessible from JVM! Get it using
+///     <see cref="IImageManager.ResolveGraphics" /> when you need it and abandon once done.
 /// </summary>
 public interface IGraphics
 {

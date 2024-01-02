@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Reflection;
 using MahoTrans.Loader;
 using MahoTrans.Native;
@@ -11,7 +14,8 @@ namespace MahoTrans.Runtime;
 public partial class JvmState
 {
     /// <summary>
-    /// List of all loaded classes. Array classes are created only when needed, use <see cref="GetClass"/> to construct them.
+    ///     List of all loaded classes. Array classes are created only when needed, use <see cref="GetClass" /> to construct
+    ///     them.
     /// </summary>
     public readonly Dictionary<string, JavaClass> Classes = new();
 
@@ -57,7 +61,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
+    ///     Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
     /// </summary>
     /// <param name="new">Newly added classes.</param>
     private void RefreshState(JavaClass[] @new)
@@ -89,7 +93,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    /// Gets class object from <see cref="Classes"/>. Automatically handles array types.
+    ///     Gets class object from <see cref="Classes" />. Automatically handles array types.
     /// </summary>
     /// <param name="name">Class name to search.</param>
     /// <returns></returns>
