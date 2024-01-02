@@ -265,12 +265,6 @@ public partial class JvmState
                     Buffer.MemoryCopy(ptr, f.Stack, len, len);
                 }
 
-                fixed (PrimitiveType* ptr = sh.StackTypes)
-                {
-                    var len = sh.StackTypes.Length * sizeof(PrimitiveType);
-                    Buffer.MemoryCopy(ptr, f.StackTypes, len, len);
-                }
-
                 fixed (long* ptr = sh.LocalVariables)
                 {
                     var bytes = sh.LocalVariables.Length * sizeof(long);
@@ -312,8 +306,7 @@ public partial class JvmState
                 {
                     Pointer = x.Pointer,
                     LocalVariables = x.DumpLocalVariables(),
-                    Stack = stack.stack,
-                    StackTypes = stack.types,
+                    Stack = stack,
                     StackTop = x.StackTop,
                     MethodDescriptor = x.Method.Method.Descriptor,
                     ClassName = x.Method.Method.Class.Name,
@@ -328,7 +321,6 @@ public partial class JvmState
         public int Pointer;
         public long[] LocalVariables = Array.Empty<long>();
         public long[] Stack = Array.Empty<long>();
-        public PrimitiveType[] StackTypes = Array.Empty<PrimitiveType>();
         public int StackTop;
         public NameDescriptor MethodDescriptor;
         public string ClassName = string.Empty;

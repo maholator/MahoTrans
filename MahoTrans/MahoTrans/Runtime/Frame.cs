@@ -10,11 +10,6 @@ public unsafe class Frame
     public long* Stack = null;
 
     /// <summary>
-    /// Types of values on stack.
-    /// </summary>
-    public PrimitiveType* StackTypes;
-
-    /// <summary>
     /// Pointer to stack top. Stack contains topmost operand at this index-1 (if zero, stack is empty). Stack length is equal to this field.
     /// </summary>
     public int StackTop;
@@ -41,7 +36,6 @@ public unsafe class Frame
     private void AllocateBuffers(ushort locals, ushort stack)
     {
         Stack = (long*)NativeMemory.Alloc(stack, sizeof(long));
-        StackTypes = (PrimitiveType*)NativeMemory.Alloc(stack, sizeof(PrimitiveType));
         LocalVariables = (long*)NativeMemory.Alloc(locals, sizeof(long));
     }
 
@@ -51,7 +45,6 @@ public unsafe class Frame
             return;
 
         NativeMemory.Free(Stack);
-        NativeMemory.Free(StackTypes);
         NativeMemory.Free(LocalVariables);
     }
 
@@ -60,21 +53,15 @@ public unsafe class Frame
         DeallocateBuffers();
     }
 
-    public (long[] stack, PrimitiveType[] types) DumpStack()
+    public long[] DumpStack()
     {
         var s = new long[Method.StackSize];
-        var t = new PrimitiveType[Method.StackSize];
         fixed (long* sPtr = s)
         {
             Buffer.MemoryCopy(Stack, sPtr, s.Length * sizeof(long), s.Length * sizeof(long));
         }
 
-        fixed (PrimitiveType* tPtr = t)
-        {
-            Buffer.MemoryCopy(StackTypes, tPtr, t.Length * sizeof(PrimitiveType), t.Length * sizeof(PrimitiveType));
-        }
-
-        return (s, t);
+        return s;
     }
 
     public long[] DumpLocalVariables()
@@ -96,11 +83,9 @@ public unsafe class Frame
     /// Pushes value into the stack.
     /// </summary>
     /// <param name="value">Value to push.</param>
-    /// <param name="type">Value type.</param>
-    public void PushUnchecked(long value, PrimitiveType type)
+    public void PushUnchecked(long value)
     {
         Stack[StackTop] = value;
-        StackTypes[StackTop] = type;
         StackTop++;
     }
 
@@ -108,29 +93,6 @@ public unsafe class Frame
     {
         StackTop--;
         return Stack[StackTop];
-    }
-
-    public bool IsDoubleSizedPopped()
-    {
-        return (StackTypes[StackTop] & PrimitiveType.IsDouble) != 0;
-    }
-
-    public PrimitiveType GetPoppedType()
-    {
-        return StackTypes[StackTop];
-    }
-
-    /// <summary>
-    /// For debugger. Checks, is operand on stack double sized.
-    /// </summary>
-    /// <param name="offset">Zero to check just popped operand. One to check actual stack top. Two and more to check deeper values.</param>
-    /// <returns>Is the operand double sized.</returns>
-    /// <remarks>
-    /// For example, there are values "53", "52" and "51" on stack. To check 52's size, pass 2. To check 53's, pass 3.
-    /// </remarks>
-    public bool IsDoubleSizeAt(int offset)
-    {
-        return (StackTypes[StackTop - offset] & PrimitiveType.IsDouble) != 0;
     }
 
     #endregion
@@ -200,23 +162,23 @@ public unsafe class Frame
 
     #region Type-specific pushes
 
-    public void PushInt(int value) => PushUnchecked(value, PrimitiveType.Int);
+    public void PushInt(int value) => PushUnchecked(value);
 
-    public void PushLong(long value) => PushUnchecked(value, PrimitiveType.Long);
+    public void PushLong(long value) => PushUnchecked(value);
 
-    public void PushFloat(float value) => PushUnchecked(BitConverter.SingleToInt32Bits(value), PrimitiveType.Float);
+    public void PushFloat(float value) => PushUnchecked(BitConverter.SingleToInt32Bits(value));
 
-    public void PushDouble(double value) => PushUnchecked(BitConverter.DoubleToInt64Bits(value), PrimitiveType.Double);
+    public void PushDouble(double value) => PushUnchecked(BitConverter.DoubleToInt64Bits(value));
 
-    public void PushBool(bool value) => PushUnchecked(value ? 1L : 0L, PrimitiveType.Int);
+    public void PushBool(bool value) => PushUnchecked(value ? 1L : 0L);
 
-    public void PushByte(sbyte value) => PushUnchecked(value, PrimitiveType.Int);
+    public void PushByte(sbyte value) => PushUnchecked(value);
 
-    public void PushShort(short value) => PushUnchecked(value, PrimitiveType.Int);
+    public void PushShort(short value) => PushUnchecked(value);
 
-    public void PushChar(char value) => PushUnchecked(value, PrimitiveType.Int);
+    public void PushChar(char value) => PushUnchecked(value);
 
-    public void PushReference(Reference value) => PushUnchecked(value, PrimitiveType.Reference);
+    public void PushReference(Reference value) => PushUnchecked(value);
 
     #endregion
 
@@ -341,8 +303,7 @@ public unsafe class Frame
     /// Pushes value from local variables. No checks are performed.
     /// </summary>
     /// <param name="index">Index of local variable.</param>
-    /// <param name="type">Type of the value.</param>
-    public void PushFromLocal(int index, PrimitiveType type) => PushUnchecked(LocalVariables[index], type);
+    public void PushFromLocal(int index) => PushUnchecked(LocalVariables[index]);
 
     #endregion
 

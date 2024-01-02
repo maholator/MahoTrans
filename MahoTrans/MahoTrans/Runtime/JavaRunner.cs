@@ -234,112 +234,112 @@ public class JavaRunner
             }
             case JavaOpcode.iload:
             {
-                frame.PushFromLocal(instr.IntData, PrimitiveType.Int);
+                frame.PushFromLocal(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.lload:
             {
-                frame.PushFromLocal(instr.IntData, PrimitiveType.Long);
+                frame.PushFromLocal(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.fload:
             {
-                frame.PushFromLocal(instr.IntData, PrimitiveType.Float);
+                frame.PushFromLocal(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.dload:
             {
-                frame.PushFromLocal(instr.IntData, PrimitiveType.Double);
+                frame.PushFromLocal(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.aload:
             {
-                frame.PushFromLocal(instr.IntData, PrimitiveType.Reference);
+                frame.PushFromLocal(instr.IntData);
                 pointer++;
                 break;
             }
             case JavaOpcode.iload_0:
-                frame.PushFromLocal(0, PrimitiveType.Int);
+                frame.PushFromLocal(0);
                 pointer++;
                 break;
             case JavaOpcode.iload_1:
-                frame.PushFromLocal(1, PrimitiveType.Int);
+                frame.PushFromLocal(1);
                 pointer++;
                 break;
             case JavaOpcode.iload_2:
-                frame.PushFromLocal(2, PrimitiveType.Int);
+                frame.PushFromLocal(2);
                 pointer++;
                 break;
             case JavaOpcode.iload_3:
-                frame.PushFromLocal(3, PrimitiveType.Int);
+                frame.PushFromLocal(3);
                 pointer++;
                 break;
             case JavaOpcode.lload_0:
-                frame.PushFromLocal(0, PrimitiveType.Long);
+                frame.PushFromLocal(0);
                 pointer++;
                 break;
             case JavaOpcode.lload_1:
-                frame.PushFromLocal(1, PrimitiveType.Long);
+                frame.PushFromLocal(1);
                 pointer++;
                 break;
             case JavaOpcode.lload_2:
-                frame.PushFromLocal(2, PrimitiveType.Long);
+                frame.PushFromLocal(2);
                 pointer++;
                 break;
             case JavaOpcode.lload_3:
-                frame.PushFromLocal(3, PrimitiveType.Long);
+                frame.PushFromLocal(3);
                 pointer++;
                 break;
             case JavaOpcode.fload_0:
-                frame.PushFromLocal(0, PrimitiveType.Float);
+                frame.PushFromLocal(0);
                 pointer++;
                 break;
             case JavaOpcode.fload_1:
-                frame.PushFromLocal(1, PrimitiveType.Float);
+                frame.PushFromLocal(1);
                 pointer++;
                 break;
             case JavaOpcode.fload_2:
-                frame.PushFromLocal(2, PrimitiveType.Float);
+                frame.PushFromLocal(2);
                 pointer++;
                 break;
             case JavaOpcode.fload_3:
-                frame.PushFromLocal(3, PrimitiveType.Float);
+                frame.PushFromLocal(3);
                 pointer++;
                 break;
             case JavaOpcode.dload_0:
-                frame.PushFromLocal(0, PrimitiveType.Double);
+                frame.PushFromLocal(0);
                 pointer++;
                 break;
             case JavaOpcode.dload_1:
-                frame.PushFromLocal(1, PrimitiveType.Double);
+                frame.PushFromLocal(1);
                 pointer++;
                 break;
             case JavaOpcode.dload_2:
-                frame.PushFromLocal(2, PrimitiveType.Double);
+                frame.PushFromLocal(2);
                 pointer++;
                 break;
             case JavaOpcode.dload_3:
-                frame.PushFromLocal(3, PrimitiveType.Double);
+                frame.PushFromLocal(3);
                 pointer++;
                 break;
             case JavaOpcode.aload_0:
-                frame.PushFromLocal(0, PrimitiveType.Reference);
+                frame.PushFromLocal(0);
                 pointer++;
                 break;
             case JavaOpcode.aload_1:
-                frame.PushFromLocal(1, PrimitiveType.Reference);
+                frame.PushFromLocal(1);
                 pointer++;
                 break;
             case JavaOpcode.aload_2:
-                frame.PushFromLocal(2, PrimitiveType.Reference);
+                frame.PushFromLocal(2);
                 pointer++;
                 break;
             case JavaOpcode.aload_3:
-                frame.PushFromLocal(3, PrimitiveType.Reference);
+                frame.PushFromLocal(3);
                 pointer++;
                 break;
             case JavaOpcode.iaload:
@@ -535,7 +535,6 @@ public class JavaRunner
                 unsafe
                 {
                     frame.Stack[frame.StackTop] = frame.Stack[frame.StackTop - 1];
-                    frame.StackTypes[frame.StackTop] = frame.StackTypes[frame.StackTop - 1];
                     frame.StackTop++;
                     pointer++;
                     break;
@@ -543,35 +542,30 @@ public class JavaRunner
             case JavaOpcode.dup_x1:
             {
                 var v1 = frame.Pop();
-                var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
-                var t2 = frame.GetPoppedType();
-                frame.PushUnchecked(v1, t1);
-                frame.PushUnchecked(v2, t2);
-                frame.PushUnchecked(v1, t1);
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v1);
                 pointer++;
                 break;
             }
             case JavaOpcode.dup_x2:
             {
                 var v1 = frame.Pop();
-                var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
-                var t2 = frame.GetPoppedType();
                 if (instr.IntData != 0)
                 {
-                    frame.PushUnchecked(v1, t1);
-                    frame.PushUnchecked(v2, t2);
-                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v1);
+                    frame.PushUnchecked(v2);
+                    frame.PushUnchecked(v1);
                 }
                 else
                 {
                     var v3 = frame.Pop();
-                    var t3 = frame.GetPoppedType();
-                    frame.PushUnchecked(v1, t1);
-                    frame.PushUnchecked(v3, t3);
-                    frame.PushUnchecked(v2, t2);
-                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v1);
+                    frame.PushUnchecked(v3);
+                    frame.PushUnchecked(v2);
+                    frame.PushUnchecked(v1);
                 }
 
                 pointer++;
@@ -580,45 +574,40 @@ public class JavaRunner
             case JavaOpcode.dup2:
             {
                 var v = frame.Pop();
-                var t = frame.GetPoppedType();
                 if (instr.IntData != 0)
                 {
-                    frame.PushUnchecked(v, t);
-                    frame.PushUnchecked(v, t);
+                    frame.PushUnchecked(v);
+                    frame.PushUnchecked(v);
                     pointer++;
                     break;
                 }
 
                 var v2 = frame.Pop();
-                var t2 = frame.GetPoppedType();
-                frame.PushUnchecked(v2, t2);
-                frame.PushUnchecked(v, t);
-                frame.PushUnchecked(v2, t2);
-                frame.PushUnchecked(v, t);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v);
+                frame.PushUnchecked(v2);
+                frame.PushUnchecked(v);
                 pointer++;
                 break;
             }
             case JavaOpcode.dup2_x1:
             {
                 var v1 = frame.Pop();
-                var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
-                var t2 = frame.GetPoppedType();
                 if (instr.IntData != 0)
                 {
-                    frame.PushUnchecked(v1, t1);
-                    frame.PushUnchecked(v2, t2);
-                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v1);
+                    frame.PushUnchecked(v2);
+                    frame.PushUnchecked(v1);
                 }
                 else
                 {
                     var v3 = frame.Pop();
-                    var t3 = frame.GetPoppedType();
-                    frame.PushUnchecked(v2, t2);
-                    frame.PushUnchecked(v1, t1);
-                    frame.PushUnchecked(v3, t3);
-                    frame.PushUnchecked(v2, t2);
-                    frame.PushUnchecked(v1, t1);
+                    frame.PushUnchecked(v2);
+                    frame.PushUnchecked(v1);
+                    frame.PushUnchecked(v3);
+                    frame.PushUnchecked(v2);
+                    frame.PushUnchecked(v1);
                 }
 
                 pointer++;
@@ -629,11 +618,9 @@ public class JavaRunner
             case JavaOpcode.swap:
             {
                 var v1 = frame.Pop();
-                var t1 = frame.GetPoppedType();
                 var v2 = frame.Pop();
-                var t2 = frame.GetPoppedType();
-                frame.PushUnchecked(v1, t1);
-                frame.PushUnchecked(v2, t2);
+                frame.PushUnchecked(v1);
+                frame.PushUnchecked(v2);
                 pointer++;
                 break;
             }
@@ -1419,19 +1406,19 @@ public class JavaRunner
                     switch (op)
                     {
                         case JavaOpcode.aload:
-                            frame.PushFromLocal(i, PrimitiveType.Reference);
+                            frame.PushFromLocal(i);
                             break;
                         case JavaOpcode.iload:
-                            frame.PushFromLocal(i, PrimitiveType.Int);
+                            frame.PushFromLocal(i);
                             break;
                         case JavaOpcode.lload:
-                            frame.PushFromLocal(i, PrimitiveType.Long);
+                            frame.PushFromLocal(i);
                             break;
                         case JavaOpcode.fload:
-                            frame.PushFromLocal(i, PrimitiveType.Float);
+                            frame.PushFromLocal(i);
                             break;
                         case JavaOpcode.dload:
-                            frame.PushFromLocal(i, PrimitiveType.Double);
+                            frame.PushFromLocal(i);
                             break;
                         case JavaOpcode.astore:
                             frame.PopToLocal(i);

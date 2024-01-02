@@ -506,10 +506,8 @@ public partial class JvmState
 
                     for (int i = 0; i < top; i++)
                     {
-                        if ((frame.StackTypes[i] & PrimitiveType.IsReference) != 0)
-                        {
-                            roots.Add(frame.Stack[i]);
-                        }
+                        //TODO we know stack types. They must be used.
+                        roots.Add(frame.Stack[i]);
                     }
 
                     for (int i = 0; i < frame.Method.LocalsCount; i++)
