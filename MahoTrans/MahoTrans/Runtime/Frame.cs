@@ -58,6 +58,8 @@ public unsafe class Frame
 
         NativeMemory.Free(Stack);
         NativeMemory.Free(LocalVariables);
+
+        Stack = null;
     }
 
     ~Frame()
