@@ -93,12 +93,20 @@ public unsafe class Frame
     /// <param name="value">Value to push.</param>
     public void PushUnchecked(long value)
     {
+#if DEBUG
+        if (StackTop >= Method.StackSize)
+            throw new JavaRuntimeError($"Stack overflow in {Method.Method}");
+#endif
         Stack[StackTop] = value;
         StackTop++;
     }
 
     public long Pop()
     {
+#if DEBUG
+        if (StackTop == 0)
+            throw new JavaRuntimeError($"Stack underflow in {Method.Method}");
+#endif
         StackTop--;
         return Stack[StackTop];
     }
