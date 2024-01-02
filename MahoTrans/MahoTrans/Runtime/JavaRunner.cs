@@ -20,7 +20,7 @@ public class JavaRunner
         try
         {
             Thread.CurrentThread = thread;
-            StepInternal(thread, state);
+            StepInternalV2(thread, state);
         }
         catch (JavaThrowable ex)
         {
@@ -141,6 +141,7 @@ public class JavaRunner
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    [Obsolete]
     private static void StepInternal(JavaThread thread, JvmState state)
     {
         var frame = thread.ActiveFrame!;
@@ -151,7 +152,7 @@ public class JavaRunner
         Debug.Assert(pointer < code.Length, $"Instruction pointer overflow in {frame.Method}");
 
         var instr = code[pointer];
-        switch (instr.Opcode)
+        switch ((JavaOpcode)instr.Opcode)
         {
             case JavaOpcode.nop:
                 pointer++;
@@ -1496,7 +1497,7 @@ public class JavaRunner
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private static void StepInternalV2(JavaThread thread, JvmState state)
+    private static void StepInternalV2(JavaThread thread, JvmState jvm)
     {
         var frame = thread.ActiveFrame!;
         ref var pointer = ref frame.Pointer;
@@ -1506,7 +1507,7 @@ public class JavaRunner
         Debug.Assert(pointer < code.Length, $"Instruction pointer overflow in {frame.Method}");
 
         var instr = code[pointer];
-        var opcode = (MTOpcode)instr.Opcode; //TODO
+        var opcode = instr.Opcode;
         switch (opcode)
         {
             case MTOpcode.nop:
@@ -1598,8 +1599,18 @@ public class JavaRunner
                 pointer++;
                 break;
 
-            case MTOpcode.mconst:
-                state.PushClassConstant(frame, instr.Data);
+            case MTOpcode.strconst:
+                frame.PushReference(jvm.InternalizeString((string)instr.Data));
+                pointer++;
+                break;
+
+            case MTOpcode.lconst:
+                frame.PushLong((long)instr.Data);
+                pointer++;
+                break;
+
+            case MTOpcode.dconst:
+                frame.PushDouble((double)instr.Data);
                 pointer++;
                 break;
 
@@ -1665,88 +1676,88 @@ public class JavaRunner
                 }
 
             case MTOpcode.iaload:
-                PushFromIntArray(frame, state);
+                PushFromIntArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.laload:
-                PushFromLongArray(frame, state);
+                PushFromLongArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.faload:
-                PushFromFloatArray(frame, state);
+                PushFromFloatArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.daload:
-                PushFromDoubleArray(frame, state);
+                PushFromDoubleArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.aaload:
-                PushFromRefArray(frame, state);
+                PushFromRefArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.baload:
-                PushFromByteArray(frame, state);
+                PushFromByteArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.caload:
-                PushFromCharArray(frame, state);
+                PushFromCharArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.saload:
-                PushFromShortArray(frame, state);
+                PushFromShortArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.iastore:
-                PopToIntArray(frame, state);
+                PopToIntArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.lastore:
-                PopToLongArray(frame, state);
+                PopToLongArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.fastore:
-                PopToFloatArray(frame, state);
+                PopToFloatArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.dastore:
-                PopToDoubleArray(frame, state);
+                PopToDoubleArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.aastore:
-                PopToRefArray(frame, state);
+                PopToRefArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.bastore:
-                PopToByteArray(frame, state);
+                PopToByteArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.castore:
-                PopToCharArray(frame, state);
+                PopToCharArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.sastore:
-                PopToShortArray(frame, state);
+                PopToShortArray(frame, jvm);
                 pointer++;
                 break;
 
             case MTOpcode.array_length:
             {
-                var arr = state.Resolve<java.lang.Array>(frame.PopReference());
+                var arr = jvm.Resolve<java.lang.Array>(frame.PopReference());
                 frame.PushInt(arr.BaseValue.Length);
                 pointer++;
                 break;
@@ -2368,7 +2379,7 @@ public class JavaRunner
                 var caller = thread.ActiveFrame;
 
                 if (frame.Method.Method.IsCritical)
-                    ExitSynchronizedMethod(frame, caller, thread, state);
+                    ExitSynchronizedMethod(frame, caller, thread, jvm);
 
                 if (caller != null)
                 {
@@ -2385,7 +2396,7 @@ public class JavaRunner
                 var caller = thread.ActiveFrame;
 
                 if (frame.Method.Method.IsCritical)
-                    ExitSynchronizedMethod(frame, caller, thread, state);
+                    ExitSynchronizedMethod(frame, caller, thread, jvm);
 
                 if (caller != null)
                 {
@@ -2401,7 +2412,7 @@ public class JavaRunner
                 var caller = thread.ActiveFrame;
 
                 if (frame.Method.Method.IsCritical)
-                    ExitSynchronizedMethod(frame, caller, thread, state);
+                    ExitSynchronizedMethod(frame, caller, thread, jvm);
 
                 break;
             }
@@ -2410,18 +2421,18 @@ public class JavaRunner
             {
                 var ex = frame.PopReference();
                 if (ex.IsNull)
-                    state.Throw<NullPointerException>();
+                    jvm.Throw<NullPointerException>();
                 else
                 {
-                    state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
+                    jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
                     throw new JavaThrowable(ex);
                 }
 
                 break;
             }
 
-            case MTOpcode.invoke_virt:
-                CallVirtual(instr.IntData, instr.ShortData, frame, thread, state);
+            case MTOpcode.invoke_virtual:
+                CallVirtual(instr.IntData, instr.ShortData, frame, thread, jvm);
                 break;
 
             case MTOpcode.invoke_static:
@@ -2432,14 +2443,14 @@ public class JavaRunner
                 CallMethod((Method)instr.Data, false, frame, thread);
                 break;
 
-            case MTOpcode.invoke_instance_void_no_args_bysig:
-                CallVirtBySig(thread, state, frame);
+            case MTOpcode.invoke_virtual_void_no_args_bysig:
+                CallVirtBySig(thread, jvm, frame);
                 break;
 
             case MTOpcode.new_obj:
             {
                 var type = (JavaClass)instr.Data;
-                frame.PushReference(state.AllocateObject(type));
+                frame.PushReference(jvm.AllocateObject(type));
                 pointer++;
                 break;
             }
@@ -2447,7 +2458,7 @@ public class JavaRunner
             case MTOpcode.new_prim_arr:
             {
                 int len = frame.PopInt();
-                frame.PushReference(state.AllocateArray((ArrayType)instr.IntData, len));
+                frame.PushReference(jvm.AllocateArray((ArrayType)instr.IntData, len));
                 pointer++;
                 break;
             }
@@ -2456,7 +2467,7 @@ public class JavaRunner
             {
                 int len = frame.PopInt();
                 var type = (JavaClass)instr.Data;
-                frame.PushReference(state.AllocateReferenceArray(len, type));
+                frame.PushReference(jvm.AllocateReferenceArray(len, type));
                 pointer++;
                 break;
             }
@@ -2485,26 +2496,26 @@ public class JavaRunner
                     _ => null
                 };
 
-                frame.PushReference(CreateMultiSubArray(dims - 1, count, state, arrayType, d.type));
+                frame.PushReference(CreateMultiSubArray(dims - 1, count, jvm, arrayType, d.type));
 
                 pointer++;
                 break;
             }
 
             case MTOpcode.monitor_enter:
-                TryEnterMonitor(thread, state, frame);
+                TryEnterMonitor(thread, jvm, frame);
                 break;
 
             case MTOpcode.monitor_exit:
             {
                 var r = frame.PopReference();
                 if (r.IsNull)
-                    state.Throw<NullPointerException>();
+                    jvm.Throw<NullPointerException>();
 
-                var obj = state.ResolveObject(r);
+                var obj = jvm.ResolveObject(r);
                 if (obj.MonitorOwner != thread.ThreadId)
                 {
-                    state.Throw<IllegalMonitorStateException>();
+                    jvm.Throw<IllegalMonitorStateException>();
                 }
                 else
                 {
@@ -2527,13 +2538,13 @@ public class JavaRunner
                     {
                         // ok
                     }
-                    else if (state.ResolveObject(obj).JavaClass.Is(type))
+                    else if (jvm.ResolveObject(obj).JavaClass.Is(type))
                     {
                         // ok
                     }
                     else
                     {
-                        state.Throw<ClassCastException>();
+                        jvm.Throw<ClassCastException>();
                     }
 
                     pointer++;
@@ -2548,7 +2559,7 @@ public class JavaRunner
                 if (obj.IsNull)
                     frame.PushInt(0);
                 else
-                    frame.PushInt(state.ResolveObject(obj).JavaClass.Is(type) ? 1 : 0);
+                    frame.PushInt(jvm.ResolveObject(obj).JavaClass.Is(type) ? 1 : 0);
                 pointer++;
                 break;
             }

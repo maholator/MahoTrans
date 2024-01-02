@@ -34,9 +34,19 @@ public enum MTOpcode : byte
     iconst,
 
     /// <summary>
-    /// Pushes <see cref="LinkedInstruction.Data"/>.
+    /// Pushes <see cref="LinkedInstruction.Data"/> as a string.
     /// </summary>
-    mconst,
+    strconst,
+
+    /// <summary>
+    /// Pushes <see cref="LinkedInstruction.Data"/> as a long.
+    /// </summary>
+    lconst,
+
+    /// <summary>
+    /// Pushes <see cref="LinkedInstruction.Data"/> as a double.
+    /// </summary>
+    dconst,
 
     #endregion
 
@@ -195,10 +205,10 @@ public enum MTOpcode : byte
 
     #region Calls
 
-    invoke_virt,
+    invoke_virtual,
     invoke_static,
     invoke_instance,
-    invoke_instance_void_no_args_bysig,
+    invoke_virtual_void_no_args_bysig,
 
     #endregion
 
