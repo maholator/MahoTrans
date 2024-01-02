@@ -8,6 +8,9 @@ using MahoTrans.Runtime;
 
 namespace MahoTrans;
 
+/// <summary>
+/// Converted opcodes, which are used in <see cref="LinkedInstruction"/>.
+/// </summary>
 public enum MTOpcode : byte
 {
     nop = 0,
@@ -249,7 +252,7 @@ public enum MTOpcode : byte
     bridge,
 
     /// <summary>
-    ///     <see cref="LinkedInstruction.Data" /> is an <see cref="ClassBoundBridge" />. It contains class to init and a bridge
+    ///     <see cref="LinkedInstruction.Data" /> is a <see cref="ClassBoundBridge" />. It contains class to init and a bridge
     ///     to run.
     ///     <see cref="LinkedInstruction.IntData" /> must contain count of taken values.
     ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.

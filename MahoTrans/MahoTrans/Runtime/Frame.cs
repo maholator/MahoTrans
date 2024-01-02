@@ -6,11 +6,30 @@ using System.Runtime.InteropServices;
 
 namespace MahoTrans.Runtime;
 
+/// <summary>
+///     JVM call stack frame. Keeps reference to running method, execution pointer, stack and locals.
+/// </summary>
 public unsafe class Frame
 {
+    /// <summary>
+    ///     Method which is run in this frame.
+    /// </summary>
     public JavaMethodBody Method;
+
+    /// <summary>
+    ///     Pointer to next instruction to execute. To get instruction for execution, do <see cref="Method" />.
+    ///     <see cref="JavaMethodBody.LinkedCode" />[<see cref="Pointer" />].
+    /// </summary>
     public int Pointer;
+
+    /// <summary>
+    ///     Buffer with local variables. Be careful to not corrupt memory around it.
+    /// </summary>
     public long* LocalVariables;
+
+    /// <summary>
+    ///     Buffer with stack. Be careful to not corrupt memory around it.
+    /// </summary>
     public long* Stack = null;
 
     /// <summary>
@@ -51,6 +70,9 @@ public unsafe class Frame
         Unsafe.InitBlock(LocalVariables, 0, (uint)(locals * sizeof(long)));
     }
 
+    /// <summary>
+    ///     Deallocates locals/stack buffers. This will be automatically done on object destruction.
+    /// </summary>
     private void DeallocateBuffers()
     {
         if (Stack == null)
@@ -317,8 +339,12 @@ public unsafe class Frame
     /// <param name="index">Local index.</param>
     public void PopToLocal(int index)
     {
-        var v = Pop();
-        LocalVariables[index] = v;
+#if DEBUG
+        if (StackTop == 0)
+            throw new JavaRuntimeError($"Stack underflow in {Method.Method}");
+#endif
+        StackTop--;
+        LocalVariables[index] = Stack[StackTop];
     }
 
     /// <summary>
