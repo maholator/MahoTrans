@@ -157,4 +157,22 @@ public class Vector : Object
     public void trimToSize()
     {
     }
+
+    public void setSize(int newSize)
+    {
+        var diff = newSize - List.Count;
+
+        if (diff > 0)
+        {
+            for (var i = 0; i < diff; i++)
+                addElement(Reference.Null);
+        }
+        else if (diff < 0)
+        {
+            for (int i = 0; i < -diff; i++)
+            {
+                List.RemoveAt(List.Count - 1);
+            }
+        }
+    }
 }
