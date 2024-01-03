@@ -93,4 +93,8 @@ public class Displayable : Object
         Toolkit.Display.Release(Handle);
         return base.OnObjectDelete();
     }
+
+    public void sizeChanged(int w, int h)
+    {
+    }
 }
