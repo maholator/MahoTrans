@@ -12,5 +12,6 @@ public class FullCanvas : Canvas
     public override void Init()
     {
         base.Init();
+        setFullScreenMode(true);
     }
 }
