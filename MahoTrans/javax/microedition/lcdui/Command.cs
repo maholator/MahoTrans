@@ -12,21 +12,14 @@ namespace javax.microedition.lcdui;
 
 public class Command : Object
 {
-    public static int BACK = 2;
-
-    public static int CANCEL = 3;
-
-    public static int EXIT = 7;
-
-    public static int HELP = 5;
-
-    public static int ITEM = 8;
-
-    public static int OK = 4;
-
-    public static int SCREEN = 1;
-
-    public static int STOP = 6;
+    public const int BACK = 2;
+    public const int CANCEL = 3;
+    public const int EXIT = 7;
+    public const int HELP = 5;
+    public const int ITEM = 8;
+    public const int OK = 4;
+    public const int SCREEN = 1;
+    public const int STOP = 6;
 
     [InitMethod]
     public void Init([String] Reference label, int commandType, int priority)

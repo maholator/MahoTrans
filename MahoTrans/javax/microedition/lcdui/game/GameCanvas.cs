@@ -28,4 +28,15 @@ public class GameCanvas : Canvas
     }
 
     public int getKeyStates() => 0;
+
+
+    public const int DOWN_PRESSED = 64;
+    public const int FIRE_PRESSED = 256;
+    public const int GAME_A_PRESSED = 512;
+    public const int GAME_B_PRESSED = 1024;
+    public const int GAME_C_PRESSED = 2048;
+    public const int GAME_D_PRESSED = 4096;
+    public const int LEFT_PRESSED = 4;
+    public const int RIGHT_PRESSED = 32;
+    public const int UP_PRESSED = 2;
 }

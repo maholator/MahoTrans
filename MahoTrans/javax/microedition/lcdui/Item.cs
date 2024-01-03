@@ -30,7 +30,21 @@ public class Item : Object
     }
 
 
-    public const int PLAIN = 0;
-    public const int HYPERLINK = 1;
     public const int BUTTON = 2;
+    public const int HYPERLINK = 1;
+    public const int LAYOUT_2 = 16384;
+    public const int LAYOUT_BOTTOM = 32;
+    public const int LAYOUT_CENTER = 3;
+    public const int LAYOUT_DEFAULT = 0;
+    public const int LAYOUT_EXPAND = 2048;
+    public const int LAYOUT_LEFT = 1;
+    public const int LAYOUT_NEWLINE_AFTER = 512;
+    public const int LAYOUT_NEWLINE_BEFORE = 256;
+    public const int LAYOUT_RIGHT = 2;
+    public const int LAYOUT_SHRINK = 1024;
+    public const int LAYOUT_TOP = 16;
+    public const int LAYOUT_VCENTER = 48;
+    public const int LAYOUT_VEXPAND = 8192;
+    public const int LAYOUT_VSHRINK = 4096;
+    public const int PLAIN = 0;
 }
