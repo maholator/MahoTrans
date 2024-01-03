@@ -16,7 +16,6 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    public AllocatorBehaviourOnOverflow OnOverflow;
     private Object?[] _heap = new Object?[1024 * 16];
     private int _nextObjectId = 1;
     [PublicAPI] public int ObjectsOnFly;

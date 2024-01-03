@@ -15,9 +15,6 @@ namespace MahoTrans.Runtime;
 /// </summary>
 public partial class JvmState
 {
-    public Toolkit Toolkit;
-    private readonly ExecutionManner _executionManner;
-
     private bool _running;
 
     private EventQueue? _eventQueue;
