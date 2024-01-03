@@ -143,8 +143,19 @@ public unsafe class Frame
 
     #region Universal methods
 
-    public void Push(object value)
+    /// <summary>
+    ///     Pushes unknown value into the stack.
+    /// </summary>
+    /// <param name="value">Value to push.</param>
+    /// <exception cref="JavaRuntimeError">Value has unsupported type.</exception>
+    public void Push(object? value)
     {
+        if (value is null)
+        {
+            PushUnchecked(0);
+            return;
+        }
+
         if (value is int i)
         {
             PushInt(i);

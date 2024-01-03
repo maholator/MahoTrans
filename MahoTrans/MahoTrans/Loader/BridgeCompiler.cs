@@ -11,7 +11,7 @@ namespace MahoTrans.Loader;
 
 public static class BridgeCompiler
 {
-    private static readonly Dictionary<Type, MethodInfo> StackPoppers = new()
+    public static readonly Dictionary<Type, MethodInfo> StackPoppers = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
         { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLong))! },

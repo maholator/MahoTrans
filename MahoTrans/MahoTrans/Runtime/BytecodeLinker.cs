@@ -1727,10 +1727,19 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                        opcode = MTOpcode.bridge_init_class;
-                        intData = 0;
-                        data = new ClassBoundBridge(b, c);
+                        if (jvm.UseBridgesForFields)
+                        {
+                            var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                            opcode = MTOpcode.bridge_init_class;
+                            intData = 0;
+                            data = new ClassBoundBridge(b, c);
+                        }
+                        else
+                        {
+                            opcode = MTOpcode.get_field;
+                            data = new ReflectionFieldPointer(f.NativeField, c);
+                        }
+
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
@@ -1741,10 +1750,19 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                        opcode = MTOpcode.bridge_init_class;
-                        intData = 1;
-                        data = new ClassBoundBridge(b, c);
+                        if (jvm.UseBridgesForFields)
+                        {
+                            var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                            opcode = MTOpcode.bridge_init_class;
+                            intData = 1;
+                            data = new ClassBoundBridge(b, c);
+                        }
+                        else
+                        {
+                            opcode = MTOpcode.set_field;
+                            data = new ReflectionFieldPointer(f.NativeField, c);
+                        }
+
                         SetNextStack();
                         break;
                     }
@@ -1754,10 +1772,19 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                        opcode = MTOpcode.bridge_init_class;
-                        intData = 1;
-                        data = new ClassBoundBridge(b, c);
+                        if (jvm.UseBridgesForFields)
+                        {
+                            var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                            opcode = MTOpcode.bridge_init_class;
+                            intData = 1;
+                            data = new ClassBoundBridge(b, c);
+                        }
+                        else
+                        {
+                            opcode = MTOpcode.get_field;
+                            data = new ReflectionFieldPointer(f.NativeField, c);
+                        }
+
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
@@ -1769,10 +1796,19 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                        opcode = MTOpcode.bridge_init_class;
-                        intData = 2;
-                        data = new ClassBoundBridge(b, c);
+                        if (jvm.UseBridgesForFields)
+                        {
+                            var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                            opcode = MTOpcode.bridge_init_class;
+                            intData = 2;
+                            data = new ClassBoundBridge(b, c);
+                        }
+                        else
+                        {
+                            opcode = MTOpcode.set_field;
+                            data = new ReflectionFieldPointer(f.NativeField, c);
+                        }
+
                         SetNextStack();
                         break;
                     }

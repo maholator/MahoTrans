@@ -9,7 +9,7 @@ using MahoTrans.Runtime;
 namespace MahoTrans;
 
 /// <summary>
-/// Converted opcodes, which are used in <see cref="LinkedInstruction"/>.
+///     Converted opcodes, which are used in <see cref="LinkedInstruction" />.
 /// </summary>
 public enum MTOpcode : byte
 {
@@ -215,6 +215,20 @@ public enum MTOpcode : byte
     invoke_static,
     invoke_instance,
     invoke_virtual_void_no_args_bysig,
+
+    #endregion
+
+    #region Fields (reflection)
+
+    /// <summary>
+    ///     Gets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
+    /// </summary>
+    get_field,
+
+    /// <summary>
+    ///     Sets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
+    /// </summary>
+    set_field,
 
     #endregion
 

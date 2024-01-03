@@ -10,4 +10,5 @@ public partial class JvmState
     public Toolkit Toolkit;
     private readonly ExecutionManner _executionManner;
     public AllocatorBehaviourOnOverflow OnOverflow;
+    public bool UseBridgesForFields = true;
 }
