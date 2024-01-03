@@ -35,14 +35,17 @@ public class Display : Object
 
     public void setCurrent([JavaType(typeof(Displayable))] Reference d)
     {
+        if (d.IsNull)
+        {
+            Toolkit.Display.SetNullCurrent();
+            return;
+        }
+
         if (Jvm.ResolveObject(d) is Alert a)
             a.Next = Current;
 
         Current = d;
-        if (d.IsNull)
-            Toolkit.Display.SetNullCurrent();
-        else
-            Toolkit.Display.SetCurrent(Jvm.Resolve<Displayable>(d).Handle);
+        Toolkit.Display.SetCurrent(Jvm.Resolve<Displayable>(d).Handle);
     }
 
     public void setCurrent([JavaType(typeof(Alert))] Reference alert, [JavaType(typeof(Displayable))] Reference next)
