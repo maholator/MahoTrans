@@ -39,6 +39,11 @@ public class TimerTree : Object
             y.Right = z.This;
     }
 
+    public void delete___r([JavaType(typeof(TimerNode))] Reference z)
+    {
+        delete(z.As<TimerNode>());
+    }
+
     [JavaIgnore]
     public void delete(TimerNode z)
     {

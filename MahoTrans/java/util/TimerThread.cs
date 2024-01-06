@@ -19,6 +19,7 @@ public class TimerThread : lang.Thread
     [InitMethod]
     public new void Init()
     {
+        base.Init();
         var tree = Jvm.AllocateObject<TimerTree>();
         tree.Init();
         Tasks = tree.This;
@@ -36,7 +37,7 @@ public class TimerThread : lang.Thread
         b.Append(JavaOpcode.monitorenter);
         b.AppendThis();
         b.AppendGetLocalField(nameof(Cancelled), typeof(bool));
-        using (b.AppendGoto(JavaOpcode.ifne))
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             b.AppendThis();
             b.Append(JavaOpcode.monitorexit);
@@ -46,7 +47,7 @@ public class TimerThread : lang.Thread
         b.AppendThis();
         b.AppendGetLocalField(nameof(Tasks), typeof(TimerTree));
         b.AppendVirtcall(nameof(TimerTree.isEmpty), typeof(bool));
-        using (b.AppendGoto(JavaOpcode.ifne))
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             using (var tr = b.BeginTry<InterruptedException>())
             {
@@ -76,7 +77,7 @@ public class TimerThread : lang.Thread
         b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_1);
         b.AppendGetField(nameof(TimerTask.Cancelled), typeof(bool), typeof(TimerTask));
-        using (b.AppendGoto(JavaOpcode.ifne))
+        using (b.AppendGoto(JavaOpcode.ifeq))
         {
             b.AppendThis();
             b.AppendGetLocalField(nameof(Tasks), typeof(TimerTree));
@@ -123,7 +124,7 @@ public class TimerThread : lang.Thread
         // tasks.delete(taskNode);
         b.AppendThis();
         b.AppendGetLocalField(nameof(Tasks), typeof(TimerTree));
-        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.aload_3);
         b.AppendVirtcall(nameof(TimerTree.delete), typeof(void), typeof(TimerNode));
 
         b.Append(JavaOpcode.aload_1);
@@ -189,7 +190,7 @@ public class TimerThread : lang.Thread
         }
 
         b.AppendGoto(JavaOpcode.@goto, begin);
-        return b.Build(2, 4);
+        return b.Build(3, 4);
     }
 
     public void insertTask([JavaType(typeof(TimerTask))] Reference newTask)
