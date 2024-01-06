@@ -16,6 +16,7 @@ public class TimerTree : Object
         return Root.IsNull;
     }
 
+    [JavaIgnore]
     public void insert(TimerNode z)
     {
         TimerNode? y = null;
@@ -38,6 +39,7 @@ public class TimerTree : Object
             y.Right = z.This;
     }
 
+    [JavaIgnore]
     public void delete(TimerNode z)
     {
         TimerNode? y;
@@ -79,7 +81,7 @@ public class TimerTree : Object
     }
 
     [return: JavaType(typeof(TimerNode))]
-    private static Reference minimum([JavaType(typeof(TimerNode))] Reference x)
+    public static Reference minimum([JavaType(typeof(TimerNode))] Reference x)
     {
         while (!x.As<TimerNode>().Left.IsNull)
             x = x.As<TimerNode>().Left;
