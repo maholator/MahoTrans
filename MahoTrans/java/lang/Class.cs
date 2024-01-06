@@ -92,4 +92,20 @@ public class Class : Object
         stream.Init(buf);
         return stream.This;
     }
+
+    public bool isInterface() => InternalClass.IsInterface;
+
+    public bool isArray() => InternalClass.IsArray;
+
+    public bool isInstance(Reference obj)
+    {
+        return Jvm.ResolveObject(obj).JavaClass.Is(InternalClass);
+    }
+
+    public bool isAssignableFrom([JavaType(typeof(Class))] Reference cls)
+    {
+        //TODO this does not take into account edge cases (like primitives)!
+        var other = Jvm.Resolve<Class>(cls);
+        return other.InternalClass.Is(InternalClass);
+    }
 }
