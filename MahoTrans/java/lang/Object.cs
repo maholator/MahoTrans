@@ -185,7 +185,7 @@ public class Object
 
     public void notify()
     {
-        if (Waiters == null)
+        if (Waiters == null || Waiters.Count == 0)
             return;
 
         var mw = Waiters[^1];
@@ -199,7 +199,7 @@ public class Object
 
     public void notifyAll()
     {
-        if (Waiters == null)
+        if (Waiters == null || Waiters.Count == 0)
             return;
 
         foreach (var mw in Waiters)
