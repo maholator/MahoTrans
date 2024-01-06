@@ -314,6 +314,17 @@ public class DataInputStream : InputStream
         };
     }
 
+    [JavaDescriptor("()F")]
+    public JavaMethodBody readFloat(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(readInt), typeof(int));
+        b.AppendStaticCall<Float>(nameof(Float.intBitsToFloat), typeof(float), typeof(int));
+        b.AppendReturnFloat();
+        return b.Build(1, 1);
+    }
+
     /// <summary>
     ///     Reads one byte from <see cref="@in" />. Performs EOF check. Always read using this method.
     /// </summary>
