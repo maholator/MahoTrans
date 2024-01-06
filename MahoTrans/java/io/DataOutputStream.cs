@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -222,6 +223,19 @@ public class DataOutputStream : OutputStream
                 new(JavaOpcode.@return),
             }
         };
+    }
+
+    [JavaDescriptor("(F)V")]
+    public JavaMethodBody writeFloat(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.Append(JavaOpcode.fload_1);
+        b.AppendStaticCall<Float>(nameof(Float.floatToIntBits), typeof(int), typeof(float));
+        b.AppendVirtcall(nameof(writeInt), typeof(void), typeof(int));
+        b.AppendReturn();
+
+        return b.Build(2, 2);
     }
 
     [JavaDescriptor("(Ljava/lang/String;)V")]
