@@ -37,6 +37,8 @@ public partial class JvmState
     /// </summary>
     private Queue<JavaThread> _wakeingUpQueue = new();
 
+    public int WakingUpQueueLength => _wakeingUpQueue.Count;
+
     #region Threads management
 
     /// <summary>
