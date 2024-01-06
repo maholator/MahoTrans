@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
 using javax.microedition.ams;
 using javax.microedition.ams.events;
 using MahoTrans;
@@ -73,20 +74,56 @@ public class Canvas : Displayable
         {
             case -1:
             case '2':
-                return 1;
+                return UP;
             case -2:
             case '8':
-                return 6;
+                return DOWN;
             case -3:
             case '4':
-                return 2;
+                return LEFT;
             case -4:
             case '6':
-                return 5;
+                return RIGHT;
             case -5:
             case 5:
-                return 8;
+                return FIRE;
+            case '1':
+                return GAME_A;
+            case '3':
+                return GAME_B;
+            case '7':
+                return GAME_C;
+            case '9':
+                return GAME_D;
             default:
+                return 0;
+        }
+    }
+
+    public int getKeyCode(int action)
+    {
+        switch (action)
+        {
+            case FIRE:
+                return -5;
+            case GAME_A:
+                return '1';
+            case GAME_B:
+                return '3';
+            case GAME_C:
+                return '7';
+            case GAME_D:
+                return '9';
+            case UP:
+                return -1;
+            case DOWN:
+                return -2;
+            case LEFT:
+                return -3;
+            case RIGHT:
+                return -4;
+            default:
+                Jvm.Throw<IllegalArgumentException>();
                 return 0;
         }
     }
@@ -138,4 +175,26 @@ public class Canvas : Displayable
     }
 
     #endregion
+
+    public const int DOWN = 6;
+    public const int FIRE = 8;
+    public const int GAME_A = 9;
+    public const int GAME_B = 10;
+    public const int GAME_C = 11;
+    public const int GAME_D = 12;
+    public const int KEY_NUM0 = 48;
+    public const int KEY_NUM1 = 49;
+    public const int KEY_NUM2 = 50;
+    public const int KEY_NUM3 = 51;
+    public const int KEY_NUM4 = 52;
+    public const int KEY_NUM5 = 53;
+    public const int KEY_NUM6 = 54;
+    public const int KEY_NUM7 = 55;
+    public const int KEY_NUM8 = 56;
+    public const int KEY_NUM9 = 57;
+    public const int KEY_POUND = 35;
+    public const int KEY_STAR = 42;
+    public const int LEFT = 2;
+    public const int RIGHT = 5;
+    public const int UP = 1;
 }
