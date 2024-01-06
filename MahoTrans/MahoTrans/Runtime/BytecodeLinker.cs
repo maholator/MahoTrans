@@ -2071,6 +2071,9 @@ public static class BytecodeLinker
 
                 void PopWithAssert(params PrimitiveType[] expected)
                 {
+                    if (emulatedStack.Count == 0)
+                        throw new JavaLinkageException(
+                            $"Opcode {instruction.Opcode} at {instrIndex} expects one of {string.Join(", ", expected)} on stack but stack was empty.");
                     var real = emulatedStack.Pop();
                     if (!expected.Contains(real))
                         throw new JavaLinkageException(
