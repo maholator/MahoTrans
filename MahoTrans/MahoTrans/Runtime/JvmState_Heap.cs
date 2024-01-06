@@ -224,6 +224,13 @@ public partial class JvmState
         return (T)_heap[r.Index]!;
     }
 
+    public T? ResolveNullable<T>(Reference r) where T : Object
+    {
+        if (r.IsNull)
+            return null;
+        return _heap[r.Index] as T;
+    }
+
     /// <summary>
     ///     Resolves a string and gets its value as <see cref="string" />. Will throw on invalid reference.
     /// </summary>

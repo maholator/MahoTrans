@@ -27,6 +27,20 @@ public struct Reference : IEquatable<Reference>
     /// </summary>
     [JsonIgnore] public Object? Value => IsNull ? null : Object.Jvm.ResolveObject(Index);
 
+    public Object AsObject()
+    {
+        return JvmState.Context.ResolveObject(this);
+    }
+
+    public T As<T>() where T : Object
+    {
+        return JvmState.Context.Resolve<T>(this);
+    }
+    public T? AsNullable<T>() where T : Object
+    {
+        return JvmState.Context.ResolveNullable<T>(this);
+    }
+
     public override int GetHashCode()
     {
         return Index;
