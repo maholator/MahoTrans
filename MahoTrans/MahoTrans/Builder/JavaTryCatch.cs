@@ -34,6 +34,9 @@ public class JavaTryCatch : IDisposable
         Builder = builder;
     }
 
+    /// <summary>
+    ///     Moves labels to end try section and begin catch section.
+    /// </summary>
     public void CatchSection()
     {
         Builder.AppendGoto(JavaOpcode.@goto, CatchEnd);
