@@ -43,4 +43,7 @@ public class Short : Object
 
         return false;
     }
+
+    //TODO proper checks
+    public static short parseShort([String] Reference str, int radix) => Convert.ToInt16(Jvm.ResolveString(str), radix);
 }
