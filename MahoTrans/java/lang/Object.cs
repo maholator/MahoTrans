@@ -7,7 +7,6 @@ using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
 
@@ -77,7 +76,7 @@ public class Object
 
     [JsonIgnore] public static bool JvmAttached => _jvm != null;
 
-    [JsonIgnore] protected static Toolkit Toolkit => Jvm.Toolkit;
+    [JsonIgnore] protected static ToolkitCollection Toolkit => Jvm.Toolkit;
 
     #endregion
 

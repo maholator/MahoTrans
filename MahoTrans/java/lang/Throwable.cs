@@ -26,7 +26,7 @@ public class Throwable : Object
 
     public void printStackTrace()
     {
-        Jvm.Toolkit.System.PrintException(this);
+        Jvm.Toolkit.System.PrintException(This);
     }
 
     [return: String]

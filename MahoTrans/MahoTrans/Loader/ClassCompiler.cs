@@ -3,9 +3,9 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
+using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
 
@@ -18,7 +18,7 @@ namespace MahoTrans.Loader;
 public static class ClassCompiler
 {
     public static void CompileTypes(Dictionary<string, JavaClass> loaded, JavaClass[] queued,
-        string assemblyName, string moduleName, ILoadTimeLogger logger)
+        string assemblyName, string moduleName, ILoadLogger logger)
     {
         Dictionary<string, JavaClass> queuedDict = queued.ToDictionary(x => x.Name, x => x);
         Dictionary<JavaClass, CompilerCache> cache = queued.ToDictionary(x => x, x => new CompilerCache(x));

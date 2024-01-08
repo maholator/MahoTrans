@@ -3,9 +3,9 @@
 
 using java.io;
 using java.lang;
+using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using IOException = java.io.IOException;
 using Object = java.lang.Object;

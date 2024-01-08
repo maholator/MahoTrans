@@ -1,14 +1,14 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using java.lang;
-using MahoTrans.Toolkits;
+using MahoTrans.Abstractions;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.ToolkitImpls.Systems;
 
 public class DummySystem : ISystem
 {
-    public void PrintException(Throwable t)
+    public void PrintException(Reference t)
     {
     }
 

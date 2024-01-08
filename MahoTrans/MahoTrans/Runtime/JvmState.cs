@@ -6,7 +6,6 @@ using System.Text;
 using javax.microedition.ams;
 using javax.microedition.midlet;
 using JetBrains.Annotations;
-using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -37,7 +36,7 @@ public partial class JvmState
 
     public event Action<long>? BetweenBunches;
 
-    public JvmState(Toolkit toolkit, ExecutionManner executionManner)
+    public JvmState(ToolkitCollection toolkit, ExecutionManner executionManner)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Toolkit = toolkit;

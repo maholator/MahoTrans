@@ -8,7 +8,6 @@ using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.ToolkitImpls.Rms;
 using MahoTrans.ToolkitImpls.Systems;
-using MahoTrans.Toolkits;
 
 namespace MahoTrans.Testing;
 
@@ -21,16 +20,18 @@ public class JavaTest
         if (jarFile == null)
             throw new FileNotFoundException();
 
-        Toolkit tk = new Toolkit(
+        ToolkitCollection tk = new ToolkitCollection(
             new DummySystem(),
             new RealTimeClock(),
             null!,
             null!,
             null!,
             new AmsEventHub(),
-            new InMemoryRms(),
-            new ConsoleLogger(),
-            new ConsoleLogger());
+            new InMemoryRms())
+        {
+            Logger = new ConsoleLogger(),
+            LoadLogger = new ConsoleLogger()
+        };
         _jvm = new JvmState(tk, ExecutionManner.Unlocked);
         _jvm.AddClrClasses(typeof(JavaRunner).Assembly);
         var cl = new ClassLoader(new ConsoleLogger());

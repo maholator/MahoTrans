@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
 using JetBrains.Annotations;
+using MahoTrans.Abstractions;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
@@ -365,7 +365,7 @@ public partial class JvmState
                 _nextObjectId = 1;
 
             ObjectsOnFly++;
-            Toolkit.HeapDebugger?.ObjectCreated(obj);
+            Toolkit.HeapDebugger?.ObjectCreated(obj.This);
 
             return r;
         }
@@ -456,14 +456,14 @@ public partial class JvmState
                     deletedCount++;
                     ObjectsOnFly--;
                     _bytesAllocated -= obj.JavaClass.Size;
+                    Toolkit.HeapDebugger?.ObjectDeleted(obj.This);
                     _heap[i] = null;
-                    Toolkit.HeapDebugger?.ObjectDeleted(obj);
                 }
             }
 
             sw.Stop();
             GcCount++;
-            Toolkit.Logger.LogDebug(DebugMessageCategory.Gc,
+            Toolkit.Logger?.LogDebug(DebugMessageCategory.Gc,
                 $"Deleted {deletedCount} objects in {sw.ElapsedMilliseconds} ms");
         }
     }

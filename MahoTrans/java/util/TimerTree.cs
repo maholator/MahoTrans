@@ -3,6 +3,7 @@
 
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace java.util;

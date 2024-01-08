@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
-using javax.microedition.lcdui;
+using MahoTrans.Abstractions;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Utils;

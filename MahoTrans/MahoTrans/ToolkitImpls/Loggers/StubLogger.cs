@@ -1,15 +1,15 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Toolkits;
-using Object = java.lang.Object;
+using MahoTrans.Abstractions;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.ToolkitImpls.Loggers;
 
 /// <summary>
 ///     Logger that does nothing with incoming messages.
 /// </summary>
-public class StubLogger : ILogger, ILoadTimeLogger, IHeapDebugger
+public class StubLogger : ILogger, ILoadLogger, IHeapDebugger
 {
     public void LogRuntime(LogLevel level, string message)
     {
@@ -23,11 +23,11 @@ public class StubLogger : ILogger, ILoadTimeLogger, IHeapDebugger
     {
     }
 
-    public void ObjectCreated(Object obj)
+    public void ObjectCreated(Reference obj)
     {
     }
 
-    public void ObjectDeleted(Object obj)
+    public void ObjectDeleted(Reference obj)
     {
     }
 }

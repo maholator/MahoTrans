@@ -1,8 +1,8 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Abstractions;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime;
@@ -61,7 +61,7 @@ public static class BytecodeLinker
     /// <summary>
     ///     Checks that there is no broken references.
     /// </summary>
-    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadTimeLogger logger)
+    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadLogger logger)
     {
         var consts = cls.Constants;
 
@@ -226,7 +226,7 @@ public static class BytecodeLinker
     }
 
 
-    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadTimeLogger logger)
+    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadLogger logger)
     {
         var code = method.Code;
         var methodName = method.Method.Descriptor.ToString();
@@ -304,7 +304,7 @@ public static class BytecodeLinker
         method.LocalTypes = types;
     }
 
-    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadTimeLogger logger)
+    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadLogger logger)
     {
         if (code.Length == 0)
             return;

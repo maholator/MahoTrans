@@ -1,14 +1,14 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Toolkits;
+using MahoTrans.Abstractions;
 
 namespace MahoTrans.ToolkitImpls.Loggers;
 
 /// <summary>
 ///     Logger that writes all messages to console.
 /// </summary>
-public class ConsoleLogger : ILogger, ILoadTimeLogger
+public class ConsoleLogger : ILogger, ILoadLogger
 {
     public void Log(LoadIssueType level, string className, string message)
     {

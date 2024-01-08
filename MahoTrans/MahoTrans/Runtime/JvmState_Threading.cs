@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
-using MahoTrans.Toolkits;
+using MahoTrans.Abstractions;
 using Thread = java.lang.Thread;
 
 namespace MahoTrans.Runtime;

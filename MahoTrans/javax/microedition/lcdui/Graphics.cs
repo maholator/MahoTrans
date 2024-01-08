@@ -3,9 +3,10 @@
 
 using com.nokia.mid.ui;
 using java.lang;
+using MahoTrans.Abstractions;
+using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkits;
 using Newtonsoft.Json;
 using Object = java.lang.Object;
 

@@ -1,9 +1,9 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkits;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;

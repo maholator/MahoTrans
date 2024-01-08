@@ -6,9 +6,9 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using Be.IO;
+using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 
 namespace MahoTrans.Loader;
@@ -18,10 +18,10 @@ namespace MahoTrans.Loader;
 /// </summary>
 public class ClassLoader
 {
-    private ILoadTimeLogger _logger;
+    private ILoadLogger _logger;
     private string _classFileName = "";
 
-    public ClassLoader(ILoadTimeLogger logger)
+    public ClassLoader(ILoadLogger logger)
     {
         _logger = logger;
     }

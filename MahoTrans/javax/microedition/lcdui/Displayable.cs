@@ -2,9 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Toolkits;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -26,7 +26,7 @@ public class Displayable : Object
     public override void Init()
     {
         base.Init();
-        Handle = Toolkit.Display.Register(this);
+        Handle = Toolkit.Display.Register(This);
     }
 
     public int getWidth() => Toolkit.Display.GetWidth(Handle);

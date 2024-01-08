@@ -7,6 +7,7 @@ using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 
 namespace java.util;
