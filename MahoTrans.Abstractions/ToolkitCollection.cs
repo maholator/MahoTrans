@@ -32,6 +32,11 @@ public class ToolkitCollection
 
     public IHeapDebugger? HeapDebugger;
 
+    /// <summary>
+    /// This will be readonly soon.
+    /// </summary>
+    public IMedia? Media;
+
     public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display,
         IAms ams,
         IRecordStore recordStore)

@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>MahoTrans</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.3</Version>
+        <Version>1.0.5</Version>
         <Title>MahoTrans.Abstractions</Title>
         <Authors>Ryzhov Fyodor (aka. sym_ansel)</Authors>
         <Description>Base library for MahoTrans.</Description>
@@ -15,9 +15,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Be.IO-netstandard" Version="1.0.3"/>
-        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Be.IO-netstandard" Version="1.0.3" />
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
 </Project>

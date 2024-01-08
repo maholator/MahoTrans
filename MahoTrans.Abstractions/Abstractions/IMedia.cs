@@ -27,7 +27,7 @@ public interface IMedia : IToolkit
     /// <param name="contentType">Content type.</param>
     /// <param name="callbacks">Callbacks to use.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(Memory<byte> data, string contentType, IMediaCallbacks callbacks);
+    MediaHandle Create(Memory<sbyte> data, string contentType, IMediaCallbacks callbacks);
 
     /// <summary>
     ///     Creates media player from MRL.
@@ -40,12 +40,12 @@ public interface IMedia : IToolkit
     /// <summary>
     ///     Returns list of supported content types.
     /// </summary>
-    string[] SupportedContentTypes { get; }
+    string[] GetSupportedContentTypes(string protocol);
 
     /// <summary>
     ///     Returns list of supported protocols.
     /// </summary>
-    string[] SupportedProtocols { get; }
+    string[] GetSupportedProtocols(string contentType);
 
     #endregion
 
