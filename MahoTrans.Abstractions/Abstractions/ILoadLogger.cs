@@ -4,12 +4,12 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Logger which is used by linker to report issues during classes load.
+///     Logger which is used by linker to report issues during classes load.
 /// </summary>
 public interface ILoadLogger : IToolkit
 {
     /// <summary>
-    /// Logs an issue, detected by linker during classes load.
+    ///     Logs an issue, detected by linker during classes load.
     /// </summary>
     /// <param name="type">Type of the issue.</param>
     /// <param name="className">Name of the class, where the issue was detected.</param>

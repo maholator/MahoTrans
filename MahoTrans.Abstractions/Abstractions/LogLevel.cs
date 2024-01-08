@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Importance of log message.
+///     Importance of log message.
 /// </summary>
 public enum LogLevel
 {

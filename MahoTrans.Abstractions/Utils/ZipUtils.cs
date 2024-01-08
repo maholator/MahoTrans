@@ -7,7 +7,7 @@ using System.Text;
 namespace MahoTrans.Utils;
 
 /// <summary>
-/// Some helper methods for working with zip archives.
+///     Some helper methods for working with zip archives.
 /// </summary>
 public static class ZipUtils
 {

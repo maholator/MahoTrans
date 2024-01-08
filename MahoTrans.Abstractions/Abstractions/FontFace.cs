@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Font face constants from LCDUI.
+///     Font face constants from LCDUI.
 /// </summary>
 public enum FontFace
 {

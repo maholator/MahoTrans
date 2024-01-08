@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Image manipulation flags from NokiaUI.
+///     Image manipulation flags from NokiaUI.
 /// </summary>
 [Flags]
 public enum ImageManipulation

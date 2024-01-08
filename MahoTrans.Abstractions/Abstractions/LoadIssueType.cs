@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Various issues with bytecode that linker can detect at load-time.
+///     Various issues with bytecode that linker can detect at load-time.
 /// </summary>
 public enum LoadIssueType
 {

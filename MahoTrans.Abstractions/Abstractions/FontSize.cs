@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Font size constants from LCDUI.
+///     Font size constants from LCDUI.
 /// </summary>
 public enum FontSize
 {

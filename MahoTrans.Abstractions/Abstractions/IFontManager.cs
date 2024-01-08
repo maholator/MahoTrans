@@ -4,19 +4,19 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Toolkit that provides font metrics.
+///     Toolkit that provides font metrics.
 /// </summary>
 public interface IFontManager : IToolkit
 {
     /// <summary>
-    /// Returns values for Font.getHeight().
+    ///     Returns values for Font.getHeight().
     /// </summary>
     /// <param name="size">Font size as LCDUI constant.</param>
     /// <returns>Height of text line in pixels.</returns>
     int GetFontHeight(FontSize size);
 
     /// <summary>
-    /// Returns values for Font.charWidth().
+    ///     Returns values for Font.charWidth().
     /// </summary>
     /// <param name="face">Font face as LCDUI constant.</param>
     /// <param name="style">Font style as LCDUI constant.</param>
@@ -26,7 +26,7 @@ public interface IFontManager : IToolkit
     int GetCharWidth(FontFace face, FontStyle style, int size, char c);
 
     /// <summary>
-    /// Returns values for Font.getCharsWidth().
+    ///     Returns values for Font.getCharsWidth().
     /// </summary>
     /// <param name="face">Font face as LCDUI constant.</param>
     /// <param name="style">Font style as LCDUI constant.</param>

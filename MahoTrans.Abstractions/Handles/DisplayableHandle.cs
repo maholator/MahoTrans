@@ -6,13 +6,13 @@ using JetBrains.Annotations;
 namespace MahoTrans.Handles;
 
 /// <summary>
-/// Handle for a displayable.
+///     Handle for a displayable.
 /// </summary>
 [PublicAPI]
 public readonly struct DisplayableHandle : IEquatable<DisplayableHandle>
 {
     /// <summary>
-    /// Displayable ID in toolkit memory.
+    ///     Displayable ID in toolkit memory.
     /// </summary>
     public readonly int Id;
 

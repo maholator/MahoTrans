@@ -15,9 +15,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Be.IO-netstandard" Version="1.0.3" />
-      <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Be.IO-netstandard" Version="1.0.3"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
     </ItemGroup>
 
 </Project>

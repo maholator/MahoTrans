@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Sprite transform constants from LCDUI.
+///     Sprite transform constants from LCDUI.
 /// </summary>
 public enum SpriteTransform
 {

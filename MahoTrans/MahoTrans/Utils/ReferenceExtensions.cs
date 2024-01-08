@@ -7,7 +7,7 @@ namespace MahoTrans.Utils;
 
 public static class ReferenceExtensions
 {
-    public static Object AsObject(this Reference r)
+    public static java.lang.Object AsObject(this Reference r)
     {
         return JvmState.Context.ResolveObject(r);
     }

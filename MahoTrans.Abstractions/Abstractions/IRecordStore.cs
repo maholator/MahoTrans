@@ -4,12 +4,12 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Toolkit that implements RMS system.
+///     Toolkit that implements RMS system.
 /// </summary>
 public interface IRecordStore : IToolkit
 {
     /// <summary>
-    /// Gets all existing stores.
+    ///     Gets all existing stores.
     /// </summary>
     /// <returns>List of names of existing stores.</returns>
     string[] ListStores();
@@ -26,7 +26,7 @@ public interface IRecordStore : IToolkit
     bool OpenStore(string name, bool createIfNotExists);
 
     /// <summary>
-    /// Notifies toolkit that store is closed.
+    ///     Notifies toolkit that store is closed.
     /// </summary>
     /// <param name="name">Store's name.</param>
     void CloseStore(string name);

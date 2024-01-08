@@ -4,7 +4,7 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-/// Various message categories for debug messages.
+///     Various message categories for debug messages.
 /// </summary>
 public enum DebugMessageCategory
 {

@@ -32,7 +32,8 @@ public class ToolkitCollection
 
     public IHeapDebugger? HeapDebugger;
 
-    public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display, IAms ams,
+    public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display,
+        IAms ams,
         IRecordStore recordStore)
     {
         System = system;

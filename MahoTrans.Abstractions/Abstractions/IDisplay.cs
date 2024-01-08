@@ -35,28 +35,28 @@ public interface IDisplay : IToolkit
     public DisplayableHandle? Current { get; }
 
     /// <summary>
-    /// Gets width of the displayable.
+    ///     Gets width of the displayable.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <returns>Width of the displayable in pixels.</returns>
     int GetWidth(DisplayableHandle handle);
 
     /// <summary>
-    /// Gets height of the displayable.
+    ///     Gets height of the displayable.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <returns>Height of the displayable in pixels.</returns>
     int GetHeight(DisplayableHandle handle);
 
     /// <summary>
-    /// Gets type of the displayable.
+    ///     Gets type of the displayable.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <returns>Displayable's type.</returns>
     DisplayableType GetType(DisplayableHandle handle);
 
     /// <summary>
-    /// Sets displayable's fullscreen mode. This throws if displayable can't be in fullscreen mode.
+    ///     Sets displayable's fullscreen mode. This throws if displayable can't be in fullscreen mode.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <param name="state">State to set.</param>
@@ -83,7 +83,7 @@ public interface IDisplay : IToolkit
     void CommandsUpdated(DisplayableHandle handle, List<Reference> commands, Reference selectCommand);
 
     /// <summary>
-    /// Notifies toolkit that ticker was updated.
+    ///     Notifies toolkit that ticker was updated.
     /// </summary>
     void TickerUpdated();
 
@@ -103,20 +103,20 @@ public interface IDisplay : IToolkit
 
 
     /// <summary>
-    /// Gets graphics to draw on the displayable. If it's not possible to draw on the displayable, this will throw.
+    ///     Gets graphics to draw on the displayable. If it's not possible to draw on the displayable, this will throw.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <returns>Handle of graphics object.</returns>
     GraphicsHandle GetGraphics(DisplayableHandle handle);
 
     /// <summary>
-    /// Flushes contents of the displayable. If displayable is not something that can be flushed, this does nothing.
+    ///     Flushes contents of the displayable. If displayable is not something that can be flushed, this does nothing.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     void Flush(DisplayableHandle handle);
 
     /// <summary>
-    /// Flushes part of the displayable. If displayable is not something that can be flushed, this does nothing.
+    ///     Flushes part of the displayable. If displayable is not something that can be flushed, this does nothing.
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <param name="x">X.</param>

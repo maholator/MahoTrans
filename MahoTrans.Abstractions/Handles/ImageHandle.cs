@@ -6,13 +6,13 @@ using JetBrains.Annotations;
 namespace MahoTrans.Handles;
 
 /// <summary>
-/// Handle for an image.
+///     Handle for an image.
 /// </summary>
 [PublicAPI]
 public readonly struct ImageHandle : IEquatable<ImageHandle>
 {
     /// <summary>
-    /// Image ID in toolkit memory.
+    ///     Image ID in toolkit memory.
     /// </summary>
     public readonly int Id;
 
