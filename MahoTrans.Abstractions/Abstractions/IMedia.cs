@@ -8,7 +8,7 @@ namespace MahoTrans.Abstractions;
 /// <summary>
 ///     Toolkit that enables audio/video playback.
 /// </summary>
-public interface IMedia
+public interface IMedia : IToolkit
 {
     #region Manager APIs
 
