@@ -50,7 +50,7 @@ public partial class JvmState
         if (thread is null)
             throw new NullReferenceException("Attempt to register null thread.");
 
-        Toolkit.Logger.LogDebug(DebugMessageCategory.Threading,
+        Toolkit.Logger?.LogDebug(DebugMessageCategory.Threading,
             $"Thread {thread.ThreadId} registered and will start soon");
         lock (_threadPoolLock)
         {

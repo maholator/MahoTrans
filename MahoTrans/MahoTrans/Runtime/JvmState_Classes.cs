@@ -6,6 +6,7 @@ using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Types;
+using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -35,7 +36,7 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
     {
-        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, Toolkit.LoadLogger);
+        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, Toolkit.LoadLogger ?? new StubLogger());
         foreach (var cls in classes)
         {
             Classes.Add(cls.Name, cls);
@@ -195,13 +196,13 @@ public partial class JvmState
 
         if (_resources.TryGetValue(name, out var blob))
         {
-            Toolkit.Logger.LogDebug(DebugMessageCategory.Resources,
+            Toolkit.Logger?.LogDebug(DebugMessageCategory.Resources,
                 $"Resource {name} accessed, {blob.Length} bytes");
             var copy = blob.ConvertToSigned();
             return copy;
         }
 
-        Toolkit.Logger.LogDebug(DebugMessageCategory.Resources, $"Resource {name} not found");
+        Toolkit.Logger?.LogDebug(DebugMessageCategory.Resources, $"Resource {name} not found");
         return null;
     }
 

@@ -81,7 +81,7 @@ public class JavaMethodBody
     {
         if (LinkedCode != null!)
             return;
-        Object.Jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Jit, $"{Method} will be linked");
+        Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Jit, $"{Method} will be linked");
         BytecodeLinker.Link(this, Object.Jvm);
     }
 

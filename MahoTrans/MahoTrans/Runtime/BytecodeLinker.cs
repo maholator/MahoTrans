@@ -61,7 +61,7 @@ public static class BytecodeLinker
     /// <summary>
     ///     Checks that there is no broken references.
     /// </summary>
-    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadLogger logger)
+    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadLogger? logger)
     {
         var consts = cls.Constants;
 
@@ -75,7 +75,7 @@ public static class BytecodeLinker
                     var type = (string)consts[Combine(args[0], args[1])];
                     if (!jvm.Classes.ContainsKey(type))
                     {
-                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{type}\" can't be found but going to be instantiated");
                     }
 
@@ -91,7 +91,7 @@ public static class BytecodeLinker
                     }
                     catch
                     {
-                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{type}\" can't be found but going to be casted into");
                     }
 
@@ -113,7 +113,7 @@ public static class BytecodeLinker
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.InvalidConstant, cls.Name,
+                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
                             $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
                         break;
                     }
@@ -128,13 +128,13 @@ public static class BytecodeLinker
                         }
                         catch
                         {
-                            logger.Log(LoadIssueType.MissingMethodAccess, cls.Name,
+                            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name,
                                 $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" will be used");
                     }
 
@@ -150,7 +150,7 @@ public static class BytecodeLinker
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.InvalidConstant, cls.Name,
+                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
                             $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
                         break;
                     }
@@ -162,19 +162,19 @@ public static class BytecodeLinker
                             var f = c.GetFieldRecursive(ndc.Descriptor);
                             if (f.Flags.HasFlag(FieldFlags.Static))
                             {
-                                logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
                                     $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is static");
                             }
                         }
                         catch
                         {
-                            logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
                                 $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
                     }
 
@@ -191,7 +191,7 @@ public static class BytecodeLinker
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.InvalidConstant, cls.Name,
+                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
                             $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
                         break;
                     }
@@ -203,19 +203,19 @@ public static class BytecodeLinker
                             var f = c.GetFieldRecursive(ndc.Descriptor);
                             if (!f.Flags.HasFlag(FieldFlags.Static))
                             {
-                                logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                                logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
                                     $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is not static");
                             }
                         }
                         catch
                         {
-                            logger.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
                                 $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
                         }
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
                             $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
                     }
 
@@ -226,7 +226,7 @@ public static class BytecodeLinker
     }
 
 
-    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadLogger logger)
+    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadLogger? logger)
     {
         var code = method.Code;
         var methodName = method.Method.Descriptor.ToString();
@@ -268,7 +268,7 @@ public static class BytecodeLinker
 
                 if (index >= method.LocalsCount)
                 {
-                    logger.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
+                    logger?.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
                         $"Local variable {index} of type \"{(LocalVariableType)type}\" is out of bounds at {methodName}:{i}");
                     continue;
                 }
@@ -287,7 +287,7 @@ public static class BytecodeLinker
             if (locals[i].Count > 1)
             {
                 locals[i].Sort();
-                logger.Log(LoadIssueType.MultiTypeLocalVariable, cls,
+                logger?.Log(LoadIssueType.MultiTypeLocalVariable, cls,
                     $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
                 types[i] = default;
             }
@@ -304,7 +304,7 @@ public static class BytecodeLinker
         method.LocalTypes = types;
     }
 
-    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadLogger logger)
+    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadLogger? logger)
     {
         if (code.Length == 0)
             return;
@@ -330,7 +330,7 @@ public static class BytecodeLinker
                 return;
         }
 
-        logger.Log(LoadIssueType.MethodWithoutReturn, cls,
+        logger?.Log(LoadIssueType.MethodWithoutReturn, cls,
             $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
     }
 
@@ -546,8 +546,10 @@ public static class BytecodeLinker
                             emulatedStack.Push(PrimitiveType.Double);
                             if (d == 0d)
                                 opcode = MTOpcode.dconst_0;
+                            // ReSharper disable once CompareOfFloatsByEqualityOperator
                             else if (d == 1d)
                                 opcode = MTOpcode.dconst_1;
+                            // ReSharper disable once CompareOfFloatsByEqualityOperator
                             else if (d == 2d)
                                 opcode = MTOpcode.dconst_2;
                             else

@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.midlet;
+using JetBrains.Annotations;
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -11,13 +12,14 @@ using Thread = java.lang.Thread;
 
 namespace javax.microedition.ams;
 
+[PublicAPI]
 public class MidletStartup : Thread
 {
-    [JavaIgnore] public string MidletClassName;
-    [JavaIgnore] public Dictionary<string, string> Manifest;
+    [JavaIgnore] public string MidletClassName = null!;
+    [JavaIgnore] public Dictionary<string, string> Manifest = null!;
 
     [JavaDescriptor("()V")]
-    public JavaMethodBody run(JavaClass cls)
+    public new JavaMethodBody run(JavaClass cls)
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();

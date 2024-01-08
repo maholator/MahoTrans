@@ -49,7 +49,7 @@ public class JavaRunner
     {
         var throwFrame = thread.ActiveFrame!;
         var t = state.Resolve<Throwable>(ex.Throwable);
-        state.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"Exception {t.JavaClass.Name} is caught");
+        state.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Exception {t.JavaClass.Name} is caught");
         Console.WriteLine("Call stack:");
         for (int i = thread.ActiveFrameIndex; i >= 0; i--)
         {
@@ -1073,7 +1073,7 @@ public class JavaRunner
                     jvm.Throw<NullPointerException>();
                 else
                 {
-                    jvm.Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
+                    jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
                     throw new JavaThrowable(ex);
                 }
 

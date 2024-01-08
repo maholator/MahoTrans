@@ -12,7 +12,7 @@ public class ByteArrayInputStream : InputStream
     // as per MIDP docs
     [JavaType("[B")] public Reference buf;
     public int count;
-    public int mark;
+    public new int mark;
     public int pos;
 
     [InitMethod]

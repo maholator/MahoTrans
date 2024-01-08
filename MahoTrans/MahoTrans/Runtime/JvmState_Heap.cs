@@ -278,7 +278,7 @@ public partial class JvmState
     [DoesNotReturn]
     public void Throw<T>() where T : Throwable
     {
-        Toolkit.Logger.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
+        Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
         var ex = AllocateObject<T>();
         ex.Init();
         throw new JavaThrowable(ex.This);
