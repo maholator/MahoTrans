@@ -23,10 +23,11 @@ public interface IMedia : IToolkit
     /// <summary>
     ///     Creates media player from file.
     /// </summary>
-    /// <param name="data">File content.</param>
+    /// <param name="data">File content. It will be copied so pass it as directly as possible.</param>
+    /// <param name="contentType">Content type.</param>
     /// <param name="callbacks">Callbacks to use.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(Memory<byte> data, IMediaCallbacks callbacks);
+    MediaHandle Create(Memory<byte> data, string contentType, IMediaCallbacks callbacks);
 
     /// <summary>
     ///     Creates media player from MRL.
