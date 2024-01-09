@@ -76,7 +76,7 @@ public partial class JvmState
     ///     Creates an array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
     /// <returns>Reference to newly created array.</returns>
     public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
         AllocateArray(data, GetClass(cls));
@@ -85,7 +85,7 @@ public partial class JvmState
     ///     Creates an array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
     /// <returns>Reference to newly created array.</returns>
     public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
     {
@@ -154,7 +154,7 @@ public partial class JvmState
     ///     Creates an array. This is used by interpreter.
     /// </summary>
     /// <param name="length">Length of the array. Will be validated.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[java/lang/String".</param>
+    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
     /// <returns>Reference to newly created array.</returns>
     public Reference AllocateReferenceArray(int length, JavaClass cls)
     {
