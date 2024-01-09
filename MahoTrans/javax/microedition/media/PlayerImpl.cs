@@ -4,6 +4,8 @@
 using java.lang;
 using MahoTrans.Handles;
 using MahoTrans.Native;
+using MahoTrans.Runtime;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.media;
@@ -35,6 +37,7 @@ public class Player : Object
         if (State == REALIZED)
         {
             State = PREFETCHED;
+
             if (!inited)
             {
                 Toolkit.Media.Prefetch(Handle);
@@ -71,11 +74,14 @@ public class Player : Object
     {
         if (State == CLOSED)
             Jvm.Throw<IllegalStateException>();
-        if (State == UNREALIZED || State == REALIZED)
-            return;
+
         if (State == STARTED)
             stop();
+        if (State == UNREALIZED || State == REALIZED)
+            return;
+
         State = REALIZED;
+        Toolkit.Media.SetTime(Handle, 0L);
     }
 
     public void close()
@@ -109,11 +115,50 @@ public class Player : Object
         return false;
     }
 
+    public long setMediaTime(long now)
+    {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+        if (State == UNREALIZED)
+            Jvm.Throw<IllegalStateException>();
+        return Toolkit.Media.SetTime(Handle, now);
+    }
+
+    public long getMediaTime()
+    {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+        if (State == UNREALIZED)
+            return TIME_UNKNOWN;
+        return Toolkit.Media.GetTime(Handle) ?? TIME_UNKNOWN;
+    }
+
+    public long getDuration()
+    {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+        if (State == UNREALIZED)
+            return TIME_UNKNOWN;
+        return Toolkit.Media.GetDuration(Handle) ?? TIME_UNKNOWN;
+    }
+
+    public int getState() => State;
+
+    #region Controls
+
+    [return: JavaType("[Ljavax/microedition/media/Control;")]
+    public Reference getControls()
+    {
+        // wip
+        return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljavax/microedition/media/Control;");
+    }
+
+    #endregion
 
     public const int CLOSED = 0;
     public const int PREFETCHED = 300;
     public const int REALIZED = 200;
     public const int STARTED = 400;
-    public const long TIME_UNKNOWN = -1l;
+    public const long TIME_UNKNOWN = -1L;
     public const int UNREALIZED = 100;
 }
