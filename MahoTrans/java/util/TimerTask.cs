@@ -11,7 +11,7 @@ public class TimerTask : Object, Runnable
 {
     public bool Cancelled;
 
-    public long scheduledTime = 0;
+    public long scheduledTime;
 
     public long when;
     public long period;
@@ -29,11 +29,13 @@ public class TimerTask : Object, Runnable
         throw new AbstractJavaMethodCallError();
     }
 
-    public long scheduledExecutionTime() {
+    public long scheduledExecutionTime()
+    {
         return scheduledTime;
     }
 
-    public bool isScheduled() {
+    public bool isScheduled()
+    {
         return when > 0 || scheduledTime > 0;
     }
 }

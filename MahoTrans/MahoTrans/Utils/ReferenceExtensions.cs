@@ -2,21 +2,23 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Runtime;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Utils;
 
 public static class ReferenceExtensions
 {
-    public static java.lang.Object AsObject(this Reference r)
+    public static Object AsObject(this Reference r)
     {
         return JvmState.Context.ResolveObject(r);
     }
 
-    public static T As<T>(this Reference r) where T : java.lang.Object
+    public static T As<T>(this Reference r) where T : Object
     {
         return JvmState.Context.Resolve<T>(r);
     }
-    public static T? AsNullable<T>(this Reference r) where T : java.lang.Object
+
+    public static T? AsNullable<T>(this Reference r) where T : Object
     {
         return JvmState.Context.ResolveNullable<T>(r);
     }

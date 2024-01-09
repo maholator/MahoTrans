@@ -57,7 +57,8 @@ public class Timer : Object
             b.Append(JavaOpcode.lload_2);
             b.Append(JavaOpcode.lload_3);
             b.Append(JavaOpcode.iconst_0);
-            b.AppendVirtcall(nameof(scheduleImpl), typeof(void), typeof(Reference), typeof(long), typeof(long), typeof(bool));
+            b.AppendVirtcall(nameof(scheduleImpl), typeof(void), typeof(Reference), typeof(long), typeof(long),
+                typeof(bool));
 
             b.AppendThis();
             b.AppendGetLocalField(nameof(Thread), typeof(TimerThread));
@@ -101,7 +102,7 @@ public class Timer : Object
     */
 
     /// <summary>
-    /// Takes date's time. Throws it time is less than zero.
+    ///     Takes date's time. Throws it time is less than zero.
     /// </summary>
     /// <param name="date">Date to unwrap.</param>
     /// <returns>JVM ticks.</returns>
@@ -125,7 +126,7 @@ public class Timer : Object
         if (Thread.As<TimerThread>().Cancelled)
             Jvm.Throw<IllegalStateException>();
 
-        long when = delay + java.lang.System.currentTimeMillis();
+        long when = delay + lang.System.currentTimeMillis();
 
         if (when < 0)
             Jvm.Throw<IllegalArgumentException>();

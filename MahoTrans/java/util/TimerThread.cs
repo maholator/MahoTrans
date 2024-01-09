@@ -8,10 +8,11 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Thread = java.lang.Thread;
 
 namespace java.util;
 
-public class TimerThread : lang.Thread
+public class TimerThread : Thread
 {
     public bool Cancelled;
 

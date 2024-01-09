@@ -187,7 +187,7 @@ public class JavaMethodBuilder
 
     public JavaLabel PlaceLabel()
     {
-        return new JavaLabel(this, _labels.Push(_code.Count, 1));
+        return new JavaLabel(this, _labels.Push(_code.Count));
     }
 
     public void BringLabel(JavaLabel label)
@@ -214,7 +214,7 @@ public class JavaMethodBuilder
     /// </returns>
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
-        var id = _loopStates.Push(1, 1);
+        var id = _loopStates.Push(1);
         var lc = AppendGoto();
         var lb = PlaceLabel();
         return new JavaLoop(this, id, lb, lc, condition);

@@ -1253,6 +1253,7 @@ public class JavaRunner
                     var val = d.Field.GetValue(obj);
                     frame.Push(val);
                 }
+
                 pointer++;
                 break;
             }
@@ -1279,6 +1280,7 @@ public class JavaRunner
                     var obj = jvm.ResolveObject(r);
                     d.Field.SetValue(obj, value);
                 }
+
                 pointer++;
                 break;
             }

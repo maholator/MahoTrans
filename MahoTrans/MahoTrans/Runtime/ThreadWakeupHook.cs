@@ -4,7 +4,7 @@
 namespace MahoTrans.Runtime;
 
 /// <summary>
-/// Struct which keeps info what thread to wake up and when.
+///     Struct which keeps info what thread to wake up and when.
 /// </summary>
 public readonly struct ThreadWakeupHook
 {
