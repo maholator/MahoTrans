@@ -3,7 +3,6 @@
 
 using java.lang;
 using javax.microedition.media.control;
-using MahoTrans.Abstractions;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -12,7 +11,7 @@ using Object = java.lang.Object;
 
 namespace javax.microedition.media;
 
-public class Player : Object, IMediaCallbacks
+public class Player : Object
 {
     [JavaIgnore] public MediaHandle Handle;
 
