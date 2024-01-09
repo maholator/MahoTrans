@@ -32,6 +32,11 @@ public static class Utils
         return new[] { (byte)((s >> 8) & 0xFF), (byte)(s & 0xFF) };
     }
 
+    /// <summary>
+    /// Enumerates base types of passed type. First returns type itself.
+    /// </summary>
+    /// <param name="type">Type to check.</param>
+    /// <returns>Enumerator of base types.</returns>
     public static IEnumerable<Type> EnumerateBaseTypes(this Type type)
     {
         var t = type;

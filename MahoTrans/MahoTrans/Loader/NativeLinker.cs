@@ -15,28 +15,16 @@ namespace MahoTrans.Loader;
 ///     This class exposes tools to build JVM types from CLR types.
 /// </summary>
 /// <seealso cref="ClassCompiler" />
+/// <seealso cref="BridgeCompiler"/>
 public static class NativeLinker
 {
-    private static int _bridgeCounter = 1;
-
-    private static readonly Dictionary<Type, MethodInfo> StackReversePoppers = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopIntFrom))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLongFrom))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PopFloatFrom))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PopDoubleFrom))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PopBoolFrom))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PopByteFrom))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PopCharFrom))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShortFrom))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReferenceFrom))! }
-    };
+    private static int _bridgeAsmCounter = 1;
 
     public static JavaClass[] Make(Type[] types)
     {
-        var name = new AssemblyName($"Bridge-{_bridgeCounter}");
+        var name = new AssemblyName($"Bridge-{_bridgeAsmCounter}");
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
-        var module = builder.DefineDynamicModule($"Bridge-{_bridgeCounter}");
+        var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
         var bridge = module.DefineType("Bridge", TypeAttributes.Public | TypeAttributes.Sealed);
 
         var java = types.Select(type => Make(type, bridge)).ToArray();
@@ -210,7 +198,7 @@ public static class NativeLinker
         java.NativeBody = nativeMethod;
         try
         {
-            java.BridgeNumber = BuildBridgeMethod(nativeMethod, bridgeBuilder);
+            java.BridgeNumber = BridgeCompiler.BuildBridgeMethod(nativeMethod, bridgeBuilder);
         }
         catch (Exception e)
         {
@@ -221,72 +209,12 @@ public static class NativeLinker
         return java;
     }
 
-    private static int BuildBridgeMethod(MethodInfo method, TypeBuilder bridgeContainer)
-    {
-        int num = _bridgeCounter;
-        _bridgeCounter++;
-        var builder = bridgeContainer.DefineMethod($"bridge_{num}", MethodAttributes.Public | MethodAttributes.Static,
-            CallingConventions.Standard, null, new[] { typeof(Frame) });
-        builder.DefineParameter(1, ParameterAttributes.None, "javaFrame");
-        var il = builder.GetILGenerator();
-        var argsLength = method.GetParameters().Length;
-        if (!method.IsStatic)
-            argsLength++;
 
-        // for push operation
-        il.Emit(OpCodes.Ldarg_0);
-
-        // all this is skipped if call is static and no args are needed.
-        if (argsLength != 0)
-        {
-            // setting stack pointer for pops
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.SetFrom))!);
-
-
-            if (!method.IsStatic)
-            {
-                // frame
-                il.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
-                // frame > heap
-                il.Emit(OpCodes.Ldarg_0);
-                // frame > heap > frame
-                il.Emit(OpCodes.Call, StackReversePoppers[typeof(Reference)]);
-                // frame > heap > ref
-                il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
-                // frame > object
-            }
-
-            foreach (var parameter in method.GetParameters())
-            {
-                il.Emit(OpCodes.Ldarg_0);
-                var popper = StackReversePoppers[parameter.ParameterType];
-                il.Emit(OpCodes.Call, popper);
-            }
-
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.Discard))!);
-        }
-
-        il.Emit(OpCodes.Call, method);
-
-        if (method.ReturnType != typeof(void))
-        {
-            // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, BridgeCompiler.StackPushers[method.ReturnType]);
-        }
-        else
-        {
-            il.Emit(OpCodes.Pop);
-        }
-
-        il.Emit(OpCodes.Ret);
-
-        return num;
-    }
-
+    /// <summary>
+    /// Checks, should the field be shown to JVM.
+    /// </summary>
+    /// <param name="field">Field to check.</param>
+    /// <returns>False to hide field.</returns>
     public static bool IsJavaVisible(FieldInfo field)
     {
         if (field.GetCustomAttribute<JavaIgnoreAttribute>() != null)
@@ -303,6 +231,14 @@ public static class NativeLinker
 
         // we use Class and String to show them to jvm
         if (t == typeof(JavaClass) || t == typeof(string))
+            return false;
+
+        if (t.EnumerateBaseTypes().Contains(typeof(Object)))
+            throw new JavaLinkageException(
+                $"{field.DeclaringType} has field {field.Name} of type {t.Name} which is java type. To store java objects, {nameof(Reference)} structs must be used.");
+
+        // usually used for internal vectors.
+        if (t == typeof(List<Reference>))
             return false;
 
         return true;

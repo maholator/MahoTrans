@@ -9,9 +9,12 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Loader;
 
+/// <summary>
+/// Set of tools to build IL bridges for JVM communication with CLR fields.
+/// </summary>
 public static class BridgeCompiler
 {
-    public static readonly Dictionary<Type, MethodInfo> StackPoppers = new()
+    public static readonly Dictionary<Type, MethodInfo> STACK_POPPERS = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
         { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLong))! },
@@ -24,7 +27,20 @@ public static class BridgeCompiler
         { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReference))! }
     };
 
-    public static readonly Dictionary<Type, MethodInfo> StackPushers = new()
+    public static readonly Dictionary<Type, MethodInfo> STACK_REVERSE_POPPERS = new()
+    {
+        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopIntFrom))! },
+        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLongFrom))! },
+        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PopFloatFrom))! },
+        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PopDoubleFrom))! },
+        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PopBoolFrom))! },
+        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PopByteFrom))! },
+        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PopCharFrom))! },
+        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShortFrom))! },
+        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReferenceFrom))! }
+    };
+
+    public static readonly Dictionary<Type, MethodInfo> STACK_PUSHERS = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PushInt))! },
         { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PushLong))! },
@@ -36,6 +52,8 @@ public static class BridgeCompiler
         { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PushShort))! },
         { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PushReference))! },
     };
+
+    #region Fields
 
     public static void BuildBridges(TypeBuilder typeBuilder, FieldInfo field, NameDescriptor name, JavaClass cls)
     {
@@ -55,7 +73,7 @@ public static class BridgeCompiler
                 // frame > heap
                 getter.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
-                getter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
+                getter.Emit(OpCodes.Call, STACK_POPPERS[typeof(Reference)]);
                 // frame > heap > ref
                 getter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // frame > object
@@ -63,7 +81,7 @@ public static class BridgeCompiler
             }
 
             // frame > value
-            getter.Emit(OpCodes.Call, StackPushers[field.FieldType]);
+            getter.Emit(OpCodes.Call, STACK_PUSHERS[field.FieldType]);
             // -
             getter.Emit(OpCodes.Ret);
         }
@@ -74,7 +92,7 @@ public static class BridgeCompiler
             {
                 setter.Emit(OpCodes.Ldarg_0);
                 // frame
-                setter.Emit(OpCodes.Call, StackPoppers[field.FieldType]);
+                setter.Emit(OpCodes.Call, STACK_POPPERS[field.FieldType]);
                 // value
                 setter.Emit(OpCodes.Stsfld, field);
                 // -
@@ -85,7 +103,7 @@ public static class BridgeCompiler
                 var val = setter.DeclareLocal(field.FieldType);
                 setter.Emit(OpCodes.Ldarg_0);
                 // frame
-                setter.Emit(OpCodes.Call, StackPoppers[field.FieldType]);
+                setter.Emit(OpCodes.Call, STACK_POPPERS[field.FieldType]);
                 // value
                 setter.Emit(OpCodes.Stloc, val);
                 // -
@@ -93,7 +111,7 @@ public static class BridgeCompiler
                 // heap
                 setter.Emit(OpCodes.Ldarg_0);
                 // heap > frame
-                setter.Emit(OpCodes.Call, StackPoppers[typeof(Reference)]);
+                setter.Emit(OpCodes.Call, STACK_POPPERS[typeof(Reference)]);
                 // heap > ref
                 setter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // target
@@ -121,4 +139,78 @@ public static class BridgeCompiler
 
     public static string GetFieldSetterName(NameDescriptor descriptor, JavaClass cls) =>
         GetFieldName(descriptor, cls) + "_bridge_set";
+
+    #endregion
+
+    #region Methods
+
+    private static int _bridgeCounter = 1;
+
+    public static int BuildBridgeMethod(MethodInfo method, TypeBuilder bridgeContainer)
+    {
+        int num = _bridgeCounter;
+        _bridgeCounter++;
+        var builder = bridgeContainer.DefineMethod($"bridge_{num}", MethodAttributes.Public | MethodAttributes.Static,
+            CallingConventions.Standard, null, new[] { typeof(Frame) });
+        builder.DefineParameter(1, ParameterAttributes.None, "javaFrame");
+        var il = builder.GetILGenerator();
+        var argsLength = method.GetParameters().Length;
+        if (!method.IsStatic)
+            argsLength++;
+
+        // for push operation
+        il.Emit(OpCodes.Ldarg_0);
+
+        // all this is skipped if call is static and no args are needed.
+        if (argsLength != 0)
+        {
+            // setting stack pointer for pops
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldc_I4, argsLength);
+            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.SetFrom))!);
+
+
+            if (!method.IsStatic)
+            {
+                // frame
+                il.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
+                // frame > heap
+                il.Emit(OpCodes.Ldarg_0);
+                // frame > heap > frame
+                il.Emit(OpCodes.Call, STACK_REVERSE_POPPERS[typeof(Reference)]);
+                // frame > heap > ref
+                il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
+                // frame > object
+            }
+
+            foreach (var parameter in method.GetParameters())
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                var popper = STACK_REVERSE_POPPERS[parameter.ParameterType];
+                il.Emit(OpCodes.Call, popper);
+            }
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldc_I4, argsLength);
+            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.Discard))!);
+        }
+
+        il.Emit(OpCodes.Call, method);
+
+        if (method.ReturnType != typeof(void))
+        {
+            // frame reference is here from the beginning
+            il.Emit(OpCodes.Call, BridgeCompiler.STACK_PUSHERS[method.ReturnType]);
+        }
+        else
+        {
+            il.Emit(OpCodes.Pop);
+        }
+
+        il.Emit(OpCodes.Ret);
+
+        return num;
+    }
+
+    #endregion
 }

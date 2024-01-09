@@ -1267,7 +1267,7 @@ public class JavaRunner
                     return;
                 }
 
-                var popper = BridgeCompiler.StackPoppers[d.Field.FieldType];
+                var popper = BridgeCompiler.STACK_POPPERS[d.Field.FieldType];
                 var value = popper.Invoke(frame, System.Array.Empty<object>());
 
                 if (d.Field.IsStatic)
