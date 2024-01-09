@@ -33,7 +33,7 @@ public static class Utils
     }
 
     /// <summary>
-    /// Enumerates base types of passed type. First returns type itself.
+    ///     Enumerates base types of passed type. First returns type itself.
     /// </summary>
     /// <param name="type">Type to check.</param>
     /// <returns>Enumerator of base types.</returns>

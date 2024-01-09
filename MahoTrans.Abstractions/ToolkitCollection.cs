@@ -26,20 +26,17 @@ public class ToolkitCollection
 
     public readonly IRecordStore RecordStore;
 
+    public readonly IMedia Media;
+
     public ILoadLogger? LoadLogger;
 
     public ILogger? Logger;
 
     public IHeapDebugger? HeapDebugger;
 
-    /// <summary>
-    ///     This will be readonly soon.
-    /// </summary>
-    public IMedia? Media;
-
     public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display,
         IAms ams,
-        IRecordStore recordStore)
+        IRecordStore recordStore, IMedia media)
     {
         System = system;
         Clock = clock;
@@ -48,5 +45,6 @@ public class ToolkitCollection
         Display = display;
         Ams = ams;
         RecordStore = recordStore;
+        Media = media;
     }
 }

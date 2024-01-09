@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Handles;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.Abstractions;
 
@@ -25,17 +26,17 @@ public interface IMedia : IToolkit
     /// </summary>
     /// <param name="data">File content. It will be copied so pass it as directly as possible.</param>
     /// <param name="contentType">Content type.</param>
-    /// <param name="callbacks">Callbacks to use.</param>
+    /// <param name="callbackTarget">Object for callbacks.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(Memory<sbyte> data, string contentType, IMediaCallbacks callbacks);
+    MediaHandle Create(Memory<sbyte> data, string contentType, Reference callbackTarget);
 
     /// <summary>
     ///     Creates media player from MRL.
     /// </summary>
     /// <param name="mrl">MRL to play.</param>
-    /// <param name="callbacks">Callbacks to use.</param>
+    /// <param name="callbackTarget">Object for callbacks.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(string mrl, IMediaCallbacks callbacks);
+    MediaHandle Create(string mrl, Reference callbackTarget);
 
     /// <summary>
     ///     Returns list of supported content types.

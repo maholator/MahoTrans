@@ -22,4 +22,14 @@ public interface IHeapDebugger : IToolkit
     /// </summary>
     /// <param name="obj">Object that will be removed from heap right after call to this.</param>
     void ObjectDeleted(Reference obj);
+
+    /// <summary>
+    /// Called when snapshot of the JVM is taken.
+    /// </summary>
+    void SnapshotTaken();
+
+    /// <summary>
+    /// Called when JVM is restored from snapshot.
+    /// </summary>
+    void SnapshotRestored();
 }
