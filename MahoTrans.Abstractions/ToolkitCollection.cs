@@ -33,7 +33,7 @@ public class ToolkitCollection
     public IHeapDebugger? HeapDebugger;
 
     /// <summary>
-    /// This will be readonly soon.
+    ///     This will be readonly soon.
     /// </summary>
     public IMedia? Media;
 

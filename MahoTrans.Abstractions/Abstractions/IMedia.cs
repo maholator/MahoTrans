@@ -88,22 +88,23 @@ public interface IMedia : IToolkit
     ///     Gets duration of the media. See MIDP docs.
     /// </summary>
     /// <param name="media">Media handle.</param>
-    /// <returns>As per MIDP docs.</returns>
-    long GetDuration(MediaHandle media);
+    /// <returns>Time in microseconds.</returns>
+    long? GetDuration(MediaHandle media);
 
     /// <summary>
     ///     Gets current time of the media. See MIDP docs.
     /// </summary>
     /// <param name="media">Media handle.</param>
-    /// <returns>As per MIDP docs.</returns>
-    long GetTime(MediaHandle media);
+    /// <returns>Time in microseconds.</returns>
+    long? GetTime(MediaHandle media);
 
     /// <summary>
     ///     Sets current time of the media. See MIDP docs.
     /// </summary>
     /// <param name="media">Media handle.</param>
     /// <param name="time">Time to set. See MIDP docs.</param>
-    void SetTime(MediaHandle media, long time);
+    /// <returns>Actual time set.</returns>
+    long SetTime(MediaHandle media, long time);
 
     /// <summary>
     ///     Sets loop count.
@@ -115,6 +116,8 @@ public interface IMedia : IToolkit
     #endregion
 
     #region Control APIs
+
+    MediaControls GetAvailableControls(MediaHandle media);
 
     /// <summary>
     ///     Gets playback volume.

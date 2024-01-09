@@ -43,14 +43,14 @@ public static class Utils
         }
     }
 
-    public static int NextKey<T>(this Dictionary<int, T> dict, int defaultKey = 0)
+    public static int NextKey<T>(this Dictionary<int, T> dict, int defaultKey = 1)
     {
         if (dict.Count == 0)
             return defaultKey;
         return dict.Keys.Max() + 1;
     }
 
-    public static int Push<T>(this Dictionary<int, T> dict, T value, int defaultKey = 0)
+    public static int Push<T>(this Dictionary<int, T> dict, T value, int defaultKey = 1)
     {
         var k = dict.NextKey(defaultKey);
         dict[k] = value;
