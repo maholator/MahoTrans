@@ -124,8 +124,14 @@ public partial class JvmState
                     {
                         var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
                         if (!Classes.ContainsKey(itemClass))
+                        {
+                            if (name.Contains('.') && !name.Contains('/'))
+                                throw new JavaRuntimeError(
+                                    $"Items class {itemClass} is not loaded. It's suspicious that name contains dots and no slashed. Class name must be written using slashed.");
+
                             throw new JavaRuntimeError(
                                 $"Class {name} can't be created because items class {itemClass} is not loaded.");
+                        }
                     }
                     else
                     {
