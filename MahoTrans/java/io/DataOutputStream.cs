@@ -105,7 +105,7 @@ public class DataOutputStream : OutputStream
         }
 
         b.AppendReturn();
-        return new JavaMethodBody(3, 4);
+        return b.Build(3, 4);
     }
 
     [JavaDescriptor("(I)V")]
