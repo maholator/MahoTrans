@@ -11,7 +11,7 @@ using MahoTrans.Utils;
 
 namespace java.io;
 
-public class DataInputStream : InputStream
+public class DataInputStream : InputStream, DataInput
 {
     [JavaType(typeof(InputStream))] public Reference @in;
 
