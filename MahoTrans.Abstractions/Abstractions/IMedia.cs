@@ -108,8 +108,9 @@ public interface IMedia : IToolkit
     /// <summary>
     ///     Sets loop count.
     /// </summary>
+    /// <param name="media">Media handle.</param>
     /// <param name="count">Loop count. -1 to infinite. 1 to one time. Zero is invalid.</param>
-    void SetLoopCount(int count);
+    void SetLoopCount(MediaHandle media, int count);
 
     #endregion
 
