@@ -4,6 +4,7 @@
 using System.IO.Compression;
 using System.Text;
 using javax.microedition.ams;
+using JetBrains.Annotations;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -40,6 +41,7 @@ public partial class JvmState
     ///     Gets snapshot of this JVM.
     /// </summary>
     /// <returns>Stream with written snapshot. Position will be zero. Make sure do dispose it.</returns>
+    [MustUseReturnValue]
     public MemoryStream Snapshot()
     {
         var snapshotStream = new MemoryStream();
