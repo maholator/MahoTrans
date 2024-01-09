@@ -2,12 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using javax.microedition.media.control;
 using MahoTrans.Abstractions;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
-using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.media;
@@ -185,14 +185,23 @@ public class Player : Object, IMediaCallbacks
     [return: JavaType("[Ljavax/microedition/media/Control;")]
     public Reference getControls()
     {
-        //TODO
-        return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljavax/microedition/media/Control;");
+        var volume = Jvm.AllocateObject<VolumeControl>();
+        volume.Handle = Handle;
+        return Jvm.AllocateArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
     }
 
     [return: JavaType(typeof(Control))]
     public Reference getControl([String] Reference type)
     {
         //TODO
+        var name = Jvm.ResolveString(type);
+        if (name == "javax.microedition.media.control.VolumeControl" || name == "VolumeControl")
+        {
+            var ctrl = Jvm.AllocateObject<VolumeControl>();
+            ctrl.Handle = Handle;
+            return ctrl.This;
+        }
+
         return Reference.Null;
     }
 
