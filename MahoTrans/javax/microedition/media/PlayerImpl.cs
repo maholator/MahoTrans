@@ -2,15 +2,17 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Abstractions;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.media;
 
-public class Player : Object
+public class Player : Object, IMediaCallbacks
 {
     [JavaIgnore] public MediaHandle Handle;
 
@@ -144,16 +146,62 @@ public class Player : Object
 
     public int getState() => State;
 
+    #region Listeners
+
+    public List<Reference> Listeners = new();
+
+    public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference playerListener)
+    {
+        if (playerListener.IsNull)
+            return;
+
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+
+        if (!Listeners.Contains(playerListener))
+            Listeners.Add(playerListener);
+    }
+
+    public void removePlayerListener([JavaType(typeof(PlayerListener))] Reference playerListener)
+    {
+        if (playerListener.IsNull)
+            return;
+
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+
+        Listeners.Remove(playerListener);
+    }
+
+    [JavaIgnore]
+    public void Update(MediaHandle player, string eventName, Reference data)
+    {
+    }
+
+    #endregion
+
     #region Controls
 
     [return: JavaType("[Ljavax/microedition/media/Control;")]
     public Reference getControls()
     {
-        // wip
+        //TODO
         return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljavax/microedition/media/Control;");
     }
 
+    [return: JavaType(typeof(Control))]
+    public Reference getControl([String] Reference type)
+    {
+        //TODO
+        return Reference.Null;
+    }
+
     #endregion
+
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
+    {
+        queue.Enqueue(Listeners);
+    }
 
     public const int CLOSED = 0;
     public const int PREFETCHED = 300;

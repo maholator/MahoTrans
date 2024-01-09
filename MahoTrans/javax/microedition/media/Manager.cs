@@ -21,7 +21,7 @@ public class Manager : Object
             var buf = bais.buf.As<Array<sbyte>>().Value;
             var mem = buf.AsMemory(bais.pos, bais.count - bais.pos);
             var player = Jvm.AllocateObject<Player>();
-            player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrDefault(type), null!);
+            player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrDefault(type), player);
             return player.This;
         }
 
