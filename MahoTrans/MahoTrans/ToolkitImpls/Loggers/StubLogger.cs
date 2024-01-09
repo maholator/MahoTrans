@@ -30,4 +30,12 @@ public class StubLogger : ILogger, ILoadLogger, IHeapDebugger
     public void ObjectDeleted(Reference obj)
     {
     }
+
+    public void SnapshotTaken()
+    {
+    }
+
+    public void SnapshotRestored()
+    {
+    }
 }

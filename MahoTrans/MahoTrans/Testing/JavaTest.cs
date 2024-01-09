@@ -27,7 +27,7 @@ public class JavaTest
             null!,
             null!,
             new AmsEventHub(),
-            new InMemoryRms())
+            new InMemoryRms(), null!)
         {
             Logger = new ConsoleLogger(),
             LoadLogger = new ConsoleLogger()
