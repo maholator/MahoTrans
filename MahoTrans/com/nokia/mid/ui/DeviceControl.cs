@@ -7,9 +7,12 @@ namespace com.nokia.mid.ui;
 
 public class DeviceControl : Object
 {
-    public static void setLights(int num,
-        int level)
+    public static void setLights(int num, int level)
     {
         //TODO implement
+    }
+
+    public static void startVibra(int i, long l)
+    {
     }
 }
