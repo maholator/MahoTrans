@@ -24,12 +24,12 @@ public interface IHeapDebugger : IToolkit
     void ObjectDeleted(Reference obj);
 
     /// <summary>
-    /// Called when snapshot of the JVM is taken.
+    ///     Called when snapshot of the JVM is taken.
     /// </summary>
     void SnapshotTaken();
 
     /// <summary>
-    /// Called when JVM is restored from snapshot.
+    ///     Called when JVM is restored from snapshot.
     /// </summary>
     void SnapshotRestored();
 }
