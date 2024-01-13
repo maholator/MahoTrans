@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using MahoTrans;
 using MahoTrans.Builder;
@@ -14,6 +15,7 @@ using Newtonsoft.Json;
 namespace java.lang;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers | ImplicitUseTargetFlags.WithInheritors)]
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
 public class Object
 {
     #region Object properties
