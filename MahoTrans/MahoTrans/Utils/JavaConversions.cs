@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
+using java.io;
 using MahoTrans.Runtime;
 
 namespace MahoTrans.Utils;
@@ -136,8 +137,8 @@ public static class JavaConversions
                 return Encoding.ASCII;
 
             default:
-                //TODO throw java exception
-                throw new JavaRuntimeError($"Unsupported encoding: {name}");
+                JvmState.Context.Throw<UnsupportedEncodingException>();
+                return null!;
         }
     }
 
