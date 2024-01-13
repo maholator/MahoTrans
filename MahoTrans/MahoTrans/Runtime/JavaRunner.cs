@@ -673,7 +673,7 @@ public class JavaRunner
 
             case MTOpcode.ishl:
             {
-                var val2 = frame.PopInt();
+                var val2 = frame.PopInt() & 0x1F;
                 var val1 = frame.PopInt();
                 frame.PushInt(val1 << val2);
                 pointer++;
@@ -682,7 +682,7 @@ public class JavaRunner
 
             case MTOpcode.lshl:
             {
-                var val2 = frame.PopInt();
+                var val2 = frame.PopInt() & 0x1F;
                 var val1 = frame.PopLong();
                 frame.PushLong(val1 << val2);
                 pointer++;
@@ -691,7 +691,7 @@ public class JavaRunner
 
             case MTOpcode.ishr:
             {
-                var val2 = frame.PopInt();
+                var val2 = frame.PopInt() & 0x1F;
                 var val1 = frame.PopInt();
                 frame.PushInt(val1 >> val2);
                 pointer++;
@@ -700,7 +700,7 @@ public class JavaRunner
 
             case MTOpcode.lshr:
             {
-                var val2 = frame.PopInt();
+                var val2 = frame.PopInt() & 0x1F;
                 var val1 = frame.PopLong();
                 frame.PushLong(val1 >> val2);
                 pointer++;
@@ -709,9 +709,9 @@ public class JavaRunner
 
             case MTOpcode.iushr:
             {
-                var val2 = frame.PopInt();
-                var val1 = frame.PopInt();
-                var r = (uint)val1 >> val2;
+                var val2 = frame.PopInt() & 0x1F;
+                var val1 = (uint)frame.PopInt();
+                var r = val1 >> val2;
                 frame.PushInt((int)r);
                 pointer++;
                 break;
@@ -719,9 +719,9 @@ public class JavaRunner
 
             case MTOpcode.lushr:
             {
-                var val2 = frame.PopInt();
-                var val1 = frame.PopLong();
-                var r = (ulong)val1 >> val2;
+                var val2 = frame.PopInt() & 0x1F;
+                var val1 = (ulong)frame.PopLong();
+                var r = val1 >> val2;
                 frame.PushLong((long)r);
                 pointer++;
                 break;
