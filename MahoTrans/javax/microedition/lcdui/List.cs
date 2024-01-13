@@ -4,7 +4,6 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Newtonsoft.Json;
 
 namespace javax.microedition.lcdui;
 
@@ -13,10 +12,6 @@ public class List : Screen
     [JavaIgnore] public List<ListItem> Items = new();
 
     public ChoiceType Type;
-
-    [JsonProperty] [JavaType(typeof(Command))]
-    // ReSharper disable once InconsistentNaming
-    public static Reference SELECT_COMMAND;
 
     [JavaIgnore] public Reference ImplicitSelectCommand;
 
@@ -29,7 +24,7 @@ public class List : Screen
     {
         var select = Jvm.AllocateObject<Command>();
         select.Init(Jvm.AllocateString(""), Command.SCREEN, 0);
-        SELECT_COMMAND = select.This;
+        NativeStatics.ListSelectCommand = select.This;
     }
 
     [InitMethod]
@@ -40,7 +35,7 @@ public class List : Screen
         if (listType < 1 || listType > 3)
             Jvm.Throw<IllegalArgumentException>();
         Type = (ChoiceType)listType;
-        ImplicitSelectCommand = SELECT_COMMAND;
+        ImplicitSelectCommand = NativeStatics.ListSelectCommand;
         // invalidate is necessary to notify toolkit about non-null implicit command
         Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
     }

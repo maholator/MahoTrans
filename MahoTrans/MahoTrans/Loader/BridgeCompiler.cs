@@ -1,8 +1,10 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
@@ -10,7 +12,7 @@ using Object = java.lang.Object;
 namespace MahoTrans.Loader;
 
 /// <summary>
-/// Set of tools to build IL bridges for JVM communication with CLR fields.
+///     Set of tools to build IL bridges for JVM communication with CLR fields.
 /// </summary>
 public static class BridgeCompiler
 {
@@ -58,7 +60,7 @@ public static class BridgeCompiler
     public static void BuildBridges(TypeBuilder typeBuilder, FieldInfo field, NameDescriptor name, JavaClass cls)
     {
         {
-            var getter = DefineBridge(GetFieldGetterName(name, cls), typeBuilder);
+            var getter = DefineBridge(GetFieldGetterName(name, cls.Name), typeBuilder);
 
             getter.Emit(OpCodes.Ldarg_0);
             // frame
@@ -86,7 +88,7 @@ public static class BridgeCompiler
             getter.Emit(OpCodes.Ret);
         }
         {
-            var setter = DefineBridge(GetFieldSetterName(name, cls), typeBuilder);
+            var setter = DefineBridge(GetFieldSetterName(name, cls.Name), typeBuilder);
 
             if (field.IsStatic)
             {
@@ -124,6 +126,37 @@ public static class BridgeCompiler
         }
     }
 
+    /// <summary>
+    /// Builds GET bridge for field, placed in <see cref="StaticMemory"/>.
+    /// </summary>
+    /// <param name="typeBuilder">Builder to place bridge at.</param>
+    /// <param name="field">Field to build bridge for.</param>
+    /// <returns>Real field descriptor.</returns>
+    public static NameDescriptor BuildNativeStaticBridge(TypeBuilder typeBuilder, FieldInfo field)
+    {
+        Debug.Assert(field.DeclaringType == typeof(StaticMemory),
+            $"Native static field {field.Name} is declared in {field.DeclaringType}, must be in {typeof(StaticMemory)}");
+
+        var attr = field.GetCustomAttribute<NativeStaticAttribute>();
+        if (attr == null)
+            throw new JavaLinkageException(
+                $"{field.Name} does not have {nameof(NativeStaticAttribute)} attached and can't be accessed via bridge.");
+
+        var getter = DefineBridge(GetFieldGetterName(attr.AsDescriptor(), attr.OwnerName), typeBuilder);
+
+        getter.Emit(OpCodes.Ldarg_0);
+        // frame
+        getter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.NativeStatics))!.GetMethod!);
+        // frame > statics
+        getter.Emit(OpCodes.Ldfld, field);
+        // frame > value
+        getter.Emit(OpCodes.Call, STACK_PUSHERS[field.FieldType]);
+        // -
+        getter.Emit(OpCodes.Ret);
+
+        return attr.AsDescriptor();
+    }
+
     private static ILGenerator DefineBridge(string name, TypeBuilder builder)
     {
         var method = builder.DefineMethod(name, MethodAttributes.Public | MethodAttributes.Static,
@@ -132,13 +165,22 @@ public static class BridgeCompiler
         return method.GetILGenerator();
     }
 
-    public static string GetFieldName(NameDescriptor descriptor, JavaClass cls) => $"{cls.Name}_{descriptor}";
+    /// <summary>
+    /// Gets a good name for a field in CLR type built from JVM one.
+    /// </summary>
+    /// <param name="descriptor">Field descriptor.</param>
+    /// <param name="className">Class, where the field is declared.</param>
+    /// <returns>Name for field.</returns>
+    public static string GetFieldName(NameDescriptor descriptor, string className)
+    {
+        return $"{className.Length}_{descriptor.GetSnapshotHash()}_{className}_{descriptor}";
+    }
 
-    public static string GetFieldGetterName(NameDescriptor descriptor, JavaClass cls) =>
-        GetFieldName(descriptor, cls) + "_bridge_get";
+    public static string GetFieldGetterName(NameDescriptor descriptor, string className) =>
+        GetFieldName(descriptor, className) + "_bridge_get";
 
-    public static string GetFieldSetterName(NameDescriptor descriptor, JavaClass cls) =>
-        GetFieldName(descriptor, cls) + "_bridge_set";
+    public static string GetFieldSetterName(NameDescriptor descriptor, string className) =>
+        GetFieldName(descriptor, className) + "_bridge_set";
 
     #endregion
 
@@ -200,7 +242,7 @@ public static class BridgeCompiler
         if (method.ReturnType != typeof(void))
         {
             // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, BridgeCompiler.STACK_PUSHERS[method.ReturnType]);
+            il.Emit(OpCodes.Call, STACK_PUSHERS[method.ReturnType]);
         }
         else
         {

@@ -98,16 +98,10 @@ public partial class JvmState
             });
             zip.AddTextEntry(heap_statics_json, s =>
             {
-                var all = Classes.Values
-                    .Where(x => !x.IsInterface && x.ClrType != null && !x.ClrType.IsAbstract)
-                    .Select(x =>
-                    {
-                        var obj = (Object)Activator.CreateInstance(x.ClrType!)!;
-                        obj.JavaClass = x;
-                        return obj;
-                    })
-                    .ToArray();
-                var t = JsonConvert.SerializeObject(all, HeapSerializeSettings);
+                SerializedStatics ss = default;
+                ss.Java = StaticFields;
+                ss.Native = StaticMemory;
+                var t = JsonConvert.SerializeObject(ss, HeapSerializeSettings);
                 s.Write(t);
             });
         }
@@ -128,6 +122,12 @@ public partial class JvmState
             ModelObject = int.Parse(line[1]);
             Hash = line[2];
         }
+    }
+
+    public struct SerializedStatics
+    {
+        public StaticMemory Native;
+        public long[] Java;
     }
 
     public void RestoreFromSnapshot(Stream stream)
@@ -214,7 +214,15 @@ public partial class JvmState
                 Object.JvmUnchecked = this;
                 _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
                     HeapSerializeSettings)!;
-                JsonConvert.DeserializeObject<object[]>(zip.ReadTextEntry(heap_statics_json), HeapSerializeSettings);
+
+                var ss = JsonConvert.DeserializeObject<SerializedStatics>(zip.ReadTextEntry(heap_statics_json),
+                    HeapSerializeSettings);
+                if (ss.Java.Length != StaticFieldsOwners.Count)
+                    throw new SnapshotLoadError(
+                        $"Statics count do not match. Expected {StaticFieldsOwners.Count}, {ss.Java.Length} was in snapshot.");
+                StaticFields = ss.Java;
+                StaticMemory = ss.Native;
+
                 Object.JvmUnchecked = null;
             }
         }

@@ -13,7 +13,7 @@ public class ChoiceGroup : Item
 
     public ChoiceType Type;
 
-    public int SelectedItem = 0;
+    public int SelectedItem;
 
     [JavaIgnore] public List<bool> SelectedMap = new();
 

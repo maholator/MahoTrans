@@ -6,7 +6,6 @@ using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Types;
-using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
 
@@ -36,7 +35,7 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
     {
-        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, Toolkit.LoadLogger ?? new StubLogger());
+        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
         foreach (var cls in classes)
         {
             Classes.Add(cls.Name, cls);
@@ -49,7 +48,7 @@ public partial class JvmState
 
     public void AddClrClasses(IEnumerable<Type> types)
     {
-        var classes = NativeLinker.Make(types.ToArray());
+        var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
         foreach (var cls in classes)
         {
             cls.Flags |= ClassFlags.Public;
@@ -65,7 +64,7 @@ public partial class JvmState
     ///     Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
     /// </summary>
     /// <param name="new">Newly added classes.</param>
-    private void RefreshState(JavaClass[] @new)
+    private void RefreshState(IEnumerable<JavaClass> @new)
     {
         foreach (var @class in @new)
         {
@@ -78,6 +77,13 @@ public partial class JvmState
         {
             @class.GenerateVirtualTable(this);
             @class.RecalculateSize();
+        }
+
+        if (StaticFields.Length < StaticFieldsOwners.Count)
+        {
+            var newStack = new long[StaticFieldsOwners.Count];
+            Array.Copy(StaticFields, newStack, StaticFields.Length);
+            StaticFields = newStack;
         }
     }
 

@@ -16,7 +16,10 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
+    public StaticMemory StaticMemory = new();
     private Object?[] _heap = new Object?[1024 * 16];
+    public long[] StaticFields = Array.Empty<long>();
+    public List<Field> StaticFieldsOwners = new();
     private int _nextObjectId = 1;
     [PublicAPI] public int ObjectsOnFly;
     private Dictionary<string, int> _internalizedStrings = new();
@@ -211,7 +214,6 @@ public partial class JvmState
     #region Resolution
 
 #if DEBUG
-
     public Object ResolveObject(Reference r)
     {
         return Resolve<Object>(r);
@@ -452,9 +454,12 @@ public partial class JvmState
                 {
                     foreach (var field in cls.Fields.Values)
                     {
-                        if (field.NativeField.FieldType == typeof(Reference) && !field.NativeField.IsStatic)
+                        if (field.NativeField != null)
                         {
-                            enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
+                            if (field.NativeField.FieldType == typeof(Reference))
+                            {
+                                enumQueue.Enqueue((Reference)field.NativeField.GetValue(o)!);
+                            }
                         }
                     }
                 }
@@ -498,32 +503,25 @@ public partial class JvmState
     /// <returns>List of references. This may contain null and invalid references (i.e. random numbers which point to nowhere).</returns>
     public unsafe List<Reference> CollectObjectGraphRoots()
     {
-        List<Reference> roots = new List<Reference>();
+        List<Reference> roots = StaticMemory.GetAll();
 
         roots.Add(MidletObject);
 
         // building roots list
         {
-            // statics and classes
+            // classes
             foreach (var cls in Classes.Values)
             {
                 if (!cls.ModelObject.IsNull)
                 {
                     roots.Add(cls.ModelObject);
                 }
+            }
 
-                foreach (var field in cls.Fields.Values)
-                {
-                    if ((field.Flags & FieldFlags.Static) != 0)
-                    {
-                        if (field.NativeField.FieldType == typeof(Reference))
-                        {
-                            roots.Add((Reference)field.NativeField.GetValue(null)!);
-                        }
-                    }
-                }
-
-                cls.StaticAnnouncer?.Invoke(roots);
+            foreach (var field in StaticFields)
+            {
+                if (field > 0 && field <= _heap.Length)
+                    roots.Add(field);
             }
 
             // threads

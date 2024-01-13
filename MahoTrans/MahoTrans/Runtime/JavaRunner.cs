@@ -1284,6 +1284,34 @@ public class JavaRunner
                 pointer++;
                 break;
             }
+
+            case MTOpcode.get_static:
+            {
+                var p = (JavaClass)instr.Data;
+                if (p.PendingInitializer)
+                {
+                    p.Initialize(thread);
+                    return;
+                }
+
+                frame.PushUnchecked(jvm.StaticFields[instr.IntData]);
+                pointer++;
+                break;
+            }
+
+            case MTOpcode.set_static:
+            {
+                var p = (JavaClass)instr.Data;
+                if (p.PendingInitializer)
+                {
+                    p.Initialize(thread);
+                    return;
+                }
+
+                jvm.StaticFields[instr.IntData] = frame.Pop();
+                pointer++;
+                break;
+            }
         }
     }
 

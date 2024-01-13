@@ -15,7 +15,7 @@ public class DefaultAlertHandler : Object, CommandListener
     {
         if (Jvm.ResolveObject(displayable) is Alert a)
         {
-            if (cmd == Alert.DISMISS_COMMAND)
+            if (cmd == NativeStatics.AlertDismissCommand)
             {
                 Jvm.Resolve<Display>(Jvm.Resolve<MIDlet>(Jvm.MidletObject).Display).setCurrent(a.Next);
             }

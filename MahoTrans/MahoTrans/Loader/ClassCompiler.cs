@@ -18,7 +18,7 @@ namespace MahoTrans.Loader;
 public static class ClassCompiler
 {
     public static void CompileTypes(Dictionary<string, JavaClass> loaded, JavaClass[] queued,
-        string assemblyName, string moduleName, ILoadLogger logger)
+        string assemblyName, string moduleName, JvmState jvm, ILoadLogger? logger)
     {
         Dictionary<string, JavaClass> queuedDict = queued.ToDictionary(x => x.Name, x => x);
         Dictionary<JavaClass, CompilerCache> cache = queued.ToDictionary(x => x, x => new CompilerCache(x));
@@ -64,7 +64,7 @@ public static class ClassCompiler
                     }
                     else
                     {
-                        logger.Log(LoadIssueType.MissingClassSuper, cls.Name,
+                        logger?.Log(LoadIssueType.MissingClassSuper, cls.Name,
                             $"The class has super \"{cls.SuperName}\" which can't be found. lang.Object will be set as super.");
                         cls.SuperName = "java/lang/Object";
                         ready = false;
@@ -94,7 +94,7 @@ public static class ClassCompiler
                             }
                             else
                             {
-                                logger.Log(LoadIssueType.MissingClassSuper, cls.Name,
+                                logger?.Log(LoadIssueType.MissingClassSuper, cls.Name,
                                     $"The class has interface \"{inter}\" which can't be found. Dummy interface will be used instead.");
                                 cls.Interfaces[i] = typeof(DummyInterface).ToJavaName();
                                 c.Interfaces.Remove(inter);
@@ -133,10 +133,16 @@ public static class ClassCompiler
             var c = cache[cls];
             foreach (var field in cls.Fields.Values)
             {
+                if (field.IsStatic)
+                {
+                    jvm.StaticFieldsOwners.Add(field);
+                    continue;
+                }
+
                 // field define
                 object fieldType = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
                 var t = fieldType as Type ?? typeof(Reference);
-                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, cls), t,
+                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, cls.Name), t,
                     ConvertFlags(field.Flags));
                 // attribute attachment
                 {
@@ -160,7 +166,7 @@ public static class ClassCompiler
                         {
                             if (!queuedDict.ContainsKey(clsName) && !loaded.ContainsKey(clsName))
                             {
-                                logger.Log(LoadIssueType.MissingClassField, cls.Name,
+                                logger?.Log(LoadIssueType.MissingClassField, cls.Name,
                                     $"There is a field of type {clsName} which can't be found");
                             }
                         }
@@ -178,13 +184,16 @@ public static class ClassCompiler
             item.Key.ClrType = type;
             foreach (var field in item.Key.Fields.Values)
             {
-                field.NativeField = type.GetField(BridgeCompiler.GetFieldName(field.Descriptor, item.Key),
+                // static fields are not managed by CLR
+                if (field.IsStatic)
+                    continue;
+                field.NativeField = type.GetField(BridgeCompiler.GetFieldName(field.Descriptor, item.Key.Name),
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance |
                     BindingFlags.DeclaredOnly)!;
-                field.GetValue = type.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, item.Key),
+                field.GetValue = type.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = type.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, item.Key),
+                field.SetValue = type.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
             }

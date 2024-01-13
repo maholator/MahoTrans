@@ -5,28 +5,21 @@ using java.io;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Newtonsoft.Json;
 
 namespace java.lang;
 
 public class System : Object
 {
-    [JsonProperty] [JavaType(typeof(PrintStream))]
-    public static Reference @out;
-
-    [JsonProperty] [JavaType(typeof(PrintStream))]
-    public static Reference err;
-
     [ClassInit]
     public static void Clinit()
     {
         var outPrinter = Jvm.AllocateObject<PrintStream>();
         outPrinter.Init(Jvm.AllocateObject<StdOut>().This);
-        @out = outPrinter.This;
+        NativeStatics.OutStream = outPrinter.This;
 
         var errPrinter = Jvm.AllocateObject<PrintStream>();
         errPrinter.Init(Jvm.AllocateObject<StdErr>().This);
-        err = errPrinter.This;
+        NativeStatics.ErrStream = errPrinter.This;
     }
 
     public static int identityHashCode(Reference x)

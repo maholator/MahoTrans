@@ -78,9 +78,12 @@ public class Object
         set => _jvm = value;
     }
 
+
     [JsonIgnore] public static bool JvmAttached => _jvm != null;
 
     [JsonIgnore] protected static ToolkitCollection Toolkit => Jvm.Toolkit;
+
+    [JsonIgnore] public static StaticMemory NativeStatics => Jvm.StaticMemory;
 
     #endregion
 

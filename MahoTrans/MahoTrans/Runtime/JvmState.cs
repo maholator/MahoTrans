@@ -146,7 +146,6 @@ public partial class JvmState
             cls.VirtualTableMap?.Clear();
             cls.VirtualTableMap = null;
             cls.VirtualTable = null;
-            cls.StaticAnnouncer = null;
             cls.Super = null!;
             foreach (var f in cls.Fields.Values)
             {

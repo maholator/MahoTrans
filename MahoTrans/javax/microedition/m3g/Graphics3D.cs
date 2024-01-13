@@ -9,14 +9,12 @@ namespace javax.microedition.m3g;
 
 public class Graphics3D : Object
 {
-    public static Reference Inst;
-
     [return: JavaType(typeof(Graphics3D))]
     public static Reference getInstance()
     {
-        if (Inst.IsNull)
-            Inst = Jvm.AllocateObject<Graphics3D>().This;
-        return Inst;
+        if (NativeStatics.Graphics3DInstance.IsNull)
+            NativeStatics.Graphics3DInstance = Jvm.AllocateObject<Graphics3D>().This;
+        return NativeStatics.Graphics3DInstance;
     }
 
     public void bindTarget(Reference obj)

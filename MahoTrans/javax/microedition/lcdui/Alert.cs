@@ -6,16 +6,12 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Newtonsoft.Json;
 
 namespace javax.microedition.lcdui;
 
 public class Alert : Screen
 {
-    public static int FOREVER = -2;
-
-    [JsonProperty] [JavaType(typeof(Command))]
-    public static Reference DISMISS_COMMAND;
+    public const int FOREVER = -2;
 
     [JavaType(typeof(Displayable))] public Reference Next;
 
@@ -24,7 +20,7 @@ public class Alert : Screen
     {
         var dismiss = Jvm.AllocateObject<Command>();
         dismiss.Init(Jvm.AllocateString(""), Command.OK, 0);
-        DISMISS_COMMAND = dismiss.This;
+        NativeStatics.AlertDismissCommand = dismiss.This;
     }
 
     [InitMethod]
@@ -43,7 +39,7 @@ public class Alert : Screen
         Image = alertImage;
         Type = alertType;
         Timeout = getDefaultTimeout();
-        Commands.Add(DISMISS_COMMAND);
+        Commands.Add(NativeStatics.AlertDismissCommand);
         setCommandListener(Jvm.AllocateObject<DefaultAlertHandler>().This);
         // invalidate is necessary to notify toolkit about non-null implicit command
         Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
@@ -100,24 +96,24 @@ public class Alert : Screen
 
     public new void addCommand([JavaType(typeof(Command))] Reference cmd)
     {
-        if (cmd == DISMISS_COMMAND)
+        if (cmd == NativeStatics.AlertDismissCommand)
             return;
         base.addCommand(cmd);
-        if (Commands.Contains(DISMISS_COMMAND) && Commands.Count != 1)
+        if (Commands.Contains(NativeStatics.AlertDismissCommand) && Commands.Count != 1)
         {
-            Commands.Remove(DISMISS_COMMAND);
+            Commands.Remove(NativeStatics.AlertDismissCommand);
             Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
         }
     }
 
     public new void removeCommand([JavaType(typeof(Command))] Reference cmd)
     {
-        if (cmd == DISMISS_COMMAND)
+        if (cmd == NativeStatics.AlertDismissCommand)
             return;
         base.removeCommand(cmd);
         if (Commands.Count == 0)
         {
-            Commands.Add(DISMISS_COMMAND);
+            Commands.Add(NativeStatics.AlertDismissCommand);
             Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
         }
     }

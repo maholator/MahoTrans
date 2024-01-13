@@ -9,8 +9,7 @@ namespace javax.microedition.media.control;
 
 public class VolumeControl : Object, Control
 {
-    [JavaIgnore]
-    public MediaHandle Handle;
+    [JavaIgnore] public MediaHandle Handle;
 
     public int setLevel(int level)
     {

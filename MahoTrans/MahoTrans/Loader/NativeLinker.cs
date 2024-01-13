@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
+using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -15,22 +16,35 @@ namespace MahoTrans.Loader;
 ///     This class exposes tools to build JVM types from CLR types.
 /// </summary>
 /// <seealso cref="ClassCompiler" />
-/// <seealso cref="BridgeCompiler"/>
+/// <seealso cref="BridgeCompiler" />
 public static class NativeLinker
 {
     private static int _bridgeAsmCounter = 1;
 
-    public static JavaClass[] Make(Type[] types)
+    /// <summary>
+    /// Converts list of CLR types to list of JVM types.
+    /// </summary>
+    /// <param name="types">Types to convert.</param>
+    /// <param name="logger">Logger to log issues to.</param>
+    /// <returns>List of java classes.</returns>
+    public static List<JavaClass> Make(Type[] types, ILoadLogger? logger)
     {
+        // bridges asm init
         var name = new AssemblyName($"Bridge-{_bridgeAsmCounter}");
+        _bridgeAsmCounter++;
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
         var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
         var bridge = module.DefineType("Bridge", TypeAttributes.Public | TypeAttributes.Sealed);
 
-        var java = types.Select(type => Make(type, bridge)).ToArray();
+        // building java classes
+        List<JavaClass> java = new List<JavaClass>();
+        foreach (var type in types)
+            java.Add(Make(type, bridge, logger));
 
+        // bridges compilation
         var loaded = bridge.CreateType()!;
 
+        // linking bridges to java fields
         foreach (var @class in java)
         {
             foreach (var method in @class.Methods.Values)
@@ -41,9 +55,9 @@ public static class NativeLinker
 
             foreach (var field in @class.Fields.Values)
             {
-                field.GetValue = loaded.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, @class))!
+                field.GetValue = loaded.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, @class.Name))?
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = loaded.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, @class))!
+                field.SetValue = loaded.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, @class.Name))?
                     .CreateDelegate<Action<Frame>>();
             }
         }
@@ -52,7 +66,7 @@ public static class NativeLinker
         return java;
     }
 
-    private static JavaClass Make(Type type, TypeBuilder bridge)
+    private static JavaClass Make(Type type, TypeBuilder bridge, ILoadLogger? logger)
     {
         var name = type.FullName!.Replace('.', '/');
         JavaClass jc = new JavaClass
@@ -66,24 +80,15 @@ public static class NativeLinker
             if (super != null)
                 jc.SuperName = super;
         }
-        var nativeFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly |
-                                          BindingFlags.Instance | BindingFlags.Static).Where(IsJavaVisible);
+        var allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly |
+                                       BindingFlags.Instance | BindingFlags.Static);
+        var nativeFields = allFields.Where(IsJavaVisible);
+        var staticFields = StaticMemory.Fields.Where(x => x.Owner == type).Select(x => x.Field);
         var nativeMethods = type.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
                                             BindingFlags.Static);
         List<Method> javaMethods = new();
         foreach (var nm in nativeMethods)
         {
-            if (nm.GetCustomAttribute<StaticFieldsAnnouncerAttribute>() != null)
-            {
-                if (nm.IsStatic)
-                {
-                    jc.StaticAnnouncer = nm.CreateDelegate<Action<List<Reference>>>();
-                    continue;
-                }
-
-                throw new JavaLinkageException("Static announcer must be static!");
-            }
-
             if (nm.GetCustomAttribute<JavaIgnoreAttribute>() != null)
                 continue;
 
@@ -110,18 +115,28 @@ public static class NativeLinker
             throw new JavaLinkageException($"Dublicate method in class {name}", e);
         }
 
-        jc.Fields = nativeFields.Select(x =>
+        jc.Fields = nativeFields.Concat(staticFields).Select(x =>
         {
-            var d = new NameDescriptor(x.Name, Parameter.FromField(x).ToString());
-            FieldFlags flags = FieldFlags.Public;
-            if (x.IsStatic)
-                flags |= FieldFlags.Static;
-            var field = new Field(d, flags)
+            if (x.DeclaringType == typeof(StaticMemory))
             {
-                NativeField = x,
-            };
-            BridgeCompiler.BuildBridges(bridge, x, d, jc);
-            return field;
+                var d = BridgeCompiler.BuildNativeStaticBridge(bridge, x);
+                var field = new Field(d, FieldFlags.Public | FieldFlags.Static);
+                return field;
+            }
+            else
+            {
+                var d = new NameDescriptor(x.Name, Parameter.FromField(x).ToString());
+                var flags = FieldFlags.Public;
+                if (x.IsStatic)
+                    flags |= FieldFlags.Static;
+
+                var field = new Field(d, flags)
+                {
+                    NativeField = x,
+                };
+                BridgeCompiler.BuildBridges(bridge, x, d, jc);
+                return field;
+            }
         }).ToDictionary(x => x.Descriptor, x => x);
         return jc;
     }
@@ -211,7 +226,7 @@ public static class NativeLinker
 
 
     /// <summary>
-    /// Checks, should the field be shown to JVM.
+    ///     Checks, should the field be shown to JVM.
     /// </summary>
     /// <param name="field">Field to check.</param>
     /// <returns>False to hide field.</returns>

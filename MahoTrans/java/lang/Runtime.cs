@@ -8,23 +8,21 @@ namespace java.lang;
 
 public class Runtime : Object
 {
-    public static Reference Instance;
-
     [ClassInit]
     public static void ClInit()
     {
-        Instance = 0;
+        NativeStatics.RuntimeInstance = Reference.Null;
     }
 
     [return: JavaType(typeof(Runtime))]
     public static Reference getRuntime()
     {
-        if (Instance.IsNull)
+        if (NativeStatics.RuntimeInstance.IsNull)
         {
-            Instance = Jvm.AllocateObject<Runtime>().This;
+            NativeStatics.RuntimeInstance = Jvm.AllocateObject<Runtime>().This;
         }
 
-        return Instance;
+        return NativeStatics.RuntimeInstance;
     }
 
     public void gc() => System.gc();

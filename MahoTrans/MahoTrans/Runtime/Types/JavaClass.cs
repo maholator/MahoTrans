@@ -37,7 +37,6 @@ public class JavaClass
     /// </summary>
     public bool PendingInitializer = true;
 
-    public Action<List<Reference>>? StaticAnnouncer;
     public int Size;
 
     public override string ToString() => Name;

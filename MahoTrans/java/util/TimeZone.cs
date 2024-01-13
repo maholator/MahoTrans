@@ -1,44 +1,25 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
-using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace java.util;
 
 public class TimeZone : Object
 {
-    [JavaIgnore] [JsonProperty] private static Dictionary<string, Reference>? _availableZones;
-
-    [JsonProperty] [JavaType(typeof(SimpleTimeZone))]
-    public static Reference Default;
-
-    [JsonProperty] [JavaType(typeof(SimpleTimeZone))]
-    public static Reference GMT;
-
     [ClassInit]
     public static void ClInit()
     {
         var gmt = Jvm.AllocateObject<SimpleTimeZone>();
         gmt.Init(0, Jvm.InternalizeString("GMT"));
-        GMT = gmt.This;
+        NativeStatics.GmtTimeZone = gmt.This;
     }
 
-    [StaticFieldsAnnouncer]
-    public static void Statics(List<Reference> list)
-    {
-        if (_availableZones != null)
-            list.AddRange(_availableZones.Values);
-    }
-
-
-    [MemberNotNull(nameof(_availableZones))]
     private static void initializeAvailable()
     {
         //TODO THIS MUST NOT BE A THING
@@ -50,29 +31,29 @@ public class TimeZone : Object
         }
 
         SimpleTimeZone[] zones = TimeZones.GetTimeZones();
-        _availableZones = new Dictionary<string, Reference>();
-        _availableZones.Add("GMT", GMT);
+        NativeStatics.AvailableZones = new Dictionary<string, Reference>();
+        NativeStatics.AvailableZones.Add("GMT", NativeStatics.GmtTimeZone);
         foreach (var t in zones)
-            _availableZones.Add(Jvm.ResolveString(t.ID), t.This);
+            NativeStatics.AvailableZones.Add(Jvm.ResolveString(t.ID), t.This);
     }
 
     // for serializer
+    //TODO what was here for serializer?
 
     [return: JavaType("[Ljava/lang/String;")]
     public static Reference getAvailableIDs()
     {
-        if (_availableZones == null) initializeAvailable();
-        int length = _availableZones.Count;
-        string[] result = _availableZones.Keys.ToArray();
+        if (NativeStatics.AvailableZones == null!) initializeAvailable();
+        string[] result = NativeStatics.AvailableZones!.Keys.ToArray();
         return result.AsJavaArray();
     }
 
     [return: JavaType(typeof(TimeZone))]
     public static Reference getDefault()
     {
-        if (Default.IsNull)
+        if (NativeStatics.DefaultTimeZone.IsNull)
             setDefault(null);
-        return Default;
+        return NativeStatics.DefaultTimeZone;
     }
 
     [return: String]
@@ -88,8 +69,8 @@ public class TimeZone : Object
     {
         var name = Jvm.ResolveString(nameString);
 
-        if (_availableZones == null) initializeAvailable();
-        if (_availableZones.TryGetValue(name, out var zone))
+        if (NativeStatics.AvailableZones == null!) initializeAvailable();
+        if (NativeStatics.AvailableZones!.TryGetValue(name, out var zone))
             return zone;
 
         if (name.StartsWith("GMT") && name.Length > 3)
@@ -101,13 +82,13 @@ public class TimeZone : Object
                 var formattedName = formatTimeZoneName(name, 4);
                 if (formattedName == null)
                 {
-                    return GMT;
+                    return NativeStatics.GmtTimeZone;
                 }
 
                 int hour = parseNumber(formattedName, 4, position);
                 if (hour < 0 || hour > 23)
                 {
-                    return GMT;
+                    return NativeStatics.GmtTimeZone;
                 }
 
                 int index = position[0];
@@ -118,7 +99,7 @@ public class TimeZone : Object
                     {
                         int minute = parseNumber(formattedName, index + 1, position);
                         if (position[0] == -1 || minute < 0 || minute > 59)
-                            return GMT;
+                            return NativeStatics.GmtTimeZone;
                         raw += minute * 60000;
                     }
                     else if (hour >= 30 || index > 6)
@@ -134,7 +115,7 @@ public class TimeZone : Object
             }
         }
 
-        return GMT;
+        return NativeStatics.GmtTimeZone;
     }
 
     private static string? formatTimeZoneName(string name, int offset)
@@ -209,12 +190,12 @@ public class TimeZone : Object
     {
         if (timezone != null)
         {
-            Default = timezone.This;
+            NativeStatics.DefaultTimeZone = timezone.This;
             return;
         }
 
         var systemZone = Jvm.Toolkit.System.TimeZone;
-        Default = getTimeZone(Jvm.InternalizeString(systemZone));
+        NativeStatics.DefaultTimeZone = getTimeZone(Jvm.InternalizeString(systemZone));
     }
 
     public virtual bool useDaylightTime() => throw new AbstractJavaMethodCallError();

@@ -26,7 +26,7 @@ public class Class : Object
     [JsonProperty]
     public string? InternalClassName
     {
-        get => InternalClass?.Name;
+        get => InternalClass != null! ? InternalClass.Name : null;
         set
         {
             if (value == null)
@@ -35,8 +35,6 @@ public class Class : Object
         }
     }
 
-    private static readonly NameDescriptor _initDescr = new NameDescriptor("<init>", "()V");
-
     [return: JavaType(typeof(Class))]
     public static Reference forName([String] Reference r)
     {
@@ -44,7 +42,7 @@ public class Class : Object
         if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
             Jvm.Throw<ClassNotFoundException>();
         var cls = Jvm.AllocateObject<Class>();
-        cls.InternalClass = jc!;
+        cls.InternalClass = jc;
         return cls.This;
     }
 
@@ -66,7 +64,7 @@ public class Class : Object
                 new(JavaOpcode.invokevirtual,
                     cls.PushConstant(new NameDescriptor("allocate", "()Ljava/lang/Object;")).Split()),
                 new(JavaOpcode.dup),
-                new(JavaOpcode.invokevirtual, cls.PushConstant(_initDescr).Split()),
+                new(JavaOpcode.invokevirtual, cls.PushConstant(new NameDescriptor("<init>", "()V")).Split()),
                 new(JavaOpcode.areturn)
             }
         };
@@ -75,7 +73,7 @@ public class Class : Object
 
     public Reference allocate()
     {
-        if (!InternalClass.Methods.ContainsKey(_initDescr))
+        if (!InternalClass.Methods.ContainsKey(new NameDescriptor("<init>", "()V")))
             Jvm.Throw<IllegalAccessException>();
         return Jvm.AllocateObject(InternalClass);
     }

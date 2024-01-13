@@ -5,6 +5,7 @@
 // ReSharper disable IdentifierTypo
 
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
 
 namespace MahoTrans;
 
@@ -229,6 +230,24 @@ public enum MTOpcode : byte
     ///     Sets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
     /// </summary>
     set_field,
+
+    #endregion
+
+    #region Fileds (static)
+
+    /// <summary>
+    ///     Gets value from <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
+    ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    get_static,
+
+    /// <summary>
+    ///     Sets value in <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
+    ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    set_static,
+
+    get_native_static,
 
     #endregion
 

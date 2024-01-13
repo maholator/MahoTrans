@@ -942,7 +942,11 @@ public static class BytecodeLinker
                         break;
                     case JavaOpcode.pop:
                         opcode = MTOpcode.pop;
-                        PrimitiveType[] expected = new[] { PrimitiveType.Int, PrimitiveType.Float, PrimitiveType.Reference, PrimitiveType.SubroutinePointer };
+                        PrimitiveType[] expected =
+                        {
+                            PrimitiveType.Int, PrimitiveType.Float, PrimitiveType.Reference,
+                            PrimitiveType.SubroutinePointer
+                        };
                         emulatedStack.PopWithAssert(expected);
                         SetNextStack();
                         break;
@@ -1731,17 +1735,25 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        if (jvm.UseBridgesForFields)
+                        var index = jvm.StaticFieldsOwners.IndexOf(f);
+                        if (index < 0)
                         {
-                            var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                            // maybe it's a native field?
+                            if (f.GetValue == null)
+                            {
+                                // no, it's not.
+                                throw new JavaLinkageException($"Static field {d} has no static slot!");
+                            }
+
                             opcode = MTOpcode.bridge_init_class;
-                            intData = 0;
-                            data = new ClassBoundBridge(b, c);
+                            intData = 1;
+                            data = new ClassBoundBridge(f.GetValue, c);
                         }
                         else
                         {
-                            opcode = MTOpcode.get_field;
-                            data = new ReflectionFieldPointer(f.NativeField, c);
+                            intData = index;
+                            data = c;
+                            opcode = MTOpcode.get_static;
                         }
 
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
@@ -1754,18 +1766,13 @@ public static class BytecodeLinker
                         var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
                         var c = jvm.Classes[d.ClassName];
                         var f = c.GetFieldRecursive(d.Descriptor);
-                        if (jvm.UseBridgesForFields)
-                        {
-                            var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                            opcode = MTOpcode.bridge_init_class;
-                            intData = 1;
-                            data = new ClassBoundBridge(b, c);
-                        }
-                        else
-                        {
-                            opcode = MTOpcode.set_field;
-                            data = new ReflectionFieldPointer(f.NativeField, c);
-                        }
+                        var index = jvm.StaticFieldsOwners.IndexOf(f);
+                        if (index < 0)
+                            throw new JavaLinkageException($"Static field {d} has no static slot!");
+
+                        intData = index;
+                        data = c;
+                        opcode = MTOpcode.set_static;
 
                         SetNextStack();
                         break;
