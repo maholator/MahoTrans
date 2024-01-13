@@ -1786,7 +1786,7 @@ public static class BytecodeLinker
                         else
                         {
                             opcode = MTOpcode.get_field;
-                            data = new ReflectionFieldPointer(f.NativeField, c);
+                            data = new ReflectionFieldPointer(f.NativeField!, c);
                         }
 
                         emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
@@ -1810,7 +1810,7 @@ public static class BytecodeLinker
                         else
                         {
                             opcode = MTOpcode.set_field;
-                            data = new ReflectionFieldPointer(f.NativeField, c);
+                            data = new ReflectionFieldPointer(f.NativeField!, c);
                         }
 
                         SetNextStack();

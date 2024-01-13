@@ -16,7 +16,7 @@ public class Field
     /// <summary>
     ///     Reference to field metadata.
     /// </summary>
-    public FieldInfo NativeField = null!;
+    public FieldInfo? NativeField;
 
     /// <summary>
     ///     Bridge method to get field value. Pops object reference from the frame and pushes the value back. No extra actions
@@ -37,6 +37,8 @@ public class Field
         Flags = flags;
         Descriptor = descriptor;
     }
+
+    public bool IsStatic => Flags.HasFlag(FieldFlags.Static);
 
     public override string ToString() => Descriptor.ToString();
 
