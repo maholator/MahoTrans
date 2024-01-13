@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>MahoTrans</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.11</Version>
+        <Version>1.0.12</Version>
         <Title>MahoTrans.Abstractions</Title>
         <Authors>Ryzhov Fyodor (aka. sym_ansel)</Authors>
         <Description>Base library for MahoTrans.</Description>
