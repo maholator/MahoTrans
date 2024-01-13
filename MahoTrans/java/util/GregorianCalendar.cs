@@ -9,12 +9,12 @@ namespace java.util;
 
 class GregorianCalendar : Calendar
 {
-    public static readonly int
+    public const int
         BC = 0,
         AD = 1;
 
-    private static readonly long gregorianCutover = -12219292800000L;
-    private static readonly int changeYear = 1582;
+    private const long gregorianCutover = -12219292800000L;
+    private const int changeYear = 1582;
 
     private static readonly int julianSkew = ((changeYear - 2000) / 400) + julianError() -
                                              ((changeYear - 2000) / 100);
@@ -24,11 +24,11 @@ class GregorianCalendar : Calendar
     [JavaIgnore] public static sbyte[] DaysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
     [JavaIgnore] private static int[] DaysInYear = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
-    private static readonly int CACHED_YEAR = 0;
-    private static readonly int CACHED_MONTH = 1;
-    private static readonly int CACHED_DATE = 2;
-    private static readonly int CACHED_DAY_OF_WEEK = 3;
-    private static readonly int CACHED_ZONE_OFFSET = 4;
+    private const int CACHED_YEAR = 0;
+    private const int CACHED_MONTH = 1;
+    private const int CACHED_DATE = 2;
+    private const int CACHED_DAY_OF_WEEK = 3;
+    private const int CACHED_ZONE_OFFSET = 4;
     private bool isCached;
     [JavaIgnore] private int[]? cachedFields;
     private long nextMidnightMillis;

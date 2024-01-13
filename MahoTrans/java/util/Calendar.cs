@@ -22,7 +22,7 @@ public class Calendar : Object
     protected int lastTimeFieldSet;
     [JavaType(typeof(TimeZone))] public Reference Zone;
 
-    public static readonly int
+    public const int
         JANUARY = 0,
         FEBRUARY = 1,
         MARCH = 2,
@@ -43,7 +43,7 @@ public class Calendar : Object
         FRIDAY = 6,
         SATURDAY = 7;
 
-    public static readonly int
+    public const int
         YEAR = 1,
         MONTH = 2,
         DATE = 5,
@@ -58,7 +58,7 @@ public class Calendar : Object
         AM = 0,
         PM = 1;
 
-    public static readonly int FIELD_COUNT = 15;
+    public const int FIELD_COUNT = 15;
 
     [InitMethod]
     public new void Init()

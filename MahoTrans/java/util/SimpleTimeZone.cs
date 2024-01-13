@@ -16,17 +16,19 @@ public class SimpleTimeZone : TimeZone
     private int startMode, endMode;
     private int startTimeMode, endTimeMode;
 
-    private const int
-        DOM_MODE = 1,
-        DOW_IN_MONTH_MODE = 2,
-        DOW_GE_DOM_MODE = 3,
-        DOW_LE_DOM_MODE = 4;
+    public const int DOM_MODE = 1;
 
-    public static readonly int UTC_TIME = 2;
+    public const int DOW_IN_MONTH_MODE = 2;
 
-    public static readonly int STANDARD_TIME = 1;
+    public const int DOW_GE_DOM_MODE = 3;
 
-    public static readonly int WALL_TIME = 0;
+    public const int DOW_LE_DOM_MODE = 4;
+
+    public const int UTC_TIME = 2;
+
+    public const int STANDARD_TIME = 1;
+
+    public const int WALL_TIME = 0;
 
     private bool useDaylight;
     private int dstSavings = 3600000;
