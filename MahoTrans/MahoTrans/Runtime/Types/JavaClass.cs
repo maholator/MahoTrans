@@ -176,6 +176,17 @@ public class JavaClass
         VirtualTable = arr;
     }
 
+    public List<Field> GetAllFieldsRecursive()
+    {
+        List<Field> list = new();
+
+        list.AddRange(Fields.Values);
+        if (Super != null! && Name != "java/lang/Object")
+            list.AddRange(Super.GetAllFieldsRecursive());
+
+        return list;
+    }
+
     public void RecalculateSize()
     {
         int size = 20; // base object size
