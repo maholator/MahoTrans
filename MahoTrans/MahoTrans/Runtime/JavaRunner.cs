@@ -1504,7 +1504,7 @@ public class JavaRunner
         var value = frame.PopDouble();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<double>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToFloatArray(Frame frame, JvmState state)
@@ -1512,7 +1512,7 @@ public class JavaRunner
         var value = frame.PopFloat();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<float>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToRefArray(Frame frame, JvmState state)
@@ -1520,7 +1520,7 @@ public class JavaRunner
         var value = frame.PopReference();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<Reference>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToLongArray(Frame frame, JvmState state)
@@ -1528,7 +1528,7 @@ public class JavaRunner
         var value = frame.PopLong();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<long>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToIntArray(Frame frame, JvmState state)
@@ -1536,7 +1536,7 @@ public class JavaRunner
         var value = frame.PopInt();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<int>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToCharArray(Frame frame, JvmState state)
@@ -1544,7 +1544,7 @@ public class JavaRunner
         var value = frame.PopChar();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<char>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToShortArray(Frame frame, JvmState state)
@@ -1552,7 +1552,7 @@ public class JavaRunner
         var value = frame.PopShort();
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        state.ResolveArray<short>(reference)[index] = value;
+        state.SetArrayElement(reference, index, value);
     }
 
     private static void PopToByteArray(Frame frame, JvmState state)
@@ -1561,6 +1561,7 @@ public class JavaRunner
         var index = frame.PopInt();
         var reference = frame.PopReference();
         var array = state.Resolve<Array>(reference);
+        array.CheckInBounds(index);
         if (array is Array<bool> b)
             b.Value[index] = value != 0;
         else if (array is Array<sbyte> s)

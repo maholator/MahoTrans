@@ -292,6 +292,15 @@ public partial class JvmState
         return obj.Value;
     }
 
+    public void SetArrayElement<T>(Reference r, int index, T value) where T : struct
+    {
+        if (r.IsNull)
+            Throw<NullPointerException>();
+        var obj = (Array<T>)_heap[r.Index]!;
+        obj.CheckInBounds(index);
+        obj.Value[index] = value;
+    }
+
     #endregion
 
     #region Exceptions

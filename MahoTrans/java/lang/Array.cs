@@ -27,4 +27,10 @@ public class Array<T> : Array where T : struct
 public abstract class Array : Object
 {
     [JsonIgnore] public abstract ClrArray BaseValue { get; }
+
+    public void CheckInBounds(int index)
+    {
+        if ((uint)index >= (uint)BaseValue.Length)
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
+    }
 }
