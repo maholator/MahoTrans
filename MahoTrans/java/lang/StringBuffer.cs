@@ -109,7 +109,7 @@ public class StringBuffer : Object
     [return: JavaType(typeof(StringBuffer))]
     public Reference append([String] Reference s)
     {
-        _buffer.AddRange(Jvm.ResolveString(s));
+        _buffer.AddRange(Jvm.ResolveStringOrDefault(s) ?? "null");
         return This;
     }
 
