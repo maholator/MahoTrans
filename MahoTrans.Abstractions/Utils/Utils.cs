@@ -94,8 +94,21 @@ public static class Utils
 
     public static string ComputeMD5(this string input)
     {
-        var ba = MD5.HashData(Encoding.UTF8.GetBytes(input));
+        return Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(input)));
+    }
+
+    public static string ComputeFileSHA1(this string filePath)
+    {
+        using var sha = SHA1.Create();
+        using var stream = File.OpenRead(filePath);
+
+        var ba = sha.ComputeHash(stream);
         return Convert.ToHexString(ba);
+    }
+
+    public static string ComputeSHA1(this string input)
+    {
+        return Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(input)));
     }
 
     public static string AsBase64(this string str)
