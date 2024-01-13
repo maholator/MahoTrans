@@ -308,7 +308,7 @@ public class ClassLoader
                 };
             }
 
-            a[i] = new Field(nd, flags)
+            a[i] = new Field(nd, flags, rc.Name)
             {
                 Attributes = attrs
             };

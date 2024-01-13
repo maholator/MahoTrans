@@ -11,6 +11,7 @@ namespace MahoTrans.Runtime.Types;
 public class Field
 {
     public readonly FieldFlags Flags;
+    public readonly string ClassName;
     public readonly NameDescriptor Descriptor;
 
     /// <summary>
@@ -32,9 +33,10 @@ public class Field
 
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
 
-    public Field(NameDescriptor descriptor, FieldFlags flags)
+    public Field(NameDescriptor descriptor, FieldFlags flags, string className)
     {
         Flags = flags;
+        ClassName = className;
         Descriptor = descriptor;
     }
 

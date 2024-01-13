@@ -120,7 +120,7 @@ public static class NativeLinker
             if (x.DeclaringType == typeof(StaticMemory))
             {
                 var d = BridgeCompiler.BuildNativeStaticBridge(bridge, x);
-                var field = new Field(d, FieldFlags.Public | FieldFlags.Static);
+                var field = new Field(d, FieldFlags.Public | FieldFlags.Static, name);
                 return field;
             }
             else
@@ -130,7 +130,7 @@ public static class NativeLinker
                 if (x.IsStatic)
                     flags |= FieldFlags.Static;
 
-                var field = new Field(d, flags)
+                var field = new Field(d, flags, name)
                 {
                     NativeField = x,
                 };
