@@ -19,7 +19,7 @@ public interface IGraphics
 
     void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color);
 
-    void FillPolygon(Memory<int> x, Memory<int> y, uint color);
+    void FillPolygon(Span<int> x, Span<int> y, uint color);
 
     void DrawLine(int x1, int y1, int x2, int y2, uint color);
 

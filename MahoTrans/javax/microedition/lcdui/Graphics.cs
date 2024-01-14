@@ -220,8 +220,8 @@ public class Graphics : Object, DirectGraphics
     public void fillPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
         int argb)
     {
-        var xm = Jvm.ResolveArray<int>(x).AsMemory(xFrom, count);
-        var ym = Jvm.ResolveArray<int>(y).AsMemory(yFrom, count);
+        var xm = Jvm.ResolveArray<int>(x).AsSpan(xFrom, count);
+        var ym = Jvm.ResolveArray<int>(y).AsSpan(yFrom, count);
         Implementation.FillPolygon(xm, ym, (uint)argb);
     }
 
