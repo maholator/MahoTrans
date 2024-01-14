@@ -12,10 +12,21 @@ using Thread = java.lang.Thread;
 
 namespace javax.microedition.ams;
 
+/// <summary>
+///     Thread that can start a MIDlet. Allocates the object, calls constructor and startApp.
+///     Assign <see cref="MidletClassName" /> and <see cref="Manifest" /> fields and start it as a regular java thread.
+/// </summary>
 [PublicAPI]
 public class MidletStartup : Thread
 {
+    /// <summary>
+    /// Name of MIDlet class. This will be instantiated.
+    /// </summary>
     [JavaIgnore] public string MidletClassName = null!;
+
+    /// <summary>
+    /// MIDlet's manifest. Will be passed to <see cref="MIDlet.Properties" />.
+    /// </summary>
     [JavaIgnore] public Dictionary<string, string> Manifest = null!;
 
     [JavaDescriptor("()V")]
@@ -31,6 +42,10 @@ public class MidletStartup : Thread
         return b.Build(2, 1);
     }
 
+    /// <summary>
+    /// Allocates MIDlet object.
+    /// </summary>
+    /// <returns>MIDlet object. Call its init method and start it.</returns>
     public Reference AllocMidlet()
     {
         var midlet = Jvm.AllocateObject(Jvm.Classes[MidletClassName]);
