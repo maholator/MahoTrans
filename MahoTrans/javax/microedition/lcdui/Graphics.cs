@@ -36,10 +36,12 @@ public class Graphics : Object, DirectGraphics
 
     #region Color / font
 
-    public void setColor(int argb)
+    public void setColor(int rgb)
     {
-        _color = (uint)argb;
+        _color = ((uint)rgb) | 0xFF000000;
     }
+
+    public void setARGBColor(int argbColor) => _color = (uint)argbColor;
 
     public void setColor(int r, int g, int b)
     {
@@ -158,6 +160,8 @@ public class Graphics : Object, DirectGraphics
 
     #endregion
 
+    #region Text
+
     public void drawString([String] Reference str, int x, int y, int a)
     {
         var text = Jvm.ResolveString(str);
@@ -182,6 +186,8 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawString(new string(arr, offset, length), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face,
             _style, _size);
     }
+
+    #endregion
 
     public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
     {
@@ -211,9 +217,12 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
     }
 
-    public void fillPolygon([JavaType("[I")] Reference q, int w, [JavaType("[I")] Reference e, int r, int t, int y)
+    public void fillPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
+        int argb)
     {
-        //TODO
+        var xm = Jvm.ResolveArray<int>(x).AsMemory(xFrom, count);
+        var ym = Jvm.ResolveArray<int>(y).AsMemory(yFrom, count);
+        Implementation.FillPolygon(xm, ym, argb);
     }
 
     public override bool OnObjectDelete()

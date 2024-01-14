@@ -78,6 +78,11 @@ public static class DescriptorUtils
         }
     }
 
+    /// <summary>
+    /// Calculate primitive type from first descriptor character.
+    /// </summary>
+    /// <param name="c">First character of descriptor.</param>
+    /// <returns>Primitive type.</returns>
     public static PrimitiveType ParseDescriptor(char c)
     {
         switch (c)
