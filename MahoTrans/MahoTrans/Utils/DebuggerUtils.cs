@@ -329,7 +329,7 @@ public static class DebuggerUtils
                 if (linked.Opcode == MTOpcode.iconst)
                     return $"{rawOpcode} ({linked.IntData})";
 
-                return $"{rawOpcode} ({linked.Data}";
+                return $"{rawOpcode} ({linked.Data})";
 
             case JavaOpcode.iload:
             case JavaOpcode.lload:
