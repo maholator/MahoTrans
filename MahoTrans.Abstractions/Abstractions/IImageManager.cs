@@ -11,12 +11,28 @@ namespace MahoTrans.Abstractions;
 public interface IImageManager : IToolkit
 {
     /// <summary>
-    ///     Creates mutable image.
+    ///     Creates mutable image filled with white color (0xFFFFFFFF).
     /// </summary>
     /// <param name="width">Width of image.</param>
     /// <param name="height">Height of image.</param>
     /// <returns>Image handle.</returns>
     ImageHandle CreateBuffer(int width, int height);
+
+    /// <summary>
+    ///     Creates mutable image filled with specified color.
+    /// </summary>
+    /// <param name="width">Width of image.</param>
+    /// <param name="height">Height of image.</param>
+    /// <param name="argb">Color of the image.</param>
+    /// <returns>Image handle.</returns>
+    ImageHandle CreateBuffer(int width, int height, int argb);
+
+    /// <summary>
+    ///     Creates mutable image from file. Used by DirectUtils.
+    /// </summary>
+    /// <param name="file">File content.</param>
+    /// <returns>Image handle.</returns>
+    ImageHandle CreateBufferFromFile(Memory<byte> file);
 
     /// <summary>
     ///     Creates immutable image from file.

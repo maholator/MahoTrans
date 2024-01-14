@@ -17,9 +17,12 @@ public interface IGraphics
 
     void FillArc(int x, int y, int w, int h, int begin, int length, uint color);
 
+    void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color);
+
+    void FillPolygon(Memory<int> x, Memory<int> y, int argbColor);
+
     void DrawLine(int x1, int y1, int x2, int y2, uint color);
 
-    void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color);
     void DrawImage(ImageHandle image, int x, int y, GraphicsAnchor an);
 
     void DrawImage(ImageHandle image, int fromX, int fromY, int toX, int toY, int w, int h,
