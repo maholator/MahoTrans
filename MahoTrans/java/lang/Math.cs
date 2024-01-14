@@ -23,6 +23,6 @@ public class Math : Object
     public static double sin(double a) => global::System.Math.Sin(a);
     public static double sqrt(double a) => global::System.Math.Sqrt(a);
     public static double tan(double a) => global::System.Math.Tan(a);
-    public static double toDegrees(double a) => a * global::System.Math.PI / 180d;
-    public static double toRadians(double a) => a * 180d / global::System.Math.PI;
+    public static double toRadians(double a) => a * global::System.Math.PI / 180d;
+    public static double toDegrees(double a) => a * 180d / global::System.Math.PI;
 }
