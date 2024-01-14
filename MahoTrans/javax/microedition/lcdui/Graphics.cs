@@ -222,7 +222,7 @@ public class Graphics : Object, DirectGraphics
     {
         var xm = Jvm.ResolveArray<int>(x).AsMemory(xFrom, count);
         var ym = Jvm.ResolveArray<int>(y).AsMemory(yFrom, count);
-        Implementation.FillPolygon(xm, ym, argb);
+        Implementation.FillPolygon(xm, ym, (uint)argb);
     }
 
     public override bool OnObjectDelete()
