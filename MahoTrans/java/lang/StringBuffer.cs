@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Globalization;
 using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
@@ -60,14 +61,14 @@ public class StringBuffer : Object
     [return: JavaType(typeof(StringBuffer))]
     public Reference append(double d)
     {
-        _buffer.AddRange(d.ToString());
+        _buffer.AddRange(d.ToString(CultureInfo.InvariantCulture));
         return This;
     }
 
     [return: JavaType(typeof(StringBuffer))]
     public Reference append(float f)
     {
-        _buffer.AddRange(f.ToString());
+        _buffer.AddRange(f.ToString(CultureInfo.InvariantCulture));
         return This;
     }
 
@@ -183,14 +184,14 @@ public class StringBuffer : Object
     [return: JavaType(typeof(StringBuffer))]
     public Reference insert(int offset, double d)
     {
-        _buffer.InsertRange(offset, d.ToString());
+        _buffer.InsertRange(offset, d.ToString(CultureInfo.InvariantCulture));
         return This;
     }
 
     [return: JavaType(typeof(StringBuffer))]
     public Reference insert(int offset, float f)
     {
-        _buffer.InsertRange(offset, f.ToString());
+        _buffer.InsertRange(offset, f.ToString(CultureInfo.InvariantCulture));
         return This;
     }
 
