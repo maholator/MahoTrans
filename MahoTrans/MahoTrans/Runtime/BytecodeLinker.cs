@@ -1037,11 +1037,11 @@ public static class BytecodeLinker
                     case JavaOpcode.dup2_x1:
                     {
                         data = null!;
-                        var t1 = emulatedStack.PopWithAssertIs32();
-                        var t2 = emulatedStack.Pop();
+                        var t1 = emulatedStack.Pop();
 
-                        if ((t2 & PrimitiveType.IsDouble) != 0)
+                        if ((t1 & PrimitiveType.IsDouble) != 0)
                         {
+                            var t2 = emulatedStack.PopWithAssertIs32();
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
@@ -1049,6 +1049,7 @@ public static class BytecodeLinker
                         }
                         else
                         {
+                            var t2 = emulatedStack.PopWithAssertIs32();
                             var t3 = emulatedStack.PopWithAssertIs32();
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
