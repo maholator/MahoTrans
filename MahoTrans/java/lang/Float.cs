@@ -25,25 +25,17 @@ public class Float : Object
     public void Init(double v) => Value = (float)v;
 
     public sbyte byteValue() => (sbyte) Value;
-
     public short shortValue() => (short) Value;
-
     public long intValue() => (int) Value;
-
     public long longValue() => (long) Value;
-
-    public float floatValue() => Value;
-
     public double doubleValue() => Value;
+    public float floatValue() => Value;
 
     public static int floatToIntBits(float v) => BitConverter.SingleToInt32Bits(v);
 
     public static float intBitsToFloat(int v) => BitConverter.Int32BitsToSingle(v);
 
-    public new int hashCode()
-    {
-        return floatToIntBits(Value);
-    }
+    public new int hashCode() => floatToIntBits(Value);
 
     public new bool equals(Reference obj)
     {
@@ -75,25 +67,13 @@ public class Float : Object
         return f;
     }
 
-    public bool isInfinite()
-    {
-        return isInfinite(Value);
-    }
+    public bool isInfinite() => isInfinite(Value);
 
-    public static bool isInfinite(float f)
-    {
-        return f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
-    }
+    public static bool isInfinite(float f) => f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
 
-    public bool isNaN()
-    {
-        return isNaN(Value);
-    }
+    public bool isNaN() => isNaN(Value);
 
-    public static bool isNaN(float f)
-    {
-        return float.IsNaN(f);
-    }
+    public static bool isNaN(float f) => float.IsNaN(f);
 
     [return: JavaType(typeof(Float))]
     public Reference valueOf([String] Reference str)

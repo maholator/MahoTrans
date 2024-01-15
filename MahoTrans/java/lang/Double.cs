@@ -23,11 +23,7 @@ public class Double : Object
         Value = value;
     }
 
-    public sbyte byteValue() => (sbyte)Value;
-
     public static long doubleToLongBits(double value) => BitConverter.DoubleToInt64Bits(value);
-
-    public double doubleValue() => Value;
 
     public new bool equals(Reference obj)
     {
@@ -40,7 +36,12 @@ public class Double : Object
         return ii.Value == Value;
     }
 
-    public float floatValue() => (float)Value;
+    public sbyte byteValue() => (sbyte) Value;
+    public short shortValue() => (short) Value;
+    public int intValue() => (int) Value;
+    public long longValue() => (long) Value;
+    public double doubleValue() => Value;
+    public float floatValue() => (float) Value;
 
     public new int hashCode()
     {
@@ -48,13 +49,7 @@ public class Double : Object
         return (int)(v ^ (v >> 32));
     }
 
-    public int intValue() => (int)Value;
-
     public static double longBitsToDouble(long bits) => BitConverter.Int64BitsToDouble(bits);
-
-    public long longValue() => (long)Value;
-
-    public short shortValue() => (short)Value;
 
     [return: String]
     public static Reference toString(double d)
@@ -84,23 +79,11 @@ public class Double : Object
         return i.This;
     }
 
-    public bool isInfinite()
-    {
-        return isInfinite(Value);
-    }
+    public bool isInfinite() => isInfinite(Value);
 
-    public static bool isInfinite(double f)
-    {
-        return f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
-    }
+    public static bool isInfinite(double f) => f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
 
-    public bool isNaN()
-    {
-        return isNaN(Value);
-    }
+    public bool isNaN() => isNaN(Value);
 
-    public static bool isNaN(double f)
-    {
-        return double.IsNaN(f);
-    }
+    public static bool isNaN(double f) => double.IsNaN(f);
 }
