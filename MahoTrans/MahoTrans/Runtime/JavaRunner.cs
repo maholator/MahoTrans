@@ -318,8 +318,7 @@ public class JavaRunner
                 {
                     long val = frame.LocalVariables[instr.ShortData];
                     var i = (int)val;
-                    i += (sbyte)instr.IntData;
-                    frame.LocalVariables[instr.ShortData] = i;
+                    frame.LocalVariables[instr.ShortData] = instr.IntData + i;
                     pointer++;
                     break;
                 }
