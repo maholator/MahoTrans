@@ -8,6 +8,9 @@ namespace java.lang;
 
 public class Short : Object
 {
+    public const short MAX_VALUE = 32767;
+    public const short MIN_VALUE = -32768;
+
     [JavaIgnore] public short Value;
 
     [InitMethod]
