@@ -1341,7 +1341,8 @@ public static class BytecodeLinker
                         SetNextStack();
                         break;
                     case JavaOpcode.iinc:
-                        intData = args[1];
+                        // sbyte cast here MUST BE because single-byte iinc may contain negative value, i.e. i-=1 is IINC 0x01 0xFF
+                        intData = (sbyte)args[1];
                         shortData = args[0];
                         opcode = MTOpcode.iinc;
                         // no changes on stack
@@ -1963,6 +1964,7 @@ public static class BytecodeLinker
                         {
                             opcode = MTOpcode.iinc;
                             shortData = (ushort)Combine(args[1], args[2]);
+                            // combine already gives as signed short, nothing to do
                             intData = Combine(args[3], args[4]);
                         }
                         else
