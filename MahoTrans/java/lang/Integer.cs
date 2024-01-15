@@ -86,7 +86,18 @@ public class Integer : Object
         return i;
     }
 
-    public static int parseInt([String] Reference str, int radix) => Convert.ToInt32(Jvm.ResolveString(str), radix);
+    public static int parseInt([String] Reference str, int radix)
+    {
+        try
+        {
+            return Convert.ToInt32(Jvm.ResolveString(str), radix);
+        }
+        catch
+        {
+            Jvm.Throw<NumberFormatException>();
+        }
+        return 0;
+    }
 
     [return: JavaType(typeof(Integer))]
     public static Reference valueOf([String] Reference str)

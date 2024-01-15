@@ -37,11 +37,24 @@ public class Long : Object
 
     public long longValue() => Value;
 
-    public static long parseLong([String] Reference s) => long.Parse(Jvm.ResolveString(s));
+    public static long parseLong([String] Reference s)
+    {
+        if(!long.TryParse(Jvm.ResolveString(s), out var i))
+           Jvm.Throw<NumberFormatException>();
+        return i;
+    }
 
     public static long parseLong([String] Reference s, int radix)
     {
-        return Convert.ToInt64(Jvm.ResolveString(s), radix);
+        try
+        {
+            return Convert.ToInt64(Jvm.ResolveString(s), radix);
+        }
+        catch
+        {
+            Jvm.Throw<NumberFormatException>();
+        }
+        return 0;
     }
 
     [return: String]
