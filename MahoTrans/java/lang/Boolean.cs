@@ -16,6 +16,11 @@ public class Boolean : Object
         Value = v;
     }
 
+    public new int hashCode()
+    {
+        return Value ? 1231 : 1237;
+    }
+
     public bool booleanValue() => Value;
 
     [return: String]
