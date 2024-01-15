@@ -73,7 +73,7 @@ public class Throwable : Object
                 }
                 s.Append(method.Name);
                 if (s.ToString().Contains("JvmState.Throw") || s.ToString().Contains("Exception.Init")) continue;
-                if (s.ToString().Contains("Bridge.bridge_")) break;
+                if (s.ToString().Contains("Bridge.bridge_") || s.ToString().EndsWith("MahoTrans.Runtime.JavaRunner.Step")) break;
                 ParameterInfo[]? p = null;
                 try
                 {
@@ -93,9 +93,8 @@ public class Throwable : Object
                             s.Append("<unknown type>");
                         //s.Append(' ');
                         //s.Append(p[k].Name);
-                        s.Append(',');
+                        if(k+1 != p.Length) s.Append(',');
                     }
-                    s.Length -= 1;
                     s.Append(')');
                 }
             }
