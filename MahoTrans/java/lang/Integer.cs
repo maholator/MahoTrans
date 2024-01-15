@@ -8,6 +8,9 @@ namespace java.lang;
 
 public class Integer : Object
 {
+    public const double MAX_VALUE = int.MaxValue;
+    public const double MIN_VALUE = int.MinValue;
+
     public int Value;
 
     [InitMethod]
@@ -22,7 +25,6 @@ public class Integer : Object
     public long longValue() => Value;
     public double doubleValue() => Value;
     public float floatValue() => Value;
-
 
     public new int hashCode()
     {
@@ -52,6 +54,23 @@ public class Integer : Object
         return Jvm.AllocateString(i.ToString());
     }
 
+    [return: String]
+    public static Reference toString(int i, int radix)
+    {
+        return Jvm.AllocateString(Convert.ToString(i, radix));
+    }
+
+    [return: String]
+    public static Reference toBinaryString(int i)
+    {
+        return Jvm.AllocateString(Convert.ToString(i, 2));
+    }
+
+    [return: String]
+    public static Reference toOctalString(int i)
+    {
+        return Jvm.AllocateString(Convert.ToString(i, 8));
+    }
 
     [return: String]
     public static Reference toHexString(int i)
@@ -74,6 +93,14 @@ public class Integer : Object
     {
         var i = Jvm.AllocateObject<Integer>();
         i.Init(parseInt(str));
+        return i.This;
+    }
+
+    [return: JavaType(typeof(Integer))]
+    public static Reference valueOf([String] Reference str, int radix)
+    {
+        var i = Jvm.AllocateObject<Integer>();
+        i.Init(parseInt(str, radix));
         return i.This;
     }
 }
