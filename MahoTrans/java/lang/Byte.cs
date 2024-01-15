@@ -8,6 +8,9 @@ namespace java.lang;
 
 public class Byte : Object
 {
+    public const sbyte MAX_VALUE = 127;
+    public const sbyte MIN_VALUE = -128;
+
     public sbyte Value;
 
     [InitMethod]
