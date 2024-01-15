@@ -40,6 +40,16 @@ public class JavaMethodBody
     /// </summary>
     public PrimitiveType[][] StackTypes = null!;
 
+    /// <summary>
+    ///     Sizes of arguments. Array size is equal to args count WITH "this" arg. Each size is one, if argument is 32-bit and
+    ///     two if 64-bit. Do not forget to call <see cref="EnsureBytecodeLinked" /> before usage!
+    /// </summary>
+    /// <example>
+    ///     For static method (IJI)V: 1,2,1 <br />
+    ///     For instance method (IFD)V: 1,1,1,2 (first "1" is "this" arg, last "2" is the third argument - double)
+    /// </example>
+    public byte[] ArgsSizes = null!;
+
     #endregion
 
     public JavaMethodBody()

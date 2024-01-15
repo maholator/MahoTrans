@@ -1751,14 +1751,20 @@ public class JavaRunner
             }
         }
 
-        m.JavaBody.EnsureBytecodeLinked();
-        var f = thread.Push(m.JavaBody);
+        var java = m.JavaBody;
+
+        java.EnsureBytecodeLinked();
+        var f = thread.Push(java);
         frame.SetFrom(argsLength);
-        for (var arg = 0; arg < argsLength; arg++)
+        unsafe
         {
-            unsafe
+            var sizes = java.ArgsSizes;
+            var argIndex = 0;
+            var localIndex = 0;
+            for (; argIndex < argsLength; argIndex++)
             {
-                f.LocalVariables[arg] = frame.PopUnknownFrom();
+                f.LocalVariables[localIndex] = frame.PopUnknownFrom();
+                localIndex += sizes[argIndex];
             }
         }
 

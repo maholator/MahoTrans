@@ -336,6 +336,23 @@ public static class BytecodeLinker
 
     private static void LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
     {
+        {
+            // let's deal with arguments sizes first.
+            var primargs = DescriptorUtils.ParseMethodDescriptorAsPrimitives(method.Method.Descriptor.Descriptor).args;
+            if (!method.Method.IsStatic)
+            {
+                primargs = new[] { PrimitiveType.Reference }.Concat(primargs).ToArray();
+            }
+
+            var argsSizes = new byte[primargs.Length];
+
+            for (int i = 0; i < argsSizes.Length; i++)
+            {
+                argsSizes[i] = ((primargs[i] & PrimitiveType.IsDouble) != 0) ? (byte)2 : (byte)1;
+            }
+
+            method.ArgsSizes = argsSizes;
+        }
         var code = method.Code;
         var consts = cls.Constants;
         var output = new LinkedInstruction[code.Length];
