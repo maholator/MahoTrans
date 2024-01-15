@@ -117,10 +117,10 @@ public class Integer : Object
         if (str.IsNull || radix < 2 || radix > 36)
             Jvm.Throw<NumberFormatException>();
         string s = Jvm.ResolveString(str);
-        if(s.Length == 0)
+        if (s.Length == 0)
             Jvm.Throw<NumberFormatException>();
         bool negative = s[0] == '-';
-        if(negative && s.Length == 1)
+        if (negative && s.Length == 1)
             Jvm.Throw<NumberFormatException>();
         int max = MIN_VALUE / radix;
         int result = 0;

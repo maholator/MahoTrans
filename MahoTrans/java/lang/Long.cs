@@ -42,7 +42,7 @@ public class Long : Object
 
     public static long parseLong([String] Reference s)
     {
-        if(!long.TryParse(Jvm.ResolveString(s), out var i))
+        if (!long.TryParse(Jvm.ResolveString(s), out var i))
            Jvm.Throw<NumberFormatException>();
         return i;
     }
