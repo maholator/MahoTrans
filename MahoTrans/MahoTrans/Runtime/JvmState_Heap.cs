@@ -319,6 +319,15 @@ public partial class JvmState
         throw new JavaThrowable(ex.This);
     }
 
+    [DoesNotReturn]
+    public void Throw<T>(string message) where T : Throwable
+    {
+        Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
+        var ex = AllocateObject<T>();
+        ex.Init(AllocateString(message));
+        throw new JavaThrowable(ex.This);
+    }
+
     #endregion
 
     #region Utils
