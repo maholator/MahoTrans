@@ -292,6 +292,14 @@ public partial class JvmState
         return obj.Value;
     }
 
+    public T[]? ResolveArrayOrDefault<T>(Reference r) where T : struct
+    {
+        if (r.IsNull)
+            return null;
+        var obj = _heap[r.Index] as Array<T>;
+        return obj?.Value;
+    }
+
     public void SetArrayElement<T>(Reference r, int index, T value) where T : struct
     {
         if (r.IsNull)
