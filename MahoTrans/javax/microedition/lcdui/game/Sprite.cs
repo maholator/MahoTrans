@@ -181,6 +181,7 @@ public class Sprite : Layer
     }
 
 
+    [JavaIgnore]
     public void setFrameSequence1(int[] var1)
     {
         int var2;

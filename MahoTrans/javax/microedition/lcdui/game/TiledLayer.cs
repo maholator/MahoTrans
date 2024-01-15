@@ -4,8 +4,6 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using static System.Net.Mime.MediaTypeNames;
-using System;
 
 namespace javax.microedition.lcdui.game;
 
@@ -30,14 +28,14 @@ public class TiledLayer : Layer
         if (image.getWidth() % n != 0 || image.getHeight() % n2 != 0)
             Jvm.Throw<IllegalArgumentException>();
 
-        anInt272 = anInt272;
-        anInt271 = anInt273;
+        this.anInt272 = anInt272;
+        this.anInt271 = anInt273;
         anIntArrayArray264 = new int[anInt273][];
         for(int i = 0; i < anInt273; i++)
         {
             anIntArrayArray264[i] = new int[anInt272];
         }
-        method111(image, image.getWidth() / n * (image.getHeight() / n2) + 1, n, n2, true);
+        method111(r, image.getWidth() / n * (image.getHeight() / n2) + 1, n, n2, true);
     }
 
     public int createAnimatedTile(int n)
@@ -226,9 +224,10 @@ public class TiledLayer : Layer
         }
     }
 
+    [JavaIgnore]
     private void method111([JavaType(nameof(Image))] Reference ranImage265, int anInt273, int anInt274, int anInt275, bool b)
     {
-        Image anImage265 = (Image) Jvm.ResolveObject(ranImage265);
+        Image anImage265 = (Image)Jvm.ResolveObject(ranImage265);
         this.anInt270 = anInt274;
         this.anInt269 = anInt275;
         int width = anImage265.getWidth();
