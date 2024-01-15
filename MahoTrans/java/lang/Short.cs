@@ -47,17 +47,12 @@ public class Short : Object
         return false;
     }
 
-    //TODO proper checks
     public static short parseShort([String] Reference str, int radix)
     {
-        try
-        {
-            return Convert.ToInt16(Jvm.ResolveString(str), radix);
-        }
-        catch
-        {
-            Jvm.Throw<NumberFormatException>();
-        }
+        int i = Integer.parseInt(str, radix);
+        if (i == (short)i)
+            return (short)i;
+        Jvm.Throw<NumberFormatException>();
         return 0;
     }
 }

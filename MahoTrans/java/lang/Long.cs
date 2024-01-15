@@ -47,17 +47,36 @@ public class Long : Object
         return i;
     }
 
-    public static long parseLong([String] Reference s, int radix)
+    public static long parseLong([String] Reference str, int radix)
     {
-        try
-        {
-            return Convert.ToInt64(Jvm.ResolveString(s), radix);
-        }
-        catch
-        {
+        if (str.IsNull || radix < 2 || radix > 36)
             Jvm.Throw<NumberFormatException>();
+        string s = Jvm.ResolveString(str);
+        if (s.Length == 0)
+            Jvm.Throw<NumberFormatException>();
+        bool negative = s[0] == '-';
+        if (negative && s.Length == 1)
+            Jvm.Throw<NumberFormatException>();
+        long max = MIN_VALUE / radix;
+        long result = 0;
+        int offset = negative ? 1 : 0;
+        while (offset < s.Length)
+        {
+            int digit = Character.digit(s[offset++], radix);
+            if (digit == -1 || max > result)
+                Jvm.Throw<NumberFormatException>();
+            long next = result * radix - digit;
+            if (next > result)
+                Jvm.Throw<NumberFormatException>();
+            result = next;
         }
-        return 0;
+        if (!negative)
+        {
+            result = -result;
+            if (result < 0)
+                Jvm.Throw<NumberFormatException>();
+        }
+        return result;
     }
 
     [return: String]
@@ -73,8 +92,34 @@ public class Long : Object
     }
 
     [return: String]
-    public static Reference toString(long i, int radix)
+    public static Reference toString(long l, int radix)
     {
-        return Jvm.AllocateString(Convert.ToString(i, radix));
+        if (radix < 2 || radix > 36)
+            radix = 10;
+        if (l == 0)
+            return Jvm.AllocateString("0");
+        int count = 2;
+        long j = l;
+        bool negative = l < 0;
+        if (!negative)
+        {
+            count = 1;
+            j = -l;
+        }
+        while ((l /= radix) != 0)
+            ++count;
+        char[] buffer = new char[count];
+        do
+        {
+            int ch = 0 - (int)(j % radix);
+            if (ch > 9)
+                ch = ch - 10 + 97;
+            else
+                ch += 48;
+            buffer[--count] = (char)ch;
+        } while ((j /= radix) != 0);
+        if (negative)
+            buffer[0] = '-';
+        return Jvm.AllocateString(new string(buffer, 0, buffer.Length));
     }
 }

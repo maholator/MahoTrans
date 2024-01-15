@@ -57,7 +57,33 @@ public class Integer : Object
     [return: String]
     public static Reference toString(int i, int radix)
     {
-        return Jvm.AllocateString(Convert.ToString(i, radix));
+        if (radix < 2 || radix > 36)
+            radix = 10;
+        if (i == 0)
+            return Jvm.AllocateString("0");
+        int count = 2;
+        int j = i;
+        bool negative = i < 0;
+        if (!negative)
+        {
+            count = 1;
+            j = -i;
+        }
+        while ((i /= radix) != 0)
+            ++count;
+        char[] buffer = new char[count];
+        do
+        {
+            int ch = 0 - (int)(j % radix);
+            if (ch > 9)
+                ch = ch - 10 + 97;
+            else
+                ch += 48;
+            buffer[--count] = (char)ch;
+        } while ((j /= radix) != 0);
+        if (negative)
+            buffer[0] = '-';
+        return Jvm.AllocateString(new string(buffer, 0, buffer.Length));
     }
 
     [return: String]
@@ -88,15 +114,34 @@ public class Integer : Object
 
     public static int parseInt([String] Reference str, int radix)
     {
-        try
-        {
-            return Convert.ToInt32(Jvm.ResolveString(str), radix);
-        }
-        catch
-        {
+        if (str.IsNull || radix < 2 || radix > 36)
             Jvm.Throw<NumberFormatException>();
+        string s = Jvm.ResolveString(str);
+        if(s.Length == 0)
+            Jvm.Throw<NumberFormatException>();
+        bool negative = s[0] == '-';
+        if(negative && s.Length == 1)
+            Jvm.Throw<NumberFormatException>();
+        int max = MIN_VALUE / radix;
+        int result = 0;
+        int offset = negative ? 1 : 0;
+        while (offset < s.Length)
+        {
+            int digit = Character.digit(s[offset++], radix);
+            if (digit == -1 || max > result)
+                Jvm.Throw<NumberFormatException>();
+            int next = result * radix - digit;
+            if (next > result)
+                Jvm.Throw<NumberFormatException>();
+            result = next;
         }
-        return 0;
+        if (!negative)
+        {
+            result = -result;
+            if (result < 0)
+                Jvm.Throw<NumberFormatException>();
+        }
+        return result;
     }
 
     [return: JavaType(typeof(Integer))]
