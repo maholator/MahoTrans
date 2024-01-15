@@ -8,6 +8,9 @@ namespace java.lang;
 
 public class Long : Object
 {
+    public const long MAX_VALUE = long.MaxValue;
+    public const long MIN_VALUE = long.MinValue;
+
     public long Value;
 
     [InitMethod]

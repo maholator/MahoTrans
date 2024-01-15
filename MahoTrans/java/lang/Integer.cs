@@ -8,8 +8,8 @@ namespace java.lang;
 
 public class Integer : Object
 {
-    public const double MAX_VALUE = int.MaxValue;
-    public const double MIN_VALUE = int.MinValue;
+    public const int MAX_VALUE = int.MaxValue;
+    public const int MIN_VALUE = int.MinValue;
 
     public int Value;
 
