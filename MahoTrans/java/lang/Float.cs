@@ -4,11 +4,18 @@
 using System.Globalization;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json.Linq;
 
 namespace java.lang;
 
 public class Float : Object
 {
+    public const float MAX_VALUE = float.MaxValue;
+    public const float MIN_VALUE = float.MinValue;
+    public const float NaN = float.NaN;
+    public const float POSITIVE_INFINITY = float.PositiveInfinity;
+    public const float NEGATIVE_INFINITY = float.NegativeInfinity;
+
     public float Value;
 
     [InitMethod]
@@ -17,6 +24,14 @@ public class Float : Object
     [InitMethod]
     public void Init(double v) => Value = (float)v;
 
+    public sbyte byteValue() => (sbyte) Value;
+
+    public short shortValue() => (short) Value;
+
+    public long intValue() => (int) Value;
+
+    public long longValue() => (long) Value;
+
     public float floatValue() => Value;
 
     public double doubleValue() => Value;
@@ -24,6 +39,21 @@ public class Float : Object
     public static int floatToIntBits(float v) => BitConverter.SingleToInt32Bits(v);
 
     public static float intBitsToFloat(int v) => BitConverter.Int32BitsToSingle(v);
+
+    public new int hashCode()
+    {
+        return floatToIntBits(Value);
+    }
+
+    public new bool equals(Reference obj)
+    {
+        if (obj.IsNull)
+            return false;
+        var o = Jvm.ResolveObject(obj);
+        if (o is not Float ii)
+            return false;
+        return ii.Value == Value;
+    }
 
     [return: String]
     public static Reference toString(float f)
@@ -43,5 +73,33 @@ public class Float : Object
         if (!float.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f))
             Jvm.Throw<NumberFormatException>();
         return f;
+    }
+
+    public bool isInfinite()
+    {
+        return isInfinite(Value);
+    }
+
+    public static bool isInfinite(float f)
+    {
+        return f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
+    }
+
+    public bool isNaN()
+    {
+        return isNaN(Value);
+    }
+
+    public static bool isNaN(float f)
+    {
+        return float.IsNaN(f);
+    }
+
+    [return: JavaType(typeof(Float))]
+    public Reference valueOf([String] Reference str)
+    {
+        var i = Jvm.AllocateObject<Float>();
+        i.Init(parseFloat(str));
+        return i.This;
     }
 }
