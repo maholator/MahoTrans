@@ -43,7 +43,7 @@ public class OutputStream : Object
         b.Append(JavaOpcode.arraylength);
         b.AppendVirtcall("write", "([BII)V");
         b.AppendReturn();
-        return b.Build(3, 2);
+        return b.Build(4, 2);
     }
 
     //TODO verify this impl
