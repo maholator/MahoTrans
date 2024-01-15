@@ -14,7 +14,7 @@ namespace java.lang;
 public class Throwable : Object
 {
     [String] public Reference Message;
-    [JavaIgnore] public Reference[]? StackTrace;
+    [JavaIgnore] public Reference[] StackTrace = null!;
 
     [InitMethod]
     public new void Init()
@@ -138,5 +138,12 @@ public class Throwable : Object
         StackTrace = new Reference[j];
         global::System.Array.Copy(tmp, StackTrace, j);
         Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Constructed {JavaClass.Name}");
+    }
+
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
+    {
+        foreach (var r in StackTrace)
+            queue.Enqueue(r);
+        base.AnnounceHiddenReferences(queue);
     }
 }
