@@ -9,6 +9,12 @@ namespace java.lang;
 
 public class Double : Object
 {
+    public const double MAX_VALUE = double.MaxValue;
+    public const double MIN_VALUE = double.MinValue;
+    public const double NaN = double.NaN;
+    public const double POSITIVE_INFINITY = double.PositiveInfinity;
+    public const double NEGATIVE_INFINITY = double.NegativeInfinity;
+
     public double Value;
 
     [InitMethod]
@@ -76,5 +82,25 @@ public class Double : Object
         var i = Jvm.AllocateObject<Double>();
         i.Init(parseDouble(str));
         return i.This;
+    }
+
+    public bool isInfinite()
+    {
+        return isInfinite(Value);
+    }
+
+    public static bool isInfinite(double f)
+    {
+        return f == POSITIVE_INFINITY || f == NEGATIVE_INFINITY;
+    }
+
+    public bool isNaN()
+    {
+        return isNaN(Value);
+    }
+
+    public static bool isNaN(double f)
+    {
+        return double.IsNaN(f);
     }
 }
