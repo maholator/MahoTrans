@@ -9,214 +9,182 @@ namespace javax.microedition.lcdui.game;
 
 public class TiledLayer : Layer
 {
-    private int anInt269;
-    private int anInt270;
-    private int anInt271;
-    private int anInt272;
-    [JavaIgnore] private int[][] anIntArrayArray264 = null!;
-    public Reference anImage265;
-    private int anInt273;
-    [JavaIgnore] public int[] anIntArray266 = null!;
-    [JavaIgnore] public int[] anIntArray267 = null!;
-    [JavaIgnore] private int[]? anIntArray268 = null!;
-    private int anInt274;
+    private int CellHeight;
+    private int CellWidth;
+    private int Rows;
+    private int Columns;
+    [JavaIgnore] private int[][] Cells = null!;
+    public Reference Image;
+    private int StaticTilesCount;
+    [JavaIgnore] public int[] CellsX = null!;
+    [JavaIgnore] public int[] CellsY = null!;
+    [JavaIgnore] private int[]? AnimatedTiles = null!;
+    private int AnimatedTilesCount;
 
     [InitMethod]
-    public void Init(int anInt272, int anInt273, [JavaType(nameof(Image))] Reference r, int n, int n2)
+    public void Init(int columns, int rows, [JavaType(nameof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
     {
-        Image image = (Image)Jvm.ResolveObject(r);
-        if (image.getWidth() % n != 0 || image.getHeight() % n2 != 0)
+        Image image = Jvm.Resolve<Image>(r);
+        if (image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)
             Jvm.Throw<IllegalArgumentException>();
-
-        this.anInt272 = anInt272;
-        this.anInt271 = anInt273;
-        anIntArrayArray264 = new int[anInt273][];
-        for(int i = 0; i < anInt273; i++)
+        Image = r;
+        Columns = columns;
+        Rows = rows;
+        Cells = new int[rows][];
+        for(int i = 0; i < rows; i++)
         {
-            anIntArrayArray264[i] = new int[anInt272];
+            Cells[i] = new int[columns];
         }
-        method111(r, image.getWidth() / n * (image.getHeight() / n2) + 1, n, n2, true);
+        SetImage(image, image.getWidth() / tileWidth * (image.getHeight() / tileHeight) + 1, tileWidth, tileHeight, true);
     }
 
-    public int createAnimatedTile(int n)
+    public int createAnimatedTile(int staticTileIndex)
     {
-        if (n < 0 || n >= anInt273)
+        if (staticTileIndex < 0 || staticTileIndex >= StaticTilesCount)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        if (anIntArray268 == null)
+        if (AnimatedTiles == null)
         {
-            anIntArray268 = new int[4];
-            anInt274 = 1;
+            AnimatedTiles = new int[4];
+            AnimatedTilesCount = 1;
         }
-        else if (anInt274 == anIntArray268.Length)
+        else if (AnimatedTilesCount == AnimatedTiles.Length)
         {
-            int[] anIntArray268 = new int[this.anIntArray268.Length * 2];
-            System.Array.Copy(this.anIntArray268, 0, anIntArray268, 0, this.anIntArray268.Length);
-            this.anIntArray268 = anIntArray268;
+            int[] tmp = new int[AnimatedTiles.Length * 2];
+            System.Array.Copy(AnimatedTiles, 0, tmp, 0, AnimatedTiles.Length);
+            AnimatedTiles = tmp;
         }
-        anIntArray268[anInt274] = n;
-        ++anInt274;
-        return -(anInt274 - 1);
+        AnimatedTiles[AnimatedTilesCount++] = staticTileIndex;
+        return -(AnimatedTilesCount - 1);
     }
 
-    public void setAnimatedTile(int n, int n2)
+    public void setAnimatedTile(int animatedTileIndex, int staticTileIndex)
     {
-        if (n2 < 0 || n2 >= anInt273)
+        if (staticTileIndex < 0 || staticTileIndex >= StaticTilesCount)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        n = -n;
-        if (anIntArray268 == null || n <= 0 || n >= anInt274)
+        animatedTileIndex = -animatedTileIndex;
+        if (AnimatedTiles == null || animatedTileIndex <= 0 || animatedTileIndex >= AnimatedTilesCount)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        anIntArray268[n] = n2;
+        AnimatedTiles[animatedTileIndex] = staticTileIndex;
     }
 
-    public int getAnimatedTile(int n)
+    public int getAnimatedTile(int animatedTileIndex)
     {
-        n = -n;
-        if (anIntArray268 == null || n <= 0 || n >= anInt274)
+        animatedTileIndex = -animatedTileIndex;
+        if (AnimatedTiles == null || animatedTileIndex <= 0 || animatedTileIndex >= AnimatedTilesCount)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        return anIntArray268[n];
+        return AnimatedTiles[animatedTileIndex];
     }
 
-    public void setCell(int n, int n2, int n3)
+    public void setCell(int col, int row, int tileIndex)
     {
-        if (n < 0 || n >= anInt272 || n2 < 0 || n2 >= anInt271)
+        if (col < 0 || col >= Columns || row < 0 || row >= Rows)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        if (n3 > 0)
+        if (tileIndex > 0)
         {
-            if (n3 >= anInt273)
+            if (tileIndex >= StaticTilesCount)
             {
                 Jvm.Throw<IndexOutOfBoundsException>();
             }
         }
-        else if (n3 < 0 && (anIntArray268 == null || -n3 >= anInt274))
+        else if (tileIndex < 0 && (AnimatedTiles == null || -tileIndex >= AnimatedTilesCount))
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        anIntArrayArray264[n2][n] = n3;
+        Cells[row][col] = tileIndex;
     }
 
-    public int getCell(int n, int n2)
+    public int getCell(int col, int row)
     {
-        if (n < 0 || n >= anInt272 || n2 < 0 || n2 >= anInt271)
+        if (col < 0 || col >= Columns || row < 0 || row >= Rows)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        return anIntArrayArray264[n2][n];
+        return Cells[row][col];
     }
 
-
-
-    public void fillCells(int n, int n2, int n3, int n4, int n5)
+    public void fillCells(int col, int row, int numCols, int numRows, int tileIndex)
     {
-        if (n < 0 || n >= this.anInt272 || n2 < 0 || n2 >= this.anInt271 || n3 < 0 || n + n3 > this.anInt272 || n4 < 0 || n2 + n4 > this.anInt271)
+        if (col < 0 || col >= Columns || row < 0 || row >= Rows || numCols < 0 || col + numCols > Columns || numRows < 0 || row + numRows > Rows)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        if (n5 > 0)
+        if (tileIndex > 0)
         {
-            if (n5 >= this.anInt273)
+            if (tileIndex >= StaticTilesCount)
             {
                 Jvm.Throw<IndexOutOfBoundsException>();
             }
         }
-        else if (n5 < 0 && (this.anIntArray268 == null || -n5 >= this.anInt274))
+        else if (tileIndex < 0 && (AnimatedTiles == null || -tileIndex >= AnimatedTilesCount))
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
-        for (int i = n2; i < n2 + n4; ++i)
+        for (int i = row; i < row + numRows; ++i)
         {
-            for (int j = n; j < n + n3; ++j)
+            for (int j = col; j < col + numCols; ++j)
             {
-                this.anIntArrayArray264[i][j] = n5;
+                Cells[i][j] = tileIndex;
             }
         }
     }
 
-    public int getCellWidth()
-    {
-        return this.anInt270;
-    }
+    public int getCellWidth() => CellWidth;
 
-    public int getCellHeight()
-    {
-        return this.anInt269;
-    }
+    public int getCellHeight() => CellHeight;
 
-    public int getColumns()
-    {
-        return this.anInt272;
-    }
+    public int getColumns() => Columns;
 
-    public int getRows()
-    {
-        return this.anInt271;
-    }
+    public int getRows() => Rows;
 
-    public void setStaticTileSet([JavaType(nameof(Image))] Reference r, int n, int n2)
+    public void setStaticTileSet([JavaType(nameof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
     {
-        Image image = (Image)Jvm.ResolveObject(r);
-        if (n < 1 || n2 < 1 || image.getWidth() % n != 0 || image.getHeight() % n2 != 0)
+        Image image = Jvm.Resolve<Image>(r);
+        if (tileWidth < 1 || tileHeight < 1 || image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)
         {
             Jvm.Throw<IllegalArgumentException>();
         }
-        Width = this.anInt272 * n;
-        Height = this.anInt271 * n2;
-        int n3;
-        int n4;
-        int n5;
-        int n6;
-        bool b;
-        if ((n3 = image.getWidth() / n * (image.getHeight() / n2)) >= this.anInt273 - 1)
-        {
-            n4 = n3 + 1;
-            n5 = n;
-            n6 = n2;
-            b = true;
-        }
-        else
-        {
-            n4 = n3 + 1;
-            n5 = n;
-            n6 = n2;
-            b = false;
-        }
-        method111(r, n4, n5, n6, b);
+        Image = r;
+        Width = Columns * tileWidth;
+        Height = Rows * tileHeight;
+        int n3 = (image.getWidth() / tileWidth * (image.getHeight() / tileHeight)) + 1;
+        SetImage(image, n3, tileWidth, tileHeight, n3 >= StaticTilesCount);
     }
 
     public new void paint([JavaType(nameof(Graphics))] Reference r)
     {
-        Graphics g = (Graphics)Jvm.ResolveObject(r);
+        Graphics g = Jvm.Resolve<Graphics>(r);
         if (g == null)
             Jvm.Throw<NullPointerException>();
         if (Visible)
         {
-            int n = g.getClipX() - this.anInt270;
-            int n2 = g.getClipY() - this.anInt269;
-            int n3 = g.getClipX() + g.getClipWidth() + this.anInt270;
-            int n4 = g.getClipY() + g.getClipHeight() + this.anInt269;
-            for (int anInt600 = Y, i = 0; i < this.anIntArrayArray264.Length; ++i, anInt600 += this.anInt269)
+            int n = g.getClipX() - CellWidth;
+            int n2 = g.getClipY() - CellHeight;
+            int n3 = g.getClipX() + g.getClipWidth() + CellWidth;
+            int n4 = g.getClipY() + g.getClipHeight() + CellHeight;
+            for (int y = Y, i = 0; i < Cells.Length; ++i, y += CellHeight)
             {
-                for (int anInt601 = X, length = this.anIntArrayArray264[i].Length, j = 0; j < length; ++j, anInt601 += this.anInt270)
+                for (int x = X, length = Cells[i].Length, j = 0; j < length; ++j, x += CellWidth)
                 {
                     int animatedTile;
-                    if ((animatedTile = this.anIntArrayArray264[i][j]) != 0 && anInt601 >= n && anInt601 <= n3 && anInt600 >= n2)
+                    if ((animatedTile = Cells[i][j]) != 0 && x >= n && x <= n3 && y >= n2)
                     {
-                        if (anInt600 <= n4)
+                        if (y <= n4)
                         {
                             if (animatedTile < 0)
                             {
-                                animatedTile = this.getAnimatedTile(animatedTile);
+                                animatedTile = getAnimatedTile(animatedTile);
                             }
-                            g.drawRegion(this.anImage265, this.anIntArray266[animatedTile], this.anIntArray267[animatedTile], this.anInt270, this.anInt269, 0, anInt601, anInt600, 20);
+                            g.drawRegion(Image, CellsX[animatedTile], CellsY[animatedTile], CellWidth, CellHeight, 0, x, y, 20);
                         }
                     }
                 }
@@ -225,46 +193,39 @@ public class TiledLayer : Layer
     }
 
     [JavaIgnore]
-    private void method111([JavaType(nameof(Image))] Reference ranImage265, int anInt273, int anInt274, int anInt275, bool b)
+    private void SetImage(Image image, int tilesCount, int tileWidth, int tileHeight, bool b)
     {
-        Image anImage265 = (Image)Jvm.ResolveObject(ranImage265);
-        this.anInt270 = anInt274;
-        this.anInt269 = anInt275;
-        int width = anImage265.getWidth();
-        int height = anImage265.getHeight();
-        this.anImage265 = ranImage265;
-        this.anInt273 = anInt273;
-        this.anIntArray266 = new int[this.anInt273];
-        this.anIntArray267 = new int[this.anInt273];
+        CellWidth = tileWidth;
+        CellHeight = tileHeight;
+        int width = image.getWidth();
+        int height = image.getHeight();
+        StaticTilesCount = tilesCount;
+        CellsX = new int[StaticTilesCount];
+        CellsY = new int[StaticTilesCount];
         if (!b)
         {
-            TiledLayer tiledLayer = this;
             int anInt276 = 0;
             while (true)
             {
-                tiledLayer.anInt271 = anInt276;
-                if (this.anInt271 >= this.anIntArrayArray264.Length)
+                Rows = anInt276;
+                if (Rows >= Cells.Length)
                 {
                     break;
                 }
-                int length = this.anIntArrayArray264[this.anInt271].Length;
-                TiledLayer tiledLayer2 = this;
+                int length = Cells[Rows].Length;
                 int anInt277 = 0;
                 while (true)
                 {
-                    tiledLayer2.anInt272 = anInt277;
-                    if (this.anInt272 >= length)
+                    Columns = anInt277;
+                    if (Columns >= length)
                     {
                         break;
                     }
-                    this.anIntArrayArray264[this.anInt271][this.anInt272] = 0;
-                    tiledLayer2 = this;
-                    anInt277 = this.anInt272 + 1;
+                    anInt277 = Columns + 1;
                 }
-                tiledLayer = this;
-                anInt276 = this.anInt271 + 1;
+                anInt276 = Rows + 1;
             }
-            this.anIntArray268 = null;
+            AnimatedTiles = null;
         }
         int n = 1;
         int n3;
@@ -285,12 +246,12 @@ public class TiledLayer : Layer
                 {
                     break;
                 }
-                this.anIntArray266[n] = n7;
-                this.anIntArray267[n] = n4;
+                CellsX[n] = n7;
+                CellsY[n] = n4;
                 ++n;
-                n5 = (n6 = n7 + anInt274);
+                n5 = (n6 = n7 + tileWidth);
             }
-            n2 = (n3 = n4 + anInt275);
+            n2 = (n3 = n4 + tileHeight);
         }
     }
 }
