@@ -8,21 +8,26 @@ using MahoTrans.Runtime.Types;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using MahoTrans;
+using MahoTrans.Runtime.Exceptions;
 
 namespace java.lang;
 
 public class Throwable : Object
 {
     [String] public Reference Message;
-    [JavaIgnore] public Reference[] StackTrace = null!;
 
-    public ThrowSource Source;
+    /// <summary>
+    /// Stack trace. Deeper methods come first.
+    /// </summary>
+    [JavaIgnore] public IMTStackFrame[]? StackTrace;
+
+    public ThrowSource Source { get; private set; }
 
     [InitMethod]
     public new void Init()
     {
         base.Init();
-        fillInStackTrace();
         Message = Reference.Null;
     }
 
@@ -30,7 +35,6 @@ public class Throwable : Object
     public void Init([String] Reference message)
     {
         base.Init();
-        fillInStackTrace();
         Message = message;
     }
 
@@ -52,7 +56,53 @@ public class Throwable : Object
         return Jvm.AllocateString(msg);
     }
 
-    void fillInStackTrace()
+    /// <summary>
+    /// Captures stack trace. This must be called exactly before throwing the exception.
+    /// </summary>
+    /// <param name="source">Who is throwing this exception?</param>
+    public void CaptureStackTrace(ThrowSource source)
+    {
+        JavaThread? thread = Thread.CurrentThread;
+        if (thread == null)
+            throw new JavaRuntimeError("Throwables must be constructed inside thread context.");
+
+        Source = source;
+
+        StackFrame[] nativeTrace = new StackTrace(true).GetFrames();
+
+        // here we will put all the data
+        List<IMTStackFrame> stack = new List<IMTStackFrame>(thread.ActiveFrameIndex + nativeTrace.Length);
+
+        int j = 0;
+        // two frames are always skipped: this method and caller (interpreter or Throw<T>())
+        for (int i = 2; i < nativeTrace.Length; i++)
+        {
+            var ntf = nativeTrace[i];
+            var m = ntf.GetMethod();
+
+            // external frame?
+            if (m == null)
+                continue;
+
+            // we reached interpreter entry point?
+            if (m.DeclaringType == typeof(JavaRunner) && m.Name == nameof(JavaRunner.Step))
+                break;
+            // let's add bridges for now.
+
+            stack.Add(new NativeStackFrame(m, ntf.GetFileLineNumber()));
+        }
+
+        // we are at interpreter level: let's add java frames.
+        for (int i = thread.ActiveFrameIndex; i >= 0; i--)
+        {
+            Frame frame = thread.CallStack[i]!;
+            stack.Add(new JavaStackFrame(frame));
+        }
+
+        StackTrace = stack.ToArray();
+    }
+
+    private void _printStackTraceInternal()
     {
         //TODO java file names & line numbers
         JavaThread? thread = Thread.CurrentThread;
@@ -73,9 +123,11 @@ public class Throwable : Object
                     s.Append(method.DeclaringType == null ? "" : method.DeclaringType.FullName!.Replace('+', '.'));
                     s.Append('.');
                 }
+
                 s.Append(method.Name);
                 if (s.ToString().Contains("JvmState.Throw") || s.ToString().Contains("Exception.Init")) continue;
-                if (s.ToString().Contains("Bridge.bridge_") || s.ToString().EndsWith("MahoTrans.Runtime.JavaRunner.Step")) break;
+                if (s.ToString().Contains("Bridge.bridge_") ||
+                    s.ToString().EndsWith("MahoTrans.Runtime.JavaRunner.Step")) break;
                 ParameterInfo[]? p = null;
                 try
                 {
@@ -84,6 +136,7 @@ public class Throwable : Object
                 catch
                 {
                 }
+
                 if (p != null)
                 {
                     s.Append('(');
@@ -95,28 +148,33 @@ public class Throwable : Object
                             s.Append("<unknown type>");
                         //s.Append(' ');
                         //s.Append(p[k].Name);
-                        if(k+1 != p.Length) s.Append(',');
+                        if (k + 1 != p.Length) s.Append(',');
                     }
+
                     s.Append(')');
                 }
             }
+
             if (nativeTrace[i].HasSource())
             {
                 string? filename = nativeTrace[i].GetFileName();
                 if (filename != null && (filename.Contains('\\') || filename.Contains('/')))
                 {
                     int idx = filename.LastIndexOf('\\');
-                    filename = filename[((idx == -1 ? filename.LastIndexOf('/') : idx)+1)..];
+                    filename = filename[((idx == -1 ? filename.LastIndexOf('/') : idx) + 1)..];
                 }
+
                 s.Append(" (");
                 s.Append(filename);
                 s.Append(':');
                 s.Append(nativeTrace[i].GetFileLineNumber());
                 s.Append(')');
             }
+
             s.Append(" (native)");
             tmp[j++] = Jvm.AllocateString(s.ToString());
         }
+
         for (int i = thread.ActiveFrameIndex; i >= 0; i--)
         {
             Frame? frame = thread.CallStack[i];
@@ -135,17 +193,12 @@ public class Throwable : Object
                         s += " (native)";
                 }
             }
+
             tmp[j++] = Jvm.AllocateString(s);
         }
-        StackTrace = new Reference[j];
+
+        //StackTrace = new Reference[j];
         global::System.Array.Copy(tmp, StackTrace, j);
         Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Constructed {JavaClass.Name}");
-    }
-
-    public override void AnnounceHiddenReferences(Queue<Reference> queue)
-    {
-        foreach (var r in StackTrace)
-            queue.Enqueue(r);
-        base.AnnounceHiddenReferences(queue);
     }
 }

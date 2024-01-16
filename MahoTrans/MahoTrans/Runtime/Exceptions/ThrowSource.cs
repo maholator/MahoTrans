@@ -11,10 +11,10 @@ public enum ThrowSource : byte
     /// <summary>
     ///     Exception is thrown via <see cref="JavaOpcode" />.<see cref="JavaOpcode.athrow" />.
     /// </summary>
-    AthrowOpcode,
+    AthrowOpcode = 1,
 
     /// <summary>
     ///     Exception is thrown via <see cref="JvmState" />.<see cref="JvmState.Throw{T}()" />.
     /// </summary>
-    Native,
+    Native = 2,
 }

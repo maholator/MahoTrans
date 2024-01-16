@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Runtime.CompilerServices;
@@ -18,7 +18,8 @@ public unsafe class Frame
 
     /// <summary>
     ///     Pointer to next instruction to execute. To get instruction for execution, do <see cref="Method" />.
-    ///     <see cref="JavaMethodBody.LinkedCode" />[<see cref="Pointer" />].
+    ///     <see cref="JavaMethodBody.LinkedCode" />[<see cref="Pointer" />]. If the frame is executed right now, this points
+    ///     to running opcode, it will be increased only after execution.
     /// </summary>
     public int Pointer;
 

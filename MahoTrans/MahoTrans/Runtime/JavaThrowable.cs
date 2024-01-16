@@ -1,6 +1,10 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
+using java.lang;
+using Exception = System.Exception;
+
 namespace MahoTrans.Runtime;
 
 /// <summary>
@@ -10,8 +14,9 @@ public class JavaThrowable : Exception
 {
     public Reference Throwable;
 
-    public JavaThrowable(Reference throwable)
+    public JavaThrowable(Throwable t)
     {
-        Throwable = throwable;
+        Debug.Assert(t.Source != default, "Attempt to throw throwable without captured context!");
+        Throwable = t.This;
     }
 }

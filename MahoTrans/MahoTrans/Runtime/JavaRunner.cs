@@ -9,7 +9,6 @@ using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Utils;
 using Array = java.lang.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
@@ -1056,13 +1055,14 @@ public class JavaRunner
 
             case MTOpcode.athrow:
             {
-                var ex = frame.PopReference();
-                if (ex.IsNull)
+                var exr = frame.PopReference();
+                if (exr.IsNull)
                     jvm.Throw<NullPointerException>();
                 else
                 {
                     jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
-                    ex.As<Throwable>().Source = ThrowSource.AthrowOpcode;
+                    var ex = jvm.Resolve<Throwable>(exr);
+                    ex.CaptureStackTrace(ThrowSource.AthrowOpcode);
                     throw new JavaThrowable(ex);
                 }
 

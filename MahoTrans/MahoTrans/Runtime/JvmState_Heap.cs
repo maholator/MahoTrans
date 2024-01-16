@@ -325,8 +325,8 @@ public partial class JvmState
         Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
         var ex = AllocateObject<T>();
         ex.Init();
-        ex.Source = ThrowSource.Native;
-        throw new JavaThrowable(ex.This);
+        ex.CaptureStackTrace(ThrowSource.Native);
+        throw new JavaThrowable(ex);
     }
 
     [DoesNotReturn]
@@ -335,8 +335,8 @@ public partial class JvmState
         Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
         var ex = AllocateObject<T>();
         ex.Init(AllocateString(message));
-        ex.Source = ThrowSource.Native;
-        throw new JavaThrowable(ex.This);
+        ex.CaptureStackTrace(ThrowSource.Native);
+        throw new JavaThrowable(ex);
     }
 
     #endregion
