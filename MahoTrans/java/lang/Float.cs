@@ -4,7 +4,6 @@
 using System.Globalization;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Newtonsoft.Json.Linq;
 
 namespace java.lang;
 
