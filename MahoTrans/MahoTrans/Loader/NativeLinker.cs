@@ -232,8 +232,10 @@ public static class NativeLinker
     /// <returns>False to hide field.</returns>
     public static bool IsJavaVisible(FieldInfo field)
     {
+        // ignored fields are ignored.
         if (field.GetCustomAttribute<JavaIgnoreAttribute>() != null)
             return false;
+
         var t = field.FieldType;
 
         // enums are always service fields
@@ -244,10 +246,11 @@ public static class NativeLinker
         if (t == typeof(NameDescriptor) || t == typeof(NameDescriptorClass))
             return false;
 
-        // we use Class and String to show them to jvm
+        // we use these internally - there is java.lang.Class and java.lang.String for JVM.
         if (t == typeof(JavaClass) || t == typeof(string))
             return false;
 
+        // java objects must be stored by ref
         if (t.EnumerateBaseTypes().Contains(typeof(Object)))
             throw new JavaLinkageException(
                 $"{field.DeclaringType} has field {field.Name} of type {t.Name} which is java type. To store java objects, {nameof(Reference)} structs must be used.");
