@@ -34,8 +34,8 @@ public class JavaRunner
     public static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
     {
         var throwFrame = thread.ActiveFrame!;
+        state.Toolkit.Logger?.LogExceptionThrow(ex.Throwable);
         var t = state.Resolve<Throwable>(ex.Throwable);
-        state.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Exception {t.JavaClass.Name} is caught");
         Console.WriteLine("Call stack:");
         for (int i = thread.ActiveFrameIndex; i >= 0; i--)
         {

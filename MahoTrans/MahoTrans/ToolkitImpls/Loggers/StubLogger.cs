@@ -38,4 +38,12 @@ public class StubLogger : ILogger, ILoadLogger, IHeapDebugger
     public void SnapshotRestored()
     {
     }
+
+    public void LogExceptionThrow(Reference t)
+    {
+    }
+
+    public void LogExceptionCatch(Reference t)
+    {
+    }
 }

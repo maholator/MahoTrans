@@ -60,6 +60,7 @@ public class Throwable : Object
     /// Captures stack trace. This must be called exactly before throwing the exception.
     /// </summary>
     /// <param name="source">Who is throwing this exception?</param>
+    [JavaIgnore]
     public void CaptureStackTrace(ThrowSource source)
     {
         JavaThread? thread = Thread.CurrentThread;
