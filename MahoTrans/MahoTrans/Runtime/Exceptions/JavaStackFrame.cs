@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Runtime.Types;
+using System.Text;
 
 namespace MahoTrans.Runtime.Exceptions;
 
@@ -32,4 +33,28 @@ public class JavaStackFrame : IMTStackFrame
 
     //TODO
     public int? LineNumber => null;
+
+    public string? SourceFile => null;
+
+    public new string ToString()
+    {
+        StringBuilder s = new StringBuilder();
+        s.Append(MethodClass.Replace('/', '.'));
+        s.Append(MethodName);
+        s.Append(MethodSignature);
+        if (LineNumber != null)
+        {
+            s.Append('(');
+            s.Append(SourceFile);
+            s.Append(':');
+            s.Append(LineNumber);
+            s.Append(')');
+        }
+        else
+        {
+            s.Append(" bci=");
+            s.Append(OpcodeNumber);
+        }
+        return s.ToString();
+    }
 }

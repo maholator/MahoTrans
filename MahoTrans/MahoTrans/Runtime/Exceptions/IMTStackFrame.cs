@@ -53,4 +53,5 @@ public interface IMTStackFrame
     ///     Source code line number. May be not available, null in such case.
     /// </summary>
     int? LineNumber { get; }
+    string? SourceFile { get; }
 }

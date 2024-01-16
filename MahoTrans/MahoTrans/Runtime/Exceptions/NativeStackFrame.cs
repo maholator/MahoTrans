@@ -10,11 +10,13 @@ namespace MahoTrans.Runtime.Exceptions;
 public class NativeStackFrame : IMTStackFrame
 {
     private readonly MethodBase _method;
+    private readonly string? _sourceName;
     private readonly int _lineNumber;
 
-    public NativeStackFrame(MethodBase method, int lineNumber)
+    public NativeStackFrame(MethodBase method, string? sourceName, int lineNumber)
     {
         _method = method;
+        _sourceName = sourceName;
         _lineNumber = lineNumber;
     }
 
@@ -59,4 +61,37 @@ public class NativeStackFrame : IMTStackFrame
     public int? OpcodeNumber => null;
 
     public int? LineNumber => _lineNumber == 0 ? null : _lineNumber;
+
+    public string? SourceFile
+    {
+        get
+        {
+            if (_sourceName == null)
+                return null;
+            string filename = _sourceName;
+            if (filename != null && (filename.Contains('\\') || filename.Contains('/')))
+            {
+                int idx = filename.LastIndexOf('\\');
+                filename = filename[((idx == -1 ? filename.LastIndexOf('/') : idx) + 1)..];
+            }
+            return filename;
+        }
+    }
+
+    public new string ToString()
+    {
+        StringBuilder s = new StringBuilder();
+        s.Append(MethodName);
+        s.Append(MethodSignature);
+        if (LineNumber != null)
+        {
+            s.Append('(');
+            s.Append(SourceFile);
+            s.Append(':');
+            s.Append(LineNumber);
+            s.Append(')');
+        }
+        s.Append(" (native)");
+        return s.ToString();
+    }
 }

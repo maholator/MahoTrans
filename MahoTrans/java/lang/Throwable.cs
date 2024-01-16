@@ -40,6 +40,11 @@ public class Throwable : Object
 
     public void printStackTrace()
     {
+        if (StackTrace == null)
+        {
+            Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{JavaClass.Name} has no trace!");
+            return;
+        }
         Jvm.Toolkit.System.PrintException(This);
     }
 
@@ -90,7 +95,7 @@ public class Throwable : Object
                 break;
             // let's add bridges for now.
 
-            stack.Add(new NativeStackFrame(m, ntf.GetFileLineNumber()));
+            stack.Add(new NativeStackFrame(m, ntf.GetFileName(), ntf.GetFileLineNumber()));
         }
 
         // we are at interpreter level: let's add java frames.
@@ -101,6 +106,7 @@ public class Throwable : Object
         }
 
         StackTrace = stack.ToArray();
+        Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Captured {JavaClass.Name}");
     }
 
     private void _printStackTraceInternal()
