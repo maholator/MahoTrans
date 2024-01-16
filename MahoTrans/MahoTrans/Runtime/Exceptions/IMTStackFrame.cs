@@ -7,7 +7,7 @@ using MahoTrans.Runtime.Types;
 namespace MahoTrans.Runtime.Exceptions;
 
 /// <summary>
-///     <see cref="StackFrame" /> but suitable for mixed code.
+///     <see cref="StackFrame" /> but suitable for mixed code. Call <see cref="object.ToString()"/> to get a quick description.
 /// </summary>
 public interface IMTStackFrame
 {
@@ -53,5 +53,6 @@ public interface IMTStackFrame
     ///     Source code line number. May be not available, null in such case.
     /// </summary>
     int? LineNumber { get; }
+
     string? SourceFile { get; }
 }

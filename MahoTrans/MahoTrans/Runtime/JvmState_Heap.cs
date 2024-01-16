@@ -324,7 +324,7 @@ public partial class JvmState
     {
         var ex = AllocateObject<T>();
         ex.Init();
-        ex.CaptureStackTrace(ThrowSource.Native);
+        ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);
         throw new JavaThrowable(ex);
     }
@@ -334,7 +334,7 @@ public partial class JvmState
     {
         var ex = AllocateObject<T>();
         ex.Init(AllocateString(message));
-        ex.CaptureStackTrace(ThrowSource.Native);
+        ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);
         throw new JavaThrowable(ex);
     }

@@ -36,7 +36,7 @@ public class JavaStackFrame : IMTStackFrame
 
     public string? SourceFile => null;
 
-    public new string ToString()
+    public override string ToString()
     {
         StringBuilder s = new StringBuilder();
         s.Append(MethodClass.Replace('/', '.'));

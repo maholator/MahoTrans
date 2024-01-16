@@ -78,7 +78,7 @@ public class NativeStackFrame : IMTStackFrame
         }
     }
 
-    public new string ToString()
+    public override string ToString()
     {
         StringBuilder s = new StringBuilder();
         s.Append(MethodName);

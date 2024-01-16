@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
-using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
@@ -1060,9 +1059,9 @@ public class JavaRunner
                     jvm.Throw<NullPointerException>();
                 else
                 {
-                    jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
                     var ex = jvm.Resolve<Throwable>(exr);
-                    ex.CaptureStackTrace(ThrowSource.AthrowOpcode);
+                    ex.Source = ThrowSource.Java;
+                    jvm.Toolkit.Logger?.LogExceptionThrow(exr);
                     throw new JavaThrowable(ex);
                 }
 

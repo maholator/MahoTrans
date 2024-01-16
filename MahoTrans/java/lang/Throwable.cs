@@ -22,12 +22,13 @@ public class Throwable : Object
     /// </summary>
     [JavaIgnore] public IMTStackFrame[]? StackTrace;
 
-    public ThrowSource Source { get; private set; }
+    public ThrowSource Source;
 
     [InitMethod]
     public new void Init()
     {
         base.Init();
+        CaptureStackTrace();
         Message = Reference.Null;
     }
 
@@ -35,16 +36,12 @@ public class Throwable : Object
     public void Init([String] Reference message)
     {
         base.Init();
+        CaptureStackTrace();
         Message = message;
     }
 
     public void printStackTrace()
     {
-        if (StackTrace == null)
-        {
-            Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{JavaClass.Name} has no trace!");
-            return;
-        }
         Jvm.Toolkit.System.PrintException(This);
     }
 
@@ -62,26 +59,22 @@ public class Throwable : Object
     }
 
     /// <summary>
-    /// Captures stack trace. This must be called exactly before throwing the exception.
+    /// Captures stack trace. This must be called in initialization method.
     /// </summary>
-    /// <param name="source">Who is throwing this exception?</param>
     [JavaIgnore]
-    public void CaptureStackTrace(ThrowSource source)
+    public void CaptureStackTrace()
     {
         JavaThread? thread = Thread.CurrentThread;
         if (thread == null)
             throw new JavaRuntimeError("Throwables must be constructed inside thread context.");
-
-        Source = source;
 
         StackFrame[] nativeTrace = new StackTrace(true).GetFrames();
 
         // here we will put all the data
         List<IMTStackFrame> stack = new List<IMTStackFrame>(thread.ActiveFrameIndex + nativeTrace.Length);
 
-        int j = 0;
-        // two frames are always skipped: this method and caller (interpreter or Throw<T>())
-        for (int i = 2; i < nativeTrace.Length; i++)
+        // three frames are always skipped: this method, init() and caller (interpreter or Throw<T>())
+        for (int i = 3; i < nativeTrace.Length; i++)
         {
             var ntf = nativeTrace[i];
             var m = ntf.GetMethod();
@@ -106,7 +99,7 @@ public class Throwable : Object
         }
 
         StackTrace = stack.ToArray();
-        Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Captured {JavaClass.Name}");
+        Jvm.Toolkit.Logger?.LogRuntime(LogLevel.Info, $"Captured trace for {JavaClass.Name}");
     }
 
     private void _printStackTraceInternal()

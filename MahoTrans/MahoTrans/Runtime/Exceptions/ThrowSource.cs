@@ -11,7 +11,7 @@ public enum ThrowSource : byte
     /// <summary>
     ///     Exception is thrown via <see cref="JavaOpcode" />.<see cref="JavaOpcode.athrow" />.
     /// </summary>
-    AthrowOpcode = 1,
+    Java = 1,
 
     /// <summary>
     ///     Exception is thrown via <see cref="JvmState" />.<see cref="JvmState.Throw{T}()" />.
