@@ -19,9 +19,6 @@ public class JavaRunner
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static void Step(JavaThread thread, JvmState state)
     {
-        //var frame = thread.ActiveFrame;
-        // try
-        // {
         try
         {
             Thread.CurrentThread = thread;
@@ -31,18 +28,6 @@ public class JavaRunner
         {
             ProcessThrow(thread, state, ex);
         }
-        // }
-        // catch
-        // {
-        //     Console.WriteLine($"Faulty instruction: {frame.Method.Code[frame.Pointer]}");
-        //     Console.WriteLine("Call stack:");
-        //     foreach (var frame1 in thread.CallStack)
-        //     {
-        //         Console.WriteLine(frame1);
-        //     }
-        //
-        //     throw;
-        // }
     }
 
     public static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
