@@ -106,4 +106,15 @@ public class Class : Object
         var other = Jvm.Resolve<Class>(cls);
         return other.InternalClass.Is(InternalClass);
     }
+
+    [return: String]
+    public Reference toString()
+    {
+        var name = InternalClass.Name.Replace('/', '.');
+        //TODO is primitive check
+        //if (isPrimitive())
+        //    return Jvm.AllocateString(name);
+        //return Jvm.AllocateString((isInterface() ? "interface " : "class ") + name);
+        return Jvm.AllocateString(name);
+    }
 }
