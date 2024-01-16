@@ -199,6 +199,5 @@ public class Throwable : Object
 
         //StackTrace = new Reference[j];
         global::System.Array.Copy(tmp, StackTrace, j);
-        Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"Constructed {JavaClass.Name}");
     }
 }
