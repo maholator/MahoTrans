@@ -8,11 +8,10 @@ namespace MahoTrans.Abstractions;
 /// </summary>
 public enum DebugMessageCategory
 {
-    Common = 0,
-    ClassInitializer = 1,
-    Jit = 2,
-    Exceptions = 3,
-    Resources = 4,
-    Gc = 5,
-    Threading = 6,
+    Common = 1,
+    ClassInitializer,
+    Jit,
+    Resources,
+    Gc,
+    Threading,
 }

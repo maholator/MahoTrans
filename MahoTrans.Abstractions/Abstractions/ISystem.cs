@@ -11,7 +11,7 @@ namespace MahoTrans.Abstractions;
 public interface ISystem : IToolkit
 {
     /// <summary>
-    ///     Prints exception.
+    ///     Prints exception to stderr. To print exception to log, use <see cref="ILogger.LogExceptionThrow" />.
     /// </summary>
     /// <param name="t">Exception to print.</param>
     void PrintException(Reference t);

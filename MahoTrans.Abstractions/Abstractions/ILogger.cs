@@ -1,6 +1,8 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Runtime;
+
 namespace MahoTrans.Abstractions;
 
 /// <summary>
@@ -13,12 +15,16 @@ public interface ILogger
     /// </summary>
     /// <param name="level">Importance of the message.</param>
     /// <param name="message">Message to log.</param>
-    public void LogRuntime(LogLevel level, string message);
+    void LogRuntime(LogLevel level, string message);
 
     /// <summary>
     ///     Logs debug message.
     /// </summary>
     /// <param name="category">Category of the message.</param>
     /// <param name="message">Text of the message.</param>
-    public void LogDebug(DebugMessageCategory category, string message);
+    void LogDebug(DebugMessageCategory category, string message);
+
+    void LogExceptionThrow(Reference t);
+
+    void LogExceptionCatch(Reference t);
 }
