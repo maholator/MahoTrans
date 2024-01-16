@@ -4,8 +4,6 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using System;
-using System.Reflection.Metadata;
 using Math = java.lang.Math;
 
 namespace javax.microedition.lcdui.game;
@@ -21,118 +19,115 @@ public class Sprite : Layer
     public const int TRANS_MIRROR_ROT180 = 1;
     public const int TRANS_MIRROR_ROT270 = 4;
 
-    private Reference anImage265;
-    private int anInt269;
+    public Reference Image;
+    private int rawFrameCount;
     [JavaIgnore] private int[] anIntArray266 = null!;
     [JavaIgnore] private int[] anIntArray267 = null!;
-    private int anInt270;
-    private int anInt271;
+    private int frameWidth;
+    private int frameHeight;
     [JavaIgnore] private int[] anIntArray268 = null!;
-    private int anInt416;
+    private int currentFrame;
     private bool abool407;
-    private int anInt272;
-    private int anInt273;
-    private int anInt274;
-    private int anInt408;
-    private int anInt409;
-    private int anInt410;
-    private int anInt411;
+    private int refX;
+    private int refY;
+    private int collisionX;
+    private int collisionY;
+    private int collisionW;
+    private int collisionH;
+    private int transform;
     private int anInt412;
     private int anInt413;
     private int anInt414;
     private int anInt415;
 
     [InitMethod]
-    public void InitImage([JavaType(nameof(Image))] Reference r)
+    public void InitImage([JavaType(nameof(lcdui.Image))] Reference r)
     {
-        Image image = (Image)Jvm.ResolveObject(r);
-        base.Init(image.getWidth(), image.getHeight());
+        Image img = Jvm.Resolve<Image>(r);
+        Image = r;
+        base.Init(img.getWidth(), img.getHeight());
     }
 
     [InitMethod]
-    public void InitImage([JavaType(nameof(Image))] Reference r, int w, int h)
+    public void InitImage([JavaType(nameof(lcdui.Image))] Reference r, int w, int h)
     {
-        Image image = (Image)Jvm.ResolveObject(r);
+        Image img = Jvm.Resolve<Image>(r);
+        Image = r;
         base.Init(w, h);
-        if (w < 1 || h < 1 || image.getWidth() % w != 0 || image.getHeight() % h != 0)
+        if (w < 1 || h < 1 || img.getWidth() % w != 0 || img.getHeight() % h != 0)
             Jvm.Throw<IllegalArgumentException>();
-
     }
 
     [InitMethod]
     public void InitSprite([JavaType(nameof(Sprite))] Reference r)
     {
-        if(r.IsNull)
+        if (r.IsNull)
             Jvm.Throw<NullPointerException>();
         Sprite sprite = (Sprite)Jvm.ResolveObject(r);
         base.Init(sprite.getWidth(), sprite.getHeight());
 
-        anImage265 = Image.createImage(sprite.anImage265);
-        anInt269 = sprite.anInt269;
-        anIntArray266 = new int[anInt269];
-        anIntArray267 = new int[anInt269];
+        Image = lcdui.Image.createImage(sprite.Image);
+        rawFrameCount = sprite.rawFrameCount;
+        anIntArray266 = new int[rawFrameCount];
+        anIntArray267 = new int[rawFrameCount];
         System.Array.Copy(sprite.anIntArray266, 0, anIntArray266, 0, sprite.getRawFrameCount());
         System.Array.Copy(sprite.anIntArray267, 0, anIntArray267, 0, sprite.getRawFrameCount());
         X = sprite.getX();
         Y = sprite.getY();
-        anInt272 = sprite.anInt272;
-        anInt273 = sprite.anInt273;
-        anInt274 = sprite.anInt274;
-        anInt408 = sprite.anInt408;
-        anInt409 = sprite.anInt409;
-        anInt410 = sprite.anInt410;
-        anInt270 = sprite.anInt270;
-        anInt271 = sprite.anInt271;
-        method209(sprite.anInt411);
+        refX = sprite.refX;
+        refY = sprite.refY;
+        collisionX = sprite.collisionX;
+        collisionY = sprite.collisionY;
+        collisionW = sprite.collisionW;
+        collisionH = sprite.collisionH;
+        frameWidth = sprite.frameWidth;
+        frameHeight = sprite.frameHeight;
+        setTransformInternal(sprite.transform);
         setVisible(sprite.isVisible());
         anIntArray268 = new int[sprite.getFrameSequenceLength()];
-        setFrameSequence1(sprite.anIntArray268);
+        setFrameSequenceInternal(sprite.anIntArray268);
         setFrame(sprite.getFrame());
         setRefPixelPosition(sprite.getRefPixelX(), sprite.getRefPixelY());
     }
 
-    public void defineReferencePixel(int var1, int var2)
+    public void defineReferencePixel(int x, int y)
     {
-        anInt272 = var1;
-        anInt273 = var2;
+        refX = x;
+        refY = y;
     }
 
-    public void setRefPixelPosition(int var1, int var2)
+    public void setRefPixelPosition(int x, int y)
     {
-        X = var1 - method206(anInt272, anInt273, anInt411);
-        Y = var2 - method208(anInt272, anInt273, anInt411);
+        X = x - method206(refX, refY, transform);
+        Y = y - method208(refX, refY, transform);
     }
 
     public int getRefPixelX()
     {
-        return X + method206(anInt272, anInt273, anInt411);
+        return X + method206(refX, refY, transform);
     }
 
     public int getRefPixelY()
     {
-        return Y + method208(anInt272, anInt273, anInt411);
+        return Y + method208(refX, refY, transform);
     }
 
-    public void setFrame(int var1)
+    public void setFrame(int frame)
     {
-        if (var1 >= 0 && var1 < anIntArray268.Length)
-        {
-            anInt416 = var1;
-        }
-        else
-        {
+        if (frame < 0 || frame >= anIntArray268.Length)
             Jvm.Throw<IndexOutOfBoundsException>();
-        }
+
+        currentFrame = frame;
     }
 
     public int getFrame()
     {
-        return anInt416;
+        return currentFrame;
     }
 
     public int getRawFrameCount()
     {
-        return anInt269;
+        return rawFrameCount;
     }
 
     public int getFrameSequenceLength()
@@ -142,60 +137,51 @@ public class Sprite : Layer
 
     public void nextFrame()
     {
-        anInt416 = (anInt416 + 1) % anIntArray268.Length;
+        currentFrame = (currentFrame + 1) % anIntArray268.Length;
     }
 
     public void prevFrame()
     {
-        Sprite var10000;
-        int var10001;
-        if (anInt416 == 0)
+        if (currentFrame == 0)
         {
-            var10000 = this;
-            var10001 = anIntArray268.Length;
-        }
-        else
-        {
-            var10000 = this;
-            var10001 = anInt416;
+            currentFrame = anIntArray268.Length - 1;
+            return;
         }
 
-        var10000.anInt416 = var10001 - 1;
+        currentFrame -= 1;
     }
 
     public new void paint([JavaType(nameof(Graphics))] Reference r)
     {
-        if (r.IsNull)
-            Jvm.Throw<NullPointerException>();
-        Graphics g = (Graphics) Jvm.ResolveObject(r);
+        Graphics g = Jvm.Resolve<Graphics>(r);
         if (Visible)
         {
-            g.drawRegion(anImage265, anIntArray266[anIntArray268[anInt416]], anIntArray267[anIntArray268[anInt416]], anInt270, anInt271, anInt411, X, Y, 20);
+            g.drawRegion(Image, anIntArray266[anIntArray268[currentFrame]], anIntArray267[anIntArray268[currentFrame]],
+                frameWidth, frameHeight, transform, X, Y, 20);
         }
     }
 
-    public void setFrameSequence([JavaType("[I")] Reference rvar1)
+    public void setFrameSequence([JavaType("[I")] Reference r)
     {
-        int[] var1 = Jvm.ResolveArray<int>(rvar1);
-        setFrameSequence1(var1);
+        int[]? a = Jvm.ResolveArrayOrDefault<int>(r);
+        setFrameSequenceInternal(a);
     }
 
 
     [JavaIgnore]
-    public void setFrameSequence1(int[] var1)
+    public void setFrameSequenceInternal(int[]? var1)
     {
         int var2;
         if (var1 == null)
         {
-            anInt416 = 0;
+            currentFrame = 0;
             abool407 = false;
-            anIntArray268 = new int[anInt269];
+            anIntArray268 = new int[rawFrameCount];
 
-            for (var2 = 0; var2 < anInt269; anIntArray268[var2] = var2++)
+            for (var2 = 0; var2 < rawFrameCount; anIntArray268[var2] = var2++)
             {
                 ;
             }
-
         }
         else if (var1.Length < 1)
         {
@@ -205,7 +191,7 @@ public class Sprite : Layer
         {
             for (var2 = 0; var2 < var1.Length; ++var2)
             {
-                if (var1[var2] < 0 || var1[var2] >= anInt269)
+                if (var1[var2] < 0 || var1[var2] >= rawFrameCount)
                 {
                     Jvm.Throw<ArrayIndexOutOfBoundsException>();
                 }
@@ -214,116 +200,97 @@ public class Sprite : Layer
             abool407 = true;
             anIntArray268 = new int[var1.Length];
             System.Array.Copy(var1, 0, anIntArray268, 0, var1.Length);
-            anInt416 = 0;
+            currentFrame = 0;
         }
     }
 
-    public void defineCollisionRectangle(int var1, int var2, int var3, int var4)
+    public void defineCollisionRectangle(int x, int y, int w, int h)
     {
-        if (var3 >= 0 && var4 >= 0)
-        {
-            anInt274 = var1;
-            anInt408 = var2;
-            anInt409 = var3;
-            anInt410 = var4;
-            method209(anInt411);
-        }
-        else
-        {
+        if (w < 0 || h < 0)
             Jvm.Throw<IllegalArgumentException>();
-        }
+        collisionX = x;
+        collisionY = y;
+        collisionW = w;
+        collisionH = h;
+        setTransformInternal(transform);
     }
 
-    public void setTransform(int var1)
-    {
-        method209(var1);
-    }
+    public void setTransform(int t) => setTransformInternal(t);
 
-    public bool collidesWith___sprite([JavaType(nameof(Sprite))] Reference rvar1, bool var2)
+    public bool collidesWith___sprite([JavaType(nameof(Sprite))] Reference r, bool pixelLevel)
     {
-        Sprite var1 = (Sprite)Jvm.ResolveObject(rvar1);
-        if (var1.Visible && Visible)
+        Sprite another = (Sprite)Jvm.ResolveObject(r);
+        if (!another.Visible || !Visible)
+            return false;
+
+        int var3 = another.X + another.anInt412;
+        int var4 = another.Y + another.anInt413;
+        int var5 = var3 + another.anInt414;
+        int var6 = var4 + another.anInt415;
+        int var7 = X + this.anInt412;
+        int var8 = Y + this.anInt413;
+        int var9 = var7 + this.anInt414;
+        int var10 = var8 + this.anInt415;
+        if (method203(var3, var4, var5, var6, var7, var8, var9, var10))
         {
-            int var3 = var1.X + var1.anInt412;
-            int var4 = var1.Y + var1.anInt413;
-            int var5 = var3 + var1.anInt414;
-            int var6 = var4 + var1.anInt415;
-            int var7 = X + this.anInt412;
-            int var8 = Y + this.anInt413;
-            int var9 = var7 + this.anInt414;
-            int var10 = var8 + this.anInt415;
-            if (method203(var3, var4, var5, var6, var7, var8, var9, var10))
+            if (!pixelLevel)
+                return true;
+
+            if (this.anInt412 < 0)
             {
-                if (var2)
-                {
-                    if (this.anInt412 < 0)
-                    {
-                        var7 = X;
-                    }
-
-                    if (this.anInt413 < 0)
-                    {
-                        var8 = Y;
-                    }
-
-                    if (this.anInt412 + this.anInt414 > Width)
-                    {
-                        var9 = X + Width;
-                    }
-
-                    if (this.anInt413 + this.anInt415 > Height)
-                    {
-                        var10 = Y + Height;
-                    }
-
-                    if (var1.anInt412 < 0)
-                    {
-                        var3 = var1.X;
-                    }
-
-                    if (var1.anInt413 < 0)
-                    {
-                        var4 = var1.Y;
-                    }
-
-                    if (var1.anInt412 + var1.anInt414 > var1.Width)
-                    {
-                        var5 = var1.X + var1.Width;
-                    }
-
-                    if (var1.anInt413 + var1.anInt415 > var1.Height)
-                    {
-                        var6 = var1.Y + var1.Height;
-                    }
-
-                    if (!method203(var3, var4, var5, var6, var7, var8, var9, var10))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        int var11 = var7 < var3 ? var3 : var7;
-                        int var12 = var8 < var4 ? var4 : var8;
-                        int var13 = var9 < var5 ? var9 : var5;
-                        int var14 = var10 < var6 ? var10 : var6;
-                        int var15 = Math.abs(var13 - var11);
-                        int var16 = Math.abs(var14 - var12);
-                        int var17 = this.method205(var11, var12, var13, var14);
-                        int var18 = this.method207(var11, var12, var13, var14);
-                        int var19 = var1.method205(var11, var12, var13, var14);
-                        int var20 = var1.method207(var11, var12, var13, var14);
-                        return method204(var17, var18, var19, var20, this.anImage265, this.anInt411, var1.anImage265, var1.anInt411, var15, var16);
-                    }
-                }
-                else
-                {
-                    return true;
-                }
+                var7 = X;
             }
-            else
+
+            if (this.anInt413 < 0)
             {
+                var8 = Y;
+            }
+
+            if (this.anInt412 + this.anInt414 > Width)
+            {
+                var9 = X + Width;
+            }
+
+            if (this.anInt413 + this.anInt415 > Height)
+            {
+                var10 = Y + Height;
+            }
+
+            if (another.anInt412 < 0)
+            {
+                var3 = another.X;
+            }
+
+            if (another.anInt413 < 0)
+            {
+                var4 = another.Y;
+            }
+
+            if (another.anInt412 + another.anInt414 > another.Width)
+            {
+                var5 = another.X + another.Width;
+            }
+
+            if (another.anInt413 + another.anInt415 > another.Height)
+            {
+                var6 = another.Y + another.Height;
+            }
+
+            if (!method203(var3, var4, var5, var6, var7, var8, var9, var10))
                 return false;
-            }
+
+            int var11 = var7 < var3 ? var3 : var7;
+            int var12 = var8 < var4 ? var4 : var8;
+            int var13 = var9 < var5 ? var9 : var5;
+            int var14 = var10 < var6 ? var10 : var6;
+            int var15 = Math.abs(var13 - var11);
+            int var16 = Math.abs(var14 - var12);
+            int var17 = this.method205(var11, var12, var13, var14);
+            int var18 = this.method207(var11, var12, var13, var14);
+            int var19 = another.method205(var11, var12, var13, var14);
+            int var20 = another.method207(var11, var12, var13, var14);
+            return imagesCollideByPixels(var17, var18, var19, var20, this.Image, this.transform, another.Image,
+                another.transform, var15, var16);
         }
         else
         {
@@ -331,200 +298,193 @@ public class Sprite : Layer
         }
     }
 
-    public bool collidesWith___tiledLayer([JavaType(nameof(TiledLayer))] Reference rvar1, bool var2)
+    public bool collidesWith___tiledLayer([JavaType(nameof(TiledLayer))] Reference rvar1, bool pixelLevel)
     {
-        TiledLayer var1 = (TiledLayer)Jvm.ResolveObject(rvar1);
-        if (var1.Visible && Visible)
+        var another = Jvm.Resolve<TiledLayer>(rvar1);
+        if (!another.Visible || !Visible)
+            return false;
+
+        int var3 = another.X;
+        int var4 = another.Y;
+        int var5 = var3 + another.Width;
+        int var6 = var4 + another.Height;
+        int var7 = another.getCellWidth();
+        int var8 = another.getCellHeight();
+        int var9 = X + this.anInt412;
+        int var10 = Y + this.anInt413;
+        int var11 = var9 + this.anInt414;
+        int var12 = var10 + this.anInt415;
+        int var13 = another.getColumns();
+        int var14 = another.getRows();
+
+        if (!method203(var3, var4, var5, var6, var9, var10, var11, var12))
+            return false;
+
+        int var15 = var9 <= var3 ? 0 : (var9 - var3) / var7;
+        int var16 = var10 <= var4 ? 0 : (var10 - var4) / var8;
+        int var17 = var11 < var5 ? (var11 - 1 - var3) / var7 : var13 - 1;
+        int var18 = var12 < var6 ? (var12 - 1 - var4) / var8 : var14 - 1;
+        int var19;
+        int var20;
+        if (!pixelLevel)
         {
-            int var3 = var1.X;
-            int var4 = var1.Y;
-            int var5 = var3 + var1.Width;
-            int var6 = var4 + var1.Height;
-            int var7 = var1.getCellWidth();
-            int var8 = var1.getCellHeight();
-            int var9 = X + this.anInt412;
-            int var10 = Y + this.anInt413;
-            int var11 = var9 + this.anInt414;
-            int var12 = var10 + this.anInt415;
-            int var13 = var1.getColumns();
-            int var14 = var1.getRows();
+            for (var19 = var16; var19 <= var18; ++var19)
+            {
+                for (var20 = var15; var20 <= var17; ++var20)
+                {
+                    if (another.getCell(var20, var19) != 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        else
+        {
+            if (this.anInt412 < 0)
+            {
+                var9 = X;
+            }
+
+            if (this.anInt413 < 0)
+            {
+                var10 = Y;
+            }
+
+            if (this.anInt412 + this.anInt414 > Width)
+            {
+                var11 = X + Width;
+            }
+
+            if (this.anInt413 + this.anInt415 > Height)
+            {
+                var12 = Y + Height;
+            }
+
             if (!method203(var3, var4, var5, var6, var9, var10, var11, var12))
             {
                 return false;
             }
             else
             {
-                int var15 = var9 <= var3 ? 0 : (var9 - var3) / var7;
-                int var16 = var10 <= var4 ? 0 : (var10 - var4) / var8;
-                int var17 = var11 < var5 ? (var11 - 1 - var3) / var7 : var13 - 1;
-                int var18 = var12 < var6 ? (var12 - 1 - var4) / var8 : var14 - 1;
-                int var19;
-                int var20;
-                if (!var2)
+                var15 = var9 <= var3 ? 0 : (var9 - var3) / var7;
+                var16 = var10 <= var4 ? 0 : (var10 - var4) / var8;
+                var17 = var11 < var5 ? (var11 - 1 - var3) / var7 : var13 - 1;
+                var18 = var12 < var6 ? (var12 - 1 - var4) / var8 : var14 - 1;
+                var20 = (var19 = var16 * var8 + var4) + var8;
+
+                for (int var21 = var16; var21 <= var18; var20 += var8)
                 {
-                    for (var19 = var16; var19 <= var18; ++var19)
+                    int var22;
+                    int var23 = (var22 = var15 * var7 + var3) + var7;
+
+                    for (int var24 = var15; var24 <= var17; var23 += var7)
                     {
-                        for (var20 = var15; var20 <= var17; ++var20)
+                        int var25;
+                        if ((var25 = another.getCell(var24, var21)) != 0)
                         {
-                            if (var1.getCell(var20, var19) != 0)
+                            int var26 = var9 < var22 ? var22 : var9;
+                            int var27 = var10 < var19 ? var19 : var10;
+                            int var28 = var11 < var23 ? var11 : var23;
+                            int var29 = var12 < var20 ? var12 : var20;
+                            int var30;
+                            if (var26 > var28)
+                            {
+                                var30 = var28;
+                                var28 = var26;
+                                var26 = var30;
+                            }
+
+                            if (var27 > var29)
+                            {
+                                var30 = var29;
+                                var29 = var27;
+                                var27 = var30;
+                            }
+
+                            var30 = var28 - var26;
+                            int var31 = var29 - var27;
+                            int var32 = this.method205(var26, var27, var28, var29);
+                            int var33 = this.method207(var26, var27, var28, var29);
+                            int var34 = another.anIntArray266[var25] + (var26 - var22);
+                            int var35 = another.anIntArray267[var25] + (var27 - var19);
+                            if (imagesCollideByPixels(var32, var33, var34, var35, this.Image, this.transform,
+                                    another.anImage265, 0, var30, var31))
                             {
                                 return true;
                             }
                         }
+
+                        ++var24;
+                        var22 += var7;
                     }
 
-                    return false;
+                    ++var21;
+                    var19 += var8;
                 }
-                else
-                {
-                    if (this.anInt412 < 0)
-                    {
-                        var9 = X;
-                    }
 
-                    if (this.anInt413 < 0)
-                    {
-                        var10 = Y;
-                    }
-
-                    if (this.anInt412 + this.anInt414 > Width)
-                    {
-                        var11 = X + Width;
-                    }
-
-                    if (this.anInt413 + this.anInt415 > Height)
-                    {
-                        var12 = Y + Height;
-                    }
-
-                    if (!method203(var3, var4, var5, var6, var9, var10, var11, var12))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        var15 = var9 <= var3 ? 0 : (var9 - var3) / var7;
-                        var16 = var10 <= var4 ? 0 : (var10 - var4) / var8;
-                        var17 = var11 < var5 ? (var11 - 1 - var3) / var7 : var13 - 1;
-                        var18 = var12 < var6 ? (var12 - 1 - var4) / var8 : var14 - 1;
-                        var20 = (var19 = var16 * var8 + var4) + var8;
-
-                        for (int var21 = var16; var21 <= var18; var20 += var8)
-                        {
-                            int var22;
-                            int var23 = (var22 = var15 * var7 + var3) + var7;
-
-                            for (int var24 = var15; var24 <= var17; var23 += var7)
-                            {
-                                int var25;
-                                if ((var25 = var1.getCell(var24, var21)) != 0)
-                                {
-                                    int var26 = var9 < var22 ? var22 : var9;
-                                    int var27 = var10 < var19 ? var19 : var10;
-                                    int var28 = var11 < var23 ? var11 : var23;
-                                    int var29 = var12 < var20 ? var12 : var20;
-                                    int var30;
-                                    if (var26 > var28)
-                                    {
-                                        var30 = var28;
-                                        var28 = var26;
-                                        var26 = var30;
-                                    }
-
-                                    if (var27 > var29)
-                                    {
-                                        var30 = var29;
-                                        var29 = var27;
-                                        var27 = var30;
-                                    }
-
-                                    var30 = var28 - var26;
-                                    int var31 = var29 - var27;
-                                    int var32 = this.method205(var26, var27, var28, var29);
-                                    int var33 = this.method207(var26, var27, var28, var29);
-                                    int var34 = var1.anIntArray266[var25] + (var26 - var22);
-                                    int var35 = var1.anIntArray267[var25] + (var27 - var19);
-                                    if (method204(var32, var33, var34, var35, this.anImage265, this.anInt411, var1.anImage265, 0, var30, var31))
-                                    {
-                                        return true;
-                                    }
-                                }
-
-                                ++var24;
-                                var22 += var7;
-                            }
-
-                            ++var21;
-                            var19 += var8;
-                        }
-
-                        return false;
-                    }
-                }
+                return false;
             }
-        }
-        else
-        {
-            return false;
         }
     }
 
-    public bool collidesWith([JavaType(nameof(Image))] Reference var1, int var2, int var3, bool var4)
+    public bool collidesWith([JavaType(nameof(lcdui.Image))] Reference r, int var2, int var3, bool pixelLevel)
     {
         if (!Visible)
             return false;
-        Image image = (Image)Jvm.ResolveObject(var1);
-        int var7 = var2 + image.getWidth();
-        int var8 = var3 + image.getHeight();
+        Image another = Jvm.Resolve<Image>(r);
+        int var7 = var2 + another.getWidth();
+        int var8 = var3 + another.getHeight();
         int var9 = X + this.anInt412;
         int var10 = Y + this.anInt413;
         int var11 = var9 + this.anInt414;
         int var12 = var10 + this.anInt415;
         if (method203(var2, var3, var7, var8, var9, var10, var11, var12))
         {
-            if (var4)
+            if (!pixelLevel)
+                return true;
+            if (this.anInt412 < 0)
             {
-                if (this.anInt412 < 0)
-                {
-                    var9 = X;
-                }
-
-                if (this.anInt413 < 0)
-                {
-                    var10 = Y;
-                }
-
-                if (this.anInt412 + this.anInt414 > Width)
-                {
-                    var11 = X + Width;
-                }
-
-                if (this.anInt413 + this.anInt415 > Height)
-                {
-                    var12 = Y + Height;
-                }
-
-                if (!method203(var2, var3, var7, var8, var9, var10, var11, var12))
-                {
-                    return false;
-                }
-                else
-                {
-                    int var13 = var9 < var2 ? var2 : var9;
-                    int var14 = var10 < var3 ? var3 : var10;
-                    int var15 = var11 < var7 ? var11 : var7;
-                    int var16 = var12 < var8 ? var12 : var8;
-                    int var17 = Math.abs(var15 - var13);
-                    int var18 = Math.abs(var16 - var14);
-                    int var19 = this.method205(var13, var14, var15, var16);
-                    int var20 = this.method207(var13, var14, var15, var16);
-                    int var21 = var13 - var2;
-                    int var22 = var14 - var3;
-                    return method204(var19, var20, var21, var22, this.anImage265, this.anInt411, var1, 0, var17, var18);
-                }
+                var9 = X;
             }
-            return true;
+
+            if (this.anInt413 < 0)
+            {
+                var10 = Y;
+            }
+
+            if (this.anInt412 + this.anInt414 > Width)
+            {
+                var11 = X + Width;
+            }
+
+            if (this.anInt413 + this.anInt415 > Height)
+            {
+                var12 = Y + Height;
+            }
+
+            if (!method203(var2, var3, var7, var8, var9, var10, var11, var12))
+            {
+                return false;
+            }
+            else
+            {
+                int var13 = var9 < var2 ? var2 : var9;
+                int var14 = var10 < var3 ? var3 : var10;
+                int var15 = var11 < var7 ? var11 : var7;
+                int var16 = var12 < var8 ? var12 : var8;
+                int var17 = Math.abs(var15 - var13);
+                int var18 = Math.abs(var16 - var14);
+                int var19 = this.method205(var13, var14, var15, var16);
+                int var20 = this.method207(var13, var14, var15, var16);
+                int var21 = var13 - var2;
+                int var22 = var14 - var3;
+                return imagesCollideByPixels(var19, var20, var21, var22, this.Image, this.transform, r, 0, var17, var18);
+            }
         }
+
         return false;
     }
 
@@ -536,20 +496,20 @@ public class Sprite : Layer
         int var6 = image.getHeight();
         int var7 = var5 / var2;
         int var8 = var6 / var3;
-        this.anImage265 = var1;
-        this.anInt270 = var2;
-        this.anInt271 = var3;
-        this.anInt269 = var7 * var8;
-        this.anIntArray266 = new int[this.anInt269];
-        this.anIntArray267 = new int[this.anInt269];
+        this.Image = var1;
+        this.frameWidth = var2;
+        this.frameHeight = var3;
+        this.rawFrameCount = var7 * var8;
+        this.anIntArray266 = new int[this.rawFrameCount];
+        this.anIntArray267 = new int[this.rawFrameCount];
         if (!var4)
         {
-            this.anInt416 = 0;
+            this.currentFrame = 0;
         }
 
         if (!this.abool407)
         {
-            this.anIntArray268 = new int[this.anInt269];
+            this.anIntArray268 = new int[this.rawFrameCount];
         }
 
         int var9 = 0;
@@ -589,10 +549,10 @@ public class Sprite : Layer
 
     private void method202()
     {
-        anInt274 = 0;
-        anInt408 = 0;
-        anInt409 = Width;
-        anInt410 = Height;
+        collisionX = 0;
+        collisionY = 0;
+        collisionW = Width;
+        collisionH = Height;
     }
 
     private static bool method203(int var0, int var1, int var2, int var3, int var4, int var5, int var6, int var7)
@@ -601,7 +561,8 @@ public class Sprite : Layer
     }
 
     [JavaIgnore]
-    private static bool method204(int var0, int var1, int var2, int var3, Reference rvar4, int var5, Reference rvar6, int var7, int var8, int var9)
+    private static bool imagesCollideByPixels(int var0, int var1, int var2, int var3, Reference rvar4, int var5, Reference rvar6,
+        int var7, int var8, int var9)
     {
         Image var4 = (Image)Jvm.ResolveObject(rvar4);
         Image var6 = (Image)Jvm.ResolveObject(rvar6);
@@ -758,6 +719,7 @@ public class Sprite : Layer
             var10006 = var8;
             var10007 = var9;
         }
+
         Toolkit.Images.CopyRgb(var25.Handle, var10001, var10002, var10003, var10004, var10005, var10006, var10007);
         int var19 = 0;
         int var20 = var14;
@@ -790,7 +752,7 @@ public class Sprite : Layer
         int var5 = 0;
         int var10000;
         int var10001;
-        switch (anInt411)
+        switch (transform)
         {
             case 0:
             case 1:
@@ -813,11 +775,11 @@ public class Sprite : Layer
                 var10001 = var4;
                 break;
             default:
-                return var5 + anIntArray266[anIntArray268[anInt416]];
+                return var5 + anIntArray266[anIntArray268[currentFrame]];
         }
 
         var5 = var10000 - var10001;
-        return var5 + anIntArray266[anIntArray268[anInt416]];
+        return var5 + anIntArray266[anIntArray268[currentFrame]];
     }
 
     private int method207(int var1, int var2, int var3, int var4)
@@ -825,7 +787,7 @@ public class Sprite : Layer
         int var5 = 0;
         int var10000;
         int var10001;
-        switch (anInt411)
+        switch (transform)
         {
             case 0:
             case 2:
@@ -848,19 +810,19 @@ public class Sprite : Layer
                 var10001 = var3;
                 break;
             default:
-                return var5 + anIntArray267[anIntArray268[anInt416]];
+                return var5 + anIntArray267[anIntArray268[currentFrame]];
         }
 
         var5 = var10000 - var10001;
-        return var5 + anIntArray267[anIntArray268[anInt416]];
+        return var5 + anIntArray267[anIntArray268[currentFrame]];
     }
 
-    private void method209(int var1)
+    private void setTransformInternal(int t)
     {
-        X = X + method206(anInt272, anInt273, anInt411) - method206(anInt272, anInt273, var1);
-        Y = Y + method208(anInt272, anInt273, anInt411) - method208(anInt272, anInt273, var1);
-        method210(var1);
-        anInt411 = var1;
+        X = X + method206(refX, refY, transform) - method206(refX, refY, t);
+        Y = Y + method208(refX, refY, transform) - method208(refX, refY, t);
+        method210(t);
+        transform = t;
     }
 
     private void method210(int var1)
@@ -868,68 +830,68 @@ public class Sprite : Layer
         switch (var1)
         {
             case 0:
-                anInt412 = anInt274;
-                anInt413 = anInt408;
-                anInt414 = anInt409;
-                anInt415 = anInt410;
-                Width = anInt270;
-                Height = anInt271;
+                anInt412 = collisionX;
+                anInt413 = collisionY;
+                anInt414 = collisionW;
+                anInt415 = collisionH;
+                Width = frameWidth;
+                Height = frameHeight;
                 return;
             case 1:
-                anInt413 = anInt271 - (anInt408 + anInt410);
-                anInt412 = anInt274;
-                anInt414 = anInt409;
-                anInt415 = anInt410;
-                Width = anInt270;
-                Height = anInt271;
+                anInt413 = frameHeight - (collisionY + collisionH);
+                anInt412 = collisionX;
+                anInt414 = collisionW;
+                anInt415 = collisionH;
+                Width = frameWidth;
+                Height = frameHeight;
                 return;
             case 2:
-                anInt412 = anInt270 - (anInt274 + anInt409);
-                anInt413 = anInt408;
-                anInt414 = anInt409;
-                anInt415 = anInt410;
-                Width = anInt270;
-                Height = anInt271;
+                anInt412 = frameWidth - (collisionX + collisionW);
+                anInt413 = collisionY;
+                anInt414 = collisionW;
+                anInt415 = collisionH;
+                Width = frameWidth;
+                Height = frameHeight;
                 return;
             case 3:
-                anInt412 = anInt270 - (anInt409 + anInt274);
-                anInt413 = anInt271 - (anInt410 + anInt408);
-                anInt414 = anInt409;
-                anInt415 = anInt410;
-                Width = anInt270;
-                Height = anInt271;
+                anInt412 = frameWidth - (collisionW + collisionX);
+                anInt413 = frameHeight - (collisionH + collisionY);
+                anInt414 = collisionW;
+                anInt415 = collisionH;
+                Width = frameWidth;
+                Height = frameHeight;
                 return;
             case 4:
-                anInt413 = anInt274;
-                anInt412 = anInt408;
-                anInt415 = anInt409;
-                anInt414 = anInt410;
-                Width = anInt271;
-                Height = anInt270;
+                anInt413 = collisionX;
+                anInt412 = collisionY;
+                anInt415 = collisionW;
+                anInt414 = collisionH;
+                Width = frameHeight;
+                Height = frameWidth;
                 return;
             case 5:
-                anInt412 = anInt271 - (anInt410 + anInt408);
-                anInt413 = anInt274;
-                anInt415 = anInt409;
-                anInt414 = anInt410;
-                Width = anInt271;
-                Height = anInt270;
+                anInt412 = frameHeight - (collisionH + collisionY);
+                anInt413 = collisionX;
+                anInt415 = collisionW;
+                anInt414 = collisionH;
+                Width = frameHeight;
+                Height = frameWidth;
                 return;
             case 6:
-                anInt412 = anInt408;
-                anInt413 = anInt270 - (anInt409 + anInt274);
-                anInt415 = anInt409;
-                anInt414 = anInt410;
-                Width = anInt271;
-                Height = anInt270;
+                anInt412 = collisionY;
+                anInt413 = frameWidth - (collisionW + collisionX);
+                anInt415 = collisionW;
+                anInt414 = collisionH;
+                Width = frameHeight;
+                Height = frameWidth;
                 return;
             case 7:
-                anInt412 = anInt271 - (anInt410 + anInt408);
-                anInt413 = anInt270 - (anInt409 + anInt274);
-                anInt415 = anInt409;
-                anInt414 = anInt410;
-                Width = anInt271;
-                Height = anInt270;
+                anInt412 = frameHeight - (collisionH + collisionY);
+                anInt413 = frameWidth - (collisionW + collisionX);
+                anInt415 = collisionW;
+                anInt414 = collisionH;
+                Width = frameHeight;
+                Height = frameWidth;
                 return;
             default:
                 Jvm.Throw<IllegalArgumentException>();
@@ -939,7 +901,6 @@ public class Sprite : Layer
 
     public int method206(int var1, int var2, int var3)
     {
-        bool var4 = false;
         int var5;
         switch (var3)
         {
@@ -950,22 +911,22 @@ public class Sprite : Layer
                 var5 = var1;
                 break;
             case 2:
-                var5 = anInt270 - var1 - 1;
+                var5 = frameWidth - var1 - 1;
                 break;
             case 3:
-                var5 = anInt270 - var1 - 1;
+                var5 = frameWidth - var1 - 1;
                 break;
             case 4:
                 var5 = var2;
                 break;
             case 5:
-                var5 = anInt271 - var2 - 1;
+                var5 = frameHeight - var2 - 1;
                 break;
             case 6:
                 var5 = var2;
                 break;
             case 7:
-                var5 = anInt271 - var2 - 1;
+                var5 = frameHeight - var2 - 1;
                 break;
             default:
                 Jvm.Throw<IllegalArgumentException>();
@@ -977,7 +938,6 @@ public class Sprite : Layer
 
     public int method208(int var1, int var2, int var3)
     {
-        bool var4 = false;
         int var5;
         switch (var3)
         {
@@ -985,13 +945,13 @@ public class Sprite : Layer
                 var5 = var2;
                 break;
             case 1:
-                var5 = anInt271 - var2 - 1;
+                var5 = frameHeight - var2 - 1;
                 break;
             case 2:
                 var5 = var2;
                 break;
             case 3:
-                var5 = anInt271 - var2 - 1;
+                var5 = frameHeight - var2 - 1;
                 break;
             case 4:
                 var5 = var1;
@@ -1000,10 +960,10 @@ public class Sprite : Layer
                 var5 = var1;
                 break;
             case 6:
-                var5 = anInt270 - var1 - 1;
+                var5 = frameWidth - var1 - 1;
                 break;
             case 7:
-                var5 = anInt270 - var1 - 1;
+                var5 = frameWidth - var1 - 1;
                 break;
             default:
                 Jvm.Throw<IllegalArgumentException>();
@@ -1012,5 +972,4 @@ public class Sprite : Layer
 
         return var5;
     }
-
 }
