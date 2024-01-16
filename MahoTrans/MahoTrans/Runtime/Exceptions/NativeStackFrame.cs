@@ -81,11 +81,13 @@ public class NativeStackFrame : IMTStackFrame
     public override string ToString()
     {
         StringBuilder s = new StringBuilder();
+        s.Append(MethodClass);
+        s.Append('.');
         s.Append(MethodName);
         s.Append(MethodSignature);
         if (LineNumber != null)
         {
-            s.Append('(');
+            s.Append(" (");
             s.Append(SourceFile);
             s.Append(':');
             s.Append(LineNumber);

@@ -40,6 +40,7 @@ public class JavaStackFrame : IMTStackFrame
     {
         StringBuilder s = new StringBuilder();
         s.Append(MethodClass.Replace('/', '.'));
+        s.Append('.');
         s.Append(MethodName);
         s.Append(MethodSignature);
         if (LineNumber != null)
