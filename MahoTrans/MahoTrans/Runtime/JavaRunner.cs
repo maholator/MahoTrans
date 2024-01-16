@@ -35,11 +35,6 @@ public class JavaRunner
         var throwFrame = thread.ActiveFrame!;
         state.Toolkit.Logger?.LogExceptionThrow(ex.Throwable);
         var t = state.Resolve<Throwable>(ex.Throwable);
-        Console.WriteLine("Call stack:");
-        for (int i = thread.ActiveFrameIndex; i >= 0; i--)
-        {
-            Console.WriteLine(thread.CallStack[i]);
-        }
 
         if (HandleException(throwFrame, throwFrame.Pointer, t))
         {
@@ -56,7 +51,7 @@ public class JavaRunner
             {
                 Console.WriteLine(ex);
                 // no more frames
-
+                // TODO replace this with proper stack print
                 var exRealMsg = state.ResolveStringOrDefault(t.Message);
                 var exMsg = string.IsNullOrEmpty(exRealMsg)
                     ? "Exception has no attached message."
@@ -75,6 +70,7 @@ public class JavaRunner
             if (HandleException(lf, lf.Pointer - 1, t))
             {
                 // handled
+                state.Toolkit.Logger?.LogExceptionCatch(ex.Throwable);
                 return;
             }
 
