@@ -8,6 +8,18 @@ namespace java.lang;
 
 public class Boolean : Object
 {
+    [ClassInit]
+    public static void Clinit()
+    {
+        var t = Jvm.AllocateObject<Boolean>();
+        t.Init(true);
+        NativeStatics.True = t.This;
+
+        var f = Jvm.AllocateObject<Boolean>();
+        f.Init(true);
+        NativeStatics.False = f.This;
+    }
+
     public bool Value;
 
     [InitMethod]

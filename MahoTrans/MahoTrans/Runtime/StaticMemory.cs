@@ -5,6 +5,7 @@ using System.Reflection;
 using java.io;
 using javax.microedition.lcdui;
 using MahoTrans.Native;
+using Boolean = java.lang.Boolean;
 
 namespace MahoTrans.Runtime;
 
@@ -50,6 +51,12 @@ public class StaticMemory
     public Reference GmtTimeZone;
     public Dictionary<string, Reference> AvailableZones = null!;
 
+    [NativeStatic("TRUE", typeof(Boolean), typeof(Boolean))]
+    public Reference True;
+
+    [NativeStatic("FALSE", typeof(Boolean), typeof(Boolean))]
+    public Reference False;
+
     /// <summary>
     ///     Gets all references in static memory. Used by GC.
     /// </summary>
@@ -81,6 +88,9 @@ public class StaticMemory
         list.Add(GmtTimeZone);
         if (AvailableZones != null!)
             list.AddRange(AvailableZones.Values);
+
+        list.Add(True);
+        list.Add(False);
 
         return list;
     }
