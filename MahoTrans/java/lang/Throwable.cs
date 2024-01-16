@@ -16,6 +16,8 @@ public class Throwable : Object
     [String] public Reference Message;
     [JavaIgnore] public Reference[] StackTrace = null!;
 
+    public ThrowSource Source;
+
     [InitMethod]
     public new void Init()
     {

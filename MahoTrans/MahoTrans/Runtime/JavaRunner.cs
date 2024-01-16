@@ -7,7 +7,9 @@ using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Abstractions;
 using MahoTrans.Loader;
+using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Array = java.lang.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
@@ -1060,6 +1062,7 @@ public class JavaRunner
                 else
                 {
                     jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, "athrow opcode executed");
+                    ex.As<Throwable>().Source = ThrowSource.AthrowOpcode;
                     throw new JavaThrowable(ex);
                 }
 

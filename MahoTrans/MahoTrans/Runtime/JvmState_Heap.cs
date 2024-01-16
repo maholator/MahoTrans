@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Abstractions;
+using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Array = System.Array;
@@ -324,6 +325,7 @@ public partial class JvmState
         Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
         var ex = AllocateObject<T>();
         ex.Init();
+        ex.Source = ThrowSource.Native;
         throw new JavaThrowable(ex.This);
     }
 
@@ -333,6 +335,7 @@ public partial class JvmState
         Toolkit.Logger?.LogDebug(DebugMessageCategory.Exceptions, $"{typeof(T).Name} is thrown via native method");
         var ex = AllocateObject<T>();
         ex.Init(AllocateString(message));
+        ex.Source = ThrowSource.Native;
         throw new JavaThrowable(ex.This);
     }
 
