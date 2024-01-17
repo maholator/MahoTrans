@@ -86,8 +86,9 @@ public class JavaRunner
         {
             if (@catch.IsIn(instr))
             {
-                string allowedType = (string)frame.Method.Method.Class.Constants[@catch.Type];
-                if (t.JavaClass.Is(allowedType))
+                var allowedType = frame.Method.Method.Class.Constants[@catch.Type];
+                //TODO ??
+                if (@catch.Type == 0 || t.JavaClass.Is((string) allowedType))
                 {
                     var code = frame.Method.Code;
                     var tByte = @catch.CatchStart;
