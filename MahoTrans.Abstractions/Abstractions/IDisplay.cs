@@ -67,7 +67,7 @@ public interface IDisplay : IToolkit
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <param name="title">New title as CLR string.</param>
-    void SetTitle(DisplayableHandle handle, string title);
+    void SetTitle(DisplayableHandle handle, string? title);
 
     /// <summary>
     ///     Notifies toolkit that commands list on the displayable was changed.
