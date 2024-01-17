@@ -16,7 +16,8 @@ public class JavaThrowable : Exception
 
     public JavaThrowable(Throwable t)
     {
-        Debug.Assert(t.Source != default, "Attempt to throw throwable without captured context!");
+        Debug.Assert(t.Source != default, "Attempt to throw throwable without known source!");
+        Debug.Assert(t.StackTrace != null, "Attempt to throw throwable without captured stack trace!");
         Throwable = t.This;
     }
 }
