@@ -16,6 +16,8 @@ namespace MahoTrans.Loader;
 /// </summary>
 public static class BridgeCompiler
 {
+    public const string METHODS_BRIDGE_CLASS_NAME = "Bridge";
+
     public static readonly Dictionary<Type, MethodInfo> STACK_POPPERS = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },

@@ -34,7 +34,8 @@ public static class NativeLinker
         _bridgeAsmCounter++;
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
         var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
-        var bridge = module.DefineType("Bridge", TypeAttributes.Public | TypeAttributes.Sealed);
+        var bridge = module.DefineType(BridgeCompiler.METHODS_BRIDGE_CLASS_NAME,
+            TypeAttributes.Public | TypeAttributes.Sealed);
 
         // building java classes
         List<JavaClass> java = new List<JavaClass>();
