@@ -18,11 +18,11 @@ public interface ILogger
     void LogRuntime(LogLevel level, string message);
 
     /// <summary>
-    ///     Logs debug message.
+    ///     Logs event message.
     /// </summary>
     /// <param name="category">Category of the message.</param>
     /// <param name="message">Text of the message.</param>
-    void LogDebug(DebugMessageCategory category, string message);
+    void LogEvent(EventCategory category, string message);
 
     void LogExceptionThrow(Reference t);
 

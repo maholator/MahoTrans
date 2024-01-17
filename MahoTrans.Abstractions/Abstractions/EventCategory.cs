@@ -4,9 +4,9 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-///     Various message categories for debug messages.
+///     Various message categories for event messages.
 /// </summary>
-public enum DebugMessageCategory
+public enum EventCategory
 {
     Common = 1,
     ClassInitializer,
