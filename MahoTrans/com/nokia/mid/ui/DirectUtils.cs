@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Abstractions;
 using javax.microedition.lcdui;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -30,5 +31,17 @@ public class DirectUtils : Object
         var image = Jvm.AllocateObject<Image>();
         image.Handle = Toolkit.Images.CreateBufferFromFile(new Memory<byte>(blob, from, len));
         return image.This;
+    }
+
+    [return: JavaType(typeof(Font))]
+    public static Reference getFont(int face, int style, int height)
+    {
+        //TODO checks
+        var font = Jvm.AllocateObject<Font>();
+        font.Face = (FontFace)face;
+        font.Style = (FontStyle)style;
+        font.Size = (FontSize)0;
+        font.Height = height;
+        return font.This;
     }
 }
