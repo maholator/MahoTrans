@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using Object = java.lang.Object;
+using MahoTrans.Native;
 
-namespace javax.microedition.io.file;
+namespace javax.microedition.io;
 
-public class FileSystemRegistry : Object
+[JavaInterface]
+public interface InputConnection : Connection
 {
 }
