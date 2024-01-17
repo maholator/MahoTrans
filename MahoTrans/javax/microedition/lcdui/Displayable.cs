@@ -36,7 +36,7 @@ public class Displayable : Object
     public void setTitle([String] Reference title)
     {
         Title = title;
-        Toolkit.Display.SetTitle(Handle, Jvm.ResolveString(title));
+        Toolkit.Display.SetTitle(Handle, Jvm.ResolveStringOrDefault(title)!);
     }
 
     [return: String]
