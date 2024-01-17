@@ -29,9 +29,11 @@ public class RealTimeClock : IClock
         set { }
     }
 
-    public long CurrentTime => DateTime.Now.Ticks;
+    public long CurrentTimeClr => DateTime.Now.Ticks;
 
-    public long PassedTime => DateTime.Now.Ticks - _startTick;
+    public long PassedTimeClr => DateTime.Now.Ticks - _startTick;
+
+    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
 
     public long GetTicksPerCycleBunch() => 0;
 }

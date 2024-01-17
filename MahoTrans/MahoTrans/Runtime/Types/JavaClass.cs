@@ -270,7 +270,7 @@ public class JavaClass
 
         if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
         {
-            Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.ClassInitializer,
+            Object.Jvm.Toolkit.Logger?.LogEvent(EventCategory.ClassInitializer,
                 $"Class {Name} initialized via <clinit> method");
             if (m.Bridge != null)
             {
@@ -284,7 +284,7 @@ public class JavaClass
         }
         else
         {
-            Object.Jvm.Toolkit.Logger?.LogDebug(DebugMessageCategory.ClassInitializer,
+            Object.Jvm.Toolkit.Logger?.LogEvent(EventCategory.ClassInitializer,
                 $"Class {Name} has no initialization method");
         }
     }

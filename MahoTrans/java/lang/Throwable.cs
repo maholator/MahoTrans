@@ -93,7 +93,7 @@ public class Throwable : Object
         }
 
         StackTrace = stack.ToArray();
-        Jvm.Toolkit.Logger?.LogRuntime(LogLevel.Info, $"Captured trace for {JavaClass.Name}");
+        //Jvm.Toolkit.Logger?.LogRuntime(LogLevel.Info, $"Captured trace for {JavaClass.Name}");
     }
 
     [JavaIgnore]

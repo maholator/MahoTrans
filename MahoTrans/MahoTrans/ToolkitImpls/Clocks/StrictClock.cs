@@ -50,9 +50,11 @@ public class StrictClock : IClock
         set { }
     }
 
-    public long CurrentTime => _passedTime + StartTicks;
+    public long CurrentTimeClr => _passedTime + StartTicks;
 
-    public long PassedTime => _passedTime;
+    public long PassedTimeClr => _passedTime;
+
+    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
 
     public long GetTicksPerCycleBunch() => TicksPerBunch;
 }
