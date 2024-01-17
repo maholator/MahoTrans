@@ -40,11 +40,12 @@ public class NativeStackFrame : IMTStackFrame
             }
 
             s.Append(')');
-            if (_method is MethodInfo mi)
-            {
-                s.Append(' ');
-                s.Append(mi.ReturnType.Name);
-            }
+
+            //if (_method is MethodInfo mi)
+            //{
+            //    s.Append(' ');
+            //    s.Append(mi.ReturnType.Name);
+            //}
 
             return s.ToString();
         }
