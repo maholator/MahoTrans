@@ -1177,7 +1177,7 @@ public class JavaRunner
                     }
                     else
                     {
-                        jvm.Throw<ClassCastException>();
+                        jvm.Throw<ClassCastException>("Attempted cast of " + jvm.ResolveObject(obj).JavaClass + " to " + type);
                     }
 
                     pointer++;
