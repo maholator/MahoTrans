@@ -70,11 +70,32 @@ public static class Utils
         }
     }
 
+    public static void Enqueue<T>(this Queue<T> queue, T[] list)
+    {
+        foreach (var val in list)
+        {
+            queue.Enqueue(val);
+        }
+    }
+
+    /// <summary>
+    /// Allows to call string.Join in functional style.
+    /// </summary>
+    /// <param name="sequence">Sequence to join.</param>
+    /// <param name="separator">Join separator.</param>
+    /// <typeparam name="T">Type of values.</typeparam>
+    /// <returns>Joined string.</returns>
     public static string Join<T>(this IEnumerable<T> sequence, string separator = "")
     {
         return string.Join(separator, sequence);
     }
 
+    /// <summary>
+    /// Pops and discards N values from stack.
+    /// </summary>
+    /// <param name="stack">Stack to pop from.</param>
+    /// <param name="count">Count of values to pop.</param>
+    /// <typeparam name="T">Type of elements in stack.</typeparam>
     public static void Pop<T>(this Stack<T> stack, int count)
     {
         for (int i = 0; i < count; i++)
