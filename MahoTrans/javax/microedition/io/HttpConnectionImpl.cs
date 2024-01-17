@@ -6,6 +6,9 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
+using MahoTrans.Builder;
+using MahoTrans.Runtime.Types;
+using MahoTrans;
 
 namespace javax.microedition.io;
 public class HttpConnectionImpl : Object, HttpConnection
@@ -99,6 +102,43 @@ public class HttpConnectionImpl : Object, HttpConnection
         return InputStream = i.This;
     }
 
+    [JavaDescriptor("()Ljava/io/OutputStream;")]
+    public Reference openOutputStream()
+    {
+        CheckClosed();
+        if (RequestSent)
+            Jvm.Throw<IOException>("Request sent");
+        // TODO
+        Jvm.Throw<IOException>("Not implemented");
+        return default;
+    }
+
+    [JavaDescriptor("()Ljava/io/DataInputStream;")]
+    public JavaMethodBody openDataInputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataInputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(2, 1);
+    }
+
+    [JavaDescriptor("()Ljava/io/DataOutputStream;")]
+    public JavaMethodBody openDataOutputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataInputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openOutputStream", "()Ljava/ioOutputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(2, 1);
+    }
+
     public long getLength()
     {
         CheckClosed();
@@ -107,6 +147,65 @@ public class HttpConnectionImpl : Object, HttpConnection
         if (l == null)
             return -1;
         return (long)l;
+    }
+
+    public long getExpiration()
+    {
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            return Response.Content.Headers.Expires!.Value.ToUnixTimeMilliseconds();
+        }
+        catch
+        {
+            return -1;
+        }
+    }
+
+    public long getDate()
+    {
+        // TODO
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            //return Response.Content.Headers.Expires!.Value.ToUnixTimeMilliseconds();
+            return 0;
+        }
+        catch
+        {
+            return -1;
+        }
+    }
+
+    public long getLastModified()
+    {
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            return Response.Content.Headers.LastModified!.Value.ToUnixTimeMilliseconds();
+        }
+        catch
+        {
+            return -1;
+        }
+    }
+
+    [return: String]
+    public Reference getHeaderField([String] Reference key)
+    {
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            return Jvm.AllocateString(Response.Headers.GetValues(Jvm.ResolveString(key)).First());
+        }
+        catch
+        {
+            return Reference.Null;
+        }
     }
 
     public void InternalClose()
@@ -148,7 +247,56 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getRequestMethod()
     {
+        CheckClosed();
         return Jvm.AllocateString(Request.Method.ToString());
+    }
+
+    [return: String]
+    public Reference getRequestProperty([String] Reference key)
+    {
+        CheckClosed();
+        try
+        {
+            return Jvm.AllocateString(Request.Headers.GetValues(Jvm.ResolveString(key)).First());
+        }
+        catch
+        {
+            return Reference.Null;
+        }
+    }
+
+    [return: String]
+    public Reference getURL()
+    {
+        CheckClosed();
+        return Jvm.AllocateString(Request.RequestUri!.OriginalString);
+    }
+
+    [return: String]
+    public Reference getProtocol()
+    {
+        CheckClosed();
+        return Jvm.AllocateString(Request.RequestUri!.Scheme);
+    }
+
+    [return: String]
+    public Reference getHost()
+    {
+        CheckClosed();
+        return Jvm.AllocateString(Request.RequestUri!.Host);
+    }
+
+    [return: String]
+    public Reference getQuery()
+    {
+        CheckClosed();
+        return Jvm.AllocateString(Request.RequestUri!.Query);
+    }
+
+    public int getPort()
+    {
+        CheckClosed();
+        return Request.RequestUri!.Port;
     }
 
     public override bool OnObjectDelete()
