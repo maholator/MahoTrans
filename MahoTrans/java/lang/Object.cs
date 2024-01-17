@@ -200,7 +200,7 @@ public class Object
         if (Jvm.Attach(mw.MonitorOwner))
             return;
 
-        throw new JavaRuntimeError($"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
+        //throw new JavaRuntimeError($"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
     }
 
     public void notifyAll()
@@ -210,9 +210,9 @@ public class Object
 
         foreach (var mw in Waiters)
         {
-            if (!Jvm.Attach(mw.MonitorOwner))
-                throw new JavaRuntimeError(
-                    $"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
+            Jvm.Attach(mw.MonitorOwner);
+            //    throw new JavaRuntimeError(
+            //        $"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
         }
 
         Waiters.Clear();
