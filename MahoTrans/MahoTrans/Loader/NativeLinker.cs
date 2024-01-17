@@ -87,6 +87,7 @@ public static class NativeLinker
         var staticFields = StaticMemory.Fields.Where(x => x.Owner == type).Select(x => x.Field);
         var nativeMethods = type.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
                                             BindingFlags.Static);
+        var interfaces = type.GetInterfaces();
         List<Method> javaMethods = new();
         foreach (var nm in nativeMethods)
         {
@@ -106,6 +107,16 @@ public static class NativeLinker
             javaMethods.Add(built);
         }
 
+        List<string> javaInterfaces = new();
+        foreach (var i in interfaces)
+        {
+            var ii = i.FullName!.Replace('.', '/');
+            if (javaInterfaces.Contains(ii))
+                continue;
+            if (i.GetCustomAttribute<JavaInterfaceAttribute>() != null)
+                javaInterfaces.Add(ii);
+        }
+        jc.Interfaces = javaInterfaces.ToArray();
 
         try
         {
@@ -113,7 +124,7 @@ public static class NativeLinker
         }
         catch (ArgumentException e)
         {
-            throw new JavaLinkageException($"Dublicate method in class {name}", e);
+            throw new JavaLinkageException($"Duplicate method in class {name}", e);
         }
 
         jc.Fields = nativeFields.Concat(staticFields).Select(x =>
