@@ -33,12 +33,12 @@ public class JavaRunner
     public static void ProcessThrow(JavaThread thread, JvmState state, JavaThrowable ex)
     {
         var throwFrame = thread.ActiveFrame!;
-        state.Toolkit.Logger?.LogExceptionThrow(ex.Throwable);
         var t = state.Resolve<Throwable>(ex.Throwable);
 
         if (HandleException(throwFrame, throwFrame.Pointer, t))
         {
             // handled
+            state.Toolkit.Logger?.LogExceptionCatch(ex.Throwable);
             return;
         }
 
