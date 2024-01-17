@@ -4,7 +4,6 @@
 using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Runtime.Types;
 using System.Diagnostics;
 using MahoTrans;
 using MahoTrans.Runtime.Exceptions;
@@ -81,6 +80,7 @@ public class Throwable : Object
             if (m.DeclaringType == typeof(JavaRunner) && m.Name == nameof(JavaRunner.Step))
                 break;
             // let's add bridges for now.
+            // we also want to see interpreter frame, as it contains line number which may be important.
 
             stack.Add(new NativeStackFrame(m, ntf.GetFileName(), ntf.GetFileLineNumber()));
         }
