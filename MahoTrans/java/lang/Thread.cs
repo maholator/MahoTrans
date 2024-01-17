@@ -175,4 +175,15 @@ public class Thread : Object, Runnable
         Jvm.RegisterThread(javaThread);
         JavaThread = javaThread;
     }
+
+    [return: String]
+    public Reference getName()
+    {
+        return _name;
+    }
+
+    public int getPriority()
+    {
+        return 0;
+    }
 }
