@@ -102,7 +102,8 @@ public class NativeStackFrame : IMTStackFrame
             // for interpreter, we want to know failed method and the line.
             s.Append(MethodName);
             // there are no overloaded methods. Signature is useless info.
-            s.Append("()");
+            // () SHOULD be printed, but it looks weird to me so disabling for now
+            //s.Append("()");
             // in RELEASE builds, this may be not available.
             if (LineNumber.HasValue)
             {
