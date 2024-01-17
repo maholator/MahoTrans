@@ -1,5 +1,7 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
+
+using System.ComponentModel;
 
 namespace MahoTrans.Abstractions;
 
@@ -9,9 +11,10 @@ namespace MahoTrans.Abstractions;
 public enum EventCategory
 {
     Common = 1,
-    ClassInitializer,
-    Jit,
-    Resources,
-    Gc,
+    [Description("Class initializers")] ClassInitializer,
+    [Description("JIT")] Jit,
+
+    [Description("Resources")] Resources,
+    [Description("GC")] Gc,
     Threading,
 }
