@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Security.Cryptography;
@@ -121,21 +121,21 @@ public static class Utils
         return Encoding.UTF8.GetString(Convert.FromBase64String(str));
     }
 
-    public static LogLevel GetSeverity(this LoadIssueType type)
+    public static MTLogLevel GetSeverity(this LoadIssueType type)
     {
         return type switch
         {
-            LoadIssueType.MissingClassAccess => LogLevel.Warning,
-            LoadIssueType.MissingMethodAccess => LogLevel.Error,
-            LoadIssueType.MissingFieldAccess => LogLevel.Error,
-            LoadIssueType.InvalidConstant => LogLevel.Error,
-            LoadIssueType.NoMetaInf => LogLevel.Error,
-            LoadIssueType.InvalidClassMagicCode => LogLevel.Error,
-            LoadIssueType.MissingClassSuper => LogLevel.Error,
-            LoadIssueType.MissingClassField => LogLevel.Warning,
-            LoadIssueType.LocalVariableIndexOutOfBounds => LogLevel.Error,
-            LoadIssueType.MultiTypeLocalVariable => LogLevel.Info,
-            LoadIssueType.MethodWithoutReturn => LogLevel.Error,
+            LoadIssueType.MissingClassAccess => MTLogLevel.Warning,
+            LoadIssueType.MissingMethodAccess => MTLogLevel.Error,
+            LoadIssueType.MissingFieldAccess => MTLogLevel.Error,
+            LoadIssueType.InvalidConstant => MTLogLevel.Error,
+            LoadIssueType.NoMetaInf => MTLogLevel.Error,
+            LoadIssueType.InvalidClassMagicCode => MTLogLevel.Error,
+            LoadIssueType.MissingClassSuper => MTLogLevel.Error,
+            LoadIssueType.MissingClassField => MTLogLevel.Warning,
+            LoadIssueType.LocalVariableIndexOutOfBounds => MTLogLevel.Error,
+            LoadIssueType.MultiTypeLocalVariable => MTLogLevel.Info,
+            LoadIssueType.MethodWithoutReturn => MTLogLevel.Error,
             _ => 0
         };
     }

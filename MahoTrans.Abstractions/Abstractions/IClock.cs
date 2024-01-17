@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics.Contracts;
@@ -13,14 +13,16 @@ public interface IClock : IToolkit
     #region JVM-side APIs
 
     /// <summary>
-    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls. This should update values, returned by <see cref="PassedTimeClr"/>/<see cref="PassedTimeJvm"/> props.
+    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls. This should update values,
+    ///     returned by <see cref="PassedTimeClr" />/<see cref="PassedTimeJvm" /> props.
     /// </summary>
     /// <param name="currentTick">Current jvm's tick.</param>
     /// <returns>Time in java format.</returns>
     long GetCurrentMs(long currentTick);
 
     /// <summary>
-    ///     Gets current time of the system. This is used for thread management. This MUST update values, returned by <see cref="PassedTimeClr"/>/<see cref="PassedTimeJvm"/> props.
+    ///     Gets current time of the system. This is used for thread management. This MUST update values, returned by
+    ///     <see cref="PassedTimeClr" />/<see cref="PassedTimeJvm" /> props.
     /// </summary>
     /// <param name="currentTick">Current jvm's tick.</param>
     /// <returns>Time in java format.</returns>
@@ -49,13 +51,15 @@ public interface IClock : IToolkit
     long CurrentTimeClr { get; }
 
     /// <summary>
-    ///     Gets current time of the system since JVM start. Returned time is in CLR format (CLR ticks). This is updated by <see cref="GetCurrentJvmMs"/> calls and actually a last returned time.
+    ///     Gets current time of the system since JVM start. Returned time is in CLR format (CLR ticks). This is updated by
+    ///     <see cref="GetCurrentJvmMs" /> calls and actually a last returned time.
     /// </summary>
     [Pure]
     long PassedTimeClr { get; }
 
     /// <summary>
-    ///     Gets current time of the system since JVM start. Returned time is in JVM format (milliseconds). This is updated by <see cref="GetCurrentJvmMs"/> calls and actually a last returned time.
+    ///     Gets current time of the system since JVM start. Returned time is in JVM format (milliseconds). This is updated by
+    ///     <see cref="GetCurrentJvmMs" /> calls and actually a last returned time.
     /// </summary>
     [Pure]
     long PassedTimeJvm { get; }

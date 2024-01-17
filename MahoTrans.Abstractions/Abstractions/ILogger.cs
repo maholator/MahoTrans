@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Runtime;
@@ -15,7 +15,7 @@ public interface ILogger
     /// </summary>
     /// <param name="level">Importance of the message.</param>
     /// <param name="message">Message to log.</param>
-    void LogRuntime(LogLevel level, string message);
+    void LogRuntime(MTLogLevel level, string message);
 
     /// <summary>
     ///     Logs event message.

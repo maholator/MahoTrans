@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.ComponentModel;
@@ -21,11 +21,23 @@ public enum DisplayableType
     [Description("Application-driven canvas")]
     GameCanvas,
 
+    /// <summary>
+    /// LCDUI form.
+    /// </summary>
     [Description("LCDUI form")] Form,
 
+    /// <summary>
+    /// LCDUI text box.
+    /// </summary>
     [Description("LCDUI text box")] TextBox,
 
+    /// <summary>
+    /// LCDUI list.
+    /// </summary>
     [Description("LCDUI list")] List,
 
+    /// <summary>
+    /// LCDUI alert.
+    /// </summary>
     [Description("LCDUI alert")] Alert,
 }
