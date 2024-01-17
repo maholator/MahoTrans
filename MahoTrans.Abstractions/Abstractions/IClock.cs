@@ -13,14 +13,14 @@ public interface IClock : IToolkit
     #region JVM-side APIs
 
     /// <summary>
-    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls.
+    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls. This should update values, returned by <see cref="PassedTimeClr"/>/<see cref="PassedTimeJvm"/> props.
     /// </summary>
     /// <param name="currentTick">Current jvm's tick.</param>
     /// <returns>Time in java format.</returns>
     long GetCurrentMs(long currentTick);
 
     /// <summary>
-    ///     Gets current time of the system. This is used for thread management.
+    ///     Gets current time of the system. This is used for thread management. This MUST update values, returned by <see cref="PassedTimeClr"/>/<see cref="PassedTimeJvm"/> props.
     /// </summary>
     /// <param name="currentTick">Current jvm's tick.</param>
     /// <returns>Time in java format.</returns>
@@ -46,13 +46,19 @@ public interface IClock : IToolkit
     ///     Gets current time of the system. Returned time is in CLR format.
     /// </summary>
     [Pure]
-    long CurrentTime { get; }
+    long CurrentTimeClr { get; }
 
     /// <summary>
-    ///     Gets current time of the system since JVM start. Returned time is in CLR format.
+    ///     Gets current time of the system since JVM start. Returned time is in CLR format (CLR ticks). This is updated by <see cref="GetCurrentJvmMs"/> calls and actually a last returned time.
     /// </summary>
     [Pure]
-    long PassedTime { get; }
+    long PassedTimeClr { get; }
+
+    /// <summary>
+    ///     Gets current time of the system since JVM start. Returned time is in JVM format (milliseconds). This is updated by <see cref="GetCurrentJvmMs"/> calls and actually a last returned time.
+    /// </summary>
+    [Pure]
+    long PassedTimeJvm { get; }
 
     #endregion
 }
