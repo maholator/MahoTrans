@@ -211,7 +211,7 @@ public partial class JvmState
                 _nextObjectId = int.Parse(zip.ReadTextEntry(heap_next_txt));
                 _internalizedStrings =
                     JsonConvert.DeserializeObject<Dictionary<string, int>>(zip.ReadTextEntry(heap_strings_json))!;
-                Object.JvmUnchecked = this;
+                JvmContext.Jvm = this;
                 _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
                     HeapSerializeSettings)!;
 
@@ -223,7 +223,7 @@ public partial class JvmState
                 StaticFields = ss.Java;
                 StaticMemory = ss.Native;
 
-                Object.JvmUnchecked = null;
+                JvmContext.Jvm = null;
             }
         }
 

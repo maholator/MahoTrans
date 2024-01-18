@@ -13,6 +13,7 @@ namespace MahoTrans.Runtime;
 /// <summary>
 ///     Object which holds all information about JVM - threads, objects, classes, etc and manages JVM execution.
 /// </summary>
+[PublicAPI]
 public partial class JvmState
 {
     private bool _running;
@@ -58,37 +59,13 @@ public partial class JvmState
     }
 
     /// <summary>
-    ///     Sets this JVM as context for this thread and runs <paramref name="action" /> in it. After the action is done,
-    ///     context is unset.
-    /// </summary>
-    /// <param name="action">Action to run with context.</param>
-    public void RunInContext(Action action)
-    {
-        var previous = Object.JvmUnchecked;
-        try
-        {
-            Object.JvmUnchecked = this;
-            action();
-        }
-        finally
-        {
-            Object.JvmUnchecked = previous;
-        }
-    }
-
-    /// <summary>
-    ///     Alias for <see cref="java.lang.Object" />.<see cref="java.lang.Object.Jvm" />.
-    /// </summary>
-    public static JvmState Context => Object.Jvm;
-
-    /// <summary>
     ///     Runs all registered threads in cycle. Behaviour of this is defined by internal interruption flag. Use
     ///     <see cref="ExecuteLoop" /> to be sure that cycle will run until call to <see cref="Stop" />, or call
     ///     <see cref="Stop" /> right before call to this method to be sure that only one cycle will be executed.
     /// </summary>
     public void Execute()
     {
-        RunInContext(() =>
+        using (new JvmContext(this))
         {
             switch (_executionManner)
             {
@@ -102,7 +79,7 @@ public partial class JvmState
                     ExecuteInternalWeak();
                     break;
             }
-        });
+        }
     }
 
     /// <summary>

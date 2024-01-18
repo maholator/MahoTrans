@@ -55,33 +55,18 @@ public class Object
 
     #region Context
 
-    [JavaIgnore] [ThreadStatic] [JsonIgnore]
-    private static JvmState? _jvm;
-
     [JsonIgnore]
     public static JvmState Jvm
     {
         get
         {
-            Debug.Assert(_jvm != null, "Heap is not attached to this thread!");
-            return _jvm;
+            var jvm = JvmContext.Jvm;
+            Debug.Assert(jvm != null, "Jvm is not attached to this thread!");
+            return jvm;
         }
     }
 
-    /// <summary>
-    ///     Direct access to context slot. Use <see cref="Jvm" /> instead.
-    /// </summary>
-    [JsonIgnore]
-    public static JvmState? JvmUnchecked
-    {
-        get => _jvm;
-        set => _jvm = value;
-    }
-
-
-    [JsonIgnore] public static bool JvmAttached => _jvm != null;
-
-    [JsonIgnore] protected static ToolkitCollection Toolkit => Jvm.Toolkit;
+    [JsonIgnore] protected static ToolkitCollection Toolkit => JvmContext.Toolkit!;
 
     [JsonIgnore] public static StaticMemory NativeStatics => Jvm.StaticMemory;
 

@@ -16,7 +16,7 @@ public static class ReferenceExtensions
     /// </summary>
     public static Object AsObject(this Reference r)
     {
-        return JvmState.Context.ResolveObject(r);
+        return JvmContext.Jvm!.ResolveObject(r);
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public static class ReferenceExtensions
     /// </summary>
     public static T As<T>(this Reference r) where T : Object
     {
-        return JvmState.Context.Resolve<T>(r);
+        return JvmContext.Jvm!.Resolve<T>(r);
     }
 
     /// <summary>
@@ -32,6 +32,6 @@ public static class ReferenceExtensions
     /// </summary>
     public static T? AsNullable<T>(this Reference r) where T : Object
     {
-        return JvmState.Context.ResolveNullable<T>(r);
+        return JvmContext.Jvm!.ResolveNullable<T>(r);
     }
 }
