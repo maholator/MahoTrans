@@ -5,6 +5,9 @@ namespace java.lang;
 
 public class Math : Object
 {
+    public const double E = global::System.Math.E;
+    public const double PI = global::System.Math.PI;
+
     public static double abs(double a) => global::System.Math.Abs(a);
     public static float abs(float a) => global::System.Math.Abs(a);
     public static int abs(int a) => global::System.Math.Abs(a);

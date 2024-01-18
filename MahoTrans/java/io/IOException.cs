@@ -12,10 +12,12 @@ public class IOException : Exception
     [InitMethod]
     public new void Init([String] Reference msg)
     {
+        base.Init(msg);
     }
 
     [InitMethod]
     public new void Init()
     {
+        base.Init();
     }
 }

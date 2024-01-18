@@ -11,10 +11,12 @@ public class UnsupportedEncodingException : IOException
     [InitMethod]
     public new void Init([String] Reference msg)
     {
+        base.Init(msg);
     }
 
     [InitMethod]
     public new void Init()
     {
+        base.Init();
     }
 }
