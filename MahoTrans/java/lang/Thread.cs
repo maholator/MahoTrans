@@ -13,6 +13,9 @@ namespace java.lang;
 
 public class Thread : Object, Runnable
 {
+    public const int MAX_PRIORITY = 10;
+    public const int MIN_PRIORITY = 1;
+    public const int NORM_PRIORITY = 5;
     /// <summary>
     ///     Reference to JVM object of the thread. During wakeup, this is validated by
     ///     <see cref="JvmState.SyncHeapAfterRestore" />. This is null if thread was not started yet or was already dead.
@@ -184,6 +187,6 @@ public class Thread : Object, Runnable
 
     public int getPriority()
     {
-        return 0;
+        return NORM_PRIORITY;
     }
 }
