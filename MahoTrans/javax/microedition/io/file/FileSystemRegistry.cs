@@ -14,7 +14,23 @@ public class FileSystemRegistry : Object
     [JavaDescriptor("()Ljava/util/Enumeration;")]
     public static Reference listRoots()
     {
-        Jvm.Throw<IOException>();
-        return default;
+        try
+        {
+            var drives = Directory.GetLogicalDrives();
+            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
+            Reference[] r = new Reference[drives.Length];
+            for (int i = 0; i < r.Length; i++)
+            {
+                r[i] = Jvm.AllocateString("file:///" + drives[i].Replace('\\', '/'));
+            }
+            enumerator.Value = r;
+            enumerator.Init();
+            return enumerator.This;
+        }
+        catch
+        {
+            Jvm.Throw<IOException>();
+            return default;
+        }
     }
 }
