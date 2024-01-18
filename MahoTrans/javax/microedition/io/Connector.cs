@@ -35,8 +35,6 @@ public class Connector : Object
     [return: JavaType(typeof(Connection))]
     public static Reference open([String] Reference name, int mode, bool timeout)
     {
-        if (name.IsNull)
-            Jvm.Throw<NullPointerException>();
         string s = Jvm.ResolveString(name);
         if (!s.Contains(':'))
             Jvm.Throw<ConnectionNotFoundException>();

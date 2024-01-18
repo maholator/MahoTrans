@@ -2,15 +2,17 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
+using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Object = java.lang.Object;
-using IOException = java.io.IOException;
 using MahoTrans.Builder;
 using MahoTrans.Runtime.Types;
-using MahoTrans;
+using Object = java.lang.Object;
+using IOException = java.io.IOException;
+using MahoTrans.Utils;
 
 namespace javax.microedition.io;
+
 public class HttpConnectionImpl : Object, HttpConnection
 {
     [JavaIgnore] private readonly HttpRequestMessage Request = new HttpRequestMessage();
@@ -63,7 +65,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaDescriptor("()Ljava/io/InputStream;")]
     public Reference openInputStream()
     {
-        CheckClosed();
+        CheckOpen();
         if (InputState != 0)
             Jvm.Throw<IOException>("Open already");
         DoRequest();
@@ -77,7 +79,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaDescriptor("()Ljava/io/OutputStream;")]
     public Reference openOutputStream()
     {
-        CheckClosed();
+        CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
         // TODO
@@ -121,7 +123,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public int getResponseCode()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         return (int)Response.StatusCode;
     }
@@ -129,14 +131,14 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getResponseMessage()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         return Jvm.AllocateString(Response.ReasonPhrase!);
     }
 
     public void setRequestMethod([String] Reference method)
     {
-        CheckClosed();
+        CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
         string s = Jvm.ResolveString(method);
@@ -147,7 +149,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public void setRequestProperty([String] Reference field, [String] Reference value)
     {
-        CheckClosed();
+        CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
         Request.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
@@ -155,7 +157,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public long getExpiration()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -170,7 +172,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     public long getDate()
     {
         // TODO
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -185,7 +187,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public long getLastModified()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -200,7 +202,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getHeaderField([String] Reference key)
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -215,14 +217,14 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getRequestMethod()
     {
-        CheckClosed();
+        CheckOpen();
         return Jvm.AllocateString(Request.Method.ToString());
     }
 
     [return: String]
     public Reference getRequestProperty([String] Reference key)
     {
-        CheckClosed();
+        CheckOpen();
         try
         {
             return Jvm.AllocateString(Request.Headers.GetValues(Jvm.ResolveString(key)).First());
@@ -236,34 +238,34 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getURL()
     {
-        CheckClosed();
+        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.OriginalString);
     }
 
     [return: String]
     public Reference getProtocol()
     {
-        CheckClosed();
+        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.Scheme);
     }
 
     [return: String]
     public Reference getHost()
     {
-        CheckClosed();
+        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.Host);
     }
 
     [return: String]
     public Reference getQuery()
     {
-        CheckClosed();
+        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.Query);
     }
 
     public int getPort()
     {
-        CheckClosed();
+        CheckOpen();
         return Request.RequestUri!.Port;
     }
 
@@ -297,7 +299,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     {
         throw new NotImplementedException();
     }
-
+        
     public int getHeaderFieldInt([String] Reference name, int def)
     {
         throw new NotImplementedException();
@@ -308,7 +310,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getEncoding()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -322,7 +324,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public long getLength()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         long? l = Response.Content.Headers.ContentLength;
         if (l == null)
@@ -333,7 +335,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getType()
     {
-        CheckClosed();
+        CheckOpen();
         DoRequest();
         try
         {
@@ -367,7 +369,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    private void CheckClosed()
+    private void CheckOpen()
     {
         if (Closed)
             Jvm.Throw<IOException>("Closed");
@@ -404,6 +406,25 @@ public class HttpInputStream : InputStream
         try
         {
             return Stream.ReadByte();
+        }
+        catch (System.Exception e)
+        {
+            Jvm.Throw<IOException>(e.ToString());
+        }
+        return default;
+    }
+
+    public int read([JavaType("[B")] Reference buf, int offset, int length)
+    {
+        if (Connection.Closed)
+        {
+            close();
+            Jvm.Throw<IOException>("closed");
+        }
+        sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
+        try
+        {
+            return Stream.Read(b.ToUnsigned(), 0, length);
         }
         catch (System.Exception e)
         {
