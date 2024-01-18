@@ -15,9 +15,8 @@ public class HttpConnectionImpl : Object, HttpConnection
 {
     [JavaIgnore] private readonly HttpRequestMessage Request = new HttpRequestMessage();
     [JavaIgnore] private readonly HttpClient Client = new HttpClient();
-    [JavaIgnore] private HttpResponseMessage Response;
+    [JavaIgnore] private HttpResponseMessage Response = null!;
     private Reference InputStream;
-    private Reference OutputStream;
     public bool Closed;
     private bool RequestSent;
     private int InputState;
@@ -26,7 +25,6 @@ public class HttpConnectionImpl : Object, HttpConnection
     public new void Init()
     {
         InputStream = Reference.Null;
-        OutputStream = Reference.Null;
     }
 
     [JavaIgnore]
