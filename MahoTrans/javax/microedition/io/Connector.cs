@@ -10,6 +10,7 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 using String = java.lang.String;
+using javax.microedition.io.file;
 
 namespace javax.microedition.io;
 
@@ -50,6 +51,11 @@ public class Connector : Object
                 http.Init();
                 http.Open(s);
                 return http.This;
+            case "file":
+                FileConnectionImpl file = Jvm.AllocateObject<FileConnectionImpl>();
+                file.Init();
+                file.Open(s);
+                return file.This;
         }
         Jvm.Throw<ConnectionNotFoundException>();
         return default;
