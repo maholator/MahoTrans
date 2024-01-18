@@ -22,7 +22,7 @@ public class TiledLayer : Layer
     private int AnimatedTilesCount;
 
     [InitMethod]
-    public void Init(int columns, int rows, [JavaType(nameof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
+    public void Init(int columns, int rows, [JavaType(typeof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
     {
         Image image = Jvm.Resolve<Image>(r);
         if (image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)

@@ -50,7 +50,7 @@ public class LayerManager : Object
         ++Size;
     }
 
-    [return: JavaType(nameof(Layer))]
+    [return: JavaType(typeof(Layer))]
     public Reference getLayerAt(int index)
     {
         if (index < 0 || index >= Size)

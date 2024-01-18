@@ -42,7 +42,7 @@ public class Sprite : Layer
     private int TransformedCollisionH;
 
     [InitMethod]
-    public void InitImage([JavaType(nameof(lcdui.Image))] Reference r)
+    public void InitImage([JavaType(typeof(lcdui.Image))] Reference r)
     {
         Image image = Jvm.Resolve<Image>(r);
         Image = r;
@@ -53,7 +53,7 @@ public class Sprite : Layer
     }
 
     [InitMethod]
-    public void InitImage([JavaType(nameof(lcdui.Image))] Reference r, int w, int h)
+    public void InitImage([JavaType(typeof(lcdui.Image))] Reference r, int w, int h)
     {
         Image image = Jvm.Resolve<Image>(r);
         Image = r;
@@ -66,7 +66,7 @@ public class Sprite : Layer
     }
 
     [InitMethod]
-    public void InitSprite([JavaType(nameof(Sprite))] Reference r)
+    public void InitSprite([JavaType(typeof(Sprite))] Reference r)
     {
         if (r.IsNull)
             Jvm.Throw<NullPointerException>();
@@ -165,7 +165,7 @@ public class Sprite : Layer
         setFrameSequenceInternal(a);
     }
 
-    public void setImage([JavaType(nameof(Image))] Reference r, int w, int h)
+    public void setImage([JavaType(typeof(Image))] Reference r, int w, int h)
     {
         Image image = Jvm.Resolve<Image>(r);
         if (w >= 1 && h >= 1 && image.getWidth() % w == 0 && image.getHeight() % h == 0)
@@ -215,7 +215,7 @@ public class Sprite : Layer
 
     public void setTransform(int t) => setTransformInternal(t);
 
-    public bool collidesWith___sprite([JavaType(nameof(Sprite))] Reference r, bool pixelLevel)
+    public bool collidesWith___sprite([JavaType(typeof(Sprite))] Reference r, bool pixelLevel)
     {
         Sprite another = Jvm.Resolve<Sprite>(r);
         if (!another.Visible || !Visible)
@@ -428,7 +428,7 @@ public class Sprite : Layer
         }
     }
 
-    public bool collidesWith___image([JavaType(nameof(lcdui.Image))] Reference r, int x, int y, bool pixelLevel)
+    public bool collidesWith___image([JavaType(typeof(lcdui.Image))] Reference r, int x, int y, bool pixelLevel)
     {
         if (!Visible)
             return false;

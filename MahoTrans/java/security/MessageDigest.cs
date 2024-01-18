@@ -15,8 +15,7 @@ public class MessageDigest : Object
     [JavaIgnore] private string Algorithm = null!;
     [JavaIgnore] private HashAlgorithm Hash = null!;
 
-    //[return: JavaType(nameof(MessageDigest))]
-    [JavaDescriptor("(Ljava/lang/String;)Ljava/security/MessageDigest;")]
+    [return: JavaType(typeof(MessageDigest))]
     public static Reference getInstance([String] Reference algorithm)
     {
         if (algorithm.IsNull)
