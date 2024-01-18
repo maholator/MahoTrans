@@ -17,9 +17,42 @@ namespace MahoTrans.Tests.Linker;
 public class TestStaticRefReturnType
 {
     [Test]
-    public void Test()
+    public void TestProper()
     {
         // preparing jvm
+        var jvm = createJvm();
+
+        // loading test class
+        jvm.AddClrClasses(new[] { typeof(TestClass) });
+
+        var cls = jvm.GetClass("MahoTrans/Tests/Linker/TestClass");
+
+        Assert.That(cls.Methods.Count, Is.EqualTo(1));
+        var method = cls.Methods.Single().Value;
+        Assert.That(method.Descriptor.Descriptor, Is.EqualTo("(Ljava/lang/String;)Ljava/security/MessageDigest;"));
+    }
+
+    [Test]
+    public void TestNameof()
+    {
+        // preparing jvm
+        var jvm = createJvm();
+
+        // nameof() with JavaType must throw
+        try
+        {
+            jvm.AddClrClasses(new[] { typeof(FaultyTestClass) });
+        }
+        catch
+        {
+            Assert.Pass();
+        }
+
+        Assert.Fail("nameof() used, the test must fail due to assert!");
+    }
+
+    private static JvmState createJvm()
+    {
         var jvm = new JvmState(
             new ToolkitCollection(new DummySystem(), new RealTimeClock(), null!, new DummyFonts(), null!,
                 new AmsEventHub(),
@@ -34,21 +67,22 @@ public class TestStaticRefReturnType
             UseBridgesForFields = false
         };
         jvm.AddClrClasses(typeof(JavaRunner).Assembly);
+        return jvm;
+    }
+}
 
-        // loading test class
-        jvm.AddClrClasses(new[] { typeof(TestClass) });
-
-        var cls = jvm.GetClass("MahoTrans/Tests/Linker/TestClass");
-
-        Assert.That(cls.Methods.Count, Is.EqualTo(1));
-        var method = cls.Methods.Single().Value;
-        Assert.That(method.Descriptor.Descriptor, Is.EqualTo("(Ljava/lang/String;)Ljava/security/MessageDigest;"));
+public class FaultyTestClass : Object
+{
+    [return: JavaType(nameof(MessageDigest))]
+    public static Reference getInstance([String] Reference algorithm)
+    {
+        return Reference.Null;
     }
 }
 
 public class TestClass : Object
 {
-    [return: JavaType(nameof(MessageDigest))]
+    [return: JavaType(typeof(MessageDigest))]
     public static Reference getInstance([String] Reference algorithm)
     {
         return Reference.Null;
