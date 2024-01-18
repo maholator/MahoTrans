@@ -16,8 +16,11 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaIgnore] private readonly HttpRequestMessage Request = new HttpRequestMessage();
     [JavaIgnore] private readonly HttpClient Client = new HttpClient();
     [JavaIgnore] private HttpResponseMessage Response = null!;
+
     private Reference InputStream;
+
     public bool Closed;
+    private bool Destroyed;
     private bool RequestSent;
     private int InputState;
 
@@ -33,8 +36,9 @@ public class HttpConnectionImpl : Object, HttpConnection
         Request.RequestUri = new Uri(url);
     }
 
+    // Sends http request
     [JavaIgnore]
-    public void DoRequest()
+    private void DoRequest()
     {
         if (RequestSent)
         {
@@ -43,6 +47,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         RequestSent = true;
         try
         {
+            // TODO find out how to send POST data
+            //Request.Content = ReadOnlyMemoryContent();
             Response = Client.Send(Request);
         }
         catch (System.Exception e)
@@ -51,39 +57,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    public void setRequestMethod([String] Reference method)
-    {
-        CheckClosed();
-        if (RequestSent)
-            Jvm.Throw<IOException>("Request sent");
-        string s = Jvm.ResolveString(method);
-        if (!s.Equals("GET") && !s.Equals("POST") && !s.Equals("HEAD"))
-            Jvm.Throw<IOException>("Invalid method");
-        Request.Method = new HttpMethod(s);
-    }
-
-    public void setRequestProperty([String] Reference field, [String] Reference value)
-    {
-        CheckClosed();
-        if (RequestSent)
-            Jvm.Throw<IOException>("Request sent");
-        Request.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
-    }
-
-    public int getResponseCode()
-    {
-        CheckClosed();
-        DoRequest();
-        return (int)Response.StatusCode;
-    }
-
-    [return: String]
-    public Reference getResponseMessage()
-    {
-        CheckClosed();
-        DoRequest();
-        return Jvm.AllocateString(Response.ReasonPhrase!);
-    }
+    // Streams
 
     //[return: JavaType(nameof(java.io.InputStream))]
     [JavaDescriptor("()Ljava/io/InputStream;")]
@@ -137,14 +111,46 @@ public class HttpConnectionImpl : Object, HttpConnection
         return b.Build(2, 1);
     }
 
-    public long getLength()
+    public void close()
+    {
+        if (Closed)
+            return;
+        Closed = true;
+        InternalClose();
+    }
+
+    public int getResponseCode()
     {
         CheckClosed();
         DoRequest();
-        long? l = Response.Content.Headers.ContentLength;
-        if (l == null)
-            return -1;
-        return (long)l;
+        return (int)Response.StatusCode;
+    }
+
+    [return: String]
+    public Reference getResponseMessage()
+    {
+        CheckClosed();
+        DoRequest();
+        return Jvm.AllocateString(Response.ReasonPhrase!);
+    }
+
+    public void setRequestMethod([String] Reference method)
+    {
+        CheckClosed();
+        if (RequestSent)
+            Jvm.Throw<IOException>("Request sent");
+        string s = Jvm.ResolveString(method);
+        if (!s.Equals("GET") && !s.Equals("POST") && !s.Equals("HEAD"))
+            Jvm.Throw<IOException>("Invalid method");
+        Request.Method = new HttpMethod(s);
+    }
+
+    public void setRequestProperty([String] Reference field, [String] Reference value)
+    {
+        CheckClosed();
+        if (RequestSent)
+            Jvm.Throw<IOException>("Request sent");
+        Request.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
     }
 
     public long getExpiration()
@@ -206,42 +212,6 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    public void InternalClose()
-    {
-        if (Closed)
-        {
-            return;
-        }
-        Closed = true;
-        if (!InputStream.IsNull)
-        {
-            Jvm.Resolve<HttpInputStream>(InputStream).close();
-        }
-        Request.Dispose();
-        Response.Dispose();
-        Client.Dispose();
-    }
-
-    public void close()
-    {
-        InternalClose();
-    }
-
-    public void InputClosed()
-    {
-        if(InputState != 2)
-        {
-            InputState = 2;
-            InternalClose();
-        }
-    }
-
-    private void CheckClosed()
-    {
-        if (Closed)
-            Jvm.Throw<IOException>("Closed");
-    }
-
     [return: String]
     public Reference getRequestMethod()
     {
@@ -297,6 +267,112 @@ public class HttpConnectionImpl : Object, HttpConnection
         return Request.RequestUri!.Port;
     }
 
+    // TODO methods
+
+    [return: String]
+    public Reference getFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    [return: String]
+    public Reference getRef()
+    {
+        throw new NotImplementedException();
+    }
+
+    [return: String]
+    public Reference getHeaderField(int n)
+    {
+        throw new NotImplementedException();
+    }
+
+    [return: String]
+    public Reference getHeaderFieldKey(int n)
+    {
+        throw new NotImplementedException();
+    }
+
+    public long getHeaderFieldDate([String] Reference name, long def)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int getHeaderFieldInt([String] Reference name, int def)
+    {
+        throw new NotImplementedException();
+    }
+
+    // ContentConnection methods
+
+    [return: String]
+    public Reference getEncoding()
+    {
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            return Jvm.AllocateString(Response.Content.Headers.ContentEncoding.First());
+        }
+        catch
+        {
+            return Reference.Null;
+        }
+    }
+
+    public long getLength()
+    {
+        CheckClosed();
+        DoRequest();
+        long? l = Response.Content.Headers.ContentLength;
+        if (l == null)
+            return -1;
+        return (long)l;
+    }
+
+    [return: String]
+    public Reference getType()
+    {
+        CheckClosed();
+        DoRequest();
+        try
+        {
+            return Jvm.AllocateString(Response.Content.Headers.ContentType!.MediaType!);
+        }
+        catch
+        {
+            return Reference.Null;
+        }
+    }
+
+    //
+
+    private void InternalClose()
+    {
+        if (Destroyed)
+            return;
+        Destroyed = true;
+        if (!InputStream.IsNull)
+            Jvm.Resolve<HttpInputStream>(InputStream).close();
+        Client.Dispose();
+    }
+
+    // on inputstream closed
+    public void InputClosed()
+    {
+        if(InputState != 2)
+        {
+            InputState = 2;
+            InternalClose();
+        }
+    }
+
+    private void CheckClosed()
+    {
+        if (Closed)
+            Jvm.Throw<IOException>("Closed");
+    }
+
     public override bool OnObjectDelete()
     {
         if(InputState != 0 && InputState != 2)
@@ -305,6 +381,9 @@ public class HttpConnectionImpl : Object, HttpConnection
             return true;
         }
         InternalClose();
+        // these are needed for get methods, so keep them till garbage collected
+        Request.Dispose();
+        Response.Dispose();
         return false;
     }
 }
