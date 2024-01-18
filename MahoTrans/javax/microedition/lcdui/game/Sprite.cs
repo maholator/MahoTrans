@@ -149,7 +149,7 @@ public class Sprite : Layer
         CurrentFrame -= 1;
     }
 
-    public new void paint([JavaType(nameof(Graphics))] Reference r)
+    public new void paint([JavaType(typeof(Graphics))] Reference r)
     {
         Graphics g = Jvm.Resolve<Graphics>(r);
         if (Visible)
@@ -296,7 +296,7 @@ public class Sprite : Layer
         }
     }
 
-    public bool collidesWith___tiledLayer([JavaType(nameof(TiledLayer))] Reference r, bool pixelLevel)
+    public bool collidesWith___tiledLayer([JavaType(typeof(TiledLayer))] Reference r, bool pixelLevel)
     {
         var another = Jvm.Resolve<TiledLayer>(r);
         if (!another.Visible || !Visible)

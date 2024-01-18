@@ -146,7 +146,7 @@ public class TiledLayer : Layer
 
     public int getRows() => Rows;
 
-    public void setStaticTileSet([JavaType(nameof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
+    public void setStaticTileSet([JavaType(typeof(Image))] Reference r, int tileWidth, int tileHeight)
     {
         Image image = Jvm.Resolve<Image>(r);
         if (tileWidth < 1 || tileHeight < 1 || image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)
@@ -160,7 +160,7 @@ public class TiledLayer : Layer
         SetImage(image, n3, tileWidth, tileHeight, n3 >= StaticTilesCount);
     }
 
-    public new void paint([JavaType(nameof(Graphics))] Reference r)
+    public new void paint([JavaType(typeof(Graphics))] Reference r)
     {
         Graphics g = Jvm.Resolve<Graphics>(r);
         if (g == null)
