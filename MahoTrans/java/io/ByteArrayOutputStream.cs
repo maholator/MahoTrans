@@ -37,13 +37,13 @@ public class ByteArrayOutputStream : OutputStream
     {
         sbyte[] temp = new sbyte[count];
         System.Array.Copy(_buf, temp, count);
-        return Jvm.AllocateArray(temp.ToArray(), "[B");
+        return Jvm.AllocateArray(temp, "[B");
     }
 
     [return: String]
     public Reference toString()
     {
-        return Jvm.AllocateString(Encoding.UTF8.GetString(_buf.ToArray().ToUnsigned(), 0, count));
+        return Jvm.AllocateString(Encoding.UTF8.GetString(_buf.ToUnsigned(), 0, count));
     }
 
     public void write([JavaType("[B")] Reference buf, int off, int len)
