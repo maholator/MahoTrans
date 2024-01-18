@@ -414,6 +414,11 @@ public class HttpInputStream : InputStream
         return default;
     }
 
+    public int read([JavaType("[B")] Reference buf)
+    {
+        return read(buf, 0, Jvm.ResolveArray<sbyte>(buf).Length);
+    }
+
     public int read([JavaType("[B")] Reference buf, int offset, int length)
     {
         if (Connection.Closed)
@@ -424,7 +429,10 @@ public class HttpInputStream : InputStream
         sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
         try
         {
-            return Stream.Read(b.ToUnsigned(), 0, length);
+            int len = Stream.Read(b.ToUnsigned(), 0, length);
+            if (len == 0)
+                return -1;
+            return len;
         }
         catch (System.Exception e)
         {
