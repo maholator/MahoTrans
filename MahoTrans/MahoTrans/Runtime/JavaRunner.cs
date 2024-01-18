@@ -37,29 +37,24 @@ public class JavaRunner
 
         if (HandleException(throwFrame, throwFrame.Pointer, t))
         {
-            // handled
+            // handled in the same frame ( try { throw } catch { } )
             state.Toolkit.Logger?.LogExceptionCatch(ex.Throwable);
             return;
         }
 
+        // unhandled in this frame: checking lower frames
         var frame = throwFrame;
-        // unhandled
         while (true)
         {
             thread.Pop(); // discarding frame
             if (thread.ActiveFrame == null)
             {
-                Console.WriteLine(ex);
-                // no more frames
-                // TODO replace this with proper stack print
+                // no more frames: aborting interpreter
                 var exRealMsg = state.ResolveStringOrDefault(t.Message);
                 var exMsg = string.IsNullOrEmpty(exRealMsg)
                     ? "Exception has no attached message."
                     : $"Message: {exRealMsg}";
-                var exSource =
-                    $"{throwFrame.Method}:{throwFrame.Pointer} ({throwFrame.Method.Code[throwFrame.Pointer]})";
-                var message = $"Unhandled JVM exception \"{t.JavaClass}\" at {exSource}\n{exMsg}";
-                throw new JavaUnhandledException(message, ex);
+                throw new JavaUnhandledException($"Unhandled JVM exception \"{t.JavaClass}\": {exMsg}", t);
             }
 
             if (frame.Method.Method.IsCritical)
@@ -78,6 +73,7 @@ public class JavaRunner
         }
     }
 
+    //TODO this is too expensive and must be precalculated
     private static bool HandleException(Frame frame, int pointer, Throwable t)
     {
         var instr = frame.Method.Code[pointer];
@@ -1177,7 +1173,8 @@ public class JavaRunner
                     }
                     else
                     {
-                        jvm.Throw<ClassCastException>("Attempted cast of " + jvm.ResolveObject(obj).JavaClass + " to " + type);
+                        jvm.Throw<ClassCastException>("Attempted cast of " + jvm.ResolveObject(obj).JavaClass + " to " +
+                                                      type);
                     }
 
                     pointer++;
