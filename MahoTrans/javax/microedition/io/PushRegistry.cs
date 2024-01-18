@@ -15,4 +15,9 @@ public class PushRegistry : Object
     {
         return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljava/lang/String;");
     }
+
+    public static bool unregisterConnection([String] Reference connection)
+    {
+        return false;
+    }
 }
