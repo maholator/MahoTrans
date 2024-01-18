@@ -40,7 +40,7 @@ public class Class : Object
     {
         var name = Jvm.ResolveString(r);
         if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
-            Jvm.Throw<ClassNotFoundException>();
+            Jvm.Throw<ClassNotFoundException>(name);
         var cls = Jvm.AllocateObject<Class>();
         cls.InternalClass = jc;
         return cls.This;
