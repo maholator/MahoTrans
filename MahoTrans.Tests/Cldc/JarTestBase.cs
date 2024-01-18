@@ -1,8 +1,8 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Runtime;
 using MahoTrans.Testing;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Tests.Cldc;
 
@@ -16,5 +16,5 @@ public abstract class JarTestBase
         return new JavaTest(file, ClassName, method);
     }
 
-    protected static void DetachHeap() => Object.JvmUnchecked = null;
+    protected static void DetachHeap() => JvmContext.Jvm = null;
 }

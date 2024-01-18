@@ -41,7 +41,8 @@ public class JavaTest
 
 
         var thread = JavaThread.CreateSynthetic(new NameDescriptor(methodName, "()V"), obj, _jvm);
-        _jvm.RunInContext(() => thread.start());
+        using (new JvmContext(_jvm))
+            thread.start();
         _jvm.BetweenBunches += _ =>
         {
             if (!thread.isAlive())

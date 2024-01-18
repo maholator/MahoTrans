@@ -137,14 +137,14 @@ public static class JavaConversions
                 return Encoding.ASCII;
 
             default:
-                JvmState.Context.Throw<UnsupportedEncodingException>();
+                JvmContext.Jvm!.Throw<UnsupportedEncodingException>();
                 return null!;
         }
     }
 
     public static Reference AsJavaArray(this string[] list)
     {
-        var jvm = JvmState.Context;
+        var jvm = JvmContext.Jvm!;
         Reference[] r = new Reference[list.Length];
         for (int i = 0; i < r.Length; i++)
         {

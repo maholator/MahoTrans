@@ -293,7 +293,7 @@ public class JavaClass
     {
         if (ModelObject.IsNull)
         {
-            var cls = JvmState.Context.AllocateObject<Class>();
+            var cls = JvmContext.Jvm!.AllocateObject<Class>();
             cls.InternalClass = this;
             ModelObject = cls.This;
         }
