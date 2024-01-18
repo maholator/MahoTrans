@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.ComponentModel;
@@ -49,4 +49,10 @@ public enum LoadIssueType
     [Description("Invalid magic")] InvalidClassMagicCode,
 
     [Description("Multitype local")] MultiTypeLocalVariable,
+
+    /// <summary>
+    ///     Something in native code looks wrong.
+    /// </summary>
+    [Description("Questionable native code")]
+    QuestionableNativeCode,
 }

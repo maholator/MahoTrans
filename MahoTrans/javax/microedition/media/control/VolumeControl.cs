@@ -17,4 +17,13 @@ public class VolumeControl : Object, Control
         Toolkit.Media.SetVolume(Handle, level);
         return level;
     }
+
+    public int getLevel() => Toolkit.Media.GetVolume(Handle);
+
+    public void setMute(bool mute)
+    {
+        Toolkit.Media.SetMute(Handle, mute);
+    }
+
+    public bool isMuted() => Toolkit.Media.GetMute(Handle);
 }

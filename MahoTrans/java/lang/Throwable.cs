@@ -1,7 +1,6 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using System.Diagnostics;
@@ -15,9 +14,9 @@ public class Throwable : Object
     [String] public Reference Message;
 
     /// <summary>
-    /// Stack trace. Deeper methods come first.
+    /// Stack trace. Deeper methods come first. This must be initialized to something sane during java constructor call.
     /// </summary>
-    [JavaIgnore] public IMTStackFrame[]? StackTrace;
+    [JavaIgnore] public IMTStackFrame[] StackTrace = null!;
 
     public ThrowSource Source;
 
@@ -93,7 +92,6 @@ public class Throwable : Object
         }
 
         StackTrace = stack.ToArray();
-        Jvm.Toolkit.Logger?.LogRuntime(LogLevel.Info, $"Captured trace for {JavaClass.Name}");
     }
 
     [JavaIgnore]

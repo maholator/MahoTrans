@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Handles;
@@ -118,6 +118,11 @@ public interface IMedia : IToolkit
 
     #region Control APIs
 
+    /// <summary>
+    /// Gets bit flags of available controls for given player.
+    /// </summary>
+    /// <param name="media">Media handle.</param>
+    /// <returns>Flags of available controls.</returns>
     MediaControls GetAvailableControls(MediaHandle media);
 
     /// <summary>

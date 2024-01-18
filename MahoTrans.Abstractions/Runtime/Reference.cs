@@ -1,3 +1,6 @@
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using System.Diagnostics;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
@@ -5,7 +8,7 @@ using Newtonsoft.Json;
 namespace MahoTrans.Runtime;
 
 /// <summary>
-/// Pointer to java object in heap.
+///     Pointer to java object in heap.
 /// </summary>
 [JsonConverter(typeof(ReferenceJsonConverter))]
 [DebuggerDisplay("Reference to {Index}")]
@@ -24,6 +27,11 @@ public struct Reference : IEquatable<Reference>
     public override int GetHashCode()
     {
         return Index;
+    }
+
+    public override string ToString()
+    {
+        return Index.ToString();
     }
 
     public bool Equals(Reference other)

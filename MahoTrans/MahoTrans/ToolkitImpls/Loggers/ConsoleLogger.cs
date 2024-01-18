@@ -19,7 +19,7 @@ public class ConsoleLogger : ILogger, ILoadLogger
         Console.WriteLine();
     }
 
-    public void LogRuntime(LogLevel level, string message)
+    public void LogRuntime(MTLogLevel level, string message)
     {
         var c = Console.ForegroundColor;
         SetConsoleColor(level);
@@ -28,18 +28,18 @@ public class ConsoleLogger : ILogger, ILoadLogger
         Console.WriteLine();
     }
 
-    public void LogDebug(DebugMessageCategory category, string message)
+    public void LogEvent(EventCategory category, string message)
     {
         Console.WriteLine($"{category}: {message}");
     }
 
-    private static void SetConsoleColor(LogLevel level)
+    private static void SetConsoleColor(MTLogLevel level)
     {
         Console.ForegroundColor = level switch
         {
-            LogLevel.Info => ConsoleColor.Green,
-            LogLevel.Warning => ConsoleColor.Yellow,
-            LogLevel.Error => ConsoleColor.Red,
+            MTLogLevel.Info => ConsoleColor.Green,
+            MTLogLevel.Warning => ConsoleColor.Yellow,
+            MTLogLevel.Error => ConsoleColor.Red,
             _ => ConsoleColor.White
         };
     }

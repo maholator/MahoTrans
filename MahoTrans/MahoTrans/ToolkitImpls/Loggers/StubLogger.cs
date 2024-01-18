@@ -11,11 +11,11 @@ namespace MahoTrans.ToolkitImpls.Loggers;
 /// </summary>
 public class StubLogger : ILogger, ILoadLogger, IHeapDebugger
 {
-    public void LogRuntime(LogLevel level, string message)
+    public void LogRuntime(MTLogLevel level, string message)
     {
     }
 
-    public void LogDebug(DebugMessageCategory category, string message)
+    public void LogEvent(EventCategory category, string message)
     {
     }
 

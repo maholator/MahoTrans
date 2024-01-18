@@ -521,7 +521,7 @@ public partial class JvmState
 
             sw.Stop();
             GcCount++;
-            Toolkit.Logger?.LogDebug(DebugMessageCategory.Gc,
+            Toolkit.Logger?.LogEvent(EventCategory.Gc,
                 $"Deleted {deletedCount} objects in {sw.ElapsedMilliseconds} ms");
         }
     }

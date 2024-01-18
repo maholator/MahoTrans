@@ -208,13 +208,13 @@ public partial class JvmState
 
         if (_resources.TryGetValue(name, out var blob))
         {
-            Toolkit.Logger?.LogDebug(DebugMessageCategory.Resources,
+            Toolkit.Logger?.LogEvent(EventCategory.Resources,
                 $"Resource {name} accessed, {blob.Length} bytes");
             var copy = blob.ConvertToSigned();
             return copy;
         }
 
-        Toolkit.Logger?.LogDebug(DebugMessageCategory.Resources, $"Resource {name} not found");
+        Toolkit.Logger?.LogEvent(EventCategory.Resources, $"Resource {name} not found");
         return null;
     }
 

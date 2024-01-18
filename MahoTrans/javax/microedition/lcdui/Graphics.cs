@@ -132,7 +132,7 @@ public class Graphics : Object, DirectGraphics
 
     public void drawRoundRect(int x, int y, int w, int h, int arcWidth, int arcHeight)
     {
-        // TODO
+        Implementation.DrawRoundRect(x + _tx, y + _ty, w, h, arcWidth, arcHeight, _color);
     }
 
     public void fillRect(int x, int y, int w, int h) =>
@@ -223,6 +223,14 @@ public class Graphics : Object, DirectGraphics
         var xm = Jvm.ResolveArray<int>(x).AsSpan(xFrom, count);
         var ym = Jvm.ResolveArray<int>(y).AsSpan(yFrom, count);
         Implementation.FillPolygon(xm, ym, (uint)argb);
+    }
+
+    public void drawPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
+        int argb)
+    {
+        var xm = Jvm.ResolveArray<int>(x).AsSpan(xFrom, count);
+        var ym = Jvm.ResolveArray<int>(y).AsSpan(yFrom, count);
+        Implementation.DrawPolygon(xm, ym, (uint)argb);
     }
 
     public override bool OnObjectDelete()

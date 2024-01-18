@@ -5,19 +5,29 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>MahoTrans</RootNamespace>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.16</Version>
+        <Version>1.0.18</Version>
         <Title>MahoTrans.Abstractions</Title>
         <Authors>Ryzhov Fyodor (aka. sym_ansel)</Authors>
         <Description>Base library for MahoTrans.</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageId>ru.nnproject.MahoTrans.Abstractions</PackageId>
+        <PackageIcon>icon.png</PackageIcon>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Be.IO-netstandard" Version="1.0.3" />
-        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Be.IO-netstandard" Version="1.0.3"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="icon.png" Pack="true" PackagePath="/"/>
     </ItemGroup>
 
 </Project>
