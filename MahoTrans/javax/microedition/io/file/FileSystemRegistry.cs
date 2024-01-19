@@ -17,12 +17,10 @@ public class FileSystemRegistry : Object
         try
         {
             var drives = Directory.GetLogicalDrives();
-            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
             Reference[] r = new Reference[drives.Length];
             for (int i = 0; i < r.Length; i++)
-            {
                 r[i] = Jvm.AllocateString("file:///" + drives[i].Replace('\\', '/'));
-            }
+            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
             enumerator.Value = r;
             enumerator.Init();
             return enumerator.This;

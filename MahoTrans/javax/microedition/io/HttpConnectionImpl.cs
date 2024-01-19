@@ -2,17 +2,15 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
+using java.lang;
 using MahoTrans;
+using MahoTrans.Utils;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Builder;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
-using MahoTrans.Utils;
-using java.lang;
-using System.Reflection.PortableExecutable;
-using System;
 
 namespace javax.microedition.io;
 
@@ -264,14 +262,12 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getRequestMethod()
     {
-        CheckOpen();
         return Jvm.AllocateString(Request.Method.ToString());
     }
 
     [return: String]
     public Reference getRequestProperty([String] Reference key)
     {
-        CheckOpen();
         try
         {
             var v = GetRequestHeader(Jvm.ResolveString(key));
@@ -288,27 +284,23 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getURL()
     {
-        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.OriginalString);
     }
 
     [return: String]
     public Reference getProtocol()
     {
-        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.Scheme);
     }
 
     [return: String]
     public Reference getHost()
     {
-        CheckOpen();
         return Jvm.AllocateString(Request.RequestUri!.Host);
     }
 
     public int getPort()
     {
-        CheckOpen();
         return Request.RequestUri!.Port;
     }
 
@@ -387,6 +379,8 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getHeaderField(int n)
     {
+        CheckOpen();
+        DoRequest();
         n = (n * 2) + 1;
         if (n >= ResHeaders.Count)
             return Reference.Null;
@@ -396,6 +390,8 @@ public class HttpConnectionImpl : Object, HttpConnection
     [return: String]
     public Reference getHeaderFieldKey(int n)
     {
+        CheckOpen();
+        DoRequest();
         n *= 2;
         if (n >= ResHeaders.Count)
             return Reference.Null;
@@ -417,6 +413,8 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public long getHeaderFieldDate([String] Reference name, long def)
     {
+        CheckOpen();
+        DoRequest();
         return GetHeaderDate(Jvm.ResolveString(name), def);
     }
 
@@ -485,6 +483,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             InternalClose();
         }
     }
+
     public void OutputClosed()
     {
         if (OutputState != 2)
@@ -519,7 +518,14 @@ public class HttpConnectionImpl : Object, HttpConnection
         key = key.ToLower();
         if (!ResHeadersTable.ContainsKey(key))
             return def;
-        return new DateTimeOffset(DateTime.Parse(ResHeadersTable[key])).ToUnixTimeMilliseconds();
+        try
+        {
+            return new DateTimeOffset(DateTime.Parse(ResHeadersTable[key])).ToUnixTimeMilliseconds();
+        }
+        catch
+        {
+            return def;
+        }
 
     }
 
@@ -612,16 +618,23 @@ public class HttpInputStream : InputStream
         return default;
     }
 
-    public void skip(int n)
+    public long skip(long n)
     {
+        if (n < 0) return 0;
         try
         {
+            if(Stream.Position + n >= Stream.Length)
+            {
+                Stream.Position = Stream.Length;
+                return Stream.Length - Stream.Position;
+            }
             Stream.Position += n;
         }
         catch (System.Exception e)
         {
             Jvm.Throw<IOException>(e.ToString());
         }
+        return n;
     }
 
     public override bool OnObjectDelete()
