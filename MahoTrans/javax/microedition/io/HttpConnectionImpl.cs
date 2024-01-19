@@ -11,6 +11,8 @@ using Object = java.lang.Object;
 using IOException = java.io.IOException;
 using MahoTrans.Utils;
 using java.lang;
+using System.Reflection.PortableExecutable;
+using System;
 
 namespace javax.microedition.io;
 
@@ -19,7 +21,12 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaIgnore] private readonly HttpRequestMessage Request = new HttpRequestMessage();
     [JavaIgnore] private readonly HttpClient Client = new HttpClient();
     [JavaIgnore] private HttpResponseMessage Response = null!;
-    [JavaIgnore] private readonly Dictionary<string, string> ReqHeaders = new();
+
+    [JavaIgnore] private readonly List<string> ReqHeaderKeys = new();
+    [JavaIgnore] private readonly Dictionary<string, string> ReqHeadersTable = new();
+
+    [JavaIgnore] private readonly List<string> ResHeaders = new();
+    [JavaIgnore] private readonly Dictionary<string, string> ResHeadersTable = new();
 
     private Reference InputStream;
     private Reference OutputStream;
@@ -60,35 +67,48 @@ public class HttpConnectionImpl : Object, HttpConnection
             if (OutputState != 0)
             {
                 ByteArrayOutputStream baos = Jvm.Resolve<ByteArrayOutputStream>(ByteOutputStream);
-                sbyte[] buf = new sbyte[baos.count];
-                System.Array.Copy(baos._buf, buf, baos.count);
-                Request.Content = new ByteArrayContent(buf.ToUnsigned());
+                Request.Content = new ByteArrayContent(baos._buf.ToUnsigned(), 0, baos.count);
                 if (GetRequestHeader("Content-Length") is null)
                     SetRequestHeader("Content-Length", "" + baos.count);
                 if (GetRequestHeader("Content-Type") is null)
                     SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                Console.WriteLine("out set " + baos.count);
             }
             if (GetRequestHeader("User-Agent") is null)
                 SetRequestHeader("User-Agent", "MahoTrans");
-            foreach (string k in ReqHeaders.Keys)
+            foreach (string k in ReqHeaderKeys)
             {
+                string v = ReqHeadersTable[k.ToLower()];
                 try
                 {
-                    Request.Content!.Headers.Add(k, ReqHeaders[k]);
+                    Request.Content!.Headers.Add(k, v);
                 }
                 catch
                 {
-                    Request.Headers.Add(k, ReqHeaders[k]);
+                    Request.Headers.Add(k, v);
                 }
             }
-            // TODO set default User-Agent header
             Response = Client.Send(Request);
+
+            foreach (KeyValuePair<string, IEnumerable<string>> h in Response.Content.Headers.AsEnumerable())
+                ParseHeaders(h.Key, h.Value);
+            foreach (KeyValuePair<string, IEnumerable<string>> h in Response.Headers.AsEnumerable())
+                ParseHeaders(h.Key, h.Value);
         }
         catch (System.Exception e)
         {
             Jvm.Throw<IOException>(e.ToString());
         }
+    }
+
+    [JavaIgnore]
+    private void ParseHeaders(string key, IEnumerable<string> values)
+    {
+        foreach (string v in values)
+        {
+            ResHeaders.Add(key);
+            ResHeaders.Add(v);
+        }
+        ResHeadersTable.Add(key.ToLower(), values.First());
     }
 
     // Streams
@@ -196,8 +216,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             Jvm.Throw<IOException>("Request sent");
         if (OutputState != 0)
             return;
-        ReqHeaders.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
-        //Request.Content!.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
+        SetRequestHeader(Jvm.ResolveString(field), Jvm.ResolveString(value));
     }
 
     public long getExpiration()
@@ -210,23 +229,21 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
         catch
         {
-            return -1;
+            return 0;
         }
     }
 
     public long getDate()
     {
-        // TODO
         CheckOpen();
         DoRequest();
         try
         {
-            //return Response.Content.Headers.Expires!.Value.ToUnixTimeMilliseconds();
-            return 0;
+            return Response.Headers.Date!.Value.ToUnixTimeMilliseconds();
         }
         catch
         {
-            return -1;
+            return 0;
         }
     }
 
@@ -240,31 +257,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
         catch
         {
-            return -1;
+            return 0;
         }
-    }
-
-    [return: String]
-    public Reference getHeaderField([String] Reference key)
-    {
-        CheckOpen();
-        DoRequest();
-        string k = Jvm.ResolveString(key);
-        try
-        {
-            return Jvm.AllocateString(Response.Content.Headers.GetValues(k).First());
-        }
-        catch
-        {
-            try
-            {
-                return Jvm.AllocateString(Response.Headers.GetValues(k).First());
-            }
-            catch
-            {
-            }
-        }
-        return Reference.Null;
     }
 
     [return: String]
@@ -280,10 +274,9 @@ public class HttpConnectionImpl : Object, HttpConnection
         CheckOpen();
         try
         {
-            string k = Jvm.ResolveString(key);
-            if (!ReqHeaders.TryGetValue(k, out var v))
-                if (!ReqHeaders.TryGetValue(k.ToLower(), out v))
-                    return Reference.Null;
+            var v = GetRequestHeader(Jvm.ResolveString(key));
+            if (v is null)
+                return Reference.Null;
             return Jvm.AllocateString(v);
         }
         catch
@@ -313,50 +306,102 @@ public class HttpConnectionImpl : Object, HttpConnection
         return Jvm.AllocateString(Request.RequestUri!.Host);
     }
 
-    [return: String]
-    public Reference getQuery()
-    {
-        CheckOpen();
-        return Jvm.AllocateString(Request.RequestUri!.Query);
-    }
-
     public int getPort()
     {
         CheckOpen();
         return Request.RequestUri!.Port;
     }
 
-    // TODO methods
-
     [return: String]
     public Reference getFile()
     {
-        throw new NotImplementedException();
+        string file = Request.RequestUri!.OriginalString;
+        int idx = file.IndexOf("//");
+        if (idx != -1)
+            file = file[(idx + 2)..];
+        if (!file.Contains('/'))
+            return Reference.Null;
+        file = file[(file.LastIndexOf('/') + 1)..];
+
+        idx = file.IndexOf('?');
+        if (idx != -1)
+            return Jvm.AllocateString(file[..idx]);
+        idx = file.IndexOf('#');
+        if (idx != -1)
+            return Jvm.AllocateString(file[..idx]);
+        return Jvm.AllocateString(file);
+    }
+
+    [return: String]
+    public Reference getQuery()
+    {
+        //return Jvm.AllocateString(Request.RequestUri!.Query);
+        string file = Request.RequestUri!.OriginalString;
+        int idx = file.IndexOf("//");
+        if (idx != -1)
+            file = file[(idx + 2)..];
+        if (!file.Contains('/'))
+            return Reference.Null;
+        file = file[(file.LastIndexOf('/') + 1)..];
+
+        idx = file.IndexOf('?');
+        if (idx == -1)
+            return Reference.Null;
+        file = file[(idx + 1)..];
+        idx = file.IndexOf('#');
+        if (idx != -1)
+            return Jvm.AllocateString(file[..idx]);
+        return Jvm.AllocateString(file);
     }
 
     [return: String]
     public Reference getRef()
     {
-        throw new NotImplementedException();
+        string file = Request.RequestUri!.OriginalString;
+        int idx = file.IndexOf("//");
+        if (idx != -1)
+            file = file[(idx + 2)..];
+        if (!file.Contains('/'))
+            return Reference.Null;
+        file = file[(file.LastIndexOf('/') + 1)..];
+
+        idx = file.IndexOf('#');
+        if (idx == -1)
+            return Reference.Null;
+        return Jvm.AllocateString(file[(idx + 1)..]);
+    }
+
+    [return: String]
+    public Reference getHeaderField([String] Reference key)
+    {
+        CheckOpen();
+        DoRequest();
+        if (key.IsNull)
+            return key;
+        string k = Jvm.ResolveString(key).ToLower();
+        if (ResHeadersTable.ContainsKey(k))
+            return Jvm.AllocateString(ResHeadersTable[k]);
+        return Reference.Null;
     }
 
     [return: String]
     public Reference getHeaderField(int n)
     {
-        throw new NotImplementedException();
+        n = (n * 2) + 1;
+        if (n >= ResHeaders.Count)
+            return Reference.Null;
+        return Jvm.AllocateString(ResHeaders[n]);
     }
 
     [return: String]
     public Reference getHeaderFieldKey(int n)
     {
-        throw new NotImplementedException();
+        n *= 2;
+        if (n >= ResHeaders.Count)
+            return Reference.Null;
+        return Jvm.AllocateString(ResHeaders[n]);
     }
 
-    public long getHeaderFieldDate([String] Reference name, long def)
-    {
-        throw new NotImplementedException();
-    }
-        
     public int getHeaderFieldInt([String] Reference name, int def)
     {
         CheckOpen();
@@ -368,6 +413,11 @@ public class HttpConnectionImpl : Object, HttpConnection
         {
             return def;
         }
+    }
+
+    public long getHeaderFieldDate([String] Reference name, long def)
+    {
+        return GetHeaderDate(Jvm.ResolveString(name), def);
     }
 
     // ContentConnection methods
@@ -450,19 +500,27 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaIgnore]
     private string? GetRequestHeader(string key)
     {
-        if (!ReqHeaders.TryGetValue(key, out var v))
-            if (!ReqHeaders.TryGetValue(key.ToLower(), out v))
-                return null;
+        if (!ReqHeadersTable.TryGetValue(key.ToLower(), out var v))
+            return null;
         return v;
     }
 
     [JavaIgnore]
     private void SetRequestHeader(string key, string value)
     {
-        if (ReqHeaders.ContainsKey(key.ToLower()))
-            ReqHeaders.Add(key.ToLower(), value);
-        else
-            ReqHeaders.Add(key, value);
+        if (!ReqHeadersTable.ContainsKey(key))
+            ReqHeaderKeys.Add(key);
+        ReqHeadersTable.Add(key.ToLower(), value);
+    }
+
+    [JavaIgnore]
+    private long GetHeaderDate(string key, long def)
+    {
+        key = key.ToLower();
+        if (!ResHeadersTable.ContainsKey(key))
+            return def;
+        return new DateTimeOffset(DateTime.Parse(ResHeadersTable[key])).ToUnixTimeMilliseconds();
+
     }
 
     public override bool OnObjectDelete()
