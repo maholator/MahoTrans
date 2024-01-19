@@ -4,8 +4,12 @@
 using java.io;
 using java.lang;
 using java.util;
+using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
 
@@ -16,13 +20,18 @@ public class FileConnectionImpl : Object, FileConnection
     [JavaIgnore] private string Url = null!;
     [JavaIgnore] private string SystemUrl = null!;
     [JavaIgnore] private FileStream Stream = null!;
+
+    private Reference InputStream;
+    private Reference OutputStream;
+
     private bool Closed;
     private bool IsDirectoryPath;
 
     [InitMethod]
     public new void Init()
     {
-        base.Init();
+        InputStream = Reference.Null;
+        OutputStream = Reference.Null;
     }
 
     [JavaIgnore]
@@ -58,7 +67,7 @@ public class FileConnectionImpl : Object, FileConnection
             Jvm.Throw<IOException>();
         try
         {
-            Stream = File.Create(SystemUrl);
+            File.Create(SystemUrl).Dispose();
         }
         catch
         {
@@ -96,6 +105,15 @@ public class FileConnectionImpl : Object, FileConnection
             return Directory.Exists(SystemUrl);
         return File.Exists(SystemUrl);
     }
+
+    public long fileSize()
+    {
+        CheckOpen();
+        if (!exists() || isDirectory())
+            Jvm.Throw<IOException>();
+        throw new NotImplementedException();
+    }
+
 
     [return: String]
     public Reference getName()
@@ -149,7 +167,24 @@ public class FileConnectionImpl : Object, FileConnection
         CheckOpen();
         if (!Directory.Exists(SystemUrl))
             Jvm.Throw<IOException>();
-        throw new NotImplementedException();
+        try
+        {
+            List<string> list = new();
+            foreach (string s in Directory.EnumerateFileSystemEntries(SystemUrl))
+                list.Add(s);
+            Reference[] r = new Reference[list.Count];
+            for (int i = 0; i < r.Length; i++)
+                r[i] = Jvm.AllocateString(s[i]);
+            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
+            enumerator.Value = r;
+            enumerator.Init();
+            return enumerator.This;
+        }
+        catch
+        {
+            Jvm.Throw<IOException>();
+            return default;
+        }
     }
 
     [return: JavaType(typeof(Enumeration))]
@@ -169,31 +204,18 @@ public class FileConnectionImpl : Object, FileConnection
         Directory.CreateDirectory(SystemUrl);
     }
 
-    [return: JavaType(typeof(DataInputStream))]
-    public Reference openDataInputStream()
-    {
-        CheckOpen();
-        if(!exists() || isDirectory())
-            Jvm.Throw<IOException>();
-        throw new NotImplementedException();
-    }
-
-    [return: JavaType(typeof(DataOutputStream))]
-    public Reference openDataOutputStream()
-    {
-        CheckOpen();
-        if (isDirectory())
-            Jvm.Throw<IOException>();
-        throw new NotImplementedException();
-    }
-
     [return: JavaType(typeof(InputStream))]
     public Reference openInputStream()
     {
         CheckOpen();
         if (!exists() || isDirectory())
             Jvm.Throw<IOException>();
-        throw new NotImplementedException();
+        if (!InputStream.IsNull || !OutputStream.IsNull)
+            Jvm.Throw<IOException>("Invalid state");
+        FileInputStream i = Jvm.AllocateObject<FileInputStream>();
+        i.Stream = File.OpenRead(SystemUrl);
+        i.Connection = this;
+        return InputStream = i.This;
     }
 
     [return: JavaType(typeof(OutputStream))]
@@ -202,16 +224,47 @@ public class FileConnectionImpl : Object, FileConnection
         CheckOpen();
         if (isDirectory())
             Jvm.Throw<IOException>();
-        throw new NotImplementedException();
+        if (!InputStream.IsNull || !OutputStream.IsNull)
+            Jvm.Throw<IOException>("Invalid state");
+        FileOutputStream o = Jvm.AllocateObject<FileOutputStream>();
+        o.Stream = Stream = File.OpenWrite(SystemUrl);
+        o.Connection = this;
+        return OutputStream = o.This;
     }
 
     [return: JavaType(typeof(OutputStream))]
-    public Reference openOutputStream___offset(long byteOffset)
+    public Reference openOutputStream(long byteOffset)
     {
         CheckOpen();
         if (isDirectory())
             Jvm.Throw<IOException>();
         throw new NotImplementedException();
+    }
+
+    [JavaDescriptor("()Ljava/io/DataInputStream;")]
+    public JavaMethodBody openDataInputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataInputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(2, 1);
+    }
+
+    [JavaDescriptor("()Ljava/io/DataOutputStream;")]
+    public JavaMethodBody openDataOutputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataInputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openOutputStream", "()Ljava/ioOutputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(2, 1);
     }
 
     public void rename([String] Reference newName)
@@ -265,6 +318,7 @@ public class FileConnectionImpl : Object, FileConnection
     {
         Closed = true;
     }
+
     private void CheckOpen()
     {
         if (Closed)
@@ -276,4 +330,154 @@ public class FileConnectionImpl : Object, FileConnection
         return !IsDirectoryPath && (!Directory.Exists(SystemUrl) || File.Exists(SystemUrl));
     }
 
+    public void InputClosed()
+    {
+        InputStream = Reference.Null;
+    }
+
+    public void OutputClosed()
+    {
+        OutputStream = Reference.Null;
+    }
 }
+
+public class FileInputStream : InputStream
+{
+    [JavaIgnore] public Stream Stream = null!;
+    [JavaIgnore] public FileConnectionImpl Connection = null!;
+    private bool Disposed;
+
+    public new void close()
+    {
+        if (Disposed)
+            return;
+        Disposed = true;
+        Stream.Dispose();
+        Connection.InputClosed();
+    }
+    public new int read()
+    {
+        if (Disposed)
+            Jvm.Throw<IOException>("closed");
+        try
+        {
+            return Stream.ReadByte();
+        }
+        catch (System.Exception e)
+        {
+            Jvm.Throw<IOException>(e.ToString());
+        }
+        return default;
+    }
+
+    public int read([JavaType("[B")] Reference buf)
+    {
+        return read(buf, 0, Jvm.ResolveArray<sbyte>(buf).Length);
+    }
+
+    public int read([JavaType("[B")] Reference buf, int offset, int length)
+    {
+        if (Disposed)
+            Jvm.Throw<IOException>("closed");
+        sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
+        try
+        {
+            int len = Stream.Read(b.ToUnsigned(), 0, length);
+            if (len == 0)
+                return -1;
+            return len;
+        }
+        catch (System.Exception e)
+        {
+            Jvm.Throw<IOException>(e.ToString());
+        }
+        return default;
+    }
+
+    public new int available()
+    {
+        try
+        {
+            return (int)Stream.Length;
+        }
+        catch (System.Exception e)
+        {
+            Jvm.Throw<IOException>(e.ToString());
+        }
+        return default;
+    }
+
+    public long skip(long n)
+    {
+        if (n < 0) return 0;
+        try
+        {
+            if (Stream.Position + n >= Stream.Length)
+            {
+                Stream.Position = Stream.Length;
+                return Stream.Length - Stream.Position;
+            }
+            Stream.Position += n;
+        }
+        catch (System.Exception e)
+        {
+            Jvm.Throw<IOException>(e.ToString());
+        }
+        return n;
+    }
+
+    public override bool OnObjectDelete()
+    {
+        close();
+        return false;
+    }
+}
+
+
+public class FileOutputStream : OutputStream
+{
+    [JavaIgnore] public Stream Stream = null!;
+    [JavaIgnore] public FileConnectionImpl Connection = null!;
+    private bool Disposed;
+
+    public new void write(int value)
+    {
+        if (Disposed)
+            Jvm.Throw<IOException>("closed");
+        Stream.WriteByte((byte)(uint)value);
+    }
+
+    public void write([JavaType("[B")] Reference buf, int offset, int length)
+    {
+        if (Disposed)
+            Jvm.Throw<IOException>("closed");
+        sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
+        Stream.Write(b.ToUnsigned(), offset, length);
+    }
+
+    public void write([JavaType("[B")] Reference buf)
+    {
+        write(buf, 0, Jvm.ResolveArray<sbyte>(buf).Length);
+    }
+
+    public new void flush()
+    {
+        Stream.Flush();
+    }
+
+    public new void close()
+    {
+        if (Disposed)
+            return;
+        Disposed = true;
+        Stream.Dispose();
+        Connection.OutputClosed();
+    }
+
+    public override bool OnObjectDelete()
+    {
+        close();
+        return false;
+    }
+}
+
