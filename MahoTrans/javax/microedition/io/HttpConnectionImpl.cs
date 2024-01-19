@@ -10,6 +10,7 @@ using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
 using MahoTrans.Utils;
+using java.lang;
 
 namespace javax.microedition.io;
 
@@ -18,18 +19,25 @@ public class HttpConnectionImpl : Object, HttpConnection
     [JavaIgnore] private readonly HttpRequestMessage Request = new HttpRequestMessage();
     [JavaIgnore] private readonly HttpClient Client = new HttpClient();
     [JavaIgnore] private HttpResponseMessage Response = null!;
+    [JavaIgnore] private readonly Dictionary<string, string> ReqHeaders = new();
 
     private Reference InputStream;
+    private Reference OutputStream;
+    private Reference ByteOutputStream;
 
     public bool Closed;
     private bool Destroyed;
     private bool RequestSent;
-    private int InputState;
+
+    public int InputState;
+    public int OutputState;
 
     [InitMethod]
     public new void Init()
     {
         InputStream = Reference.Null;
+        OutputStream = Reference.Null;
+        ByteOutputStream = Reference.Null;
     }
 
     [JavaIgnore]
@@ -49,8 +57,32 @@ public class HttpConnectionImpl : Object, HttpConnection
         RequestSent = true;
         try
         {
-            // TODO find out how to send POST data
-            //Request.Content = ReadOnlyMemoryContent();
+            if (OutputState != 0)
+            {
+                ByteArrayOutputStream baos = Jvm.Resolve<ByteArrayOutputStream>(ByteOutputStream);
+                sbyte[] buf = new sbyte[baos.count];
+                System.Array.Copy(baos._buf, buf, baos.count);
+                Request.Content = new ByteArrayContent(buf.ToUnsigned());
+                if (GetRequestHeader("Content-Length") is null)
+                    SetRequestHeader("Content-Length", "" + baos.count);
+                if (GetRequestHeader("Content-Type") is null)
+                    SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                Console.WriteLine("out set " + baos.count);
+            }
+            if (GetRequestHeader("User-Agent") is null)
+                SetRequestHeader("User-Agent", "MahoTrans");
+            foreach (string k in ReqHeaders.Keys)
+            {
+                try
+                {
+                    Request.Content!.Headers.Add(k, ReqHeaders[k]);
+                }
+                catch
+                {
+                    Request.Headers.Add(k, ReqHeaders[k]);
+                }
+            }
+            // TODO set default User-Agent header
             Response = Client.Send(Request);
         }
         catch (System.Exception e)
@@ -61,7 +93,6 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     // Streams
 
-    //[return: JavaType(nameof(java.io.InputStream))]
     [JavaDescriptor("()Ljava/io/InputStream;")]
     public Reference openInputStream()
     {
@@ -82,9 +113,18 @@ public class HttpConnectionImpl : Object, HttpConnection
         CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
-        // TODO
-        Jvm.Throw<IOException>("Not implemented");
-        return default;
+        if (OutputState != 0)
+            Jvm.Throw<IOException>("Open already");
+        Request.Method = new HttpMethod("POST"); // force POST method
+
+        OutputState = 1;
+
+        HttpOutputStream o = Jvm.AllocateObject<HttpOutputStream>();
+        ByteArrayOutputStream baos = Jvm.AllocateObject<ByteArrayOutputStream>();
+        baos.Init();
+        o.ByteStream = ByteOutputStream = baos.This;
+        o.Connection = this;
+        return OutputStream = o.This;
     }
 
     [JavaDescriptor("()Ljava/io/DataInputStream;")]
@@ -141,6 +181,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
+        if (OutputState != 0)
+            return;
         string s = Jvm.ResolveString(method);
         if (!s.Equals("GET") && !s.Equals("POST") && !s.Equals("HEAD"))
             Jvm.Throw<IOException>("Invalid method");
@@ -152,7 +194,10 @@ public class HttpConnectionImpl : Object, HttpConnection
         CheckOpen();
         if (RequestSent)
             Jvm.Throw<IOException>("Request sent");
-        Request.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
+        if (OutputState != 0)
+            return;
+        ReqHeaders.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
+        //Request.Content!.Headers.Add(Jvm.ResolveString(field), Jvm.ResolveString(value));
     }
 
     public long getExpiration()
@@ -204,14 +249,22 @@ public class HttpConnectionImpl : Object, HttpConnection
     {
         CheckOpen();
         DoRequest();
+        string k = Jvm.ResolveString(key);
         try
         {
-            return Jvm.AllocateString(Response.Headers.GetValues(Jvm.ResolveString(key)).First());
+            return Jvm.AllocateString(Response.Content.Headers.GetValues(k).First());
         }
         catch
         {
-            return Reference.Null;
+            try
+            {
+                return Jvm.AllocateString(Response.Headers.GetValues(k).First());
+            }
+            catch
+            {
+            }
         }
+        return Reference.Null;
     }
 
     [return: String]
@@ -227,7 +280,11 @@ public class HttpConnectionImpl : Object, HttpConnection
         CheckOpen();
         try
         {
-            return Jvm.AllocateString(Request.Headers.GetValues(Jvm.ResolveString(key)).First());
+            string k = Jvm.ResolveString(key);
+            if (!ReqHeaders.TryGetValue(k, out var v))
+                if (!ReqHeaders.TryGetValue(k.ToLower(), out v))
+                    return Reference.Null;
+            return Jvm.AllocateString(v);
         }
         catch
         {
@@ -302,7 +359,15 @@ public class HttpConnectionImpl : Object, HttpConnection
         
     public int getHeaderFieldInt([String] Reference name, int def)
     {
-        throw new NotImplementedException();
+        CheckOpen();
+        try
+        {
+            return Integer.parseInt(getHeaderField(name));
+        }
+        catch
+        {
+            return def;
+        }
     }
 
     // ContentConnection methods
@@ -356,6 +421,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         Destroyed = true;
         if (!InputStream.IsNull)
             Jvm.Resolve<HttpInputStream>(InputStream).close();
+        if (!OutputStream.IsNull)
+            Jvm.Resolve<HttpOutputStream>(OutputStream).close();
         Client.Dispose();
     }
 
@@ -368,11 +435,34 @@ public class HttpConnectionImpl : Object, HttpConnection
             InternalClose();
         }
     }
+    public void OutputClosed()
+    {
+        if (OutputState != 2)
+            OutputState = 2;
+    }
 
     private void CheckOpen()
     {
         if (Closed)
             Jvm.Throw<IOException>("Closed");
+    }
+
+    [JavaIgnore]
+    private string? GetRequestHeader(string key)
+    {
+        if (!ReqHeaders.TryGetValue(key, out var v))
+            if (!ReqHeaders.TryGetValue(key.ToLower(), out v))
+                return null;
+        return v;
+    }
+
+    [JavaIgnore]
+    private void SetRequestHeader(string key, string value)
+    {
+        if (ReqHeaders.ContainsKey(key.ToLower()))
+            ReqHeaders.Add(key.ToLower(), value);
+        else
+            ReqHeaders.Add(key, value);
     }
 
     public override bool OnObjectDelete()
@@ -474,6 +564,53 @@ public class HttpInputStream : InputStream
         {
             Jvm.Throw<IOException>(e.ToString());
         }
+    }
+
+    public override bool OnObjectDelete()
+    {
+        close();
+        return false;
+    }
+}
+
+public class HttpOutputStream : OutputStream
+{
+    [JavaIgnore] public HttpConnectionImpl Connection = null!;
+    public Reference ByteStream;
+    private bool Disposed;
+
+    public new void write(int value)
+    {
+        if (Connection.OutputState == 2)
+            Jvm.Throw<IOException>("closed");
+        Jvm.Resolve<ByteArrayOutputStream>(ByteStream).write(value);
+    }
+
+    public void write([JavaType("[B")] Reference buf, int offset, int length)
+    {
+        if (Connection.OutputState == 2)
+            Jvm.Throw<IOException>("closed");
+        Jvm.Resolve<ByteArrayOutputStream>(ByteStream).write(buf, offset, length);
+    }
+
+    public void write([JavaType("[B")] Reference buf)
+    {
+        if (Connection.OutputState == 2)
+            Jvm.Throw<IOException>("closed");
+        Jvm.Resolve<ByteArrayOutputStream>(ByteStream).write(buf, 0, Jvm.ResolveArray<sbyte>(buf).Length);
+    }
+
+    public new void flush()
+    {
+    }
+
+    public new void close()
+    {
+        if (Disposed)
+            return;
+        Disposed = true;
+        Connection.OutputClosed();
+        //Jvm.Resolve<ByteArrayOutputStream>(ByteStream).close();
     }
 
     public override bool OnObjectDelete()
