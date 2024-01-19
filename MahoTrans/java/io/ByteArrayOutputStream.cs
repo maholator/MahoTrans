@@ -51,9 +51,10 @@ public class ByteArrayOutputStream : OutputStream
         sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
         if(off >= 0 && off <= b.Length && len >= 0 && len <= b.Length - off)
         {
-            if (this.count +  len > _buf.Length)
+            if (count + len > _buf.Length)
                 Expand(len);
-            System.Array.Copy(b, off, _buf, this.count, len);
+            System.Array.Copy(b, off, _buf, count, len);
+            count += len;
         }
         else
         {
