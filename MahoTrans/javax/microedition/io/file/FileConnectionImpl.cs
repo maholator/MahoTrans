@@ -174,7 +174,7 @@ public class FileConnectionImpl : Object, FileConnection
                 list.Add(s);
             Reference[] r = new Reference[list.Count];
             for (int i = 0; i < r.Length; i++)
-                r[i] = Jvm.AllocateString(s[i]);
+                r[i] = Jvm.AllocateString(list[i]);
             var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
             enumerator.Value = r;
             enumerator.Init();
