@@ -86,6 +86,11 @@ public class Graphics : Object, DirectGraphics
     [return: JavaType(typeof(Font))]
     public Reference getFont() => Font;
 
+    public void setStrokeStyle(int style)
+    {
+        //TODO toolkit doesn't support this for now
+    }
+
     #endregion
 
     #region Translation
