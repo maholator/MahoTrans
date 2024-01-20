@@ -81,7 +81,7 @@ public class Class : Object
     [return: JavaType(typeof(InputStream))]
     public Reference getResourceAsStream([String] Reference name)
     {
-        var data = Jvm.GetResource(Jvm.ResolveString(name));
+        var data = Jvm.GetResource(Jvm.ResolveString(name), InternalClass);
         if (data == null)
             return Reference.Null;
 
