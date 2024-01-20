@@ -53,7 +53,7 @@ public class Method : IDisposable
 
     public override string ToString()
     {
-        var s = $"{Class.Name}::{Descriptor}";
+        var s = $"{Class.Name}.{Descriptor}";
 
         if (IsNative)
             return $"{s} (native)";
