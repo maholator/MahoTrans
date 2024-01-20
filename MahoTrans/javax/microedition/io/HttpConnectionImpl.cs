@@ -76,6 +76,11 @@ public class HttpConnectionImpl : Object, HttpConnection
             foreach (string k in ReqHeaderKeys)
             {
                 string v = ReqHeadersTable[k.ToLower()];
+                if (Request.Content is null)
+                {
+                    Request.Headers.Add(k, v);
+                    continue;
+                }
                 try
                 {
                     Request.Content!.Headers.Add(k, v);

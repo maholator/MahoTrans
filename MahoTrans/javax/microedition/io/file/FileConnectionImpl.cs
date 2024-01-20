@@ -19,7 +19,6 @@ public class FileConnectionImpl : Object, FileConnection
 {
     [JavaIgnore] private string Url = null!;
     [JavaIgnore] private string SystemUrl = null!;
-    [JavaIgnore] private FileStream Stream = null!;
 
     private Reference InputStream;
     private Reference OutputStream;
@@ -227,7 +226,7 @@ public class FileConnectionImpl : Object, FileConnection
         if (!InputStream.IsNull || !OutputStream.IsNull)
             Jvm.Throw<IOException>("Invalid state");
         FileOutputStream o = Jvm.AllocateObject<FileOutputStream>();
-        o.Stream = Stream = File.OpenWrite(SystemUrl);
+        o.Stream = File.OpenWrite(SystemUrl);
         o.Connection = this;
         return OutputStream = o.This;
     }
