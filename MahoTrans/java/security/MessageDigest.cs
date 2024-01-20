@@ -18,8 +18,6 @@ public class MessageDigest : Object
     [return: JavaType(typeof(MessageDigest))]
     public static Reference getInstance([String] Reference algorithm)
     {
-        if (algorithm.IsNull)
-            Jvm.Throw<NullPointerException>();
         string s = Jvm.ResolveString(algorithm).ToUpper().Trim();
         if (s.Length < 3)
             Jvm.Throw<NoSuchAlgorithmException>(s);
