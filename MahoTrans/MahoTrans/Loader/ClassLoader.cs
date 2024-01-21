@@ -4,6 +4,7 @@
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using Be.IO;
 using MahoTrans.Abstractions;
@@ -34,7 +35,15 @@ public class ClassLoader
     /// <returns>JAR object.</returns>
     public JarPackage ReadJarFile(Stream file, bool leaveOpen)
     {
-        using (var zip = new ZipArchive(file, ZipArchiveMode.Read, leaveOpen, Encoding.UTF8))
+        using var ms = new MemoryStream();
+        file.CopyTo(ms);
+        if (!leaveOpen)
+            file.Close();
+
+        ms.Position = 0;
+        var hash = Convert.ToHexString(SHA1.HashData(ms.GetBuffer().AsSpan(0, (int)ms.Length)));
+        ms.Position = 0;
+        using (var zip = new ZipArchive(ms, ZipArchiveMode.Read, false, Encoding.UTF8))
         {
             List<JavaClass> classes = new();
             Dictionary<string, byte[]> res = new();
@@ -89,7 +98,7 @@ public class ClassLoader
                 };
             }
 
-            return new JarPackage(classes.ToArray(), res, manifest);
+            return new JarPackage(classes.ToArray(), res, manifest, hash);
         }
     }
 

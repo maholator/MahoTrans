@@ -1,7 +1,6 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using java.io;
 using java.lang;
 using MahoTrans;
 using MahoTrans.Builder;
@@ -22,7 +21,7 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage([String] Reference name)
     {
-        var blob = Jvm.GetResource(Jvm.ResolveString(name));
+        var blob = Jvm.GetResource(Jvm.ResolveString(name), null);
         if (blob == null)
             Jvm.Throw<IOException>();
 
@@ -124,7 +123,8 @@ public class Image : Object
                 b.Append(JavaOpcode.aload, 5);
                 b.Append(JavaOpcode.iconst_0);
                 b.Append(JavaOpcode.iload_2);
-                b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", typeof(java.lang.System)));
+                b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                    typeof(java.lang.System)));
 
                 // buf = tmp
                 b.Append(JavaOpcode.aload, 5);
@@ -137,7 +137,8 @@ public class Image : Object
             b.Append(JavaOpcode.aload_1);
             b.Append(JavaOpcode.iload_2);
             b.Append(JavaOpcode.iload, 4);
-            b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", typeof(java.lang.System)));
+            b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                typeof(java.lang.System)));
 
             // count += read
             b.Append(JavaOpcode.iload_2);
@@ -152,7 +153,8 @@ public class Image : Object
         b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.iconst_0);
         b.Append(JavaOpcode.iload_2);
-        b.AppendStaticCall(new NameDescriptorClass("createImage", "([BII)Ljavax/microedition/lcdui/Image;", typeof(Image)));
+        b.AppendStaticCall(new NameDescriptorClass("createImage", "([BII)Ljavax/microedition/lcdui/Image;",
+            typeof(Image)));
         b.AppendReturnReference();
 
         return b.Build(5, 6);

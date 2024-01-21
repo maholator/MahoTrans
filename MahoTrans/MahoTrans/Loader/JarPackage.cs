@@ -10,15 +10,17 @@ namespace MahoTrans.Loader;
 /// </summary>
 public class JarPackage
 {
+    public readonly string PackageSHA1;
     public readonly JavaClass[] Classes;
     public readonly Dictionary<string, byte[]> Resources;
     public readonly Dictionary<string, string> Manifest;
 
-    public JarPackage(JavaClass[] classes, Dictionary<string, byte[]> resources, Dictionary<string, string> manifest)
+    public JarPackage(JavaClass[] classes, Dictionary<string, byte[]> resources, Dictionary<string, string> manifest, string packageSHA1)
     {
         Classes = classes;
         Resources = resources;
         Manifest = manifest;
+        PackageSHA1 = packageSHA1;
     }
 
     private static string GetMidletKey(int i) => $"MIDlet-{i}";

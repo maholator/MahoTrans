@@ -66,7 +66,7 @@ public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
 
     public override string ToString()
     {
-        return $"{ClassName}::{Descriptor}";
+        return $"{ClassName}.{Descriptor}";
     }
 
     public bool Equals(NameDescriptorClass other)

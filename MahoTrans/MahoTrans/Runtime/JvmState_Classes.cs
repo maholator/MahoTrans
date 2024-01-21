@@ -199,11 +199,19 @@ public partial class JvmState
 
     #region Resources
 
-    public sbyte[]? GetResource(string name)
+    public sbyte[]? GetResource(string name, JavaClass? cls)
     {
         if (name.StartsWith('/'))
         {
             name = name.Substring(1);
+        }
+        else if (cls != null)
+        {
+            var li = cls.Name.LastIndexOf('/');
+            if (li != -1)
+            {
+                name = $"{cls.Name.Substring(0, li + 1)}{name}";
+            }
         }
 
         if (_resources.TryGetValue(name, out var blob))

@@ -198,7 +198,7 @@ public static class NativeLinker
             };
         }
 
-        var ms = $"Initialization method {javaType.Name}::{nativeMethod.Name}";
+        var ms = $"Initialization method {javaType.Name}.{nativeMethod.Name}";
 
         if (isCtor && isClinit)
             throw new JavaLinkageException(
@@ -229,7 +229,7 @@ public static class NativeLinker
         }
         catch (Exception e)
         {
-            throw new JavaLinkageException($"Failed to build native bridges for {javaType.Name}::{nativeMethod.Name}",
+            throw new JavaLinkageException($"Failed to build native bridges for {javaType.Name}.{nativeMethod.Name}",
                 e);
         }
 

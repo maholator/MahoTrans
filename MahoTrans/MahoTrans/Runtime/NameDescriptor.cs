@@ -19,7 +19,7 @@ public readonly struct NameDescriptor : IEquatable<NameDescriptor>
     public override string ToString()
     {
         if (Descriptor[0] == '(')
-            return $"{Name} {Descriptor}";
+            return $"{Name}{Descriptor}";
         return $"{Descriptor}+{Name}";
     }
 
