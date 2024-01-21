@@ -118,16 +118,29 @@ public class FileConnectionImpl : Object, FileConnection
     public Reference getName()
     {
         CheckOpen();
+        string s;
         if (isDirectory())
-            return Jvm.AllocateString(Path.GetDirectoryName(SystemUrl)!);
-        return Jvm.AllocateString(Path.GetFileName(SystemUrl));
+        {
+            s = Path.GetDirectoryName(SystemUrl)!;
+        }
+        else
+        {
+            s = Path.GetFileName(SystemUrl);
+        }
+        s = s.Replace('\\', '/');
+        if (s.EndsWith('/'))
+            s = s[0..(s.Length - 1)];
+        if (s.Contains('/'))
+            s = s[(s.LastIndexOf('/') + 1)..];
+        Console.WriteLine(s);
+        return Jvm.AllocateString(s);
     }
 
     [return: String]
     public Reference getPath()
     {
         CheckOpen();
-        throw new NotImplementedException();
+        return Jvm.AllocateString(Path.GetDirectoryName(SystemUrl)!.Replace('\\', '/'));
     }
 
     [return: String]
@@ -169,8 +182,21 @@ public class FileConnectionImpl : Object, FileConnection
         try
         {
             List<string> list = new();
-            foreach (string s in Directory.EnumerateFileSystemEntries(SystemUrl))
+            foreach (string p in Directory.EnumerateFileSystemEntries(SystemUrl))
+            {
+                Console.WriteLine(p);
+                string s = p.Replace('\\', '/');
+                bool dir;
+                if (dir = s.EndsWith('/'))
+                    s = s[0..(s.Length - 1)];
+                if (!dir)
+                    dir = Directory.Exists(s);
+                if (s.Contains('/'))
+                    s = s[(s.LastIndexOf('/') + 1)..];
+                if (dir)
+                    s += '/';
                 list.Add(s);
+            }
             Reference[] r = new Reference[list.Count];
             for (int i = 0; i < r.Length; i++)
                 r[i] = Jvm.AllocateString(list[i]);
@@ -200,6 +226,7 @@ public class FileConnectionImpl : Object, FileConnection
         CheckOpen();
         if (Directory.Exists(SystemUrl))
             Jvm.Throw<IOException>();
+        Console.WriteLine(SystemUrl);
         Directory.CreateDirectory(SystemUrl);
     }
 
@@ -250,20 +277,20 @@ public class FileConnectionImpl : Object, FileConnection
         b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
         b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
         b.AppendReturnReference();
-        return b.Build(2, 1);
+        return b.Build(3, 1);
     }
 
     [JavaDescriptor("()Ljava/io/DataOutputStream;")]
     public JavaMethodBody openDataOutputStream(JavaClass cls)
     {
         var b = new JavaMethodBuilder(cls);
-        b.AppendNewObject<DataInputStream>();
+        b.AppendNewObject<DataOutputStream>();
         b.Append(JavaOpcode.dup);
         b.AppendThis();
-        b.AppendVirtcall("openOutputStream", "()Ljava/ioOutputStream;");
+        b.AppendVirtcall("openOutputStream", "()Ljava/io/OutputStream;");
         b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
         b.AppendReturnReference();
-        return b.Build(2, 1);
+        return b.Build(3, 1);
     }
 
     public void rename([String] Reference newName)

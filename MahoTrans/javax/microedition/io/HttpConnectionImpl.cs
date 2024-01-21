@@ -160,20 +160,20 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
         b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
         b.AppendReturnReference();
-        return b.Build(2, 1);
+        return b.Build(3, 1);
     }
 
     [JavaDescriptor("()Ljava/io/DataOutputStream;")]
     public JavaMethodBody openDataOutputStream(JavaClass cls)
     {
         var b = new JavaMethodBuilder(cls);
-        b.AppendNewObject<DataInputStream>();
+        b.AppendNewObject<DataOutputStream>();
         b.Append(JavaOpcode.dup);
         b.AppendThis();
-        b.AppendVirtcall("openOutputStream", "()Ljava/ioOutputStream;");
+        b.AppendVirtcall("openOutputStream", "()Ljava/io/OutputStream;");
         b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
         b.AppendReturnReference();
-        return b.Build(2, 1);
+        return b.Build(3, 1);
     }
 
     public void close()
