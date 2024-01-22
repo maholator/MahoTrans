@@ -11,9 +11,34 @@ namespace java.lang;
 [JavaIgnore]
 public class Array<T> : Array where T : struct
 {
+    /// <summary>
+    /// Underlying CLR array. Do not do direct accesses to it if there is a chance that index is invalid, use <see cref="this"/> instead for proper bounds checks.
+    /// </summary>
     [JavaIgnore] public T[] Value = null!;
 
     [JsonIgnore] public override ClrArray BaseValue => Value;
+
+    /// <summary>
+    /// Gets/sets values in <see cref="Value"/>, performs bounds checks. Throws <see cref="ArrayIndexOutOfBoundsException"/> in case of failure.
+    /// </summary>
+    /// <param name="index"></param>
+    public T this[int index]
+    {
+        get
+        {
+            if ((uint)index >= (uint)Value.Length)
+                Jvm.Throw<ArrayIndexOutOfBoundsException>(
+                    $"Attempt to access index {index} on array with length {Value.Length}");
+            return Value[index];
+        }
+        set
+        {
+            if ((uint)index >= (uint)Value.Length)
+                Jvm.Throw<ArrayIndexOutOfBoundsException>(
+                    $"Attempt to access index {index} on array with length {Value.Length}");
+            Value[index] = value;
+        }
+    }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -27,10 +52,4 @@ public class Array<T> : Array where T : struct
 public abstract class Array : Object
 {
     [JsonIgnore] public abstract ClrArray BaseValue { get; }
-
-    public void CheckInBounds(int index)
-    {
-        if ((uint)index >= (uint)BaseValue.Length)
-            Jvm.Throw<ArrayIndexOutOfBoundsException>();
-    }
 }

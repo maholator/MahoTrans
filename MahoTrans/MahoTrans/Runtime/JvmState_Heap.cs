@@ -306,8 +306,7 @@ public partial class JvmState
         if (r.IsNull)
             Throw<NullPointerException>();
         var obj = (Array<T>)_heap[r.Index]!;
-        obj.CheckInBounds(index);
-        obj.Value[index] = value;
+        obj[index] = value;
     }
 
     #endregion
