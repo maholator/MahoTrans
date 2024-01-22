@@ -48,6 +48,10 @@ public static class GraphicsUtils
                 y -= h;
                 break;
 
+            case GraphicsAnchor.Baseline:
+                y -= h * 3 / 4;
+                break;
+
             default:
                 Object.Jvm.Throw<IllegalArgumentException>();
                 break;
