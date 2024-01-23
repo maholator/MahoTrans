@@ -15,7 +15,7 @@ public class VirtualRms : IRecordStore
     ///     <b>Key:</b> store name in plain form. <br />
     ///     <b>Value:</b> zero-based list of records. Records are one-based so implementation must always do [index - 1]. Deleted records are null.
     /// </summary>
-    private readonly Dictionary<string, List<sbyte[]?>> _storage = new();
+    private readonly Dictionary<string, List<byte[]?>> _storage = new();
 
     public string[] ListStores() => _storage.Keys.ToArray();
 
@@ -28,7 +28,7 @@ public class VirtualRms : IRecordStore
 
         if (createIfNotExists)
         {
-            _storage.Add(name, new List<sbyte[]?>());
+            _storage.Add(name, new List<byte[]?>());
             return true;
         }
 
@@ -44,7 +44,7 @@ public class VirtualRms : IRecordStore
         return _storage.Remove(name);
     }
 
-    public int AddRecord(string name, ReadOnlySpan<sbyte> data)
+    public int AddRecord(string name, ReadOnlySpan<byte> data)
     {
         var id = GetNextId(name);
         _storage[name][id] = data.ToArray();
@@ -85,14 +85,14 @@ public class VirtualRms : IRecordStore
         return _storage[name][id - 1]?.Length;
     }
 
-    public sbyte[]? GetRecord(string name, int id)
+    public byte[]? GetRecord(string name, int id)
     {
         if (id < 1 || id > _storage[name].Count)
             return null;
         return _storage[name][id - 1]?.ToArray();
     }
 
-    public bool SetRecord(string name, int id, ReadOnlySpan<sbyte> data)
+    public bool SetRecord(string name, int id, ReadOnlySpan<byte> data)
     {
         _storage[name][id - 1] = data.ToArray();
         return true;

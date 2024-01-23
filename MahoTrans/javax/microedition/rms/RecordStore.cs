@@ -64,11 +64,11 @@ public class RecordStore : Object
 
         if (count == 0)
         {
-            return Toolkit.RecordStore.AddRecord(name, ReadOnlySpan<sbyte>.Empty);
+            return Toolkit.RecordStore.AddRecord(name, ReadOnlySpan<byte>.Empty);
         }
 
         var arr = Jvm.ResolveArray<sbyte>(data);
-        return Toolkit.RecordStore.AddRecord(name, new ReadOnlySpan<sbyte>(arr, offset, count));
+        return Toolkit.RecordStore.AddRecord(name, new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
     }
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
@@ -296,7 +296,7 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, new ReadOnlySpan<sbyte>(arr, offset, count));
+        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
     }
 
     #region Utils

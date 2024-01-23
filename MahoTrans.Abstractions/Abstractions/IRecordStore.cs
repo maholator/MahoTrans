@@ -45,7 +45,7 @@ public interface IRecordStore : IToolkit
     /// <param name="name">Name of store to add to.</param>
     /// <param name="data">Data to add.</param>
     /// <returns>Index of added slot.</returns>
-    int AddRecord(string name, ReadOnlySpan<sbyte> data);
+    int AddRecord(string name, ReadOnlySpan<byte> data);
 
 
     /// <summary>
@@ -72,9 +72,9 @@ public interface IRecordStore : IToolkit
     /// </returns>
     int? GetSize(string name, int id);
 
-    sbyte[]? GetRecord(string name, int id);
+    byte[]? GetRecord(string name, int id);
 
-    bool SetRecord(string name, int id, ReadOnlySpan<sbyte> data);
+    bool SetRecord(string name, int id, ReadOnlySpan<byte> data);
 
     int GetNextId(string name);
 
