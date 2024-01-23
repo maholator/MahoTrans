@@ -28,7 +28,7 @@ public interface IMedia : IToolkit
     /// <param name="contentType">Content type.</param>
     /// <param name="callbackTarget">Object for callbacks.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(Memory<sbyte> data, string contentType, Reference callbackTarget);
+    MediaHandle Create(ReadOnlySpan<sbyte> data, string contentType, Reference callbackTarget);
 
     /// <summary>
     ///     Creates media player from MRL.
