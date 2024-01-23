@@ -4,7 +4,6 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using System;
 using Math = java.lang.Math;
 
 namespace javax.microedition.lcdui.game;

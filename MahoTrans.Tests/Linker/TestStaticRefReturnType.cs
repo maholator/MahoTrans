@@ -56,7 +56,7 @@ public class TestStaticRefReturnType
         var jvm = new JvmState(
             new ToolkitCollection(new DummySystem(), new RealTimeClock(), null!, new DummyFonts(), null!,
                 new AmsEventHub(),
-                new InMemoryRms(), null!)
+                new VirtualRms(), null!)
             {
                 Logger = new ConsoleLogger(),
                 LoadLogger = new ConsoleLogger(),

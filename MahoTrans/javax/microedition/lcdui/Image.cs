@@ -36,7 +36,7 @@ public class Image : Object
         var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
 
         var image = Jvm.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateFromFile(new Memory<byte>(blob, from, len));
+        image.Handle = Toolkit.Images.CreateFromFile(new ReadOnlySpan<byte>(blob, from, len));
         return image.This;
     }
 
