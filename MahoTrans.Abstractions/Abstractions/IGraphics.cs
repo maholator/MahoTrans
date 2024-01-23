@@ -50,4 +50,6 @@ public interface IGraphics
     GraphicsClip Clip { get; set; }
 
     void ClipRect(GraphicsClip clip);
+
+    bool DottedStroke { set; }
 }
