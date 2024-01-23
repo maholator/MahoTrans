@@ -79,7 +79,7 @@ public static class Utils
     }
 
     /// <summary>
-    /// Allows to call string.Join in functional style.
+    ///     Allows to call string.Join in functional style.
     /// </summary>
     /// <param name="sequence">Sequence to join.</param>
     /// <param name="separator">Join separator.</param>
@@ -91,7 +91,7 @@ public static class Utils
     }
 
     /// <summary>
-    /// Pops and discards N values from stack.
+    ///     Pops and discards N values from stack.
     /// </summary>
     /// <param name="stack">Stack to pop from.</param>
     /// <param name="count">Count of values to pop.</param>

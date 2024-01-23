@@ -119,7 +119,7 @@ public interface IMedia : IToolkit
     #region Control APIs
 
     /// <summary>
-    /// Gets bit flags of available controls for given player.
+    ///     Gets bit flags of available controls for given player.
     /// </summary>
     /// <param name="media">Media handle.</param>
     /// <returns>Flags of available controls.</returns>

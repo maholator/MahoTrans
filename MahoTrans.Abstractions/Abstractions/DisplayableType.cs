@@ -22,22 +22,22 @@ public enum DisplayableType
     GameCanvas,
 
     /// <summary>
-    /// LCDUI form.
+    ///     LCDUI form.
     /// </summary>
     [Description("LCDUI form")] Form,
 
     /// <summary>
-    /// LCDUI text box.
+    ///     LCDUI text box.
     /// </summary>
     [Description("LCDUI text box")] TextBox,
 
     /// <summary>
-    /// LCDUI list.
+    ///     LCDUI list.
     /// </summary>
     [Description("LCDUI list")] List,
 
     /// <summary>
-    /// LCDUI alert.
+    ///     LCDUI alert.
     /// </summary>
     [Description("LCDUI alert")] Alert,
 }
