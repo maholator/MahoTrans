@@ -74,7 +74,7 @@ public interface IRecordStore : IToolkit
 
     sbyte[]? GetRecord(string name, int id);
 
-    void SetRecord(string name, int id, ReadOnlySpan<sbyte> data);
+    bool SetRecord(string name, int id, ReadOnlySpan<sbyte> data);
 
     int GetNextId(string name);
 
