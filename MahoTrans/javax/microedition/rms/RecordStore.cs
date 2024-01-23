@@ -211,6 +211,9 @@ public class RecordStore : Object
     {
         var nameStr = Jvm.ResolveString(name);
 
+        if (nameStr.Length == 0 || nameStr.Length > 32)
+            Jvm.Throw<IllegalArgumentException>();
+
         if (!Toolkit.RecordStore.OpenStore(nameStr, create))
         {
             Jvm.Throw<RecordStoreNotFoundException>();
@@ -296,7 +299,8 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
+        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId,
+            new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
     }
 
     #region Utils
