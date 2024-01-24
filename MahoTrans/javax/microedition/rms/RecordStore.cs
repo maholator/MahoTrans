@@ -151,7 +151,7 @@ public class RecordStore : Object
         var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(StoreName), recordId);
         if (buf == null)
             Jvm.Throw<InvalidRecordIDException>();
-        return Jvm.AllocateArray(buf, "[B");
+        return Jvm.AllocateArray(buf.ConvertToSigned(), "[B");
     }
 
     public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
@@ -163,7 +163,7 @@ public class RecordStore : Object
             Jvm.Throw<InvalidRecordIDException>();
         if (r.Length + offset > arr.Length)
             Jvm.Throw<ArrayIndexOutOfBoundsException>();
-        r.CopyTo(arr, offset);
+        r.ConvertToSigned().CopyTo(arr, offset);
         return r.Length;
     }
 
