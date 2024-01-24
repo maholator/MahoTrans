@@ -72,6 +72,8 @@ public interface IRecordStore : IToolkit
     /// </returns>
     int? GetSize(string name, int id);
 
+    int AvailableMemory { get; }
+
     byte[]? GetRecord(string name, int id);
 
     bool SetRecord(string name, int id, ReadOnlySpan<byte> data);

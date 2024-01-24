@@ -24,7 +24,7 @@ public class ToolkitCollection
 
     public readonly IAms Ams;
 
-    public readonly IRecordStore RecordStore;
+    public IRecordStore RecordStore;
 
     public readonly IMedia Media;
 
