@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;

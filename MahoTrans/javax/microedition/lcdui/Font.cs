@@ -14,8 +14,14 @@ public class Font : Object
 
     [JavaIgnore] public FontStyle Style;
 
+    /// <summary>
+    /// Font size as LCDUI constant. For custom fonts, this is 0.
+    /// </summary>
     [JavaIgnore] public FontSize Size;
 
+    /// <summary>
+    /// Height of the font in pixels.
+    /// </summary>
     [JavaIgnore] public int Height;
 
     [return: JavaType(typeof(Font))]
@@ -47,6 +53,18 @@ public class Font : Object
 
     public int getSize() => (int)Size;
 
+    public int getStyle() => (int)Style;
+
+    public int getFace() => (int)Face;
+
+    public bool isPlain() => Style == FontStyle.Plain;
+
+    public bool isBold() => (Style & FontStyle.Bold) != 0;
+
+    public bool isItalic() => (Style & FontStyle.Italic) != 0;
+
+    public bool isUnderlined() => (Style & FontStyle.Underlined) != 0;
+
     public int stringWidth([String] Reference str)
     {
         return Toolkit.Fonts.GetCharsWidth(Face, Style, Height, Jvm.ResolveString(str));
@@ -68,4 +86,18 @@ public class Font : Object
         return Toolkit.Fonts.GetCharsWidth(Face, Style, Height,
             Jvm.ResolveArray<char>(str).AsSpan(from, len));
     }
+
+
+    public const int FACE_MONOSPACE = 32;
+    public const int FACE_PROPORTIONAL = 64;
+    public const int FACE_SYSTEM = 0;
+    public const int FONT_INPUT_TEXT = 1;
+    public const int FONT_STATIC_TEXT = 0;
+    public const int SIZE_LARGE = 16;
+    public const int SIZE_MEDIUM = 0;
+    public const int SIZE_SMALL = 8;
+    public const int STYLE_BOLD = 1;
+    public const int STYLE_ITALIC = 2;
+    public const int STYLE_PLAIN = 0;
+    public const int STYLE_UNDERLINED = 4;
 }

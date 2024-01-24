@@ -9,7 +9,6 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
-using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.rms;
@@ -65,11 +64,11 @@ public class RecordStore : Object
 
         if (count == 0)
         {
-            return Toolkit.RecordStore.AddRecord(name, Array.Empty<sbyte>(), 0, 0);
+            return Toolkit.RecordStore.AddRecord(name, ReadOnlySpan<byte>.Empty);
         }
 
         var arr = Jvm.ResolveArray<sbyte>(data);
-        return Toolkit.RecordStore.AddRecord(name, arr, offset, count);
+        return Toolkit.RecordStore.AddRecord(name, new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
     }
 
     public void addRecordListener([JavaType(typeof(RecordListener))] Reference listener)
@@ -297,7 +296,7 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, arr, offset, count);
+        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId, new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
     }
 
     #region Utils

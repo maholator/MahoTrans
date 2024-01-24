@@ -32,14 +32,14 @@ public interface IImageManager : IToolkit
     /// </summary>
     /// <param name="file">File content.</param>
     /// <returns>Image handle.</returns>
-    ImageHandle CreateBufferFromFile(Memory<byte> file);
+    ImageHandle CreateBufferFromFile(ReadOnlySpan<byte> file);
 
     /// <summary>
     ///     Creates immutable image from file.
     /// </summary>
     /// <param name="file">File content.</param>
     /// <returns>Image handle.</returns>
-    ImageHandle CreateFromFile(Memory<byte> file);
+    ImageHandle CreateFromFile(ReadOnlySpan<byte> file);
 
     /// <summary>
     ///     Creates immutable image from RGB array.

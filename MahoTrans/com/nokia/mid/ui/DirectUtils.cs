@@ -29,7 +29,7 @@ public class DirectUtils : Object
         var blob = Jvm.ResolveArray<sbyte>(data).ToUnsigned();
 
         var image = Jvm.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateBufferFromFile(new Memory<byte>(blob, from, len));
+        image.Handle = Toolkit.Images.CreateBufferFromFile(new ReadOnlySpan<byte>(blob, from, len));
         return image.This;
     }
 
@@ -40,7 +40,7 @@ public class DirectUtils : Object
         var font = Jvm.AllocateObject<Font>();
         font.Face = (FontFace)face;
         font.Style = (FontStyle)style;
-        font.Size = (FontSize)0;
+        font.Size = default;
         font.Height = height;
         return font.This;
     }

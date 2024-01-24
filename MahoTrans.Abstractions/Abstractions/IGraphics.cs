@@ -21,7 +21,7 @@ public interface IGraphics
 
     void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color);
 
-    void FillPolygon(Span<int> x, Span<int> y, uint color);
+    void FillPolygon(ReadOnlySpan<int> x, ReadOnlySpan<int> y, uint color);
 
     #endregion
 
@@ -32,7 +32,7 @@ public interface IGraphics
     void DrawArc(int x, int y, int w, int h, int begin, int length, uint color);
     void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, uint color);
 
-    void DrawPolygon(Span<int> x, Span<int> y, uint color);
+    void DrawPolygon(ReadOnlySpan<int> x, ReadOnlySpan<int> y, uint color);
 
     #endregion
 
@@ -41,13 +41,16 @@ public interface IGraphics
     void DrawImage(ImageHandle image, int fromX, int fromY, int toX, int toY, int w, int h,
         SpriteTransform transform, GraphicsAnchor an);
 
-    void DrawImage(ImageHandle image, int x, int y, ImageManipulation manipul, GraphicsAnchor an);
+    void DrawImage(ImageHandle image, int x, int y, ImageManipulation manipulation, GraphicsAnchor an);
 
-    void DrawString(string text, int x, int y, GraphicsAnchor an, uint color, FontFace face, FontStyle style, int size);
+    void DrawString(ReadOnlySpan<char> text, int x, int y, GraphicsAnchor an, uint color, FontFace face,
+        FontStyle style, int size);
 
     void DrawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width, int height, bool processAlpha);
 
     GraphicsClip Clip { get; set; }
 
     void ClipRect(GraphicsClip clip);
+
+    bool DottedStroke { set; }
 }

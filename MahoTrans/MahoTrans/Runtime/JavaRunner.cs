@@ -1543,11 +1543,10 @@ public class JavaRunner
         var index = frame.PopInt();
         var reference = frame.PopReference();
         var array = state.Resolve<Array>(reference);
-        array.CheckInBounds(index);
         if (array is Array<bool> b)
-            b.Value[index] = value != 0;
+            b[index] = value != 0;
         else if (array is Array<sbyte> s)
-            s.Value[index] = value;
+            s[index] = value;
         else
             throw new JavaRuntimeError();
     }
@@ -1556,9 +1555,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<char>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<char>>(reference);
         frame.PushChar(array[index]);
     }
 
@@ -1566,9 +1563,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<short>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<short>>(reference);
         frame.PushShort(array[index]);
     }
 
@@ -1576,9 +1571,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<Reference>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<Reference>>(reference);
         frame.PushReference(array[index]);
     }
 
@@ -1586,9 +1579,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<double>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<double>>(reference);
         frame.PushDouble(array[index]);
     }
 
@@ -1596,9 +1587,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<float>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<float>>(reference);
         frame.PushFloat(array[index]);
     }
 
@@ -1606,9 +1595,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<long>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<long>>(reference);
         frame.PushLong(array[index]);
     }
 
@@ -1616,9 +1603,7 @@ public class JavaRunner
     {
         var index = frame.PopInt();
         var reference = frame.PopReference();
-        var array = state.Resolve<Array<int>>(reference).Value;
-        if (index < 0 || index >= array.Length)
-            state.Throw<ArrayIndexOutOfBoundsException>();
+        var array = state.Resolve<Array<int>>(reference);
         frame.PushInt(array[index]);
     }
 
@@ -1630,9 +1615,9 @@ public class JavaRunner
         if (index < 0 || index >= array.BaseValue.Length)
             state.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)
-            frame.PushBool(b.Value[index]);
+            frame.PushBool(b[index]);
         else if (array is Array<sbyte> s)
-            frame.PushByte(s.Value[index]);
+            frame.PushByte(s[index]);
         else
             throw new JavaRuntimeError($"Unknown byte array type: {array.GetType()}");
     }

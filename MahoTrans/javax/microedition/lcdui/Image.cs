@@ -33,19 +33,11 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage([JavaType("[B")] Reference buf, int from, int len)
     {
-        try
-        {
-            var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
+        var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
 
-            var image = Jvm.AllocateObject<Image>();
-            image.Handle = Toolkit.Images.CreateFromFile(new Memory<byte>(blob, from, len));
-            return image.This;
-        }
-        catch
-        {
-            Jvm.Throw<IOException>();
-        }
-        return default;
+        var image = Jvm.AllocateObject<Image>();
+        image.Handle = Toolkit.Images.CreateFromFile(new ReadOnlySpan<byte>(blob, from, len));
+        return image.This;
     }
 
     [return: JavaType(typeof(Image))]

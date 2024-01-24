@@ -28,7 +28,7 @@ public interface IMedia : IToolkit
     /// <param name="contentType">Content type.</param>
     /// <param name="callbackTarget">Object for callbacks.</param>
     /// <returns>Media handle.</returns>
-    MediaHandle Create(Memory<sbyte> data, string contentType, Reference callbackTarget);
+    MediaHandle Create(ReadOnlySpan<sbyte> data, string? contentType, Reference callbackTarget);
 
     /// <summary>
     ///     Creates media player from MRL.
@@ -119,7 +119,7 @@ public interface IMedia : IToolkit
     #region Control APIs
 
     /// <summary>
-    /// Gets bit flags of available controls for given player.
+    ///     Gets bit flags of available controls for given player.
     /// </summary>
     /// <param name="media">Media handle.</param>
     /// <returns>Flags of available controls.</returns>

@@ -38,17 +38,43 @@ public interface IRecordStore : IToolkit
     /// <returns>False, if there is no such store.</returns>
     bool DeleteStore(string name);
 
-    int AddRecord(string name, sbyte[] data, int offset, int count);
+    /// <summary>
+    ///     Adds data to record store. Data is added on the slot that returned by <see cref="GetNextId" />. See MIDP docs for
+    ///     details.
+    /// </summary>
+    /// <param name="name">Name of store to add to.</param>
+    /// <param name="data">Data to add.</param>
+    /// <returns>Index of added slot.</returns>
+    int AddRecord(string name, ReadOnlySpan<byte> data);
 
-    void DeleteRecord(string name, int id);
+
+    /// <summary>
+    ///     Deletes a slot from store.
+    /// </summary>
+    /// <param name="name">Name of the store.</param>
+    /// <param name="id">Slot index.</param>
+    /// <returns>
+    ///     False is returned if <paramref name="id" /> is invalid. InvalidRecordIDException must be thrown by
+    ///     implementation in such case.
+    /// </returns>
+    bool DeleteRecord(string name, int id);
 
     int GetSize(string name);
 
+    /// <summary>
+    ///     Gets size of slot in a store.
+    /// </summary>
+    /// <param name="name">Name of the store.</param>
+    /// <param name="id">Slot index.</param>
+    /// <returns>
+    ///     Size of data in the slot in bytes. Null if <paramref name="id" /> is invalid. InvalidRecordIDException must be
+    ///     thrown by implementation in such case.
+    /// </returns>
     int? GetSize(string name, int id);
 
-    sbyte[]? GetRecord(string name, int id);
+    byte[]? GetRecord(string name, int id);
 
-    void SetRecord(string name, int id, sbyte[] data, int offset, int count);
+    bool SetRecord(string name, int id, ReadOnlySpan<byte> data);
 
     int GetNextId(string name);
 
