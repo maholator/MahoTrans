@@ -1,14 +1,12 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Abstractions;
-
 namespace MahoTrans.ToolkitImpls.Rms;
 
 /// <summary>
 ///     Record store implementation which holds all the data in a dictionary.
 /// </summary>
-public sealed class VirtualRms : IRecordStore
+public sealed class VirtualRms : ISnapshotableRecordStore
 {
     /// <summary>
     ///     Keeps records. <br />
@@ -92,6 +90,8 @@ public sealed class VirtualRms : IRecordStore
         return _storage[name][id - 1]?.Length;
     }
 
+    public int AvailableMemory => 1024 * 1024 * 1204;
+
     public byte[]? GetRecord(string name, int id)
     {
         if (id < 1 || id > _storage[name].Count)
@@ -113,5 +113,23 @@ public sealed class VirtualRms : IRecordStore
     public int GetCount(string name)
     {
         return _storage[name].Count(x => x != null);
+    }
+
+    public VirtualRms TakeSnapshot()
+    {
+        var dict = new Dictionary<string, List<byte[]?>>();
+
+        foreach (var (name, slots) in _storage)
+        {
+            var clone = new List<byte[]?>(slots.Count);
+            foreach (var slot in slots)
+            {
+                clone.Add(slot?.ToArray());
+            }
+
+            dict.Add(name, clone);
+        }
+
+        return new VirtualRms(dict);
     }
 }

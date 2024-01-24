@@ -185,8 +185,7 @@ public class RecordStore : Object
 
     public int getSizeAvailable()
     {
-        //TODO
-        return 798 * 1024 + 590;
+        return Toolkit.RecordStore.AvailableMemory;
     }
 
     public int getVersion() => _version;
