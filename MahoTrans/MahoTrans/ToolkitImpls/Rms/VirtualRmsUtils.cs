@@ -31,9 +31,9 @@ namespace MahoTrans.ToolkitImpls.Rms;
 /// </remarks>
 public static class VirtualRmsUtils
 {
-    public static void Write(this VirtualRms rms, Stream strean)
+    public static void Write(this VirtualRms rms, Stream stream)
     {
-        using var writer = new BeBinaryWriter(strean, Encoding.UTF8, true);
+        using var writer = new BeBinaryWriter(stream, Encoding.UTF8, true);
         var dict = rms.Storage;
 
         // count of stores

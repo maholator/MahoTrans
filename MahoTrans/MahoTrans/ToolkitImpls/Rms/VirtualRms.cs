@@ -16,7 +16,7 @@ public sealed class VirtualRms : ISnapshotableRecordStore
     /// </summary>
     private readonly Dictionary<string, List<byte[]?>> _storage;
 
-    internal IReadOnlyDictionary<string, List<byte[]?>> Storage => _storage;
+    public IReadOnlyDictionary<string, List<byte[]?>> Storage => _storage;
 
     public VirtualRms() => _storage = new Dictionary<string, List<byte[]?>>();
 
