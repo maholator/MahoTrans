@@ -107,7 +107,9 @@ public sealed class VirtualRms : ISnapshotableRecordStore
 
     public int GetNextId(string name)
     {
-        return _storage[name].Count;
+        // if store is empty, count is 0, our ID is 1.
+        // if store has 2 records, 1 and 2, our ID is count+1 (2+1=3).
+        return _storage[name].Count + 1;
     }
 
     public int GetCount(string name)
