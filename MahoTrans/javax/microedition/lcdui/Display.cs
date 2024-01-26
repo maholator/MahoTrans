@@ -41,6 +41,11 @@ public class Display : Object
             return;
         }
 
+        // we ignore double-sets of displayables, i guess?
+        //TODO notify toolkit about "screen resume"
+        if (Current == d)
+            return;
+
         if (Jvm.ResolveObject(d) is Alert a)
             a.Next = Current;
 
@@ -50,9 +55,10 @@ public class Display : Object
 
     public void setCurrent([JavaType(typeof(Alert))] Reference alert, [JavaType(typeof(Displayable))] Reference next)
     {
-        if (next.IsNull)
+        if (next.IsNull || alert.IsNull)
             Jvm.Throw<NullPointerException>();
 
+        // i added check above for readability
         var a = Jvm.Resolve<Alert>(alert);
         a.Next = next;
 
