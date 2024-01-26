@@ -154,6 +154,9 @@ public class Graphics : Object, DirectGraphics
     public void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) =>
         Implementation.FillTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, (uint)argbColor);
 
+    public void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) =>
+        Implementation.DrawTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, (uint)argbColor);
+
     public void drawArc(int x, int y, int w, int h, int s, int e) =>
         Implementation.DrawArc(x + _tx, y + _ty, w, h, s, e, _color);
 
