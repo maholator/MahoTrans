@@ -55,6 +55,9 @@ public class PlayerImpl : Object, Player
 
     public void start()
     {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
+
         if (State == STARTED)
             return;
 
@@ -99,6 +102,7 @@ public class PlayerImpl : Object, Player
             stop();
         State = CLOSED;
         Toolkit.Media.Dispose(Handle);
+        State = CLOSED;
     }
 
     public void setLoopCount(int count)
@@ -220,6 +224,8 @@ public class PlayerImpl : Object, Player
     [return: JavaType("[Ljavax/microedition/media/Control;")]
     public Reference getControls()
     {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
         var volume = AllocVolomeControl();
         return Jvm.AllocateArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
     }
@@ -227,6 +233,8 @@ public class PlayerImpl : Object, Player
     [return: JavaType(typeof(Control))]
     public Reference getControl([String] Reference type)
     {
+        if (State == CLOSED)
+            Jvm.Throw<IllegalStateException>();
         //TODO
         var name = Jvm.ResolveString(type);
         if (name == "javax.microedition.media.control.VolumeControl" || name == "VolumeControl")
@@ -268,7 +276,10 @@ public class PlayerImpl : Object, Player
         }
 
         if (State != CLOSED)
+        {
             Toolkit.Media.Dispose(Handle);
+            State = CLOSED;
+        }
 
         return false;
     }
