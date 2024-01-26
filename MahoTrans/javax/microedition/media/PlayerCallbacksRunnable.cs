@@ -20,7 +20,7 @@ public class PlayerCallbacksRunnable : Object, Runnable
     public Reference Targets;
 
     [InitMethod]
-    public void Init(Reference player, [String] Reference eventName, Reference args, Reference targets)
+    public void Init([JavaType(typeof(Player))] Reference player, [String] Reference eventName, Reference args, Reference targets)
     {
         base.Init();
         Player = player;

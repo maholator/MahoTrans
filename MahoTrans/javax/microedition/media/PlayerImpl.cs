@@ -3,11 +3,16 @@
 
 using java.lang;
 using javax.microedition.media.control;
+using MahoTrans;
+using MahoTrans.Abstractions;
+using MahoTrans.Builder;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
+using String = java.lang.String;
 using Thread = java.lang.Thread;
 
 namespace javax.microedition.media;
@@ -24,18 +29,22 @@ public class PlayerImpl : Object, Player
     /// </summary>
     public int listenersPending;
 
-    public void realize()
+    public void checkNotClosed()
     {
         if (State == CLOSED)
             Jvm.Throw<IllegalStateException>();
+    }
+
+    public void realize()
+    {
+        checkNotClosed();
         if (State == UNREALIZED)
             State = REALIZED;
     }
 
     public void prefetch()
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
 
         // implicit realize
         if (State == UNREALIZED)
@@ -53,14 +62,63 @@ public class PlayerImpl : Object, Player
         }
     }
 
-    public void start()
+    [JavaDescriptor("()V")]
+    public JavaMethodBody start(JavaClass cls)
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getState), typeof(int));
+        b.AppendConstant(STARTED);
+        using (b.AppendGoto(JavaOpcode.if_icmpne))
+        {
+            b.AppendReturn();
+        }
 
-        if (State == STARTED)
-            return;
+        AppendMediaTimeCallbackConstruction(b, PlayerListener.STARTED);
 
+        b.AppendThis();
+        b.AppendVirtcall(nameof(startInternal), typeof(void));
+
+        b.AppendVirtcall(nameof(PlayerCallbacksRunnable.run), typeof(void));
+        b.AppendReturn();
+
+        return b.Build(7, 1);
+    }
+
+    [JavaIgnore]
+    private static void AppendMediaTimeCallbackConstruction(JavaMethodBuilder b, string eventName)
+    {
+        b.AppendNewObject<PlayerCallbacksRunnable>();
+        b.Append(JavaOpcode.dup);
+
+        // runnable > runnable
+
+        b.AppendThis();
+        b.AppendConstant(eventName);
+
+        // runnable > runnable > this > event
+        b.AppendNewObject<Long>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getMediaTime), typeof(long));
+        b.AppendVirtcall("<init>", typeof(void), typeof(long));
+
+        // runnable > runnable > this > event > time
+
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getListeners), "()[Ljavax/microedition/media/PlayerListener;");
+
+        // runnable > runnable > this > event > time > listeners
+
+        b.AppendVirtcall("<init>", typeof(void), typeof(Player), typeof(String), typeof(Object), typeof(Object));
+
+        // runnable
+    }
+
+    public void startInternal()
+    {
         if (State != PREFETCHED)
             prefetch();
 
@@ -68,16 +126,35 @@ public class PlayerImpl : Object, Player
         State = STARTED;
     }
 
-    public void stop()
+    [JavaDescriptor("()V")]
+    public JavaMethodBody stop(JavaClass cls)
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
-
-        if (State == STARTED)
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getState), typeof(int));
+        b.AppendConstant(STARTED);
+        using (b.AppendGoto(JavaOpcode.if_icmpeq))
         {
-            Toolkit.Media.Stop(Handle);
-            State = PREFETCHED;
+            b.AppendReturn();
         }
+
+        AppendMediaTimeCallbackConstruction(b, PlayerListener.STOPPED);
+
+        b.AppendThis();
+        b.AppendVirtcall(nameof(stopInternal), typeof(void));
+
+        b.AppendVirtcall(nameof(PlayerCallbacksRunnable.run), typeof(void));
+        b.AppendReturn();
+
+        return b.Build(7, 1);
+    }
+
+    public void stopInternal()
+    {
+        Toolkit.Media.Stop(Handle);
+        State = PREFETCHED;
     }
 
     public void deallocate()
@@ -99,7 +176,8 @@ public class PlayerImpl : Object, Player
         if (State == CLOSED)
             return;
         if (State == STARTED)
-            stop();
+            stopInternal();
+        Toolkit.Logger?.LogRuntime(MTLogLevel.Info, $"Closing player {Handle.Id} via close() call");
         State = CLOSED;
         Toolkit.Media.Dispose(Handle);
         State = CLOSED;
@@ -145,6 +223,12 @@ public class PlayerImpl : Object, Player
 
     public List<Reference> Listeners = new();
 
+    [return: JavaType("[Ljavax/microedition/media/PlayerListener;")]
+    public Reference getListeners()
+    {
+        return Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+    }
+
     public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference playerListener)
     {
         if (playerListener.IsNull)
@@ -177,6 +261,12 @@ public class PlayerImpl : Object, Player
     [JavaIgnore]
     public void Update(string eventName, Reference data, bool changeState)
     {
+        if (State == CLOSED)
+        {
+            throw new JavaRuntimeError(
+                $"Closed player {Handle.Id} got event {eventName} with state change {changeState}");
+        }
+
         if (changeState)
         {
             if (eventName == PlayerListener.STARTED)
@@ -277,6 +367,7 @@ public class PlayerImpl : Object, Player
 
         if (State != CLOSED)
         {
+            Toolkit.Logger?.LogRuntime(MTLogLevel.Info, $"Closing player {Handle.Id} during object delete");
             Toolkit.Media.Dispose(Handle);
             State = CLOSED;
         }
