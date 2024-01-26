@@ -6,6 +6,7 @@ using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Exceptions;
+using Newtonsoft.Json;
 
 namespace java.lang;
 
@@ -31,7 +32,11 @@ public class Throwable : Object
     /// <summary>
     ///     Stack trace. Deeper methods come first. This must be initialized to something sane during java constructor call.
     /// </summary>
-    [JavaIgnore] public IMTStackFrame[] StackTrace = null!;
+    /// <remarks>
+    ///     <see cref="JsonIgnoreAttribute" /> is needed because call stack is stored as references to actual methods. There is
+    ///     no way to snapshot call stack.
+    /// </remarks>
+    [JsonIgnore] [JavaIgnore] public IMTStackFrame[] StackTrace = null!;
 
     public ThrowSource Source;
 
