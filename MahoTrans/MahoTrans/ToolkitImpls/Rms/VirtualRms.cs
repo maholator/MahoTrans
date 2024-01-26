@@ -52,7 +52,7 @@ public sealed class VirtualRms : ISnapshotableRecordStore
     public int AddRecord(string name, ReadOnlySpan<byte> data)
     {
         var id = GetNextId(name);
-        _storage[name][id] = data.ToArray();
+        _storage[name].Add(data.ToArray());
         return id;
     }
 
