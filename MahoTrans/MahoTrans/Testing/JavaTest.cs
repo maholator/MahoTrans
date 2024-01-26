@@ -3,6 +3,7 @@
 
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Config;
 using MahoTrans.ToolkitImpls.Ams;
 using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Loggers;

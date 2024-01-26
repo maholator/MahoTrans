@@ -3,7 +3,7 @@
 
 using MahoTrans.Abstractions;
 
-namespace MahoTrans.Runtime;
+namespace MahoTrans.Runtime.Config;
 
 /// <summary>
 ///     Sets kind of loop in which interpreter will run.

@@ -6,6 +6,7 @@ using System.Text;
 using javax.microedition.ams;
 using javax.microedition.midlet;
 using JetBrains.Annotations;
+using MahoTrans.Runtime.Config;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;

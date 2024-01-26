@@ -3,7 +3,7 @@
 
 using System.ComponentModel;
 
-namespace MahoTrans.Runtime;
+namespace MahoTrans.Runtime.Config;
 
 public enum AllocatorBehaviourOnOverflow
 {
