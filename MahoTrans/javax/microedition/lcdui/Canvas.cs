@@ -64,7 +64,14 @@ public class Canvas : Displayable
         Jvm.EventQueue.Enqueue<RepaintEvent>(s => s.Target = This);
     }
 
-    public void flushGraphics() => Toolkit.Display.Flush(Handle);
+    public void flushGraphics()
+    {
+        Toolkit.Display.Flush(Handle);
+        if (!CachedGraphics.IsNull)
+        {
+            CachedGraphics.As<Graphics>().Reset();
+        }
+    }
 
     [JavaDescriptor("()V")]
     public JavaMethodBody serviceRepaints(JavaClass cls)
