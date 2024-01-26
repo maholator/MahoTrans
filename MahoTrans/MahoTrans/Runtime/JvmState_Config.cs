@@ -10,5 +10,6 @@ public partial class JvmState
     public ToolkitCollection Toolkit;
     private readonly ExecutionManner _executionManner;
     public AllocatorBehaviourOnOverflow OnOverflow;
+    public GraphicsFlow GraphicsFlow;
     public bool UseBridgesForFields = true;
 }
