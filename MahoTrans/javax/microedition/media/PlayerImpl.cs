@@ -11,7 +11,7 @@ using Object = java.lang.Object;
 
 namespace javax.microedition.media;
 
-public class PlayerImpl : Object, Player
+public class PlayerImpl : Object, Player, Runnable
 {
     [JavaIgnore] public MediaHandle Handle;
 
@@ -173,8 +173,17 @@ public class PlayerImpl : Object, Player
     }
 
     [JavaIgnore]
-    public void Update(MediaHandle player, string eventName, Reference data)
+    public void Update(string eventName, Reference data)
     {
+        if (eventName == PlayerListener.STARTED)
+        {
+            State = STARTED;
+        }
+        else if (eventName == PlayerListener.END_OF_MEDIA || eventName == PlayerListener.STOPPED)
+        {
+            State = PREFETCHED;
+        }
+        //todo post events
     }
 
     #endregion
