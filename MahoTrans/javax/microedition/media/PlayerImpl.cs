@@ -78,7 +78,7 @@ public class PlayerImpl : Object, Player
             Jvm.Throw<IllegalStateException>();
 
         if (State == STARTED)
-            stop();
+            Toolkit.Media.Stop(Handle);
         if (State == UNREALIZED || State == REALIZED)
             return;
 
@@ -178,16 +178,21 @@ public class PlayerImpl : Object, Player
     /// </summary>
     /// <param name="eventName">Event name.</param>
     /// <param name="data">Event data. See MIDP docs.</param>
+    /// <param name="changeState">If false, <see cref="State"/> won't be touched, only <see cref="Listeners"/> will be notified.</param>
     [JavaIgnore]
-    public void Update(string eventName, Reference data)
+    public void Update(string eventName, Reference data, bool changeState)
     {
-        if (eventName == PlayerListener.STARTED)
+        if (changeState)
         {
-            State = STARTED;
-        }
-        else if (eventName == PlayerListener.END_OF_MEDIA || eventName == PlayerListener.STOPPED)
-        {
-            State = PREFETCHED;
+            if (eventName == PlayerListener.STARTED)
+            {
+                State = STARTED;
+            }
+            else if (eventName == PlayerListener.END_OF_MEDIA || eventName == PlayerListener.STOPPED)
+            {
+                if (State == STARTED)
+                    State = PREFETCHED;
+            }
         }
 
         if (Listeners.Count == 0)
