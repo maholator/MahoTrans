@@ -11,7 +11,7 @@ using Object = java.lang.Object;
 
 namespace javax.microedition.media;
 
-public class Player : Object
+public class PlayerImpl : Object, Player
 {
     [JavaIgnore] public MediaHandle Handle;
 
