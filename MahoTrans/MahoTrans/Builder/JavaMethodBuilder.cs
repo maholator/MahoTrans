@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -11,6 +11,9 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Builder;
 
+/// <summary>
+///     Utility for building JVM bytecode pieces.
+/// </summary>
 public class JavaMethodBuilder
 {
     private readonly JavaClass _class;
@@ -22,6 +25,13 @@ public class JavaMethodBuilder
 
     private readonly List<JavaTryCatch> _tryCatches = new();
 
+    /// <summary>
+    ///     Creates a builder.
+    /// </summary>
+    /// <param name="cls">
+    ///     Class, where the method will be placed. Usually, you get it in arguments of non-native method
+    ///     builder.
+    /// </param>
     public JavaMethodBuilder(JavaClass cls)
     {
         _class = cls;

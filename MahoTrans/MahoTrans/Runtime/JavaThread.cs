@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -141,12 +141,15 @@ public class JavaThread
     }
 
     /// <summary>
-    ///     Creates thread for passed java model. Does nothing with the created thread.
+    ///     Creates thread for passed java model. Does nothing with the created thread. This must be called inside JVM context.
     /// </summary>
-    /// <param name="thread"></param>
-    /// <param name="state"></param>
-    /// <returns></returns>
-    /// <exception cref="JavaRuntimeError"></exception>
+    /// <param name="thread">Thread to start.</param>
+    /// <returns>MT thread object.</returns>
+    /// <remarks>
+    ///     If you want to start a java thread from native code, this is not for you. Allocate a <see cref="Thread" /> via
+    ///     <see cref="JvmState.AllocateObject{T}" />, initialize it with a runnable via <see cref="Thread.InitTargeted" /> and
+    ///     call <see cref="Thread" />.<see cref="Thread.start" />.
+    /// </remarks>
     public static unsafe JavaThread CreateReal(Thread thread)
     {
         if (thread.This.IsNull)
