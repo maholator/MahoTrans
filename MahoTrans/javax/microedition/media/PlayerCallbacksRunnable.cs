@@ -70,6 +70,9 @@ public class PlayerCallbacksRunnable : Object, Runnable
             b.Append(JavaOpcode.arraylength);
         }
 
+        b.Append(JavaOpcode.aload_3);
+        b.AppendVirtcall(nameof(PlayerImpl.ListenersThreadExited), typeof(void));
+
         b.AppendReturn();
 
         return b.Build(4, 4);

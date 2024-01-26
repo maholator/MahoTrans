@@ -19,6 +19,11 @@ public class PlayerImpl : Object, Player
     public int State = UNREALIZED;
     private bool inited;
 
+    /// <summary>
+    /// This is >0 if there are working listener threads
+    /// </summary>
+    public int listenersPending;
+
     public void realize()
     {
         if (State == CLOSED)
@@ -101,20 +106,6 @@ public class PlayerImpl : Object, Player
         if (State == CLOSED)
             Jvm.Throw<IllegalStateException>();
         Toolkit.Media.SetLoopCount(Handle, count);
-    }
-
-    public override bool OnObjectDelete()
-    {
-        if (State == STARTED)
-        {
-            // we are still playing
-            return true;
-        }
-
-        if (State != CLOSED)
-            Toolkit.Media.Dispose(Handle);
-
-        return false;
     }
 
     public long setMediaTime(long now)
@@ -206,7 +197,20 @@ public class PlayerImpl : Object, Player
         var t = Jvm.AllocateObject<Thread>();
         t.InitTargeted(r.This);
 
+        lock (this)
+        {
+            listenersPending++;
+        }
+
         t.start();
+    }
+
+    public void ListenersThreadExited()
+    {
+        lock (this)
+        {
+            listenersPending--;
+        }
     }
 
     #endregion
@@ -216,8 +220,7 @@ public class PlayerImpl : Object, Player
     [return: JavaType("[Ljavax/microedition/media/Control;")]
     public Reference getControls()
     {
-        var volume = Jvm.AllocateObject<VolumeControl>();
-        volume.Handle = Handle;
+        var volume = AllocVolomeControl();
         return Jvm.AllocateArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
     }
 
@@ -228,12 +231,19 @@ public class PlayerImpl : Object, Player
         var name = Jvm.ResolveString(type);
         if (name == "javax.microedition.media.control.VolumeControl" || name == "VolumeControl")
         {
-            var ctrl = Jvm.AllocateObject<VolumeControl>();
-            ctrl.Handle = Handle;
-            return ctrl.This;
+            return AllocVolomeControl().This;
         }
 
         return Reference.Null;
+    }
+
+    [JavaIgnore]
+    private VolumeControl AllocVolomeControl()
+    {
+        var ctrl = Jvm.AllocateObject<VolumeControl>();
+        ctrl.Handle = Handle;
+        ctrl.Player = This;
+        return ctrl;
     }
 
     #endregion
@@ -241,6 +251,26 @@ public class PlayerImpl : Object, Player
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         queue.Enqueue(Listeners);
+    }
+
+    public override bool OnObjectDelete()
+    {
+        if (State == STARTED)
+        {
+            // we are still playing
+            return true;
+        }
+
+        if (listenersPending > 0)
+        {
+            // listeners are running in background
+            return true;
+        }
+
+        if (State != CLOSED)
+            Toolkit.Media.Dispose(Handle);
+
+        return false;
     }
 
     public const int CLOSED = 0;
