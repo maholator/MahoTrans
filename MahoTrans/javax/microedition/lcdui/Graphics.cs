@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using com.nokia.mid.ui;
@@ -207,12 +207,12 @@ public class Graphics : Object, DirectGraphics
     }
 
     public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
-        int transform, int x_dest,
-        int y_dest, int anchor)
+        int transform, int x_dest, int y_dest, int anchor)
     {
         var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height,
-            (SpriteTransform)transform, (GraphicsAnchor)anchor);
+        var t = (SpriteTransform)transform;
+        var a = (GraphicsAnchor)anchor;
+        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
     }
 
     public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
@@ -242,5 +242,14 @@ public class Graphics : Object, DirectGraphics
     {
         Toolkit.Images.ReleaseGraphics(Handle);
         return false;
+    }
+
+    public void Reset()
+    {
+        setFont(lcdui.Font.getDefaultFont());
+        _color = 0;
+        _tx = 0;
+        _ty = 0;
+        Implementation.Reset();
     }
 }

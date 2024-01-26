@@ -53,4 +53,9 @@ public interface IGraphics
     void ClipRect(GraphicsClip clip);
 
     bool DottedStroke { set; }
+
+    /// <summary>
+    ///     Brings graphics to initial state.
+    /// </summary>
+    void Reset();
 }
