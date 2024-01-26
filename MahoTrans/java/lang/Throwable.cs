@@ -1,10 +1,10 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Native;
-using MahoTrans.Runtime;
 using System.Diagnostics;
 using MahoTrans;
+using MahoTrans.Native;
+using MahoTrans.Runtime;
 using MahoTrans.Runtime.Exceptions;
 
 namespace java.lang;
@@ -14,7 +14,22 @@ public class Throwable : Object
     [String] public Reference Message;
 
     /// <summary>
-    /// Stack trace. Deeper methods come first. This must be initialized to something sane during java constructor call.
+    ///     <see cref="Message" />, resolved during constructor execution.
+    /// </summary>
+    /// <remarks>
+    ///     Well, this not how this is supposed to work. But we have what we have.
+    ///     Throwable objects are supposed to be stored as is by frontend for various purposes - logging, debugging, etc. While
+    ///     it's stored, it will likely be deleted from the heap by GC.
+    ///     Attempt to prevent this breaks concept of MT determinism. So, string object that contains message will be lost.
+    ///     Usually i would say something like "frontend should capture a full snapshot and work with it" but exception message
+    ///     is a TOO IMPORTANT thing because, well, it explains what happened.
+    ///     Why <see cref="Message" /> exists? Oh, well, because "new Throwable(abc).getMessage() == abc" must be true because
+    ///     java.
+    /// </remarks>
+    public string? MessageClr;
+
+    /// <summary>
+    ///     Stack trace. Deeper methods come first. This must be initialized to something sane during java constructor call.
     /// </summary>
     [JavaIgnore] public IMTStackFrame[] StackTrace = null!;
 
@@ -34,6 +49,7 @@ public class Throwable : Object
         base.Init();
         CaptureStackTrace();
         Message = message;
+        MessageClr = Jvm.ResolveStringOrDefault(message);
     }
 
     public void printStackTrace()
@@ -51,7 +67,7 @@ public class Throwable : Object
     }
 
     /// <summary>
-    /// Captures stack trace. This must be called in initialization method.
+    ///     Captures stack trace. This must be called in initialization method.
     /// </summary>
     [JavaIgnore]
     public void CaptureStackTrace()
