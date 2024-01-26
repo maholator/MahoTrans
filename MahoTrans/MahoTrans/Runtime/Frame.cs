@@ -39,10 +39,25 @@ public unsafe class Frame
     /// </summary>
     public int StackTop;
 
+    /// <summary>
+    ///     Length of <see cref="Stack" />. Never touch it manually!
+    /// </summary>
+    public ushort CurrentStackSize;
+
+    /// <summary>
+    ///     Length of <see cref="LocalVariables" />. Never touch it manually!
+    /// </summary>
+    public ushort CurrentLocalsSize;
+
+    public const ushort INIT_BUF_SIZE = 16;
+
     public Frame(JavaMethodBody method)
     {
         Method = method;
-        AllocateBuffers(method.LocalsCount, method.StackSize);
+        // we are trying to alloc at least INIT_BUF_SIZE size buffer, but our method may request more.
+        AllocateLocals(Math.Max(method.LocalsCount, INIT_BUF_SIZE));
+        AllocateStack(Math.Max(method.StackSize, INIT_BUF_SIZE));
+        ClearBuffers(method.LocalsCount, method.StackSize);
     }
 
     public void Reinitialize(JavaMethodBody method)
@@ -52,42 +67,86 @@ public unsafe class Frame
 
         if (Method == method)
         {
-            Unsafe.InitBlock(Stack, 0, (uint)(method.StackSize * sizeof(long)));
-            Unsafe.InitBlock(LocalVariables, 0, (uint)(method.LocalsCount * sizeof(long)));
+            ClearBuffers(method.LocalsCount, method.StackSize);
+            return;
         }
-        else
+
+        Method = method;
+        if (CurrentLocalsSize < method.LocalsCount)
         {
-            Method = method;
-            DeallocateBuffers();
-            AllocateBuffers(method.LocalsCount, method.StackSize);
+            DeallocateLocals();
+            AllocateLocals(method.LocalsCount);
         }
+
+        if (CurrentStackSize < method.StackSize)
+        {
+            DeallocateStack();
+            AllocateStack(method.StackSize);
+        }
+
+        ClearBuffers(method.LocalsCount, method.StackSize);
     }
 
-    private void AllocateBuffers(ushort locals, ushort stack)
+    #region Native buffers management
+
+    /// <summary>
+    ///     Fills native buffers with zeros.
+    /// </summary>
+    /// <param name="locals">Locals count.</param>
+    /// <param name="stack">Stack size.</param>
+    private void ClearBuffers(ushort locals, ushort stack)
     {
-        Stack = (long*)NativeMemory.Alloc(stack, sizeof(long));
-        Unsafe.InitBlock(Stack, 0, (uint)(stack * sizeof(long)));
-        LocalVariables = (long*)NativeMemory.Alloc(locals, sizeof(long));
         Unsafe.InitBlock(LocalVariables, 0, (uint)(locals * sizeof(long)));
+        Unsafe.InitBlock(Stack, 0, (uint)(stack * sizeof(long)));
     }
 
     /// <summary>
-    ///     Deallocates locals/stack buffers. This will be automatically done on object destruction.
+    ///     Allocates locals buffer.
     /// </summary>
-    private void DeallocateBuffers()
+    /// <param name="locals">Count of locals.</param>
+    private void AllocateLocals(ushort locals)
     {
-        if (Stack == null)
-            return;
+        LocalVariables = (long*)NativeMemory.Alloc(locals, sizeof(long));
+        CurrentLocalsSize = locals;
+    }
 
-        NativeMemory.Free(Stack);
-        NativeMemory.Free(LocalVariables);
+    /// <summary>
+    ///     Allocates stack buffer.
+    /// </summary>
+    /// <param name="stack">Stack size.</param>
+    private void AllocateStack(ushort stack)
+    {
+        Stack = (long*)NativeMemory.Alloc(stack, sizeof(long));
+        CurrentStackSize = stack;
+    }
 
+
+    /// <summary>
+    ///     Deallocates locals buffer. This will be automatically done on object destruction.
+    /// </summary>
+    private void DeallocateLocals()
+    {
+        if (LocalVariables != null)
+            NativeMemory.Free(LocalVariables);
+        LocalVariables = null;
+    }
+
+    /// <summary>
+    ///     Deallocates stack buffer. This will be automatically done on object destruction.
+    /// </summary>
+    private void DeallocateStack()
+    {
+        if (Stack != null)
+            NativeMemory.Free(Stack);
         Stack = null;
     }
 
+    #endregion
+
     ~Frame()
     {
-        DeallocateBuffers();
+        DeallocateLocals();
+        DeallocateStack();
     }
 
     public long[] DumpStack()
