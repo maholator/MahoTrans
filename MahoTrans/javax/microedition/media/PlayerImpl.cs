@@ -8,10 +8,11 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
+using Thread = java.lang.Thread;
 
 namespace javax.microedition.media;
 
-public class PlayerImpl : Object, Player, Runnable
+public class PlayerImpl : Object, Player
 {
     [JavaIgnore] public MediaHandle Handle;
 
@@ -172,6 +173,11 @@ public class PlayerImpl : Object, Player, Runnable
         Listeners.Remove(playerListener);
     }
 
+    /// <summary>
+    /// Updates player state based on events. Sends events to listeners. This must be called in context.
+    /// </summary>
+    /// <param name="eventName">Event name.</param>
+    /// <param name="data">Event data. See MIDP docs.</param>
     [JavaIgnore]
     public void Update(string eventName, Reference data)
     {
@@ -183,7 +189,19 @@ public class PlayerImpl : Object, Player, Runnable
         {
             State = PREFETCHED;
         }
-        //todo post events
+
+        if (Listeners.Count == 0)
+            return;
+
+        var targets = Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+
+        var r = Jvm.AllocateObject<PlayerCallbacksRunnable>();
+        r.Init(This, Jvm.InternalizeString(eventName), data, targets);
+
+        var t = Jvm.AllocateObject<Thread>();
+        t.InitTargeted(r.This);
+
+        t.start();
     }
 
     #endregion
