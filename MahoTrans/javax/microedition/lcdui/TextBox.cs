@@ -7,11 +7,11 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class TextBox : Screen
+public class TextBox : Screen, HasText
 {
     [JavaIgnore] public string Content = string.Empty;
 
-    public int MaxSize;
+    public int MaxSize { get; set; }
 
     [InitMethod]
     public void Init([String] Reference title, [String] Reference text, int maxSize, int constraints)
@@ -39,4 +39,10 @@ public class TextBox : Screen
     }
 
     public int getMaxSize() => MaxSize;
+
+    string HasText.Text
+    {
+        get => Content;
+        set => Content = value;
+    }
 }
