@@ -9,5 +9,5 @@ namespace javax.microedition.lcdui;
 public interface Choice
 {
     int SelectedIndex { get; set; }
-    bool[] SelectedIndices { get; set; }
+    bool[] SelectedIndixes { get; set; }
 }

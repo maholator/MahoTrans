@@ -23,7 +23,7 @@ public class List : Screen, Choice
         set => SelectedItem = value;
     }
 
-    bool[] Choice.SelectedIndices
+    bool[] Choice.SelectedIndixes
     {
         get => SelectedMap.ToArray();
         set => SelectedMap = value.ToList();
