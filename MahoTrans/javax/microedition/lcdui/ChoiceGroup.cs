@@ -29,6 +29,8 @@ public class ChoiceGroup : Item, Choice
         set => SelectedMap = value.ToList();
     }
 
+    int Choice.ItemsCount => Items.Count;
+
     [InitMethod]
     public void Init([String] Reference label, int listType)
     {

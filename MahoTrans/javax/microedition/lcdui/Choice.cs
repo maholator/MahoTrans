@@ -10,4 +10,5 @@ public interface Choice
 {
     int SelectedIndex { get; set; }
     bool[] SelectedIndixes { get; set; }
+    int ItemsCount { get; }
 }

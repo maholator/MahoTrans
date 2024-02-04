@@ -29,6 +29,8 @@ public class List : Screen, Choice
         set => SelectedMap = value.ToList();
     }
 
+    int Choice.ItemsCount => Items.Count;
+
     [JavaIgnore] public List<bool> SelectedMap = new();
 
     [ClassInit]
