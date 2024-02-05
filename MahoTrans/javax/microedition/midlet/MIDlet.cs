@@ -43,6 +43,15 @@ public class MIDlet : Object
         java.lang.System.exit(0);
     }
 
+    public void notifyPaused()
+    {
+        if (IsPaused)
+            return;
+
+        IsPaused = true;
+        Toolkit.AmsCallbacks?.MidletPaused();
+    }
+
     public bool platformRequest([String] Reference url)
     {
         Toolkit.AmsCallbacks?.PlatformRequest(Jvm.ResolveString(url));
