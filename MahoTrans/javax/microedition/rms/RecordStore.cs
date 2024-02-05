@@ -298,8 +298,10 @@ public class RecordStore : Object
     {
         CheckNotClosed();
         var arr = Jvm.ResolveArray<sbyte>(newData);
-        Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId,
+        var res = Toolkit.RecordStore.SetRecord(Jvm.ResolveString(StoreName), recordId,
             new ReadOnlySpan<byte>(arr.ToUnsigned(), offset, count));
+        if (!res)
+            Jvm.Throw<InvalidRecordIDException>();
     }
 
     #region Utils

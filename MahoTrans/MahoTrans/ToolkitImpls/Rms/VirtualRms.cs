@@ -101,8 +101,21 @@ public sealed class VirtualRms : ISnapshotableRecordStore
 
     public bool SetRecord(string name, int id, ReadOnlySpan<byte> data)
     {
-        _storage[name][id - 1] = data.ToArray();
-        return true;
+        var intId = id - 1;
+        if (intId < 0)
+            return false;
+        if (intId < _storage[name].Count)
+        {
+            _storage[name][id - 1] = data.ToArray();
+            return true;
+        }
+
+        if (intId == _storage[name].Count)
+        {
+            _storage[name].Add(data.ToArray());
+        }
+
+        return false;
     }
 
     public int GetNextId(string name)

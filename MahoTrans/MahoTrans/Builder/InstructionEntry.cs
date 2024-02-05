@@ -14,7 +14,6 @@ public class InstructionEntry : IBuilderEntry
         Instruction = instruction;
     }
 
-
     public int ArgsLength => Instruction.Args.Length;
 
     public static implicit operator Instruction(InstructionEntry entry)
