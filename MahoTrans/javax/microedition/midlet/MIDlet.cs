@@ -35,12 +35,12 @@ public class MIDlet : Object
 
     public void notifyDestroyed()
     {
-        Toolkit.Ams.DestroyMidlet();
+        java.lang.System.exit(0);
     }
 
     public bool platformRequest([String] Reference url)
     {
-        Toolkit.Ams.PlatformRequest(Jvm.ResolveString(url));
+        Toolkit.AmsCallbacks.PlatformRequest(Jvm.ResolveString(url));
         return false;
     }
 }

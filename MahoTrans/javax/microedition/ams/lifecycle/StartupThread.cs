@@ -10,14 +10,14 @@ using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using Thread = java.lang.Thread;
 
-namespace javax.microedition.ams;
+namespace javax.microedition.ams.lifecycle;
 
 /// <summary>
 ///     Thread that can start a MIDlet. Allocates the object, calls constructor and startApp.
 ///     Assign <see cref="MidletClassName" /> and <see cref="Manifest" /> fields and start it as a regular java thread.
 /// </summary>
 [PublicAPI]
-public class MidletStartup : Thread
+public class StartupThread : Thread
 {
     /// <summary>
     /// Name of MIDlet class. This will be instantiated.

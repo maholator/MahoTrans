@@ -90,8 +90,9 @@ static void Main(string midletClass) {
     {
         j.InitQueue(); // init ams queue
         // MidletStaertup is for example here: you may want to bootstrap your app in another way.
-        var runner = j.AllocateObject<MidletStartup>(); // alloc startup object
-        runner.MidletClassName = midletClass; // setup it
+        var runner = j.AllocateObject<StartupThread>(); // alloc startup object
+        runner.Manifest = new(); // we start with empty manifest
+        runner.MidletClassName = midletClass; // assign class name
         runner.start(); // start a thread
         // MT does nothing by itself! Launch your threads you want it to execute.
         j.ExecuteLoop(); // run jvm
