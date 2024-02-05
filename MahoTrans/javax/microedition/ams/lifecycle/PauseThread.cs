@@ -30,6 +30,7 @@ public class PauseThread : Thread
         b.AppendVirtcall("pauseApp", typeof(void));
         b.AppendThis();
         b.AppendVirtcall(nameof(Callback), typeof(void));
+        b.AppendReturn();
         return b.Build(1, 1);
     }
 

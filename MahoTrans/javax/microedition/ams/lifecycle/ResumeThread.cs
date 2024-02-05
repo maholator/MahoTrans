@@ -30,6 +30,7 @@ public class ResumeThread : Thread
         b.AppendVirtcall("startApp", typeof(void));
         b.AppendThis();
         b.AppendVirtcall(nameof(Callback), typeof(void));
+        b.AppendReturn();
         return b.Build(1, 1);
     }
 
