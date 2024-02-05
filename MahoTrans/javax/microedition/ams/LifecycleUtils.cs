@@ -27,6 +27,8 @@ public class LifecycleUtils : Object
 
     public static void ResumeMidlet()
     {
+        var thread = Jvm.AllocateObject<ResumeThread>();
+        thread.start();
     }
 
     public static void DestroyMidlet()
