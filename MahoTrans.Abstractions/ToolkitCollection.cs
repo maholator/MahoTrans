@@ -22,7 +22,7 @@ public class ToolkitCollection
 
     public readonly IDisplay Display;
 
-    public readonly IAms Ams;
+    public IAmsCallbacks? AmsCallbacks;
 
     public IRecordStore RecordStore;
 
@@ -35,7 +35,6 @@ public class ToolkitCollection
     public IHeapDebugger? HeapDebugger;
 
     public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display,
-        IAms ams,
         IRecordStore recordStore, IMedia media)
     {
         System = system;
@@ -43,7 +42,6 @@ public class ToolkitCollection
         Images = images;
         Fonts = fonts;
         Display = display;
-        Ams = ams;
         RecordStore = recordStore;
         Media = media;
     }

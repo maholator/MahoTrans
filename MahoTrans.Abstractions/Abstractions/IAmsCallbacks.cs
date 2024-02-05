@@ -4,24 +4,24 @@
 namespace MahoTrans.Abstractions;
 
 /// <summary>
-///     Toolkit that allows MIDlet to interact with AMS.
+///     Toolkit that allows MIDlet to interact with frontend.
 /// </summary>
-public interface IAms : IToolkit
+public interface IAmsCallbacks : IToolkit
 {
     /// <summary>
-    ///     Notifies AMS that MIDlet pauses.
+    ///     Fires when MIDlet enters "paused" state. This is called both when midlet pauses itself or when frontend does it. At this moment, midlet's
     /// </summary>
-    void PauseMidlet();
+    void MidletPaused();
 
     /// <summary>
-    ///     Asks AMS to resume MIDlet.
+    ///     Fires when midlet wants to resume
     /// </summary>
-    void ResumeMidlet();
+    void AskForResume();
 
     /// <summary>
-    ///     Asks AMS to destroy MIDlet.
+    ///     Fires on exit() call.
     /// </summary>
-    void DestroyMidlet();
+    void Exited(int code);
 
     /// <summary>
     ///     Performs "platform request" (i.e. opening an URL).
