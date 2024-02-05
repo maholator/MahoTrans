@@ -33,5 +33,7 @@ public class LifecycleUtils : Object
 
     public static void DestroyMidlet()
     {
+        var thread = Jvm.AllocateObject<DestroyThread>();
+        thread.start();
     }
 }
