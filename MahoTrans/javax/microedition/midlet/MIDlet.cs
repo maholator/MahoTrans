@@ -14,6 +14,11 @@ public class MIDlet : Object
 
     public Reference Display;
 
+    /// <summary>
+    /// This is true if MIDlet is in paused state.
+    /// </summary>
+    [JavaIgnore] public bool IsPaused;
+
     [InitMethod]
     public new void Init()
     {
@@ -40,7 +45,7 @@ public class MIDlet : Object
 
     public bool platformRequest([String] Reference url)
     {
-        Toolkit.AmsCallbacks.PlatformRequest(Jvm.ResolveString(url));
+        Toolkit.AmsCallbacks?.PlatformRequest(Jvm.ResolveString(url));
         return false;
     }
 }
