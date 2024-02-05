@@ -52,6 +52,14 @@ public class MIDlet : Object
         Toolkit.AmsCallbacks?.MidletPaused();
     }
 
+    public void resumeRequest()
+    {
+        if (!IsPaused)
+            return;
+
+        Toolkit.AmsCallbacks?.AskForResume();
+    }
+
     public bool platformRequest([String] Reference url)
     {
         Toolkit.AmsCallbacks?.PlatformRequest(Jvm.ResolveString(url));
