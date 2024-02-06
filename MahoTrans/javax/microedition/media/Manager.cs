@@ -16,6 +16,7 @@ public class Manager : Object
     public static Reference createPlayer(Reference stream, Reference type)
     {
         var str = stream.As<InputStream>();
+
         if (str is ByteArrayInputStream bais)
         {
             var buf = bais.buf.As<Array<sbyte>>().Value;
@@ -33,5 +34,16 @@ public class Manager : Object
     {
         Jvm.Throw<MediaException>();
         return Reference.Null;
+    }
+
+    [return: JavaType("[Ljava/lang/String;")]
+    public static Reference getSupportedContentTypes([String] Reference pr)
+    {
+        return new[]
+        {
+            "audio/midi",
+            "audio/mpeg",
+            "audio/x-wav"
+        }.AsJavaArray();
     }
 }
