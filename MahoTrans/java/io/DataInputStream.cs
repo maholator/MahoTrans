@@ -500,7 +500,7 @@ public class DataInputStream : InputStream, DataInput
         b.AppendThis();
         b.AppendGetLocalField(nameof(@in), typeof(InputStream));
         b.Append(JavaOpcode.iload_1);
-        b.AppendVirtcall(nameof(mark), typeof(void));
+        b.AppendVirtcall(nameof(mark), typeof(void), typeof(int));
         b.AppendReturn();
         return b.Build(2, 2);
     }
