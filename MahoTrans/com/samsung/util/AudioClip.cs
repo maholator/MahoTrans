@@ -9,6 +9,8 @@ namespace com.samsung.util;
 
 public class AudioClip : Object
 {
+    public static bool isSupported() => true;
+
     //TODO
     [InitMethod]
     public void Init(int type, [JavaType("[B")] Reference buf, int audioOffset, int audioLength)

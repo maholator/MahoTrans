@@ -15,4 +15,8 @@ public class DeviceControl : Object
     public static void startVibra(int i, long l)
     {
     }
+
+    public static void stopVibra()
+    {
+    }
 }
