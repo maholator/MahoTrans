@@ -481,4 +481,38 @@ public class DataInputStream : InputStream, DataInput
             }
         };
     }
+
+    [JavaDescriptor("()V")]
+    public JavaMethodBody reset(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendGetLocalField(nameof(@in), typeof(InputStream));
+        b.AppendVirtcall(nameof(reset), typeof(void));
+        b.AppendReturn();
+        return b.Build(1, 1);
+    }
+
+    [JavaDescriptor("(I)V")]
+    public JavaMethodBody mark(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendGetLocalField(nameof(@in), typeof(InputStream));
+        b.Append(JavaOpcode.iload_1);
+        b.AppendVirtcall(nameof(mark), typeof(void));
+        b.AppendReturn();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("()Z")]
+    public JavaMethodBody markSupported(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendGetLocalField(nameof(@in), typeof(InputStream));
+        b.AppendVirtcall(nameof(markSupported), typeof(bool));
+        b.AppendReturnInt();
+        return b.Build(2, 2);
+    }
 }
