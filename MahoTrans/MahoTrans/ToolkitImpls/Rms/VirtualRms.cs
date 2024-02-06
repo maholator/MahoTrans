@@ -106,6 +106,10 @@ public sealed class VirtualRms : ISnapshotableRecordStore
             return false;
         if (intId < _storage[name].Count)
         {
+            if (_storage[name][id - 1] == null)
+                // we can't write to deleted slots
+                return false;
+
             _storage[name][id - 1] = data.ToArray();
             return true;
         }
