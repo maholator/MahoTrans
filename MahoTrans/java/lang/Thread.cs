@@ -79,6 +79,16 @@ public class Thread : Object, Runnable
         };
     }
 
+    [JavaDescriptor("()V")]
+    public JavaMethodBody runInternal(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(run), "()V");
+        b.AppendReturn();
+        return b.Build(1, 1);
+    }
+
     [return: JavaType(typeof(Thread))]
     public static Reference currentThread() => CurrentThread!.Model;
 

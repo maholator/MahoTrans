@@ -155,9 +155,8 @@ public class JavaThread
         if (thread.This.IsNull)
             throw new JavaRuntimeError("Attempt to launch thread which is created not in java heap.");
 
-        var runDescr = new NameDescriptor("run", "()V");
         var jvm = Object.Jvm;
-        var method = jvm.GetVirtualMethod(jvm.GetVirtualPointer(runDescr), thread.This);
+        var method = jvm.Classes["java/lang/Thread"].Methods[new NameDescriptor(nameof(Thread.runInternal), "()V")];
 
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;
