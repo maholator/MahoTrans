@@ -73,53 +73,23 @@ public class JavaRunner
         }
     }
 
-    //TODO this is too expensive and must be precalculated
     private static bool HandleException(Frame frame, int pointer, Throwable t)
     {
-        var instr = frame.Method.Code[pointer];
-
-        foreach (var @catch in frame.Method.Catches)
+        foreach (var linkedCatch in frame.Method.LinkedCatches)
         {
-            if (@catch.IsIn(instr))
+            if (!linkedCatch.IsIn(pointer))
+                continue;
+
+            if (t.JavaClass.Is(linkedCatch.ExceptionType))
             {
-                string allowedType = (string)frame.Method.Method.Class.Constants[@catch.Type];
-                if (t.JavaClass.Is(allowedType))
-                {
-                    var code = frame.Method.Code;
-                    var tByte = @catch.CatchStart;
-                    if (tByte < pointer)
-                    {
-                        for (var j = pointer; j >= 0; j--)
-                        {
-                            if (code[j].Offset == tByte)
-                            {
-                                frame.Pointer = j;
-                                goto push;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (var j = pointer; j < code.Length; j++)
-                        {
-                            if (code[j].Offset == tByte)
-                            {
-                                frame.Pointer = j;
-                                goto push;
-                            }
-                        }
-                    }
-                }
+                frame.Pointer = linkedCatch.CatchStart;
+                frame.DiscardAll();
+                frame.PushReference(t.This);
+                return true;
             }
         }
 
         return false;
-
-        // pushing exception back to stack
-        push:
-        frame.DiscardAll();
-        frame.PushReference(t.This);
-        return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]

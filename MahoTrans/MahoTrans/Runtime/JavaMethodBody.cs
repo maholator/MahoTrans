@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
@@ -28,6 +28,11 @@ public class JavaMethodBody
     ///     Linked bytecode of this method. Do not forget to call <see cref="EnsureBytecodeLinked" /> before usage!
     /// </summary>
     public LinkedInstruction[] LinkedCode = null!;
+
+    /// <summary>
+    ///     Linked exceptions table of this method. Do not forget to call <see cref="EnsureBytecodeLinked" /> before usage!
+    /// </summary>
+    public LinkedCatch[] LinkedCatches = null!;
 
     /// <summary>
     ///     Types of local variables. This method must be verified.
@@ -127,6 +132,53 @@ public class JavaMethodBody
         {
             int trys = (TryStart << 16) | TryEnd;
             return trys ^ CatchStart;
+        }
+    }
+
+    /// <summary>
+    ///     <see cref="Catch" />, but precalculated.
+    /// </summary>
+    public struct LinkedCatch
+    {
+        /// <summary>
+        ///     Index of first instruction, covered with this try. Inclusive.
+        /// </summary>
+        public ushort TryStart;
+
+        /// <summary>
+        ///     Index of last instruction, covered with this try. Exclusive.
+        /// </summary>
+        public ushort TryEnd;
+
+        /// <summary>
+        ///     Index of instruction to jump to get into catch block.
+        /// </summary>
+        public ushort CatchStart;
+
+        /// <summary>
+        ///     Exception type. Always non-null.
+        /// </summary>
+        public JavaClass ExceptionType;
+
+        public LinkedCatch(ushort tryStart, ushort tryEnd, ushort catchStart, JavaClass exceptionType)
+        {
+            TryStart = tryStart;
+            TryEnd = tryEnd;
+            CatchStart = catchStart;
+            ExceptionType = exceptionType;
+        }
+
+        public LinkedCatch(int tryStart, int tryEnd, int catchStart, JavaClass exceptionType)
+        {
+            TryStart = (ushort)tryStart;
+            TryEnd = (ushort)tryEnd;
+            CatchStart = (ushort)catchStart;
+            ExceptionType = exceptionType;
+        }
+
+        public bool IsIn(int index)
+        {
+            return index >= TryStart && index <= TryEnd;
         }
     }
 

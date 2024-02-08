@@ -13,9 +13,11 @@ public static class BytecodeLinker
     {
         var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
         var cls = method.Method.Class;
+        // we need this because linux CoreCLR can't break on handled exceptions.
 #if DEBUG
         LinkInternal(method, cls, jvm, isClinit);
 #else
+        // when on release, it's safe to catch it and rethrow with additional context.
         try
         {
             LinkInternal(method, cls, jvm, isClinit);
@@ -361,6 +363,7 @@ public static class BytecodeLinker
         stackBeforeInstruction[0] = Array.Empty<PrimitiveType>(); // we enter with empty stack
 
         // offsets cache
+        // key is offset, value is instruction index
         Dictionary<int, int> offsets = new Dictionary<int, int>();
         for (int i = 0; i < code.Length; i++)
             offsets[code[i].Offset] = i;
@@ -2102,6 +2105,7 @@ public static class BytecodeLinker
             }
         }
 
+        method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
         method.StackTypes = stackBeforeInstruction!;
     }
@@ -2125,6 +2129,63 @@ public static class BytecodeLinker
 
         var argsCount = DescriptorUtils.ParseMethodArgsCount(nd.Descriptor);
         return (jvm.GetVirtualPointer(nd), (ushort)argsCount);
+    }
+
+    /// <summary>
+    /// Links exceptions table.
+    /// </summary>
+    /// <param name="raw">Raw table.</param>
+    /// <param name="constants">Class constants.</param>
+    /// <param name="offsets">Offsets map. Key is offset, value is index.</param>
+    /// <param name="jvm">Jvm.</param>
+    /// <returns>Linked table.</returns>
+    private static JavaMethodBody.LinkedCatch[] LinkCatches(JavaMethodBody.Catch[] raw, object[] constants,
+        Dictionary<int, int> offsets, JvmState jvm)
+    {
+        var result = new JavaMethodBody.LinkedCatch[raw.Length];
+        for (int i = 0; i < raw.Length; i++)
+        {
+            var c = raw[i];
+            var tryStart = offsets[c.TryStart];
+            var catchStart = offsets[c.CatchStart];
+            // try end is exclusive bound, so here is a little hack:
+            int tryEnd;
+            int rawTryEnd = c.TryEnd;
+            while (true)
+            {
+                if (offsets.TryGetValue(rawTryEnd, out var index))
+                {
+                    // we found NEXT instruction
+                    tryEnd = index - 1;
+                    break;
+                }
+
+                rawTryEnd++;
+                if (rawTryEnd == int.MaxValue)
+                    throw new JavaLinkageException($"Broken catch section {i}");
+            }
+
+            JavaClass type;
+            if (c.Type == 0)
+                type = jvm.GetClass("java/lang/Throwable");
+            else
+            {
+                var obj = constants[c.Type];
+                if (obj is string s)
+                {
+                    type = jvm.GetClass(s);
+                }
+                else
+                {
+                    throw new JavaLinkageException(
+                        $"Catch type constant {c.Type} was {obj.GetType()}, string expected");
+                }
+            }
+
+            result[i] = new JavaMethodBody.LinkedCatch(tryStart, tryEnd, catchStart, type);
+        }
+
+        return result;
     }
 
     public static int Combine(byte indexByte1, byte indexByte2)
