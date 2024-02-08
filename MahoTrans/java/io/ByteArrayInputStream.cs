@@ -81,16 +81,17 @@ public class ByteArrayInputStream : InputStream
         return read;
     }
 
-    public void mark(int readlimit)
+    public new void mark(int readlimit)
     {
         markPos = pos;
     }
 
-    public void reset() {
+    public new void reset()
+    {
         pos = markPos;
     }
 
-    public bool markSupported() => true;
+    public new bool markSupported() => true;
 
     public new int available() => count - pos;
 
