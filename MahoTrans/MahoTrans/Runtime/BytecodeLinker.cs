@@ -126,8 +126,14 @@ public static class BytecodeLinker
                     {
                         if (c.IsInterface)
                         {
-                            var reference = c.ClrType?.GetCustomAttribute<JavaInterfaceAttribute>()
-                                ?.ReferenceImplementation;
+                            var attr = c.ClrType?.GetCustomAttribute<JavaInterfaceAttribute>();
+                            if (attr == null)
+                            {
+                                // this is an interface from java code
+                                break;
+                            }
+
+                            var reference = attr.ReferenceImplementation;
                             if (reference == null)
                             {
                                 // can't check interface without reference implementation.
