@@ -77,7 +77,6 @@ public class EventQueue : Thread
 
             _events.Enqueue(e.This);
 
-            //Console.WriteLine($"{e.JavaClass} is enqueued");
             OwningJvm.Attach(JavaThread!.ThreadId);
         }
     }
@@ -89,7 +88,7 @@ public class EventQueue : Thread
             if (_events.Count == 0)
             {
                 // no more events
-                OwningJvm.Detach(JavaThread!, 0);
+                OwningJvm.Detach(JavaThread!, 0, Reference.Null);
                 // it will stay detached until Enqueue is called.
             }
             // if there are more events - do nothing

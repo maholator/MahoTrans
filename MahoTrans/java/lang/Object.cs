@@ -93,14 +93,15 @@ public class Object
             Jvm.Throw<IllegalArgumentException>();
 
         // adding self to waitlist
+        Debug.Assert(MonitorOwner != 0);
+        Debug.Assert(This.Index != 0);
         var mw = new MonitorWait(MonitorReEnterCount, MonitorOwner);
         Waiters ??= new();
         Waiters.Add(mw);
 
         // detaching from scheduler
         var jvm = Jvm;
-        var thread = jvm.AliveThreads.Find(x => x.ThreadId == MonitorOwner);
-        jvm.Detach(thread!, timeout);
+        jvm.Detach(Thread.CurrentThread!, timeout, This);
 
         // leaving the monitor
         MonitorOwner = 0;
@@ -193,14 +194,16 @@ public class Object
         if (Waiters == null || Waiters.Count == 0)
             return;
 
-        foreach (var mw in Waiters)
+        for (var i = Waiters.Count - 1; i >= 0; i--)
         {
+            var mw = Waiters[i];
             if (!Jvm.Attach(mw.MonitorOwner))
                 throw new JavaRuntimeError(
                     $"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
         }
 
-        Waiters.Clear();
+        // waiters list must be cleared by attach calls
+        Debug.Assert(Waiters.Count == 0);
     }
 
     [JavaDescriptor("()Ljava/lang/String;")]

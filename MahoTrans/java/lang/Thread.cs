@@ -16,6 +16,7 @@ public class Thread : Object, Runnable
     public const int MAX_PRIORITY = 10;
     public const int MIN_PRIORITY = 1;
     public const int NORM_PRIORITY = 5;
+
     /// <summary>
     ///     Reference to JVM object of the thread. During wakeup, this is validated by
     ///     <see cref="JvmState.SyncHeapAfterRestore" />. This is null if thread was not started yet or was already dead.
@@ -103,7 +104,7 @@ public class Thread : Object, Runnable
 
         Jvm.Resolve<Thread>(threadToSleep.Model).CheckInterrupt();
 
-        Jvm.Detach(threadToSleep, time <= 0 ? 1 : time);
+        Jvm.Detach(threadToSleep, time <= 0 ? 1 : time, Reference.Null);
     }
 
     public void interrupt()
@@ -157,7 +158,7 @@ public class Thread : Object, Runnable
         }
 
         waitFor.WaitingForKill.Add(waiter.ThreadId);
-        Jvm.Detach(waiter, 0);
+        Jvm.Detach(waiter, 0, Reference.Null);
     }
 
     public static void yield()
