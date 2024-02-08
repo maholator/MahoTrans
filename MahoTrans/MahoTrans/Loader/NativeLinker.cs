@@ -70,6 +70,7 @@ public static class NativeLinker
     private static JavaClass Make(Type type, TypeBuilder bridge, ILoadLogger? logger)
     {
         var name = type.FullName!.Replace('.', '/');
+
         JavaClass jc = new JavaClass
         {
             Name = name,
@@ -116,6 +117,7 @@ public static class NativeLinker
             if (i.GetCustomAttribute<JavaInterfaceAttribute>() != null)
                 javaInterfaces.Add(ii);
         }
+
         jc.Interfaces = javaInterfaces.ToArray();
 
         try
