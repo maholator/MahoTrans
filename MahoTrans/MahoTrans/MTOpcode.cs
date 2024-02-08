@@ -4,6 +4,7 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
+using java.lang;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 
@@ -291,6 +292,25 @@ public enum MTOpcode : byte
     ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.
     /// </summary>
     bridge_init_class,
+
+    #endregion
+
+    #region Errors
+
+    /// <summary>
+    /// Throws <see cref="NoClassDefFoundError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing class.
+    /// </summary>
+    error_no_class,
+
+    /// <summary>
+    /// Throws <see cref="NoSuchFieldError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing field.
+    /// </summary>
+    error_no_field,
+
+    /// <summary>
+    /// Throws <see cref="NoSuchMethodError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing method.
+    /// </summary>
+    error_no_method,
 
     #endregion
 }

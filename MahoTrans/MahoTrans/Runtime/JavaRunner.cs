@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Loader;
+using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using Array = java.lang.Array;
@@ -1261,6 +1262,33 @@ public class JavaRunner
 
                 jvm.StaticFields[instr.IntData] = frame.Pop();
                 pointer++;
+                break;
+            }
+
+            case MTOpcode.error_no_class:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Class {instr.Data} is not loaded!");
+
+                jvm.Throw<NoClassDefFoundError>($"Class {instr.Data} is not loaded!");
+                break;
+            }
+
+            case MTOpcode.error_no_method:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Method {instr.Data} is not found!");
+
+                jvm.Throw<NoSuchMethodError>($"Method {instr.Data} is not found!");
+                break;
+            }
+
+            case MTOpcode.error_no_field:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Field {instr.Data} is not found!");
+
+                jvm.Throw<NoSuchFieldError>($"Field {instr.Data} is not found!");
                 break;
             }
         }

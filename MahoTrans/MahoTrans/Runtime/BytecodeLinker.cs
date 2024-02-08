@@ -338,6 +338,7 @@ public static class BytecodeLinker
 
     private static void LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
     {
+        var logger = jvm.Toolkit.LoadLogger;
         {
             // let's deal with arguments sizes first.
             var primargs = DescriptorUtils.ParseMethodDescriptorAsPrimitives(method.Method.Descriptor.Descriptor).args;
