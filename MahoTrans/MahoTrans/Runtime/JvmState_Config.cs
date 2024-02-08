@@ -11,5 +11,6 @@ public partial class JvmState
     private readonly ExecutionManner _executionManner;
     public AllocatorBehaviourOnOverflow OnOverflow;
     public GraphicsFlow GraphicsFlow;
+    public MissingThingsHandling MissingHandling;
     public bool UseBridgesForFields = true;
 }
