@@ -5,7 +5,7 @@ using MahoTrans.Native;
 
 namespace javax.microedition.media;
 
-[JavaInterface]
+[JavaInterface(typeof(PlayerImpl))]
 public interface Player
 {
 }
