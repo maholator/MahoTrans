@@ -19,21 +19,16 @@ public class RealTimeClock : IClock
         return DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
-    public long GetCurrentJvmMs(long currentTick)
-    {
-        return GetCurrentMs(currentTick);
-    }
+    public long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
+
+    public long GetCurrentClrTicks(long currentCycle) => DateTime.UtcNow.Ticks;
+
+    public long GetPassedClrTicks(long currentCycle) => DateTime.UtcNow.Ticks - _startTick;
+
+    public long TicksPerCycleBunch => 0;
 
     public bool JvmSleeping
     {
         set { }
     }
-
-    public long CurrentTimeClr => DateTime.Now.Ticks;
-
-    public long PassedTimeClr => DateTime.Now.Ticks - _startTick;
-
-    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
-
-    public long GetTicksPerCycleBunch() => 0;
 }

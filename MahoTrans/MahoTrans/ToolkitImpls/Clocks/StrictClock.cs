@@ -14,9 +14,7 @@ public class StrictClock : IClock
     public long TicksPerBunch;
     public readonly long StartTicks;
 
-    private readonly long _unixEpoch = DateTimeOffset.UnixEpoch.Ticks;
-
-    private long _passedTime;
+    private static readonly long UnixEpoch = DateTimeOffset.UnixEpoch.Ticks;
 
     /// <summary>
     ///     Initializes the clock.
@@ -35,26 +33,35 @@ public class StrictClock : IClock
     public long GetCurrentMs(long currentTick)
     {
         // this is passed time in CLR ticks since JVM start
-        _passedTime = currentTick * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+        var passedTime = currentTick * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
         // this is a total passed time in global CLR ticks
-        var absTick = _passedTime + StartTicks;
+        var absTick = passedTime + StartTicks;
         // this is a time in CLR ticks since unix epoch
-        var sinceUnix = (absTick - _unixEpoch);
+        var sinceUnix = (absTick - UnixEpoch);
         return sinceUnix / TimeSpan.TicksPerMillisecond;
     }
 
     public long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
 
+    public long GetCurrentClrTicks(long currentCycle)
+    {
+        // this is passed time in CLR ticks since JVM start
+        var passedTime = currentCycle * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+        // this is a total passed time in global CLR ticks
+        var absTick = passedTime + StartTicks;
+
+        return absTick;
+    }
+
+    public long GetPassedClrTicks(long currentCycle)
+    {
+        return currentCycle * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+    }
+
+    public long TicksPerCycleBunch => TicksPerBunch;
+
     public bool JvmSleeping
     {
         set { }
     }
-
-    public long CurrentTimeClr => _passedTime + StartTicks;
-
-    public long PassedTimeClr => _passedTime;
-
-    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
-
-    public long GetTicksPerCycleBunch() => TicksPerBunch;
 }
