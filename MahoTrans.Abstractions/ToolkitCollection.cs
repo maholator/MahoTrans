@@ -14,11 +14,11 @@ public class ToolkitCollection
 {
     public readonly ISystem System;
 
-    public readonly IClock Clock;
+    public IClock Clock;
 
     public readonly IImageManager Images;
 
-    public readonly IFontManager Fonts;
+    public IFontManager Fonts;
 
     public readonly IDisplay Display;
 
