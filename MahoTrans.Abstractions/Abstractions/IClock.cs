@@ -13,56 +13,43 @@ public interface IClock : IToolkit
     #region JVM-side APIs
 
     /// <summary>
-    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls. This should update values,
-    ///     returned by <see cref="PassedTimeClr" />/<see cref="PassedTimeJvm" /> props.
+    ///     Gets current time of the system. This is used for System.currentTimeMillis() calls.
     /// </summary>
-    /// <param name="currentTick">Current jvm's tick.</param>
+    /// <param name="currentCycle">Current jvm's cycle.</param>
     /// <returns>Time in java format.</returns>
-    long GetCurrentMs(long currentTick);
+    long GetCurrentMs(long currentCycle);
 
     /// <summary>
-    ///     Gets current time of the system. This is used for thread management. This MUST update values, returned by
-    ///     <see cref="PassedTimeClr" />/<see cref="PassedTimeJvm" /> props.
+    ///     Gets current time of the system. This is used for thread management.
     /// </summary>
-    /// <param name="currentTick">Current jvm's tick.</param>
+    /// <param name="currentCycle">Current jvm's cycle.</param>
     /// <returns>Time in java format.</returns>
-    long GetCurrentJvmMs(long currentTick);
+    long GetCurrentJvmMs(long currentCycle);
+
+    /// <summary>
+    ///     Gets current time of the system in CLR format.
+    /// </summary>
+    /// <param name="currentCycle">Сurrent jvm's cycle.</param>
+    /// <returns>Time in CLR format.</returns>
+    long GetCurrentClrTicks(long currentCycle);
+
+    /// <summary>
+    ///     Gets time, passed since JVM start in CLR format.
+    /// </summary>
+    /// <param name="currentCycle">Current jvm's cycle.</param>
+    /// <returns>Time in CLR format.</returns>
+    long GetPassedClrTicks(long currentCycle);
 
     /// <summary>
     ///     Gets CLR time in which ticks bunch must be done. Ticks count is set by JvmState.CYCLES_PER_BUNCH.
     /// </summary>
-    /// <returns>CLR ticks.</returns>
     [Pure]
-    long GetTicksPerCycleBunch();
+    long TicksPerCycleBunch { get; }
 
     /// <summary>
     ///     Used to notify clock that jvm is going to sleep/wakeup
     /// </summary>
     bool JvmSleeping { set; }
-
-    #endregion
-
-    #region Frontend-side APIs
-
-    /// <summary>
-    ///     Gets current time of the system. Returned time is in CLR format.
-    /// </summary>
-    [Pure]
-    long CurrentTimeClr { get; }
-
-    /// <summary>
-    ///     Gets current time of the system since JVM start. Returned time is in CLR format (CLR ticks). This is updated by
-    ///     <see cref="GetCurrentJvmMs" /> calls and actually a last returned time.
-    /// </summary>
-    [Pure]
-    long PassedTimeClr { get; }
-
-    /// <summary>
-    ///     Gets current time of the system since JVM start. Returned time is in JVM format (milliseconds). This is updated by
-    ///     <see cref="GetCurrentJvmMs" /> calls and actually a last returned time.
-    /// </summary>
-    [Pure]
-    long PassedTimeJvm { get; }
 
     #endregion
 }
