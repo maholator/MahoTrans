@@ -7,8 +7,12 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
+    /// <summary>
+    /// Toolkits, used in this JVM. Do not set this field on the fly because it may be cached somewhere. Alter implemenations inside it.
+    /// </summary>
     public ToolkitCollection Toolkit;
-    private readonly ExecutionManner _executionManner;
+
+    private ExecutionManner _executionManner;
     public AllocatorBehaviourOnOverflow OnOverflow;
     public GraphicsFlow GraphicsFlow;
     public MissingThingsHandling MissingHandling;
