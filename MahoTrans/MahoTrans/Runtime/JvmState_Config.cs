@@ -12,7 +12,7 @@ public partial class JvmState
     /// </summary>
     public ToolkitCollection Toolkit;
 
-    private ExecutionManner _executionManner;
+    public ExecutionManner ExecutionManner;
     public AllocatorBehaviourOnOverflow OnOverflow;
     public GraphicsFlow GraphicsFlow;
     public MissingThingsHandling MissingHandling;

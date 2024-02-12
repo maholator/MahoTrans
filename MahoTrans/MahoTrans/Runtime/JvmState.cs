@@ -42,7 +42,7 @@ public partial class JvmState
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Toolkit = toolkit;
-        _executionManner = executionManner;
+        ExecutionManner = executionManner;
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public partial class JvmState
     {
         using (new JvmContext(this))
         {
-            switch (_executionManner)
+            switch (ExecutionManner)
             {
                 case ExecutionManner.Unlocked:
                     ExecuteInternalUnlocked();

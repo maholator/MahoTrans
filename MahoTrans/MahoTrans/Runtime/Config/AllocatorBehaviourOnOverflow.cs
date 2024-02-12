@@ -8,12 +8,14 @@ namespace MahoTrans.Runtime.Config;
 /// <summary>
 ///     What to do if there is not enough heap slots?
 /// </summary>
-public enum AllocatorBehaviourOnOverflow
+public enum AllocatorBehaviourOnOverflow : byte
 {
-    [Description("Expand the heap")] Expand,
+    [Description("Expand the heap")]
+    Expand,
 
     [Description("Throw OutOfMemoryError")]
     ThrowOutOfMem,
 
-    [Description("Crash")] Crash
+    [Description("Crash")]
+    Crash
 }

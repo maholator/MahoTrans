@@ -9,7 +9,7 @@ namespace MahoTrans.Runtime.Config;
 /// <summary>
 ///     How to handle <see cref="Graphics" /> objects?
 /// </summary>
-public enum GraphicsFlow
+public enum GraphicsFlow : byte
 {
     /// <summary>
     ///     Each time <see cref="Canvas.ObtainGraphics" /> is called, new object is created. This is how this should work

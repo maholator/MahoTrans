@@ -5,9 +5,11 @@ using System.ComponentModel;
 
 namespace MahoTrans.Runtime.Config;
 
-public enum MissingThingsHandling
+public enum MissingThingsHandling : byte
 {
-    [Description("Throw java error")] ThrowJavaError,
+    [Description("Throw java error")]
+    ThrowJavaError,
 
-    [Description("Crash")] Crash,
+    [Description("Crash")]
+    Crash,
 }
