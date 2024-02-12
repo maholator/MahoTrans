@@ -40,7 +40,7 @@ public static class VirtualRmsUtils
         writer.Write(dict.Count);
 
         // stores data
-        foreach (var (name, slots) in dict)
+        foreach (var (name, slots) in dict.OrderBy(x => x.Key))
         {
             // store name
             var enc = Encoding.UTF8.GetBytes(name);
