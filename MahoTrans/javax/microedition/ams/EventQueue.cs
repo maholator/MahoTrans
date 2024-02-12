@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.ams.events;
+using javax.microedition.lcdui;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -106,6 +107,9 @@ public class EventQueue : Thread
             if (Jvm.ResolveObject(e) is RepaintEvent re)
             {
                 QueuedRepaints[re.Target.Index] = false;
+                // if screen not shown we do not want to execute such repaint.
+                if (!re.Target.As<Displayable>().isShown())
+                    return Reference.Null;
             }
 
             //Console.WriteLine($"{Heap.ResolveObject(e).JavaClass} is dequeued, {_events.Count} more...");
