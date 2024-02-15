@@ -21,9 +21,9 @@ public class RealTimeClock : IClock
 
     public long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
 
-    public long GetCurrentClrTicks(long currentCycle) => DateTime.UtcNow.Ticks;
+    public long GetCurrentClrTicks(long currentCycle) => DateTime.Now.Ticks;
 
-    public long GetPassedClrTicks(long currentCycle) => DateTime.UtcNow.Ticks - _startTick;
+    public long GetPassedClrTicks(long currentCycle) => DateTime.Now.Ticks - _startTick;
 
     public long TicksPerCycleBunch => 0;
 
