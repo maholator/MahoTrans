@@ -3,6 +3,7 @@
 
 using java.lang;
 using MahoTrans;
+using MahoTrans.Abstractions;
 using MahoTrans.Builder;
 using MahoTrans.Handles;
 using MahoTrans.Native;
@@ -61,6 +62,15 @@ public class Image : Object
     {
         var image = Jvm.AllocateObject<Image>();
         image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle);
+        return image.This;
+    }
+
+    [return: JavaType(typeof(Image))]
+    public static Reference createImage___copy([JavaType(typeof(Image))] Reference source, int x, int y, int w, int h,
+        int tr)
+    {
+        var image = Jvm.AllocateObject<Image>();
+        image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle, x, y, w, h, (SpriteTransform)tr);
         return image.This;
     }
 
