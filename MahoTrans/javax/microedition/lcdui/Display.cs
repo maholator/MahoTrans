@@ -77,9 +77,42 @@ public class Display : Object
 
     public int numColors() => 256 * 256 * 256;
 
-    public bool vibrate(int dur)
+    public bool vibrate(int dur) => true;
+
+    public bool flashBacklight(int duration) => false;
+
+    public int getBorderStyle(bool highlighted) => 0; // solid border
+
+    public int getColor(int colorSpecifier)
     {
-        //TODO
-        return true;
+        switch (colorSpecifier)
+        {
+            case COLOR_BACKGROUND:
+                return unchecked((int)0xFF000000);
+            case COLOR_FOREGROUND:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_HIGHLIGHTED_BACKGROUND:
+                return unchecked((int)0xFF4791DC);
+            case COLOR_HIGHLIGHTED_FOREGROUND:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_BORDER:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_HIGHLIGHTED_BORDER:
+                return unchecked((int)0xFFFFFFFF);
+            default:
+                Jvm.Throw<IllegalArgumentException>();
+                return 0;
+        }
     }
+
+
+    public const int ALERT = 3;
+    public const int CHOICE_GROUP_ELEMENT = 2;
+    public const int COLOR_BACKGROUND = 0;
+    public const int COLOR_BORDER = 4;
+    public const int COLOR_FOREGROUND = 1;
+    public const int COLOR_HIGHLIGHTED_BACKGROUND = 2;
+    public const int COLOR_HIGHLIGHTED_BORDER = 5;
+    public const int COLOR_HIGHLIGHTED_FOREGROUND = 3;
+    public const int LIST_ELEMENT = 1;
 }
