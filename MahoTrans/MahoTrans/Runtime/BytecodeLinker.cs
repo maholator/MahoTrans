@@ -15,11 +15,7 @@ public static class BytecodeLinker
     {
         var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
         var cls = method.Method.Class;
-        // we need this because linux CoreCLR can't break on handled exceptions.
-#if DEBUG
-        LinkInternal(method, cls, jvm, isClinit);
-#else
-        // when on release, it's safe to catch it and rethrow with additional context.
+
         try
         {
             LinkInternal(method, cls, jvm, isClinit);
@@ -29,12 +25,12 @@ public static class BytecodeLinker
             throw new JavaLinkageException(
                 $"Failed to link {method} in JIT manner", e);
         }
-#endif
     }
 
     public static void Verify(JavaClass cls, JvmState jvm)
     {
         var logger = jvm.Toolkit.LoadLogger;
+
         foreach (var method in cls.Methods.Values)
         {
             // we don't have bytecode at all.
