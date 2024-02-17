@@ -92,7 +92,7 @@ public interface IDisplay : IToolkit
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <remarks>
-    ///     This is used only for LCDUI things (alert text/image, list items, form items, textbox content).
+    ///     This is used only for LCDUI things (alert text/image, list items, form items list, textbox content).
     ///     <list type="bullet">
     ///         <item>Title changes are reported via <see cref="SetTitle" />.</item>
     ///         <item>Fullscreen mode is set via <see cref="SetFullscreen" />.</item>
@@ -105,10 +105,19 @@ public interface IDisplay : IToolkit
     void ContentUpdated(DisplayableHandle handle);
 
     /// <summary>
-    ///     Notifies toolkit that LCDUI item was updated.
+    ///     Notifies toolkit that LCDUI item was updated. Called even if item not on current screen. Never called if item is
+    ///     not on any screen.
     /// </summary>
+    /// <param name="displayable">Displayable where this item lives.</param>
     /// <param name="item">Reference to item.</param>
-    void ItemUpdated(Reference item);
+    void ItemUpdated(DisplayableHandle displayable, Reference item);
+
+    /// <summary>
+    ///     Implementation for MIDP "setCurrentItem(Item item)". Changes displayable to passed one and focuses an item.
+    /// </summary>
+    /// <param name="displayable"></param>
+    /// <param name="item"></param>
+    void FocusItem(DisplayableHandle displayable, Reference item);
 
     /// <summary>
     ///     Gets graphics to draw on the displayable. If it's not possible to draw on the displayable, this will throw.
