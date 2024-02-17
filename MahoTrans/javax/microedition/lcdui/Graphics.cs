@@ -222,7 +222,7 @@ public class Graphics : Object, DirectGraphics
         int height, bool processAlpha)
     {
         var buf = Jvm.ResolveArray<int>(rgbData);
-        Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
+        Implementation.DrawARGB32(buf, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height);
     }
 
     public void fillPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
