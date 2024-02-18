@@ -66,6 +66,15 @@ public class Display : Object
         Toolkit.Display.SetCurrent(a.Handle);
     }
 
+    public void setCurrentItem([JavaType(typeof(Item))] Reference item)
+    {
+        var i = Jvm.Resolve<Item>(item);
+        if (i.Owner == default)
+            Jvm.Throw<IllegalStateException>();
+
+        Toolkit.Display.FocusItem(i.Owner, item);
+    }
+
     public void callSerially([JavaType(typeof(Runnable))] Reference r)
     {
         Jvm.EventQueue.Enqueue<ActionEvent>(x => x.Target = r);
