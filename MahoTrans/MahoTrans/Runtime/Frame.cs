@@ -60,6 +60,8 @@ public unsafe class Frame
         ClearBuffers(method.LocalsCount, method.StackSize);
     }
 
+    #region Native buffers management
+
     public void Reinitialize(JavaMethodBody method)
     {
         StackTop = 0;
@@ -86,8 +88,6 @@ public unsafe class Frame
 
         ClearBuffers(method.LocalsCount, method.StackSize);
     }
-
-    #region Native buffers management
 
     /// <summary>
     ///     Fills native buffers with zeros.
@@ -141,13 +141,15 @@ public unsafe class Frame
         Stack = null;
     }
 
-    #endregion
-
     ~Frame()
     {
         DeallocateLocals();
         DeallocateStack();
     }
+
+    #endregion
+
+    #region Dump API
 
     public long[] DumpStack()
     {
@@ -170,6 +172,8 @@ public unsafe class Frame
 
         return s;
     }
+
+    #endregion
 
     public void DiscardAll() => StackTop = 0;
 
