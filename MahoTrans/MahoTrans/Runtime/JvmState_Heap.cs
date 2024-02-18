@@ -1,7 +1,6 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
 using JetBrains.Annotations;
@@ -439,8 +438,6 @@ public partial class JvmState
         {
             //TODO optimization
 
-            Stopwatch sw = new();
-            sw.Start();
             var roots = CollectObjectGraphRoots();
             Queue<Reference> enumQueue = new Queue<Reference>(roots);
 
@@ -519,10 +516,9 @@ public partial class JvmState
                 }
             }
 
-            sw.Stop();
             GcCount++;
             Toolkit.Logger?.LogEvent(EventCategory.Gc,
-                $"Deleted {deletedCount} objects in {sw.ElapsedMilliseconds} ms");
+                $"Deleted {deletedCount} objects");
         }
     }
 
