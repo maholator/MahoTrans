@@ -241,6 +241,30 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawPolygon(xm, ym, (uint)argb);
     }
 
+    public int getNativePixelFormat() => DirectGraphics.TYPE_INT_8888_ARGB;
+
+    public void drawPixels([JavaType("[S")] Reference pixels, bool transparency, int offset, int scanlength,
+        int x, int y, int width, int height, int manipulation, int format)
+    {
+        var buf = Jvm.ResolveArray<short>(pixels);
+        UShortPixelType f = format switch
+        {
+            DirectGraphics.TYPE_USHORT_565_RGB => UShortPixelType.Argb0565,
+            DirectGraphics.TYPE_USHORT_1555_ARGB => UShortPixelType.Argb1555,
+            DirectGraphics.TYPE_USHORT_4444_ARGB => UShortPixelType.Argb4444,
+            _ => throwUShortFormat()
+        };
+
+        Implementation.DrawARGB16(buf, f, transparency, offset, scanlength, x, y, width, height,
+            (ImageManipulation)manipulation);
+    }
+
+    private static UShortPixelType throwUShortFormat()
+    {
+        Jvm.Throw<IllegalArgumentException>();
+        return default;
+    }
+
     public override bool OnObjectDelete()
     {
         Toolkit.Images.ReleaseGraphics(Handle);
