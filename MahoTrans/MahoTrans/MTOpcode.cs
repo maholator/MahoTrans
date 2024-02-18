@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 // ReSharper disable InconsistentNaming
@@ -298,19 +298,28 @@ public enum MTOpcode : byte
     #region Errors
 
     /// <summary>
-    /// Throws <see cref="NoClassDefFoundError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing class.
+    ///     Throws <see cref="NoClassDefFoundError" />. Indicates linker failure. <see cref="LinkedInstruction.Data" />
+    ///     contains name of missing class.
     /// </summary>
     error_no_class,
 
     /// <summary>
-    /// Throws <see cref="NoSuchFieldError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing field.
+    ///     Throws <see cref="NoSuchFieldError" />. Indicates linker failure. <see cref="LinkedInstruction.Data" /> contains
+    ///     name of missing field.
     /// </summary>
     error_no_field,
 
     /// <summary>
-    /// Throws <see cref="NoSuchMethodError"/>. Indicates linker failure. <see cref="LinkedInstruction.Data"/> contains name of missing method.
+    ///     Throws <see cref="NoSuchMethodError" />. Indicates linker failure. <see cref="LinkedInstruction.Data" /> contains
+    ///     name of missing method.
     /// </summary>
     error_no_method,
+
+    /// <summary>
+    ///     Aborts JVM execution. Indicates mailformed bytecode that was not linked.  <see cref="LinkedInstruction.Data" /> may
+    ///     (but doesn't need to ) contain explanation.
+    /// </summary>
+    error_bytecode,
 
     #endregion
 }
