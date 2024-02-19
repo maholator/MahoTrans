@@ -434,7 +434,7 @@ public static class BytecodeLinker
                 object data = null!;
                 int intData = 0;
                 ushort shortData = 0;
-                MTOpcode opcode;
+                MTOpcode opcode = MTOpcode.error_bytecode;
 
                 emulatedStack.InstrIndex = instrIndex;
 
@@ -1780,47 +1780,51 @@ public static class BytecodeLinker
                     }
                     case JavaOpcode.getstatic:
                     {
-                        var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                        var c = jvm.Classes[d.ClassName];
-                        var f = c.GetFieldRecursive(d.Descriptor);
-                        var index = jvm.StaticFieldsOwners.IndexOf(f);
-                        if (index < 0)
+                        var f = getFieldSafely(cls, args, true, ref opcode, ref data, out var d, out var c);
+                        if (f != null)
                         {
-                            // maybe it's a native field?
-                            if (f.GetValue == null)
+                            var index = jvm.StaticFieldsOwners.IndexOf(f);
+                            if (index < 0)
                             {
-                                // no, it's not.
-                                throw new JavaLinkageException($"Static field {d} has no static slot!");
+                                // maybe it's a native field?
+                                if (f.GetValue == null)
+                                {
+                                    // no, it's not.
+                                    throw new JavaLinkageException($"Static field {d} has no static slot!");
+                                }
+
+                                opcode = MTOpcode.bridge_init_class;
+                                intData = 1;
+                                data = new ClassBoundBridge(f.GetValue, c);
                             }
-
-                            opcode = MTOpcode.bridge_init_class;
-                            intData = 1;
-                            data = new ClassBoundBridge(f.GetValue, c);
-                        }
-                        else
-                        {
-                            intData = index;
-                            data = c;
-                            opcode = MTOpcode.get_static;
+                            else
+                            {
+                                intData = index;
+                                data = c;
+                                opcode = MTOpcode.get_static;
+                            }
                         }
 
-                        emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
+                        if (d != default)
+                            emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
                     }
                     case JavaOpcode.putstatic:
                     {
                         emulatedStack.Pop(); // TODO check field type
-                        var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                        var c = jvm.Classes[d.ClassName];
-                        var f = c.GetFieldRecursive(d.Descriptor);
-                        var index = jvm.StaticFieldsOwners.IndexOf(f);
-                        if (index < 0)
-                            throw new JavaLinkageException($"Static field {d} has no static slot!");
+                        var f = getFieldSafely(cls, args, true, ref opcode, ref data, out var d, out var c);
+                        if (f != null)
+                        {
+                            // set to "native" static is forbidden in MIDP/CLDC specs. we do not check this case.
+                            var index = jvm.StaticFieldsOwners.IndexOf(f);
+                            if (index < 0)
+                                throw new JavaLinkageException($"Static field {d} has no static slot!");
 
-                        intData = index;
-                        data = c;
-                        opcode = MTOpcode.set_static;
+                            intData = index;
+                            data = c;
+                            opcode = MTOpcode.set_static;
+                        }
 
                         SetNextStack();
                         break;
@@ -1828,23 +1832,25 @@ public static class BytecodeLinker
                     case JavaOpcode.getfield:
                     {
                         emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                        var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                        var c = jvm.Classes[d.ClassName];
-                        var f = c.GetFieldRecursive(d.Descriptor);
-                        if (jvm.UseBridgesForFields)
+                        var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
+                        if (f != null)
                         {
-                            var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                            opcode = MTOpcode.bridge_init_class;
-                            intData = 1;
-                            data = new ClassBoundBridge(b, c);
-                        }
-                        else
-                        {
-                            opcode = MTOpcode.get_field;
-                            data = new ReflectionFieldPointer(f.NativeField!, c);
+                            if (jvm.UseBridgesForFields)
+                            {
+                                var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                                opcode = MTOpcode.bridge_init_class;
+                                intData = 1;
+                                data = new ClassBoundBridge(b, c);
+                            }
+                            else
+                            {
+                                opcode = MTOpcode.get_field;
+                                data = new ReflectionFieldPointer(f.NativeField!, c);
+                            }
                         }
 
-                        emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
+                        if (d != default)
+                            emulatedStack.Push(DescriptorUtils.ParseDescriptor(d.Descriptor.Descriptor[0]));
                         SetNextStack();
                         break;
                     }
@@ -1852,20 +1858,21 @@ public static class BytecodeLinker
                     {
                         emulatedStack.Pop(); // TODO check field type
                         emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                        var d = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                        var c = jvm.Classes[d.ClassName];
-                        var f = c.GetFieldRecursive(d.Descriptor);
-                        if (jvm.UseBridgesForFields)
+                        var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
+                        if (f != null)
                         {
-                            var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                            opcode = MTOpcode.bridge_init_class;
-                            intData = 2;
-                            data = new ClassBoundBridge(b, c);
-                        }
-                        else
-                        {
-                            opcode = MTOpcode.set_field;
-                            data = new ReflectionFieldPointer(f.NativeField!, c);
+                            if (jvm.UseBridgesForFields)
+                            {
+                                var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                                opcode = MTOpcode.bridge_init_class;
+                                intData = 2;
+                                data = new ClassBoundBridge(b, c);
+                            }
+                            else
+                            {
+                                opcode = MTOpcode.set_field;
+                                data = new ReflectionFieldPointer(f.NativeField!, c);
+                            }
                         }
 
                         SetNextStack();
@@ -1993,7 +2000,7 @@ public static class BytecodeLinker
                         {
                             opcode = MTOpcode.iinc;
                             shortData = (ushort)Combine(args[1], args[2]);
-                            // combine already gives as signed short, nothing to do
+                            // combine already gives us a signed short, nothing to do
                             intData = Combine(args[3], args[4]);
                         }
                         else
@@ -2251,21 +2258,26 @@ public static class BytecodeLinker
     /// <param name="isStatic">True if we look for static field.</param>
     /// <param name="opcode">Reference to opcode.</param>
     /// <param name="data">Reference to opcode data.</param>
+    /// <param name="ndc">Found (or not) NDC of the field.</param>
+    /// <param name="c">Found (or not) class where the field is.</param>
     /// <returns>
     ///     Found field. Null in case of failure. If null is returned, <paramref name="opcode" /> and
     ///     <paramref name="data" /> are set and must not be touched.
     /// </returns>
     private static Field? getFieldSafely(JavaClass cls, byte[] args, bool isStatic, ref MTOpcode opcode,
-        ref object data)
+        ref object data, out NameDescriptorClass ndc, out JavaClass c)
     {
         var logger = JvmContext.Toolkit?.LoadLogger;
         var jvm = JvmContext.Jvm!;
         var index = Combine(args[0], args[1]);
 
-        if (!getConstantSafely(cls, index, ref opcode, ref data, out NameDescriptorClass ndc))
+        if (!getConstantSafely(cls, index, ref opcode, ref data, out ndc))
+        {
+            c = null!;
             return null;
+        }
 
-        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        if (!jvm.Classes.TryGetValue(ndc.ClassName, out c!))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" is going to be used";
             logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
