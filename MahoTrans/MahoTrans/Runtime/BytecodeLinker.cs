@@ -556,7 +556,10 @@ public static class BytecodeLinker
                         }
                         else
                         {
-                            throw new ArgumentException($"ldc was {obj.GetType()}");
+                            var msg = $"ldc opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
+                            logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
+                            opcode = MTOpcode.error_bytecode;
+                            data = msg;
                         }
 
                         SetNextStack();
@@ -564,7 +567,8 @@ public static class BytecodeLinker
                     }
                     case JavaOpcode.ldc2_w:
                     {
-                        var obj = consts[Combine(args[0], args[1])];
+                        var index = Combine(args[0], args[1]);
+                        var obj = consts[index];
                         if (obj is long l)
                         {
                             emulatedStack.Push(PrimitiveType.Long);
@@ -599,7 +603,10 @@ public static class BytecodeLinker
                         }
                         else
                         {
-                            throw new ArgumentException($"ldc2 was {obj.GetType()}");
+                            var msg = $"ldc2_w opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
+                            logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
+                            opcode = MTOpcode.error_bytecode;
+                            data = msg;
                         }
 
                         SetNextStack();
