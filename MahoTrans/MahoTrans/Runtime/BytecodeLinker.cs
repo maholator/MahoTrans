@@ -13,12 +13,10 @@ public static class BytecodeLinker
 {
     public static void Link(JavaMethodBody method, JvmState jvm)
     {
-        var isClinit = method.Method.Descriptor == new NameDescriptor("<clinit>", "()V");
-        var cls = method.Method.Class;
-
+        var isClinit = method.Method.Descriptor.Name == "<clinit>";
         try
         {
-            LinkInternal(method, cls, jvm, isClinit);
+            LinkInternal(method, method.Method.Class, jvm, isClinit);
         }
         catch (Exception e)
         {
