@@ -41,16 +41,8 @@ public static class BytecodeLinker
             if (method.IsAbstract)
                 continue;
 
-            Instruction[] code;
-
-            try
-            {
-                code = method.JavaBody.Code;
-            }
-            catch
-            {
-                continue;
-            }
+            // there was a try-catch but its hit is a failure by itself, soo...
+            Instruction[] code = method.JavaBody.Code;
 
             VerifyClassReferences(code, cls, jvm, logger);
             VerifyLocals(method.JavaBody, cls.Name, logger);
