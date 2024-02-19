@@ -37,7 +37,7 @@ public enum LoadIssueType
     MissingClassSuper,
 
     /// <summary>
-    ///     Constant has unexpected type.
+    ///     Constant has unexpected type or index.
     /// </summary>
     [Description("Invalid constant")] InvalidConstant,
 

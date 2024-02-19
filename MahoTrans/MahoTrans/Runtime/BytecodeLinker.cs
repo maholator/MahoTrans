@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -556,7 +556,8 @@ public static class BytecodeLinker
                         }
                         else
                         {
-                            var msg = $"ldc opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
+                            var msg =
+                                $"ldc opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
                             logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
                             opcode = MTOpcode.error_bytecode;
                             data = msg;
@@ -603,7 +604,8 @@ public static class BytecodeLinker
                         }
                         else
                         {
-                            var msg = $"ldc2_w opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
+                            var msg =
+                                $"ldc2_w opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
                             logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
                             opcode = MTOpcode.error_bytecode;
                             data = msg;
@@ -2156,7 +2158,7 @@ public static class BytecodeLinker
     }
 
     /// <summary>
-    /// Links exceptions table.
+    ///     Links exceptions table.
     /// </summary>
     /// <param name="raw">Raw table.</param>
     /// <param name="constants">Class constants.</param>
@@ -2210,6 +2212,89 @@ public static class BytecodeLinker
         }
 
         return result;
+    }
+
+    private static bool getConstantSafely<T>(JavaClass cls, int index, ref MTOpcode opcode, ref object data,
+        out T result)
+    {
+        var logger = JvmContext.Toolkit?.LoadLogger;
+        var constants = cls.Constants;
+        if (index < 0 || index >= constants.Length)
+        {
+            var msg = $"Invalid constant index {index}";
+            logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
+            opcode = MTOpcode.error_bytecode;
+            data = msg;
+            result = default!;
+            return false;
+        }
+
+        if (constants[index] is T t)
+        {
+            result = t;
+            return true;
+        }
+
+        var msg2 = $"Expected {typeof(T)} constant at {index} but got {constants.GetType()}";
+        logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg2);
+        opcode = MTOpcode.error_bytecode;
+        data = msg2;
+        result = default!;
+        return false;
+    }
+
+    /// <summary>
+    ///     Gets field of a class. Checks everything that can be checked.
+    /// </summary>
+    /// <param name="cls">Class to look from. Constant table is taken from it.</param>
+    /// <param name="args">Opcode arguments.</param>
+    /// <param name="isStatic">True if we look for static field.</param>
+    /// <param name="opcode">Reference to opcode.</param>
+    /// <param name="data">Reference to opcode data.</param>
+    /// <returns>
+    ///     Found field. Null in case of failure. If null is returned, <paramref name="opcode" /> and
+    ///     <paramref name="data" /> are set and must not be touched.
+    /// </returns>
+    private static Field? getFieldSafely(JavaClass cls, byte[] args, bool isStatic, ref MTOpcode opcode,
+        ref object data)
+    {
+        var logger = JvmContext.Toolkit?.LoadLogger;
+        var jvm = JvmContext.Jvm!;
+        var index = Combine(args[0], args[1]);
+
+        if (!getConstantSafely(cls, index, ref opcode, ref data, out NameDescriptorClass ndc))
+            return null;
+
+        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        {
+            var msg = $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" is going to be used";
+            logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_class;
+            data = ndc.ClassName;
+            return null;
+        }
+
+        var f = c.GetFieldRecursiveOrNull(ndc.Descriptor);
+
+        if (f == null)
+        {
+            var msg = $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"";
+            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_field;
+            data = ndc.Descriptor.Name;
+            return null;
+        }
+
+        if (f.Flags.HasFlag(FieldFlags.Static) != isStatic)
+        {
+            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
+                $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it {(isStatic ? "is not" : "is")} static");
+            opcode = MTOpcode.error_no_field;
+            data = ndc.Descriptor.Name;
+            return null;
+        }
+
+        return f;
     }
 
     public static int Combine(byte indexByte1, byte indexByte2)

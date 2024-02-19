@@ -240,6 +240,24 @@ public class JavaClass
     }
 
     /// <summary>
+    ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
+    /// </summary>
+    /// <param name="descriptor">Descriptor of the field.</param>
+    /// <returns>Field object. Null if field was not found.</returns>
+    public Field? GetFieldRecursiveOrNull(NameDescriptor descriptor)
+    {
+        var cls = this;
+        while (true)
+        {
+            if (cls.Fields.TryGetValue(descriptor, out var f))
+                return f;
+            if (cls.IsObject)
+                return null;
+            cls = cls.Super;
+        }
+    }
+
+    /// <summary>
     ///     Gets method defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
