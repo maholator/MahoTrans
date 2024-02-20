@@ -234,7 +234,7 @@ public class JavaClass
             if (cls.Fields.TryGetValue(descriptor, out var f))
                 return f;
             if (cls.IsObject)
-                throw new JavaLinkageException($"Field {descriptor} is not found in class {this}");
+                throw new JavaRuntimeError($"Field {descriptor} is not found in class {this}");
             cls = cls.Super;
         }
     }

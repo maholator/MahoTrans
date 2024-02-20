@@ -156,7 +156,7 @@ public static class Utils
             LoadIssueType.MissingClassField => MTLogLevel.Warning,
             LoadIssueType.LocalVariableIndexOutOfBounds => MTLogLevel.Error,
             LoadIssueType.MultiTypeLocalVariable => MTLogLevel.Info,
-            LoadIssueType.MethodWithoutReturn => MTLogLevel.Error,
+            LoadIssueType.BrokenFlow => MTLogLevel.Error,
             _ => 0
         };
     }
