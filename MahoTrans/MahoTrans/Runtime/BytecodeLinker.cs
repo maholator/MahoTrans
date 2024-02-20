@@ -559,6 +559,7 @@ public static class BytecodeLinker
                             }
                             else
                             {
+                                emulatedStack.PushError();
                                 var msg =
                                     $"ldc opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
                                 logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
@@ -607,6 +608,7 @@ public static class BytecodeLinker
                             }
                             else
                             {
+                                emulatedStack.PushError();
                                 var msg =
                                     $"ldc2_w opcode accepts int, float and text, but {obj.GetType()} given at index {index}";
                                 logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg);
@@ -2133,7 +2135,7 @@ public static class BytecodeLinker
                     {
                         var offsetsPrint = string.Join('\n',
                             offsets.Select(x => $"{x.Value}: {x.Key} ({code[x.Value].Opcode})"));
-                        throw new JavaLinkageException(
+                        throw new BrokenFlowException(
                             $"There is no opcode at offset {globalOffset} (relative {relativeOffset}).\nAvailable offsets:\n{offsetsPrint}");
                     }
 
@@ -2141,23 +2143,30 @@ public static class BytecodeLinker
                 }
             }
         }
-        catch (JavaLinkageException)
+        catch (StackMismatchException e)
         {
-            throw;
+            logger?.Log(LoadIssueType.StackMismatch, cls.Name, e.Message);
+            stubCode(ref output, out stackBeforeInstruction);
         }
-        catch
+        catch (BrokenFlowException e)
         {
-            for (int i = 0; i < output.Length; i++)
-            {
-                output[i] = new LinkedInstruction(MTOpcode.error_bytecode);
-            }
-
-            stackBeforeInstruction = null!;
+            logger?.Log(LoadIssueType.BrokenFlow, cls.Name, e.Message);
+            stubCode(ref output, out stackBeforeInstruction);
         }
 
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
         method.StackTypes = stackBeforeInstruction!;
+    }
+
+    private static void stubCode(ref LinkedInstruction[] output, out PrimitiveType[]?[] stackBeforeInstruction)
+    {
+        for (int i = 0; i < output.Length; i++)
+        {
+            output[i] = new LinkedInstruction(MTOpcode.error_bytecode);
+        }
+
+        stackBeforeInstruction = null!;
     }
 
     private static (int, ushort) LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
@@ -2378,6 +2387,17 @@ public static class BytecodeLinker
                     $"{Current()} attempts to overflow stack");
         }
 
+        /// <summary>
+        ///     Pushes unknown value to stack.
+        /// </summary>
+        public void PushError()
+        {
+            _stack.Push(default);
+            if (_stack.Count > _maxLength)
+                throw new StackMismatchException(
+                    $"{Current()} attempts to overflow stack");
+        }
+
         public PrimitiveType Pop()
         {
             if (_stack.Count == 0)
@@ -2389,6 +2409,8 @@ public static class BytecodeLinker
         public PrimitiveType PopWithAssertIs32()
         {
             var real = Pop();
+            if (real == default)
+                return real; // faulty instruction
             if ((real & PrimitiveType.IsDouble) != 0)
                 throw new StackMismatchException(
                     $"{Current()} expects 32-bit value on stack but got {real}");
@@ -2398,6 +2420,8 @@ public static class BytecodeLinker
         public void PopWithAssert(PrimitiveType expected)
         {
             var real = Pop();
+            if (real == default)
+                return; // faulty instruction
             if (expected != real)
                 throw new StackMismatchException($"{Current()} expects {expected} on stack but got {real}");
         }
@@ -2405,6 +2429,8 @@ public static class BytecodeLinker
         public void PopWithAssert(params PrimitiveType[] expected)
         {
             var real = Pop();
+            if (real == default)
+                return; // faulty instruction
             if (!expected.Contains(real))
             {
                 var expectedStr = expected.Length == 1
