@@ -4,6 +4,7 @@
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using Object = java.lang.Object;
 
 namespace javax.microedition.midlet;

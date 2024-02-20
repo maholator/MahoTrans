@@ -9,6 +9,7 @@ using MahoTrans.Builder;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;

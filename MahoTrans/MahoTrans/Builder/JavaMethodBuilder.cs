@@ -3,6 +3,7 @@
 
 using java.lang;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Loader;
 using MahoTrans.Runtime.Config;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using Array = java.lang.Array;

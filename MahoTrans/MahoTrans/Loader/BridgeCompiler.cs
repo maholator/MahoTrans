@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 

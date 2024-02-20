@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Runtime.Errors;
 using Array = System.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;

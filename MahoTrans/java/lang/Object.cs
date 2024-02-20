@@ -8,6 +8,7 @@ using MahoTrans;
 using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Newtonsoft.Json;

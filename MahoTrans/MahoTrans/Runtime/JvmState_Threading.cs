@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
+using MahoTrans.Runtime.Errors;
 
 namespace MahoTrans.Runtime;
 

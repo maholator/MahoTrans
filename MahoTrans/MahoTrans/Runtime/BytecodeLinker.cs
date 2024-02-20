@@ -4,6 +4,7 @@
 using System.Reflection;
 using MahoTrans.Abstractions;
 using MahoTrans.Native;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 

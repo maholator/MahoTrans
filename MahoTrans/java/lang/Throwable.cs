@@ -5,6 +5,7 @@ using System.Diagnostics;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using Newtonsoft.Json;
 

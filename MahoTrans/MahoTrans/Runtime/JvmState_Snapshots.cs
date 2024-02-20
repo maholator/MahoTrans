@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Text;
 using javax.microedition.ams;
 using JetBrains.Annotations;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

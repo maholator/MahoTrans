@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using java.lang;
 using MahoTrans.Abstractions;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;

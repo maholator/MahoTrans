@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MahoTrans.Runtime.Errors;
 
 namespace MahoTrans.Runtime;
 

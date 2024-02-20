@@ -6,6 +6,7 @@ using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Abstractions;
 using MahoTrans.Runtime.Config;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;

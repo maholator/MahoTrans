@@ -5,6 +5,7 @@ using System.Reflection;
 using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Native;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
