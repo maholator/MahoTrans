@@ -1693,16 +1693,17 @@ public static class BytecodeLinker
                                 opcode = MTOpcode.invoke_virtual;
                                 intData = pointer;
                                 shortData = argsCount;
-
-                                foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
-                                emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                                if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
                             }
-                            else
+
+                            if (d == default)
                             {
                                 throw new StackMismatchException(
                                     "Unable to predict stack state when no method signature is known.");
                             }
+
+                            foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
 
                             SetNextStack();
                             break;
@@ -2060,6 +2061,8 @@ public static class BytecodeLinker
             return false;
         }
 
+        types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
+
         if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
@@ -2068,7 +2071,6 @@ public static class BytecodeLinker
             data = ndc.ClassName;
             pointer = 0;
             argsCount = 0;
-            types = default;
             return false;
         }
 
@@ -2106,18 +2108,11 @@ public static class BytecodeLinker
         if (m == null || m.IsStatic)
         {
             var msg = $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"";
-            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name, msg);
-            opcode = MTOpcode.error_no_method;
-            data = ndc.Descriptor.Name;
-            pointer = 0;
-            argsCount = 0;
-            types = default;
-            return false;
+            logger?.Log(LoadIssueType.MissingVirtualAccess, cls.Name, msg);
         }
 
         argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor);
         pointer = jvm.GetVirtualPointer(ndc.Descriptor);
-        types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
         return true;
     }
 

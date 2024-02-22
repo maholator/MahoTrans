@@ -158,6 +158,8 @@ public static class Utils
             LoadIssueType.MultiTypeLocalVariable => MTLogLevel.Info,
             LoadIssueType.BrokenFlow => MTLogLevel.Error,
             LoadIssueType.StackMismatch => MTLogLevel.Error,
+            LoadIssueType.MissingVirtualAccess => MTLogLevel.Warning,
+            LoadIssueType.QuestionableNativeCode => MTLogLevel.Info,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }

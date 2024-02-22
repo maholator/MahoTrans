@@ -37,6 +37,11 @@ public enum LoadIssueType : byte
     [Description("Missing method access")] MissingMethodAccess,
 
     /// <summary>
+    ///     There is an access to existing class' method via virtual call, but this method is not available.
+    /// </summary>
+    [Description("Missing virtual access")] MissingVirtualAccess,
+
+    /// <summary>
     ///     There is an access to existing class' field, but that field is not available.
     /// </summary>
     [Description("Missing field access")] MissingFieldAccess,
