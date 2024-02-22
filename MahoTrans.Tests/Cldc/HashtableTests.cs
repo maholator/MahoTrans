@@ -14,7 +14,7 @@ public class HashtableTests : JarTestBase
     public void TestThrow()
     {
         var test = Load("TestThrow");
-        Assert.Throws<JavaRuntimeError>(() => test.Run());
+        Assert.Throws<JavaUnhandledException>(() => test.Run());
     }
 
     [Test]
