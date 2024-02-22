@@ -36,29 +36,35 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
     {
-        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
-        foreach (var cls in classes)
+        using (new JvmContext(this))
         {
-            Classes.Add(cls.Name, cls);
-        }
+            ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
+            foreach (var cls in classes)
+            {
+                Classes.Add(cls.Name, cls);
+            }
 
-        RefreshState(classes);
-        foreach (var cls in classes)
-            BytecodeLinker.Link(cls);
+            RefreshState(classes);
+            foreach (var cls in classes)
+                BytecodeLinker.Link(cls);
+        }
     }
 
     public void AddClrClasses(IEnumerable<Type> types)
     {
-        var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
-        foreach (var cls in classes)
+        using (new JvmContext(this))
         {
-            cls.Flags |= ClassFlags.Public;
-            Classes.Add(cls.Name, cls);
-        }
+            var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
+            foreach (var cls in classes)
+            {
+                cls.Flags |= ClassFlags.Public;
+                Classes.Add(cls.Name, cls);
+            }
 
-        RefreshState(classes);
-        foreach (var cls in classes)
-            BytecodeLinker.Link(cls);
+            RefreshState(classes);
+            foreach (var cls in classes)
+                BytecodeLinker.Link(cls);
+        }
     }
 
     /// <summary>
@@ -172,6 +178,8 @@ public partial class JvmState
         return null;
     }
 
+    [Obsolete("Faulty method, see TODO",true)]
+    //TODO: for java/lang/abc it returns... "[java/lang/abc"? No "L;"?
     public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
 
     #endregion
