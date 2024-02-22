@@ -14,6 +14,7 @@ JVM interpreter&recompiler written on C# as core for mobile apps emulators
 ## This project is not:
 
 - Accurate port of any mobile device runtime environment: use emulators in SDKs instead.
+- "Desktop" JVM: MT implements CLDC and MIDP and not compatible with SE/EE apps.
 - Bi-directional bridge between JVM and CLR: use IKVM.NET instead.
 - Java source code compiler: use `javac` instead. All java pieces of this are written on java bytecode.
 - Something that you can run: MahoTrans is only one of the parts of an arbitrary emulator/RE. It can do nothing by
@@ -66,6 +67,27 @@ JVM interpreter&recompiler written on C# as core for mobile apps emulators
 | `JavaThread`        | Interpreted thread.                                                                             |
 | `JavaThrowable`     | Allows to throw JVM exceptions as CLR exceptions.                                               |
 
+## Toolkits
+
+| Class                                                                 | Description                                                                          |
+|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [ISystem](MahoTrans.Abstractions/Abstractions/ISystem.cs)             | Receives data from stdout/stderr. Provides properties and timezone.                  |
+| [IClock](MahoTrans.Abstractions/Abstractions/IClock.cs)               | Provides time and controls execution speed.                                          |
+| [IImageManager](MahoTrans.Abstractions/Abstractions/IImageManager.cs) | Backend for LCDUI `Image`/`Graphics` classes.                                        |
+| [IFontManager](MahoTrans.Abstractions/Abstractions/IFontManager.cs)   | Backend for LCDUI `Font` class.                                                      |
+| [IDisplay](MahoTrans.Abstractions/Abstractions/IDisplay.cs)           | Backend for LCDUI `Display`/`Displayable` classes.                                   |
+| [IAmsCallbacks](MahoTrans.Abstractions/Abstractions/IAmsCallbacks.cs) | Receives pause/resume/exit signals from MIDlet. Allows to perform platform requests. |
+| [IRecordStore](MahoTrans.Abstractions/Abstractions/IRecordStore.cs)   | Backend for `RecordStore` class.                                                     |
+| [IMedia](MahoTrans.Abstractions/Abstractions/IMedia.cs)               | Backend for MMAPI.                                                                   |
+| [ILoadLogger](MahoTrans.Abstractions/Abstractions/ILoadLogger.cs)     | Receives messages from loader, linker and compiler.                                  |
+| [ILogger](MahoTrans.Abstractions/Abstractions/ILogger.cs)             | Receives exception and runtime events.                                               |
+
+Some stub implementations are provided out of the box. Others must be implemented by frontend.
+
+MT manages only its own lifetime. Toolkits must be initialized/disposed/snapshoted/restored themselves.
+
+Some toolkits do not need access to MT to work (for example, graphics, clock, record store). They should reference [package](https://www.nuget.org/packages/ru.nnproject.MahoTrans.Abstractions/) directly and not depend on MT itself.
+
 ## Example code
 
 ```csharp
@@ -89,7 +111,7 @@ static void Main(string midletClass) {
     using (new JvmContext(j)) // enter context
     {
         j.InitQueue(); // init ams queue
-        // MidletStaertup is for example here: you may want to bootstrap your app in another way.
+        // StartupThread is for example here: you may want to bootstrap your app in another way.
         var runner = j.AllocateObject<StartupThread>(); // alloc startup object
         runner.Manifest = new(); // we start with empty manifest
         runner.MidletClassName = midletClass; // assign class name
