@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -101,11 +101,21 @@ public partial class JvmState
     }
 
     /// <summary>
+    ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
+    /// </summary>
+    /// <param name="name">Class name to search.</param>
+    /// <returns>Found or created class object.</returns>
+    public JavaClass GetClass(string name)
+    {
+        return GetClassOrNull(name) ?? throw new JavaRuntimeError($"Class {name} is not loaded!");
+    }
+
+    /// <summary>
     ///     Gets class object from <see cref="Classes" />. Automatically handles array types.
     /// </summary>
     /// <param name="name">Class name to search.</param>
-    /// <returns></returns>
-    public JavaClass GetClass(string name)
+    /// <returns>Class object if found or created, null otherwise.</returns>
+    public JavaClass? GetClassOrNull(string name)
     {
         if (Classes.TryGetValue(name, out var o))
             return o;
@@ -159,7 +169,7 @@ public partial class JvmState
             return ac;
         }
 
-        throw new JavaRuntimeError($"Class {name} is not loaded!");
+        return null;
     }
 
     public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");

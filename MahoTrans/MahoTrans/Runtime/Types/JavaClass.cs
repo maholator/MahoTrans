@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using java.lang;
 using MahoTrans.Abstractions;
-using MahoTrans.Runtime.Errors;
 using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
@@ -226,24 +225,6 @@ public class JavaClass
     ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
-    /// <returns>Field object.</returns>
-    public Field GetFieldRecursive(NameDescriptor descriptor)
-    {
-        var cls = this;
-        while (true)
-        {
-            if (cls.Fields.TryGetValue(descriptor, out var f))
-                return f;
-            if (cls.IsObject)
-                throw new JavaRuntimeError($"Field {descriptor} is not found in class {this}");
-            cls = cls.Super;
-        }
-    }
-
-    /// <summary>
-    ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
-    /// </summary>
-    /// <param name="descriptor">Descriptor of the field.</param>
     /// <returns>Field object. Null if field was not found.</returns>
     public Field? GetFieldRecursiveOrNull(NameDescriptor descriptor)
     {
@@ -263,7 +244,7 @@ public class JavaClass
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
     /// <returns>Method object.</returns>
-    public Method GetMethodRecursive(NameDescriptor descriptor)
+    public Method? GetMethodRecursiveOrNull(NameDescriptor descriptor)
     {
         var cls = this;
         while (true)
@@ -271,12 +252,10 @@ public class JavaClass
             if (cls.Methods.TryGetValue(descriptor, out var m))
                 return m;
             if (cls.IsObject)
-                throw new JavaLinkageException($"Method {descriptor} is not found in class {this}");
+                return null;
             cls = cls.Super;
         }
     }
-
-    public void AddMethod(Method m) => Methods.Add(m.Descriptor, m);
 
     /// <summary>
     ///     Runs class' initializer method on the thread. Call this before any usage. Call this only once per class lifecycle.

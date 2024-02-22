@@ -157,7 +157,8 @@ public static class Utils
             LoadIssueType.LocalVariableIndexOutOfBounds => MTLogLevel.Error,
             LoadIssueType.MultiTypeLocalVariable => MTLogLevel.Info,
             LoadIssueType.BrokenFlow => MTLogLevel.Error,
-            _ => 0
+            LoadIssueType.StackMismatch => MTLogLevel.Error,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }
 

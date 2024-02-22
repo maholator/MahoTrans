@@ -22,7 +22,7 @@ public static class BytecodeLinker
         catch (Exception e)
         {
             throw new JavaLinkageException(
-                $"Failed to link {method} in JIT manner", e);
+                $"Failed to link {method}", e);
         }
     }
 
@@ -43,207 +43,10 @@ public static class BytecodeLinker
             // there was a try-catch but its hit is a failure by itself, soo...
             Instruction[] code = method.JavaBody.Code;
 
-            VerifyClassReferences(code, cls, jvm, logger);
             VerifyLocals(method.JavaBody, cls.Name, logger);
-            CheckMethodExit(code, method.Descriptor.ToString(), cls.Name, logger);
+            CheckMethodExit(code, method.Descriptor.ToString(), cls);
         }
     }
-
-    /// <summary>
-    ///     Checks that there is no broken references.
-    /// </summary>
-    private static void VerifyClassReferences(Instruction[] code, JavaClass cls, JvmState jvm, ILoadLogger? logger)
-    {
-        var consts = cls.Constants;
-
-        foreach (var instruction in code)
-        {
-            var args = instruction.Args;
-            switch (instruction.Opcode)
-            {
-                case JavaOpcode.newobject:
-                {
-                    var type = (string)consts[Combine(args[0], args[1])];
-                    if (!jvm.Classes.ContainsKey(type))
-                    {
-                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{type}\" can't be found but going to be instantiated");
-                    }
-
-                    break;
-                }
-                case JavaOpcode.checkcast:
-                case JavaOpcode.instanceof:
-                {
-                    var type = (string)consts[Combine(args[0], args[1])];
-                    try
-                    {
-                        jvm.GetClass(type);
-                    }
-                    catch
-                    {
-                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{type}\" can't be found but going to be casted into");
-                    }
-
-                    break;
-                }
-                case JavaOpcode.invokespecial:
-                case JavaOpcode.invokestatic:
-                case JavaOpcode.invokeinterface:
-                case JavaOpcode.invokevirtual:
-                {
-                    NameDescriptorClass ndc;
-                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
-                    {
-                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    }
-                    else if (consts[Combine(args[0], args[1])] is NameDescriptor)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
-                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
-                        break;
-                    }
-
-                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
-                    {
-                        if (c.IsInterface)
-                        {
-                            var attr = c.ClrType?.GetCustomAttribute<JavaInterfaceAttribute>();
-                            if (attr == null)
-                            {
-                                // this is an interface from java code
-                                break;
-                            }
-
-                            var reference = attr.ReferenceImplementation;
-                            if (reference == null)
-                            {
-                                // can't check interface without reference implementation.
-                                logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
-                                    $"Interface \"{c.Name}\" should have reference implementation.");
-                                break;
-                            }
-
-                            try
-                            {
-                                c = jvm.GetClass(reference.FullName!.Replace('.', '/'));
-                            }
-                            catch
-                            {
-                                logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
-                                    $"Interface \"{c.Name}\" has invalid reference implementation.");
-                                break;
-                            }
-                        }
-
-                        try
-                        {
-                            c.GetMethodRecursive(ndc.Descriptor);
-                        }
-                        catch
-                        {
-                            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"");
-                        }
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" will be used");
-                    }
-
-                    break;
-                }
-                case JavaOpcode.getfield:
-                case JavaOpcode.putfield:
-                {
-                    NameDescriptorClass ndc;
-                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
-                    {
-                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
-                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
-                        break;
-                    }
-
-                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
-                    {
-                        try
-                        {
-                            var f = c.GetFieldRecursive(ndc.Descriptor);
-                            if (f.Flags.HasFlag(FieldFlags.Static))
-                            {
-                                logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                    $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is static");
-                            }
-                        }
-                        catch
-                        {
-                            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
-                        }
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
-                    }
-
-                    break;
-                }
-                case JavaOpcode.getstatic:
-                case JavaOpcode.putstatic:
-                {
-                    NameDescriptorClass ndc;
-
-                    if (consts[Combine(args[0], args[1])] is NameDescriptorClass)
-                    {
-                        ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.InvalidConstant, cls.Name,
-                            $"Constant \"{Combine(args[0], args[1])}\" isn't a member reference");
-                        break;
-                    }
-
-                    if (jvm.Classes.TryGetValue(ndc.ClassName, out var c))
-                    {
-                        try
-                        {
-                            var f = c.GetFieldRecursive(ndc.Descriptor);
-                            if (!f.Flags.HasFlag(FieldFlags.Static))
-                            {
-                                logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                    $"\"{ndc.ClassName}\" has field \"{ndc.Descriptor}\", but it is not static");
-                            }
-                        }
-                        catch
-                        {
-                            logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name,
-                                $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"");
-                        }
-                    }
-                    else
-                    {
-                        logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
-                            $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" will be used");
-                    }
-
-                    break;
-                }
-            }
-        }
-    }
-
 
     private static void VerifyLocals(JavaMethodBody method, string cls, ILoadLogger? logger)
     {
@@ -323,10 +126,10 @@ public static class BytecodeLinker
         method.LocalTypes = types;
     }
 
-    private static void CheckMethodExit(Instruction[] code, string method, string cls, ILoadLogger? logger)
+    private static bool CheckMethodExit(Instruction[] code, string method, JavaClass cls)
     {
         if (code.Length == 0)
-            return;
+            return true;
         var lastOpcode = code[^1].Opcode;
 
         switch (lastOpcode)
@@ -346,11 +149,12 @@ public static class BytecodeLinker
             case JavaOpcode.goto_w:
             case JavaOpcode.jsr_w:
             case JavaOpcode._inplacereturn:
-                return;
+                return true;
         }
 
-        logger?.Log(LoadIssueType.BrokenFlow, cls,
+        JvmContext.Toolkit?.LoadLogger?.Log(LoadIssueType.BrokenFlow, cls.Name,
             $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
+        return false;
     }
 
     private static void LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
@@ -1863,7 +1667,7 @@ public static class BytecodeLinker
                         {
                             emulatedStack.Pop(); // TODO check field type
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                            var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
+                            var f = getFieldSafely(cls, args, false, ref opcode, ref data, out _, out var c);
                             if (f != null)
                             {
                                 if (jvm.UseBridgesForFields)
@@ -1886,39 +1690,54 @@ public static class BytecodeLinker
                         case JavaOpcode.invokevirtual:
                         case JavaOpcode.invokeinterface:
                         {
-                            var vp = LinkVirtualCall(jvm, consts, args);
-                            intData = vp.Item1;
-                            shortData = vp.Item2;
-                            opcode = MTOpcode.invoke_virtual;
-                            var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(jvm.DecodeVirtualPointer(vp.Item1)
-                                .Descriptor);
-                            foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                            if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
+                            if (LinkVirtualCall(cls, args, ref opcode, ref data, out var pointer, out var argsCount,
+                                    out var d))
+                            {
+                                opcode = MTOpcode.invoke_virtual;
+                                intData = pointer;
+                                shortData = argsCount;
+
+                                foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
+                                emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                                if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
+                            }
+                            else
+                            {
+                                throw new StackMismatchException(
+                                    "Unable to predict stack state when no method signature is known.");
+                            }
+
                             SetNextStack();
                             break;
                         }
                         case JavaOpcode.invokespecial:
                         case JavaOpcode.invokestatic:
                         {
-                            var ndc = (NameDescriptorClass)consts[Combine(args[0], args[1])];
-                            var @class = jvm.Classes[ndc.ClassName];
-                            var m = @class.GetMethodRecursive(ndc.Descriptor);
-                            data = m;
-                            var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
-                            foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
-                            if (instruction.Opcode == JavaOpcode.invokespecial)
+                            bool isStatic = instruction.Opcode == JavaOpcode.invokestatic;
+                            var m = getMethodSafely(cls, args, isStatic, ref opcode, ref data, out var ndc);
+                            if (m != null)
                             {
-                                emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                                opcode = MTOpcode.invoke_instance;
+                                data = m;
+                                opcode = isStatic ? MTOpcode.invoke_static : MTOpcode.invoke_instance;
+                            }
+
+                            if (ndc != default)
+                            {
+                                var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
+                                foreach (var p in d.args.Reverse())
+                                    emulatedStack.PopWithAssert(p);
+                                if (!isStatic)
+                                    emulatedStack.PopWithAssert(PrimitiveType.Reference);
+
+                                if (d.returnType.HasValue)
+                                    emulatedStack.Push(d.returnType.Value);
                             }
                             else
                             {
-                                opcode = MTOpcode.invoke_static;
+                                throw new StackMismatchException(
+                                    "Unable to predict stack state when no method signature is known.");
                             }
 
-                            if (d.returnType.HasValue)
-                                emulatedStack.Push(d.returnType.Value);
                             SetNextStack();
                             break;
                         }
@@ -1926,11 +1745,23 @@ public static class BytecodeLinker
                             throw new NotImplementedException("No invokedynamic support");
                         case JavaOpcode.newobject:
                         {
-                            opcode = MTOpcode.new_obj;
-                            var type = (string)consts[Combine(args[0], args[1])];
-                            if (!jvm.Classes.TryGetValue(type, out var cls1))
-                                throw new JavaLinkageException($"Class \"{type}\" is not registered");
-                            data = cls1;
+                            if (getConstantSafely(cls, Combine(args[0], args[1]), ref opcode, ref data,
+                                    out string type))
+                            {
+                                if (jvm.Classes.TryGetValue(type, out var cls1))
+                                {
+                                    opcode = MTOpcode.new_obj;
+                                    data = cls1;
+                                }
+                                else
+                                {
+                                    logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                                        $"\"{type}\" can't be found but going to be instantiated");
+                                    opcode = MTOpcode.error_no_class;
+                                    data = type;
+                                }
+                            }
+
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
                             break;
@@ -1970,9 +1801,24 @@ public static class BytecodeLinker
                             goto entryPointsLoop;
                         case JavaOpcode.checkcast:
                         {
-                            opcode = MTOpcode.checkcast;
-                            var type = (string)consts[Combine(args[0], args[1])];
-                            data = jvm.GetClass(type);
+                            if (getConstantSafely(cls, Combine(args[0], args[1]), ref opcode, ref data,
+                                    out string type))
+                            {
+                                var cls1 = jvm.GetClassOrNull(type);
+                                if (cls1 != null)
+                                {
+                                    opcode = MTOpcode.checkcast;
+                                    data = cls1;
+                                }
+                                else
+                                {
+                                    logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                                        $"\"{type}\" can't be found but going to be casted into");
+                                    opcode = MTOpcode.error_no_class;
+                                    data = type;
+                                }
+                            }
+
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
@@ -1980,9 +1826,24 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.instanceof:
                         {
-                            opcode = MTOpcode.instanceof;
-                            var type = (string)consts[Combine(args[0], args[1])];
-                            data = jvm.GetClass(type);
+                            if (getConstantSafely(cls, Combine(args[0], args[1]), ref opcode, ref data,
+                                    out string type))
+                            {
+                                var cls1 = jvm.GetClassOrNull(type);
+                                if (cls1 != null)
+                                {
+                                    opcode = MTOpcode.instanceof;
+                                    data = cls1;
+                                }
+                                else
+                                {
+                                    logger?.Log(LoadIssueType.MissingClassAccess, cls.Name,
+                                        $"\"{type}\" can't be found but going to be casted into");
+                                    opcode = MTOpcode.error_no_class;
+                                    data = type;
+                                }
+                            }
+
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStack();
@@ -2169,25 +2030,91 @@ public static class BytecodeLinker
         stackBeforeInstruction = null!;
     }
 
-    private static (int, ushort) LinkVirtualCall(JvmState jvm, object[] consts, byte[] args)
+    private static bool LinkVirtualCall(JavaClass cls, byte[] args, ref MTOpcode opcode, ref object data,
+        out int pointer, out ushort argsCount, out (PrimitiveType? returnType, PrimitiveType[] args) types)
     {
-        var ndc = consts[Combine(args[0], args[1])];
-        NameDescriptor nd;
-        switch (ndc)
+        var logger = JvmContext.Toolkit?.LoadLogger;
+        var jvm = JvmContext.Jvm!;
+        var index = Combine(args[0], args[1]);
+
         {
-            case NameDescriptor r:
-                nd = r;
-                break;
-            case NameDescriptorClass c:
-                nd = c.Descriptor;
-                break;
-            default:
-                throw new JavaLinkageException(
-                    $"Argument for virtual call was not a descriptor object but {ndc.GetType()}");
+            if (getConstantSilently(cls, index, out NameDescriptor nonBoundNd))
+            {
+                // this is a non-bound call
+                argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(nonBoundNd.Descriptor);
+                pointer = jvm.GetVirtualPointer(nonBoundNd);
+                types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(nonBoundNd.Descriptor);
+                return true;
+            }
         }
 
-        var argsCount = DescriptorUtils.ParseMethodArgsCount(nd.Descriptor);
-        return (jvm.GetVirtualPointer(nd), (ushort)argsCount);
+        if (!getConstantSafely(cls, index, ref opcode, ref data, out NameDescriptorClass ndc))
+        {
+            pointer = 0;
+            argsCount = 0;
+            types = default;
+            return false;
+        }
+
+        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        {
+            var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
+            logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_class;
+            data = ndc.ClassName;
+            pointer = 0;
+            argsCount = 0;
+            types = default;
+            return false;
+        }
+
+        if (c.IsInterface)
+        {
+            var attr = c.ClrType?.GetCustomAttribute<JavaInterfaceAttribute>();
+            // this may be an interface from java code.
+            if (attr != null)
+            {
+                var reference = attr.ReferenceImplementation;
+                // to check reference impl, it must exist.
+                if (reference != null)
+                {
+                    try
+                    {
+                        c = jvm.GetClass(reference.FullName!.Replace('.', '/'));
+                        // checking reference impl if found
+                    }
+                    catch
+                    {
+                        logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
+                            $"Interface \"{c.Name}\" has invalid reference implementation.");
+                    }
+                }
+                else
+                {
+                    logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
+                        $"Interface \"{c.Name}\" should have reference implementation.");
+                }
+            }
+        }
+
+        var m = c.GetMethodRecursiveOrNull(ndc.Descriptor);
+
+        if (m == null || m.IsStatic)
+        {
+            var msg = $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"";
+            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_method;
+            data = ndc.Descriptor.Name;
+            pointer = 0;
+            argsCount = 0;
+            types = default;
+            return false;
+        }
+
+        argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor);
+        pointer = jvm.GetVirtualPointer(ndc.Descriptor);
+        types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
+        return true;
     }
 
     /// <summary>
@@ -2247,6 +2174,19 @@ public static class BytecodeLinker
         return result;
     }
 
+    /// <summary>
+    ///     Gets constant at attempts to cast it.
+    /// </summary>
+    /// <param name="cls">Class to get constant from.</param>
+    /// <param name="index">Index of constant.</param>
+    /// <param name="opcode">Opcode to set to "error" on fail.</param>
+    /// <param name="data">Data to set error message to.</param>
+    /// <param name="result">Constant value.</param>
+    /// <typeparam name="T">Constant type.</typeparam>
+    /// <returns>False on error. Opcode and data will be updated in such case.</returns>
+    /// <remarks>
+    ///     This is basically "(T)cls.Constants[index]" but with safety checks.
+    /// </remarks>
     private static bool getConstantSafely<T>(JavaClass cls, int index, ref MTOpcode opcode, ref object data,
         out T result)
     {
@@ -2272,6 +2212,22 @@ public static class BytecodeLinker
         logger?.Log(LoadIssueType.InvalidConstant, cls.Name, msg2);
         opcode = MTOpcode.error_bytecode;
         data = msg2;
+        result = default!;
+        return false;
+    }
+
+    private static bool getConstantSilently<T>(JavaClass cls, int index, out T result)
+    {
+        var constants = cls.Constants;
+        if (index >= 0 && index < constants.Length)
+        {
+            if (constants[index] is T t)
+            {
+                result = t;
+                return true;
+            }
+        }
+
         result = default!;
         return false;
     }
@@ -2333,6 +2289,50 @@ public static class BytecodeLinker
         }
 
         return f;
+    }
+
+    private static Method? getMethodSafely(JavaClass cls, byte[] args, bool isStatic, ref MTOpcode opcode,
+        ref object data, out NameDescriptorClass ndc)
+    {
+        var logger = JvmContext.Toolkit?.LoadLogger;
+        var jvm = JvmContext.Jvm!;
+        var index = Combine(args[0], args[1]);
+
+        if (!getConstantSafely(cls, index, ref opcode, ref data, out ndc))
+        {
+            return null;
+        }
+
+        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        {
+            var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
+            logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_class;
+            data = ndc.ClassName;
+            return null;
+        }
+
+        var m = c.GetMethodRecursiveOrNull(ndc.Descriptor);
+
+        if (m == null)
+        {
+            var msg = $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"";
+            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name, msg);
+            opcode = MTOpcode.error_no_method;
+            data = ndc.Descriptor.Name;
+            return null;
+        }
+
+        if (m.IsStatic != isStatic)
+        {
+            logger?.Log(LoadIssueType.MissingMethodAccess, cls.Name,
+                $"\"{ndc.ClassName}\" has method \"{ndc.Descriptor}\", but it {(isStatic ? "is not" : "is")} static");
+            opcode = MTOpcode.error_no_method;
+            data = ndc.Descriptor.Name;
+            return null;
+        }
+
+        return m;
     }
 
     public static int Combine(byte indexByte1, byte indexByte2)
