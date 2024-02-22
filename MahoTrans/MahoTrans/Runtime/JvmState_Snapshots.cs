@@ -182,23 +182,10 @@ public partial class JvmState
                 AliveThreads.Clear();
                 AliveThreads.AddRange(Restore(zip, threads_alive_json));
 
-                foreach (var thread in AliveThreads)
-                {
-                    for (int i = 0; i <= thread.ActiveFrameIndex; i++)
-                    {
-                        thread.CallStack[i]!.Method.EnsureBytecodeLinked();
-                    }
-                }
-
                 WaitingThreads.Clear();
 
                 foreach (var thread in Restore(zip, threads_waiting_json))
                 {
-                    for (int i = 0; i <= thread.ActiveFrameIndex; i++)
-                    {
-                        thread.CallStack[i]!.Method.EnsureBytecodeLinked();
-                    }
-
                     WaitingThreads.Add(thread.ThreadId, thread);
                 }
 

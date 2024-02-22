@@ -61,7 +61,6 @@ public class JavaThread
     public JavaThread(Frame root, Reference model)
         : this(model)
     {
-        root.Method.EnsureBytecodeLinked();
         ActiveFrameIndex = 0;
         ActiveFrame = root;
         CallStack[0] = root;

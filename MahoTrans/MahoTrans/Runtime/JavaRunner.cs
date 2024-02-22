@@ -1724,7 +1724,6 @@ public class JavaRunner
 
         var java = m.JavaBody;
 
-        java.EnsureBytecodeLinked();
         var f = thread.Push(java);
         frame.SetFrom(argsLength);
         unsafe

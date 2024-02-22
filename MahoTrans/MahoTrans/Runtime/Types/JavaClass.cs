@@ -276,7 +276,6 @@ public class JavaClass
             }
             else
             {
-                m.JavaBody.EnsureBytecodeLinked();
                 thread.Push(m.JavaBody);
             }
         }

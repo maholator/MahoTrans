@@ -12,12 +12,12 @@ namespace MahoTrans.Runtime;
 
 public static class BytecodeLinker
 {
-    public static void Link(JavaMethodBody method, JvmState jvm)
+    public static void Link(JavaMethodBody method)
     {
         var isClinit = method.Method.Descriptor.Name == "<clinit>";
         try
         {
-            LinkInternal(method, method.Method.Class, jvm, isClinit);
+            LinkInternal(method, method.Method.Class, isClinit);
         }
         catch (Exception e)
         {
@@ -26,10 +26,8 @@ public static class BytecodeLinker
         }
     }
 
-    public static void Verify(JavaClass cls, JvmState jvm)
+    public static void Link(JavaClass cls)
     {
-        var logger = jvm.Toolkit.LoadLogger;
-
         foreach (var method in cls.Methods.Values)
         {
             // we don't have bytecode at all.
@@ -40,18 +38,15 @@ public static class BytecodeLinker
             if (method.IsAbstract)
                 continue;
 
-            // there was a try-catch but its hit is a failure by itself, soo...
-            Instruction[] code = method.JavaBody.Code;
-
-            VerifyLocals(method.JavaBody, cls.Name, logger);
-            CheckMethodExit(code, method.Descriptor.ToString(), cls);
+            Link(method.JavaBody);
         }
     }
 
-    private static void VerifyLocals(JavaMethodBody method, string cls, ILoadLogger? logger)
+    private static void LinkLocals(JavaMethodBody method, ref LinkedInstruction[] output)
     {
         var code = method.Code;
         var methodName = method.Method.Descriptor.ToString();
+        var logger = JvmContext.Toolkit?.LoadLogger;
         List<LocalVariableType>[] locals = new List<LocalVariableType>[method.LocalsCount];
 
         for (int i = 0; i < method.LocalsCount; i++)
@@ -90,7 +85,8 @@ public static class BytecodeLinker
 
                 if (index >= method.LocalsCount)
                 {
-                    logger?.Log(LoadIssueType.LocalVariableIndexOutOfBounds, cls,
+                    output[i] = new LinkedInstruction(MTOpcode.error_bytecode);
+                    logger?.Log(LoadIssueType.LocalVariableIndexOutOfBounds, method.Method.Class.Name,
                         $"Local variable {index} of type \"{(LocalVariableType)type}\" is out of bounds at {methodName}:{i}");
                     continue;
                 }
@@ -109,7 +105,7 @@ public static class BytecodeLinker
             if (locals[i].Count > 1)
             {
                 locals[i].Sort();
-                logger?.Log(LoadIssueType.MultiTypeLocalVariable, cls,
+                logger?.Log(LoadIssueType.MultiTypeLocalVariable, method.Method.Class.Name,
                     $"Local variable {i} has multiple types: {string.Join(", ", locals[i])} at {methodName}");
                 types[i] = default;
             }
@@ -126,7 +122,7 @@ public static class BytecodeLinker
         method.LocalTypes = types;
     }
 
-    private static bool CheckMethodExit(Instruction[] code, string method, JavaClass cls)
+    private static bool CheckMethodExit(Instruction[] code, NameDescriptor method, JavaClass cls)
     {
         if (code.Length == 0)
             return true;
@@ -157,8 +153,9 @@ public static class BytecodeLinker
         return false;
     }
 
-    private static void LinkInternal(JavaMethodBody method, JavaClass cls, JvmState jvm, bool isClinit)
+    private static void LinkInternal(JavaMethodBody method, JavaClass cls, bool isClinit)
     {
+        JvmState jvm = JvmContext.Jvm!;
         var logger = jvm.Toolkit.LoadLogger;
         {
             // let's deal with arguments sizes first.
@@ -2014,6 +2011,13 @@ public static class BytecodeLinker
             logger?.Log(LoadIssueType.BrokenFlow, cls.Name, e.Message);
             stubCode(ref output, out stackBeforeInstruction);
         }
+
+        if (!CheckMethodExit(code, method.Method.Descriptor, cls))
+        {
+            output[^1] = new LinkedInstruction(MTOpcode.error_bytecode);
+        }
+
+        LinkLocals(method, ref output);
 
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
