@@ -229,7 +229,7 @@ public static class NativeLinker
         java.NativeBody = nativeMethod;
         try
         {
-            java.BridgeNumber = BridgeCompiler.BuildBridgeMethod(nativeMethod, bridgeBuilder);
+            java.BridgeNumber = CallBridgeCompiler.BuildCallBridge(nativeMethod, bridgeBuilder);
         }
         catch (Exception e)
         {
