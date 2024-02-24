@@ -69,18 +69,18 @@ JVM interpreter&recompiler written on C# as core for mobile apps emulators
 
 ## Toolkits
 
-| Class                                                                 | Description                                                                          |
-|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| [ISystem](MahoTrans.Abstractions/Abstractions/ISystem.cs)             | Receives data from stdout/stderr. Provides properties and timezone.                  |
-| [IClock](MahoTrans.Abstractions/Abstractions/IClock.cs)               | Provides time and controls execution speed.                                          |
+| Class                                                                | Description                                                                          |
+|----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [ISystem](MahoTrans.Abstractions/Abstractions/ISystem.cs)            | Receives data from stdout/stderr. Provides properties and timezone.                  |
+| [Clock](MahoTrans.Abstractions/Abstractions/Clock.cs)               | Provides time and controls execution speed.                                          |
 | [IImageManager](MahoTrans.Abstractions/Abstractions/IImageManager.cs) | Backend for LCDUI `Image`/`Graphics` classes.                                        |
-| [IFontManager](MahoTrans.Abstractions/Abstractions/IFontManager.cs)   | Backend for LCDUI `Font` class.                                                      |
-| [IDisplay](MahoTrans.Abstractions/Abstractions/IDisplay.cs)           | Backend for LCDUI `Display`/`Displayable` classes.                                   |
+| [IFontManager](MahoTrans.Abstractions/Abstractions/IFontManager.cs)  | Backend for LCDUI `Font` class.                                                      |
+| [IDisplay](MahoTrans.Abstractions/Abstractions/IDisplay.cs)          | Backend for LCDUI `Display`/`Displayable` classes.                                   |
 | [IAmsCallbacks](MahoTrans.Abstractions/Abstractions/IAmsCallbacks.cs) | Receives pause/resume/exit signals from MIDlet. Allows to perform platform requests. |
-| [IRecordStore](MahoTrans.Abstractions/Abstractions/IRecordStore.cs)   | Backend for `RecordStore` class.                                                     |
-| [IMedia](MahoTrans.Abstractions/Abstractions/IMedia.cs)               | Backend for MMAPI.                                                                   |
-| [ILoadLogger](MahoTrans.Abstractions/Abstractions/ILoadLogger.cs)     | Receives messages from loader, linker and compiler.                                  |
-| [ILogger](MahoTrans.Abstractions/Abstractions/ILogger.cs)             | Receives exception and runtime events.                                               |
+| [IRecordStore](MahoTrans.Abstractions/Abstractions/IRecordStore.cs)  | Backend for `RecordStore` class.                                                     |
+| [IMedia](MahoTrans.Abstractions/Abstractions/IMedia.cs)              | Backend for MMAPI.                                                                   |
+| [ILoadLogger](MahoTrans.Abstractions/Abstractions/ILoadLogger.cs)    | Receives messages from loader, linker and compiler.                                  |
+| [ILogger](MahoTrans.Abstractions/Abstractions/ILogger.cs)            | Receives exception and runtime events.                                               |
 
 Some stub implementations are provided out of the box. Others must be implemented by frontend.
 
