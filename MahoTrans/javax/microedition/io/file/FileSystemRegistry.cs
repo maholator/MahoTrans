@@ -5,6 +5,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
+using java.util;
 
 namespace javax.microedition.io.file;
 
