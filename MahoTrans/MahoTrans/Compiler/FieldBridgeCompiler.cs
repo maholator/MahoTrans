@@ -1,22 +1,21 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using MahoTrans.Compiler;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 
-namespace MahoTrans.Loader;
+namespace MahoTrans.Compiler;
 
 /// <summary>
-///     Set of tools to build IL bridges for JVM communication with CLR fields and methods.
+///     Can build IL bridge that moves data between CLR field and JVM stack.
 /// </summary>
-public static class BridgeCompiler
+public static class FieldBridgeCompiler
 {
     #region Fields
 
@@ -90,7 +89,7 @@ public static class BridgeCompiler
     }
 
     /// <summary>
-    /// Builds GET bridge for field, placed in <see cref="StaticMemory"/>.
+    ///     Builds GET bridge for field, placed in <see cref="StaticMemory" />.
     /// </summary>
     /// <param name="typeBuilder">Builder to place bridge at.</param>
     /// <param name="field">Field to build bridge for.</param>
@@ -129,7 +128,7 @@ public static class BridgeCompiler
     }
 
     /// <summary>
-    /// Gets a good name for a field in CLR type built from JVM one.
+    ///     Gets a good name for a field in CLR type built from JVM one.
     /// </summary>
     /// <param name="descriptor">Field descriptor.</param>
     /// <param name="className">Class, where the field is declared.</param>

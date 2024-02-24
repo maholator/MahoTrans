@@ -18,7 +18,7 @@ namespace MahoTrans.Loader;
 ///     This class exposes tools to build JVM types from CLR types.
 /// </summary>
 /// <seealso cref="ClassCompiler" />
-/// <seealso cref="BridgeCompiler" />
+/// <seealso cref="FieldBridgeCompiler" />
 public static class NativeLinker
 {
     private static int _bridgeAsmCounter = 1;
@@ -58,9 +58,9 @@ public static class NativeLinker
 
             foreach (var field in @class.Fields.Values)
             {
-                field.GetValue = loaded.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, @class.Name))?
+                field.GetValue = loaded.GetMethod(FieldBridgeCompiler.GetFieldGetterName(field.Descriptor, @class.Name))?
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = loaded.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, @class.Name))?
+                field.SetValue = loaded.GetMethod(FieldBridgeCompiler.GetFieldSetterName(field.Descriptor, @class.Name))?
                     .CreateDelegate<Action<Frame>>();
             }
         }
@@ -135,7 +135,7 @@ public static class NativeLinker
         {
             if (x.DeclaringType == typeof(StaticMemory))
             {
-                var d = BridgeCompiler.BuildNativeStaticBridge(bridge, x);
+                var d = FieldBridgeCompiler.BuildNativeStaticBridge(bridge, x);
                 var field = new Field(d, FieldFlags.Public | FieldFlags.Static, name);
                 return field;
             }
@@ -150,7 +150,7 @@ public static class NativeLinker
                 {
                     NativeField = x,
                 };
-                BridgeCompiler.BuildBridges(bridge, x, d, jc);
+                FieldBridgeCompiler.BuildBridges(bridge, x, d, jc);
                 return field;
             }
         }).ToDictionary(x => x.Descriptor, x => x);
