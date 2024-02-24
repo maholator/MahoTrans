@@ -8,7 +8,10 @@ namespace MahoTrans.Compiler;
 
 public static class CompilerUtils
 {
-    public const string BRIDGE_CLASS_NAME = "Bridge";
+    /// <summary>
+    ///     Name of a class that will host all bridge methods.
+    /// </summary>
+    public const string BRIDGE_CLASS_NAME = "MTBridgesHost";
 
     public static readonly Dictionary<Type, MethodInfo> StackPopMethods = new()
     {
