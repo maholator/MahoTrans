@@ -14,17 +14,17 @@ public class ToolkitCollection
 {
     public readonly ISystem System;
 
-    public readonly IClock Clock;
+    public Clock Clock;
 
     public readonly IImageManager Images;
 
-    public readonly IFontManager Fonts;
+    public IFontManager Fonts;
 
     public readonly IDisplay Display;
 
-    public readonly IAms Ams;
+    public IAmsCallbacks? AmsCallbacks;
 
-    public readonly IRecordStore RecordStore;
+    public IRecordStore RecordStore;
 
     public readonly IMedia Media;
 
@@ -34,8 +34,7 @@ public class ToolkitCollection
 
     public IHeapDebugger? HeapDebugger;
 
-    public ToolkitCollection(ISystem system, IClock clock, IImageManager images, IFontManager fonts, IDisplay display,
-        IAms ams,
+    public ToolkitCollection(ISystem system, Clock clock, IImageManager images, IFontManager fonts, IDisplay display,
         IRecordStore recordStore, IMedia media)
     {
         System = system;
@@ -43,7 +42,6 @@ public class ToolkitCollection
         Images = images;
         Fonts = fonts;
         Display = display;
-        Ams = ams;
         RecordStore = recordStore;
         Media = media;
     }

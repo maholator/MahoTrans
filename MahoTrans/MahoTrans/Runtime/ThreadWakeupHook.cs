@@ -9,11 +9,21 @@ namespace MahoTrans.Runtime;
 public readonly struct ThreadWakeupHook
 {
     public readonly long WakeupAtMs;
+
+    /// <summary>
+    /// Thread that waits for wakeup.
+    /// </summary>
     public readonly int ThreadId;
 
-    public ThreadWakeupHook(long wakeupAtMs, int threadId)
+    /// <summary>
+    /// Object where this thread waits for notify.
+    /// </summary>
+    public readonly Reference MonitorObject;
+
+    public ThreadWakeupHook(long wakeupAtMs, int threadId, Reference monitorObject)
     {
         WakeupAtMs = wakeupAtMs;
         ThreadId = threadId;
+        MonitorObject = monitorObject;
     }
 }

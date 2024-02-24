@@ -1,20 +1,33 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class TextField : Item
+public class TextField : Item, HasText
 {
     [JavaIgnore] public string Content = string.Empty;
+
+    public int MaxSize { get; set; }
 
     [InitMethod]
     public void Init([String] Reference label, [String] Reference text, int maxSize, int constraints)
     {
+        if (maxSize <= 0)
+            Jvm.Throw<IllegalArgumentException>();
+        base.Init();
         Label = label;
         Content = Jvm.ResolveStringOrDefault(text) ?? string.Empty;
+        MaxSize = maxSize;
+    }
+
+    string HasText.Text
+    {
+        get => Content;
+        set => Content = value;
     }
 
     public const int ANY = 0;

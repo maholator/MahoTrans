@@ -41,6 +41,11 @@ public class Display : Object
             return;
         }
 
+        // we ignore double-sets of displayables, i guess?
+        //TODO notify toolkit about "screen resume"
+        if (Current == d)
+            return;
+
         if (Jvm.ResolveObject(d) is Alert a)
             a.Next = Current;
 
@@ -50,14 +55,24 @@ public class Display : Object
 
     public void setCurrent([JavaType(typeof(Alert))] Reference alert, [JavaType(typeof(Displayable))] Reference next)
     {
-        if (next.IsNull)
+        if (next.IsNull || alert.IsNull)
             Jvm.Throw<NullPointerException>();
 
+        // i added check above for readability
         var a = Jvm.Resolve<Alert>(alert);
         a.Next = next;
 
         Current = alert;
         Toolkit.Display.SetCurrent(a.Handle);
+    }
+
+    public void setCurrentItem([JavaType(typeof(Item))] Reference item)
+    {
+        var i = Jvm.Resolve<Item>(item);
+        if (i.Owner == default)
+            Jvm.Throw<IllegalStateException>();
+
+        Toolkit.Display.FocusItem(i.Owner, item);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)
@@ -71,9 +86,42 @@ public class Display : Object
 
     public int numColors() => 256 * 256 * 256;
 
-    public bool vibrate(int dur)
+    public bool vibrate(int dur) => true;
+
+    public bool flashBacklight(int duration) => false;
+
+    public int getBorderStyle(bool highlighted) => 0; // solid border
+
+    public int getColor(int colorSpecifier)
     {
-        //TODO
-        return true;
+        switch (colorSpecifier)
+        {
+            case COLOR_BACKGROUND:
+                return unchecked((int)0xFF000000);
+            case COLOR_FOREGROUND:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_HIGHLIGHTED_BACKGROUND:
+                return unchecked((int)0xFF4791DC);
+            case COLOR_HIGHLIGHTED_FOREGROUND:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_BORDER:
+                return unchecked((int)0xFFFFFFFF);
+            case COLOR_HIGHLIGHTED_BORDER:
+                return unchecked((int)0xFFFFFFFF);
+            default:
+                Jvm.Throw<IllegalArgumentException>();
+                return 0;
+        }
     }
+
+
+    public const int ALERT = 3;
+    public const int CHOICE_GROUP_ELEMENT = 2;
+    public const int COLOR_BACKGROUND = 0;
+    public const int COLOR_BORDER = 4;
+    public const int COLOR_FOREGROUND = 1;
+    public const int COLOR_HIGHLIGHTED_BACKGROUND = 2;
+    public const int COLOR_HIGHLIGHTED_BORDER = 5;
+    public const int COLOR_HIGHLIGHTED_FOREGROUND = 3;
+    public const int LIST_ELEMENT = 1;
 }

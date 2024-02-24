@@ -1,7 +1,6 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace MahoTrans.Native;
@@ -28,8 +27,10 @@ public class JavaTypeAttribute : Attribute
     {
         // arrays are always okay. Too short types are probably okay too (unit tests, global ad-hocs, etc.)
         // Otherwise, type must be in a non-global package.
-        Debug.Assert(name[0] == '[' || name.Length <= 6 || name.IndexOf('/') != -1,
-            $"Suspicious type name - you used nameof() instead of typeof()? Type name: {name}");
+        if (name[0] != '[' && name.Length > 6 && name.IndexOf('/') == -1)
+            throw new ArgumentException(
+                $"Suspicious type name - you used nameof() instead of typeof()? Type name: {name}");
+
         Name = name;
     }
 

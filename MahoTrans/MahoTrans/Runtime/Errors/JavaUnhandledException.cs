@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using java.lang;
 
-namespace MahoTrans;
+namespace MahoTrans.Runtime.Errors;
 
 public class JavaUnhandledException : JavaRuntimeError
 {

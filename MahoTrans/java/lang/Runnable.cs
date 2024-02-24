@@ -5,7 +5,7 @@ using MahoTrans.Native;
 
 namespace java.lang;
 
-[JavaInterface]
+[JavaInterface(typeof(Thread))]
 public interface Runnable
 {
 }

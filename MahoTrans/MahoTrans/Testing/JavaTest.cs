@@ -3,7 +3,7 @@
 
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
-using MahoTrans.ToolkitImpls.Ams;
+using MahoTrans.Runtime.Config;
 using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.ToolkitImpls.Rms;
@@ -26,7 +26,6 @@ public class JavaTest
             null!,
             null!,
             null!,
-            new AmsEventHub(),
             new VirtualRms(), null!)
         {
             Logger = new ConsoleLogger(),

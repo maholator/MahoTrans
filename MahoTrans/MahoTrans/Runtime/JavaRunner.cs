@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
@@ -6,6 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Loader;
+using MahoTrans.Runtime.Config;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using Array = java.lang.Array;
@@ -73,54 +75,23 @@ public class JavaRunner
         }
     }
 
-    //TODO this is too expensive and must be precalculated
     private static bool HandleException(Frame frame, int pointer, Throwable t)
     {
-        var instr = frame.Method.Code[pointer];
-
-        foreach (var @catch in frame.Method.Catches)
+        foreach (var linkedCatch in frame.Method.LinkedCatches)
         {
-            if (@catch.IsIn(instr))
+            if (!linkedCatch.IsIn(pointer))
+                continue;
+
+            if (t.JavaClass.Is(linkedCatch.ExceptionType))
             {
-                var allowedType = frame.Method.Method.Class.Constants[@catch.Type];
-                //TODO ??
-                if (@catch.Type == 0 || t.JavaClass.Is((string) allowedType))
-                {
-                    var code = frame.Method.Code;
-                    var tByte = @catch.CatchStart;
-                    if (tByte < pointer)
-                    {
-                        for (var j = pointer; j >= 0; j--)
-                        {
-                            if (code[j].Offset == tByte)
-                            {
-                                frame.Pointer = j;
-                                goto push;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (var j = pointer; j < code.Length; j++)
-                        {
-                            if (code[j].Offset == tByte)
-                            {
-                                frame.Pointer = j;
-                                goto push;
-                            }
-                        }
-                    }
-                }
+                frame.Pointer = linkedCatch.CatchStart;
+                frame.DiscardAll();
+                frame.PushReference(t.This);
+                return true;
             }
         }
 
         return false;
-
-        // pushing exception back to stack
-        push:
-        frame.DiscardAll();
-        frame.PushReference(t.This);
-        return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -1294,6 +1265,38 @@ public class JavaRunner
                 pointer++;
                 break;
             }
+
+            case MTOpcode.error_no_class:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Class {instr.Data} is not loaded!");
+
+                jvm.Throw<NoClassDefFoundError>($"Class {instr.Data} is not loaded!");
+                break;
+            }
+
+            case MTOpcode.error_no_method:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Method {instr.Data} is not found!");
+
+                jvm.Throw<NoSuchMethodError>($"Method {instr.Data} is not found!");
+                break;
+            }
+
+            case MTOpcode.error_no_field:
+            {
+                if (jvm.MissingHandling == MissingThingsHandling.Crash)
+                    throw new JavaRuntimeError($"Field {instr.Data} is not found!");
+
+                jvm.Throw<NoSuchFieldError>($"Field {instr.Data} is not found!");
+                break;
+            }
+
+            case MTOpcode.error_bytecode:
+                if (instr.Data == null!)
+                    throw new JavaRuntimeError("Execution abort opcode was reached.");
+                throw new JavaRuntimeError(instr.Data.ToString());
         }
     }
 
@@ -1721,7 +1724,6 @@ public class JavaRunner
 
         var java = m.JavaBody;
 
-        java.EnsureBytecodeLinked();
         var f = thread.Push(java);
         frame.SetFrom(argsLength);
         unsafe

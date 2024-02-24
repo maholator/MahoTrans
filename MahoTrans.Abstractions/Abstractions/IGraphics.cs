@@ -46,11 +46,23 @@ public interface IGraphics
     void DrawString(ReadOnlySpan<char> text, int x, int y, GraphicsAnchor an, uint color, FontFace face,
         FontStyle style, int size);
 
-    void DrawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width, int height, bool processAlpha);
+    void DrawARGB32(int[] rgbData, bool transparent, int offset, int scanlength, int x, int y, int width, int height);
+
+    void DrawARGB32(int[] rgbData, bool transparent, int offset, int scanlength, int x, int y, int width, int height,
+        ImageManipulation manipulation);
+
+    void DrawARGB16(short[] rgbData, UShortPixelType type, bool transparent, int offset, int scanlength, int x, int y,
+        int width, int height, ImageManipulation manipulation);
+
 
     GraphicsClip Clip { get; set; }
 
     void ClipRect(GraphicsClip clip);
 
     bool DottedStroke { set; }
+
+    /// <summary>
+    ///     Brings graphics to initial state.
+    /// </summary>
+    void Reset();
 }

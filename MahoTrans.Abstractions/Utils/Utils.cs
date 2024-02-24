@@ -118,13 +118,17 @@ public static class Utils
         return Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(input)));
     }
 
-    public static string ComputeFileSHA1(this string filePath)
+    public static byte[] ComputeFileSHA1Blob(this string filePath)
     {
         using var sha = SHA1.Create();
         using var stream = File.OpenRead(filePath);
 
-        var ba = sha.ComputeHash(stream);
-        return Convert.ToHexString(ba);
+        return sha.ComputeHash(stream);
+    }
+
+    public static string ComputeFileSHA1(this string filePath)
+    {
+        return Convert.ToHexString(filePath.ComputeFileSHA1Blob());
     }
 
     public static string ComputeSHA1(this string input)
@@ -156,8 +160,11 @@ public static class Utils
             LoadIssueType.MissingClassField => MTLogLevel.Warning,
             LoadIssueType.LocalVariableIndexOutOfBounds => MTLogLevel.Error,
             LoadIssueType.MultiTypeLocalVariable => MTLogLevel.Info,
-            LoadIssueType.MethodWithoutReturn => MTLogLevel.Error,
-            _ => 0
+            LoadIssueType.BrokenFlow => MTLogLevel.Error,
+            LoadIssueType.StackMismatch => MTLogLevel.Error,
+            LoadIssueType.MissingVirtualAccess => MTLogLevel.Warning,
+            LoadIssueType.QuestionableNativeCode => MTLogLevel.Info,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }
 

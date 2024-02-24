@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
+using MahoTrans.Runtime.Errors;
 
 namespace MahoTrans.Runtime;
 
@@ -61,8 +62,9 @@ public partial class JvmState
     /// </summary>
     /// <param name="thread">Thread to move.</param>
     /// <param name="returnAfter">If positive sets up a timeout. If negative or zero, no timeout is set.</param>
+    /// <param name="monitor">Object on which monitor the thread will wait for notify. Null if there is no monitor.</param>
     /// <exception cref="JavaRuntimeError">If the thread was no running.</exception>
-    public void Detach(JavaThread thread, long returnAfter)
+    public void Detach(JavaThread thread, long returnAfter, Reference monitor)
     {
         lock (_threadPoolLock)
         {
@@ -73,7 +75,7 @@ public partial class JvmState
             if (returnAfter > 0)
             {
                 _wakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
-                    thread.ThreadId));
+                    thread.ThreadId, monitor));
             }
         }
     }
@@ -93,6 +95,22 @@ public partial class JvmState
                 {
                     if (_wakeupHooks[i].ThreadId == id)
                     {
+                        //TODO monitor object may be collected by GC
+                        var monitor = _wakeupHooks[i].MonitorObject;
+                        if (!monitor.IsNull)
+                        {
+                            var waiters = ResolveObject(monitor).Waiters!;
+                            for (int j = waiters.Count - 1; j >= 0; j--)
+                            {
+                                if (waiters[j].MonitorOwner == id)
+                                {
+                                    // we assume that one thread can't own the same monitor twice
+                                    waiters.RemoveAt(j);
+                                    break;
+                                }
+                            }
+                        }
+
                         _wakeupHooks.RemoveAt(i);
                     }
                 }

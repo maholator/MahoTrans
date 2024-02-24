@@ -4,7 +4,7 @@
 using java.security;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.ToolkitImpls.Ams;
+using MahoTrans.Runtime.Config;
 using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Dummy;
 using MahoTrans.ToolkitImpls.Loggers;
@@ -55,7 +55,6 @@ public class TestStaticRefReturnType
     {
         var jvm = new JvmState(
             new ToolkitCollection(new DummySystem(), new RealTimeClock(), null!, new DummyFonts(), null!,
-                new AmsEventHub(),
                 new VirtualRms(), null!)
             {
                 Logger = new ConsoleLogger(),

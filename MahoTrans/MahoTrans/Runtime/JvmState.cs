@@ -6,6 +6,7 @@ using System.Text;
 using javax.microedition.ams;
 using javax.microedition.midlet;
 using JetBrains.Annotations;
+using MahoTrans.Runtime.Config;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
@@ -41,7 +42,7 @@ public partial class JvmState
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         Toolkit = toolkit;
-        _executionManner = executionManner;
+        ExecutionManner = executionManner;
     }
 
     /// <summary>
@@ -67,7 +68,7 @@ public partial class JvmState
     {
         using (new JvmContext(this))
         {
-            switch (_executionManner)
+            switch (ExecutionManner)
             {
                 case ExecutionManner.Unlocked:
                     ExecuteInternalUnlocked();

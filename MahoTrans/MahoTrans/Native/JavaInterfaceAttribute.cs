@@ -12,4 +12,14 @@ namespace MahoTrans.Native;
 [MeansImplicitUse]
 public class JavaInterfaceAttribute : Attribute
 {
+    public Type? ReferenceImplementation { get; }
+
+    public JavaInterfaceAttribute()
+    {
+    }
+
+    public JavaInterfaceAttribute(Type? referenceImplementation)
+    {
+        ReferenceImplementation = referenceImplementation;
+    }
 }

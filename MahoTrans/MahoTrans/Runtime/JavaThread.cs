@@ -1,7 +1,8 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Runtime.Errors;
 using Array = System.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
@@ -60,7 +61,6 @@ public class JavaThread
     public JavaThread(Frame root, Reference model)
         : this(model)
     {
-        root.Method.EnsureBytecodeLinked();
         ActiveFrameIndex = 0;
         ActiveFrame = root;
         CallStack[0] = root;
@@ -141,20 +141,22 @@ public class JavaThread
     }
 
     /// <summary>
-    ///     Creates thread for passed java model. Does nothing with the created thread.
+    ///     Creates thread for passed java model. Does nothing with the created thread. This must be called inside JVM context.
     /// </summary>
-    /// <param name="thread"></param>
-    /// <param name="state"></param>
-    /// <returns></returns>
-    /// <exception cref="JavaRuntimeError"></exception>
+    /// <param name="thread">Thread to start.</param>
+    /// <returns>MT thread object.</returns>
+    /// <remarks>
+    ///     If you want to start a java thread from native code, this is not for you. Allocate a <see cref="Thread" /> via
+    ///     <see cref="JvmState.AllocateObject{T}" />, initialize it with a runnable via <see cref="Thread.InitTargeted" /> and
+    ///     call <see cref="Thread" />.<see cref="Thread.start" />.
+    /// </remarks>
     public static unsafe JavaThread CreateReal(Thread thread)
     {
         if (thread.This.IsNull)
             throw new JavaRuntimeError("Attempt to launch thread which is created not in java heap.");
 
-        var runDescr = new NameDescriptor("run", "()V");
         var jvm = Object.Jvm;
-        var method = jvm.GetVirtualMethod(jvm.GetVirtualPointer(runDescr), thread.This);
+        var method = jvm.Classes["java/lang/Thread"].Methods[new NameDescriptor(nameof(Thread.runInternal), "()V")];
 
         var f = new Frame(method.JavaBody);
         f.LocalVariables[0] = thread.This;

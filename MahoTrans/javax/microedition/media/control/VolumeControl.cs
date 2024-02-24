@@ -3,6 +3,7 @@
 
 using MahoTrans.Handles;
 using MahoTrans.Native;
+using MahoTrans.Runtime;
 using Object = java.lang.Object;
 
 namespace javax.microedition.media.control;
@@ -10,6 +11,11 @@ namespace javax.microedition.media.control;
 public class VolumeControl : Object, Control
 {
     [JavaIgnore] public MediaHandle Handle;
+
+    /// <summary>
+    /// Reference to the player. Used to block GC from collecting it.
+    /// </summary>
+    public Reference Player;
 
     public int setLevel(int level)
     {

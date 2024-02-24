@@ -11,6 +11,7 @@ using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using static System.StringSplitOptions;
 
 namespace MahoTrans.Loader;
 
@@ -75,17 +76,21 @@ public class ClassLoader
                     classes.Add(cls);
                 }
 
-                if (entry.FullName == "META-INF/MANIFEST.MF")
+                if (entry.FullName.ToUpperInvariant() == "META-INF/MANIFEST.MF")
                 {
                     //TODO check MIDP docs
-                    manifest = Encoding.UTF8.GetString(res["META-INF/MANIFEST.MF"])
-                        .Split('\n')
-                        .Select(x => x.Trim('\r').Trim())
-                        .Where(s => !string.IsNullOrWhiteSpace(s))
-                        .Select(x => x.Split(':', 2,
-                            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        .Where(x => x.Length == 2)
-                        .ToDictionary(x => x[0], x => x[1]);
+                    manifest = new();
+                    foreach (var line in Encoding.UTF8.GetString(res[entry.FullName])
+                                 .Split('\n')
+                                 .Select(x => x.Trim('\r').Trim()))
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+                        var split = line.Split(':', 2, RemoveEmptyEntries | TrimEntries);
+                        if (split.Length != 2)
+                            continue;
+                        manifest[split[0]] = split[1];
+                    }
                 }
             }
 

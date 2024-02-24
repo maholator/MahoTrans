@@ -211,6 +211,8 @@ public class InputStream : Object
         }
 
         b.Append(JavaOpcode.lload_3);
+        b.Append(JavaOpcode.lconst_0);
+        b.Append(JavaOpcode.lcmp);
         using (b.AppendGoto(JavaOpcode.ifeq))
         {
             b.Append(JavaOpcode.lload_3);

@@ -26,7 +26,7 @@ public class Item : Object
     [JavaIgnore]
     protected void NotifyToolkit()
     {
-        if (Owner != default) Toolkit.Display.ContentUpdated(Owner);
+        if (Owner != default) Toolkit.Display.ItemUpdated(Owner, This);
     }
 
 

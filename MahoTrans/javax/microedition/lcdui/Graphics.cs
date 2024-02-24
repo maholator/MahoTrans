@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using com.nokia.mid.ui;
@@ -154,6 +154,9 @@ public class Graphics : Object, DirectGraphics
     public void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) =>
         Implementation.FillTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, (uint)argbColor);
 
+    public void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) =>
+        Implementation.DrawTriangle(x1 + _tx, y1 + _ty, x2 + _tx, y2 + _ty, x3 + _tx, y3 + _ty, (uint)argbColor);
+
     public void drawArc(int x, int y, int w, int h, int s, int e) =>
         Implementation.DrawArc(x + _tx, y + _ty, w, h, s, e, _color);
 
@@ -207,19 +210,19 @@ public class Graphics : Object, DirectGraphics
     }
 
     public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
-        int transform, int x_dest,
-        int y_dest, int anchor)
+        int transform, int x_dest, int y_dest, int anchor)
     {
         var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height,
-            (SpriteTransform)transform, (GraphicsAnchor)anchor);
+        var t = (SpriteTransform)transform;
+        var a = (GraphicsAnchor)anchor;
+        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
     }
 
     public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
         var buf = Jvm.ResolveArray<int>(rgbData);
-        Implementation.DrawRGB(buf, offset, scanlength, x + _tx, y + _ty, width, height, processAlpha);
+        Implementation.DrawARGB32(buf, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height);
     }
 
     public void fillPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
@@ -238,9 +241,42 @@ public class Graphics : Object, DirectGraphics
         Implementation.DrawPolygon(xm, ym, (uint)argb);
     }
 
+    public int getNativePixelFormat() => DirectGraphics.TYPE_INT_8888_ARGB;
+
+    public void drawPixels([JavaType("[S")] Reference pixels, bool transparency, int offset, int scanlength,
+        int x, int y, int width, int height, int manipulation, int format)
+    {
+        var buf = Jvm.ResolveArray<short>(pixels);
+        UShortPixelType f = format switch
+        {
+            DirectGraphics.TYPE_USHORT_565_RGB => UShortPixelType.Argb0565,
+            DirectGraphics.TYPE_USHORT_1555_ARGB => UShortPixelType.Argb1555,
+            DirectGraphics.TYPE_USHORT_4444_ARGB => UShortPixelType.Argb4444,
+            _ => throwUShortFormat()
+        };
+
+        Implementation.DrawARGB16(buf, f, transparency, offset, scanlength, x, y, width, height,
+            (ImageManipulation)manipulation);
+    }
+
+    private static UShortPixelType throwUShortFormat()
+    {
+        Jvm.Throw<IllegalArgumentException>();
+        return default;
+    }
+
     public override bool OnObjectDelete()
     {
         Toolkit.Images.ReleaseGraphics(Handle);
         return false;
+    }
+
+    public void Reset()
+    {
+        setFont(lcdui.Font.getDefaultFont());
+        _color = 0;
+        _tx = 0;
+        _ty = 0;
+        Implementation.Reset();
     }
 }

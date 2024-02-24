@@ -7,7 +7,7 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class ChoiceGroup : Item
+public class ChoiceGroup : Item, Choice
 {
     [JavaIgnore] public List<List.ListItem> Items = new();
 
@@ -16,6 +16,20 @@ public class ChoiceGroup : Item
     public int SelectedItem;
 
     [JavaIgnore] public List<bool> SelectedMap = new();
+
+    int Choice.SelectedIndex
+    {
+        get => SelectedItem;
+        set => SelectedItem = value;
+    }
+
+    bool[] Choice.SelectedIndixes
+    {
+        get => SelectedMap.ToArray();
+        set => SelectedMap = value.ToList();
+    }
+
+    int Choice.ItemsCount => Items.Count;
 
     [InitMethod]
     public void Init([String] Reference label, int listType)

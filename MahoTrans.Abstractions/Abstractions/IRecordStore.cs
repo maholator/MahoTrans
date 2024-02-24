@@ -72,8 +72,19 @@ public interface IRecordStore : IToolkit
     /// </returns>
     int? GetSize(string name, int id);
 
+    int AvailableMemory { get; }
+
     byte[]? GetRecord(string name, int id);
 
+    /// <summary>
+    ///     Sets data in record store slot.
+    /// </summary>
+    /// <param name="name">Name of the store.</param>
+    /// <param name="id">ID of slot.</param>
+    /// <param name="data">Data to set.</param>
+    /// <returns>
+    ///     False if this ID is invalid for use. InvalidRecordIDException must be thrown by implementation in such case.
+    /// </returns>
     bool SetRecord(string name, int id, ReadOnlySpan<byte> data);
 
     int GetNextId(string name);

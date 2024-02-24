@@ -9,14 +9,11 @@ namespace MahoTrans.ToolkitImpls.Clocks;
 /// <summary>
 ///     Clock that locks JVM to specific tickrate and provides time based on it.
 /// </summary>
-public class StrictClock : IClock
+public class StrictClock : Clock
 {
-    public long TicksPerBunch;
     public readonly long StartTicks;
 
-    private readonly long _unixEpoch = DateTimeOffset.UnixEpoch.Ticks;
-
-    private long _passedTime;
+    private static readonly long UnixEpoch = DateTimeOffset.UnixEpoch.Ticks;
 
     /// <summary>
     ///     Initializes the clock.
@@ -28,33 +25,35 @@ public class StrictClock : IClock
     /// </param>
     public StrictClock(int ticksPerBunch, long startTicks)
     {
-        TicksPerBunch = ticksPerBunch;
+        TicksPerCycleStep = ticksPerBunch;
         StartTicks = startTicks;
     }
 
-    public long GetCurrentMs(long currentTick)
+    public override long GetCurrentMs(long currentTick)
     {
         // this is passed time in CLR ticks since JVM start
-        _passedTime = currentTick * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+        var passedTime = currentTick * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
         // this is a total passed time in global CLR ticks
-        var absTick = _passedTime + StartTicks;
+        var absTick = passedTime + StartTicks;
         // this is a time in CLR ticks since unix epoch
-        var sinceUnix = (absTick - _unixEpoch);
+        var sinceUnix = (absTick - UnixEpoch);
         return sinceUnix / TimeSpan.TicksPerMillisecond;
     }
 
-    public long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
+    public override long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
 
-    public bool JvmSleeping
+    public override long GetCurrentClrTicks(long currentCycle)
     {
-        set { }
+        // this is passed time in CLR ticks since JVM start
+        var passedTime = currentCycle * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
+        // this is a total passed time in global CLR ticks
+        var absTick = passedTime + StartTicks;
+
+        return absTick;
     }
 
-    public long CurrentTimeClr => _passedTime + StartTicks;
-
-    public long PassedTimeClr => _passedTime;
-
-    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
-
-    public long GetTicksPerCycleBunch() => TicksPerBunch;
+    public override long GetPassedClrTicks(long currentCycle)
+    {
+        return currentCycle * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
+    }
 }

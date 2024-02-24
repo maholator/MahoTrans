@@ -1,21 +1,26 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Abstractions;
-
 namespace MahoTrans.ToolkitImpls.Rms;
 
 /// <summary>
 ///     Record store implementation which holds all the data in a dictionary.
 /// </summary>
-public class VirtualRms : IRecordStore
+public sealed class VirtualRms : ISnapshotableRecordStore
 {
     /// <summary>
     ///     Keeps records. <br />
     ///     <b>Key:</b> store name in plain form. <br />
-    ///     <b>Value:</b> zero-based list of records. Records are one-based so implementation must always do [index - 1]. Deleted records are null.
+    ///     <b>Value:</b> zero-based list of records. Records are one-based so implementation must always do [index - 1].
+    ///     Deleted records are null.
     /// </summary>
-    private readonly Dictionary<string, List<byte[]?>> _storage = new();
+    private readonly Dictionary<string, List<byte[]?>> _storage;
+
+    public IReadOnlyDictionary<string, List<byte[]?>> Storage => _storage;
+
+    public VirtualRms() => _storage = new Dictionary<string, List<byte[]?>>();
+
+    public VirtualRms(Dictionary<string, List<byte[]?>> data) => _storage = data;
 
     public string[] ListStores() => _storage.Keys.ToArray();
 
@@ -47,7 +52,7 @@ public class VirtualRms : IRecordStore
     public int AddRecord(string name, ReadOnlySpan<byte> data)
     {
         var id = GetNextId(name);
-        _storage[name][id] = data.ToArray();
+        _storage[name].Add(data.ToArray());
         return id;
     }
 
@@ -85,6 +90,8 @@ public class VirtualRms : IRecordStore
         return _storage[name][id - 1]?.Length;
     }
 
+    public int AvailableMemory => 1024 * 1024 * 1204;
+
     public byte[]? GetRecord(string name, int id)
     {
         if (id < 1 || id > _storage[name].Count)
@@ -94,17 +101,54 @@ public class VirtualRms : IRecordStore
 
     public bool SetRecord(string name, int id, ReadOnlySpan<byte> data)
     {
-        _storage[name][id - 1] = data.ToArray();
-        return true;
+        var intId = id - 1;
+        if (intId < 0)
+            return false;
+        if (intId < _storage[name].Count)
+        {
+            if (_storage[name][id - 1] == null)
+                // we can't write to deleted slots
+                return false;
+
+            _storage[name][id - 1] = data.ToArray();
+            return true;
+        }
+
+        if (intId == _storage[name].Count)
+        {
+            _storage[name].Add(data.ToArray());
+        }
+
+        return false;
     }
 
     public int GetNextId(string name)
     {
-        return _storage[name].Count;
+        // if store is empty, count is 0, our ID is 1.
+        // if store has 2 records, 1 and 2, our ID is count+1 (2+1=3).
+        return _storage[name].Count + 1;
     }
 
     public int GetCount(string name)
     {
         return _storage[name].Count(x => x != null);
+    }
+
+    public VirtualRms TakeSnapshot()
+    {
+        var dict = new Dictionary<string, List<byte[]?>>();
+
+        foreach (var (name, slots) in _storage)
+        {
+            var clone = new List<byte[]?>(slots.Count);
+            foreach (var slot in slots)
+            {
+                clone.Add(slot?.ToArray());
+            }
+
+            dict.Add(name, clone);
+        }
+
+        return new VirtualRms(dict);
     }
 }

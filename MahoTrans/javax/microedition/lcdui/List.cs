@@ -7,7 +7,7 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class List : Screen
+public class List : Screen, Choice
 {
     [JavaIgnore] public List<ListItem> Items = new();
 
@@ -16,6 +16,20 @@ public class List : Screen
     [JavaIgnore] public Reference ImplicitSelectCommand;
 
     public int SelectedItem;
+
+    int Choice.SelectedIndex
+    {
+        get => SelectedItem;
+        set => SelectedItem = value;
+    }
+
+    bool[] Choice.SelectedIndixes
+    {
+        get => SelectedMap.ToArray();
+        set => SelectedMap = value.ToList();
+    }
+
+    int Choice.ItemsCount => Items.Count;
 
     [JavaIgnore] public List<bool> SelectedMap = new();
 

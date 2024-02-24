@@ -3,33 +3,49 @@
 
 using java.lang;
 using javax.microedition.media.control;
+using MahoTrans;
+using MahoTrans.Abstractions;
+using MahoTrans.Builder;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
+using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
+using String = java.lang.String;
+using Thread = java.lang.Thread;
 
 namespace javax.microedition.media;
 
-public class Player : Object
+public class PlayerImpl : Object, Player
 {
     [JavaIgnore] public MediaHandle Handle;
 
     public int State = UNREALIZED;
     private bool inited;
 
-    public void realize()
+    /// <summary>
+    /// This is >0 if there are working listener threads
+    /// </summary>
+    public int listenersPending;
+
+    public void checkNotClosed()
     {
         if (State == CLOSED)
             Jvm.Throw<IllegalStateException>();
+    }
+
+    public void realize()
+    {
+        checkNotClosed();
         if (State == UNREALIZED)
             State = REALIZED;
     }
 
     public void prefetch()
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
 
         // implicit realize
         if (State == UNREALIZED)
@@ -47,11 +63,63 @@ public class Player : Object
         }
     }
 
-    public void start()
+    [JavaDescriptor("()V")]
+    public JavaMethodBody start(JavaClass cls)
     {
-        if (State == STARTED)
-            return;
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getState), typeof(int));
+        b.AppendConstant(STARTED);
+        using (b.AppendGoto(JavaOpcode.if_icmpne))
+        {
+            b.AppendReturn();
+        }
 
+        AppendMediaTimeCallbackConstruction(b, PlayerListener.STARTED);
+
+        b.AppendThis();
+        b.AppendVirtcall(nameof(startInternal), typeof(void));
+
+        b.AppendVirtcall(nameof(PlayerCallbacksRunnable.run), typeof(void));
+        b.AppendReturn();
+
+        return b.Build(7, 1);
+    }
+
+    [JavaIgnore]
+    private static void AppendMediaTimeCallbackConstruction(JavaMethodBuilder b, string eventName)
+    {
+        b.AppendNewObject<PlayerCallbacksRunnable>();
+        b.Append(JavaOpcode.dup);
+
+        // runnable > runnable
+
+        b.AppendThis();
+        b.AppendConstant(eventName);
+
+        // runnable > runnable > this > event
+        b.AppendNewObject<Long>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getMediaTime), typeof(long));
+        b.AppendVirtcall("<init>", typeof(void), typeof(long));
+
+        // runnable > runnable > this > event > time
+
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getListeners), "()[Ljavax/microedition/media/PlayerListener;");
+
+        // runnable > runnable > this > event > time > listeners
+
+        b.AppendVirtcall("<init>", typeof(void), typeof(Player), typeof(String), typeof(Object), typeof(Object));
+
+        // runnable
+    }
+
+    public void startInternal()
+    {
         if (State != PREFETCHED)
             prefetch();
 
@@ -59,25 +127,43 @@ public class Player : Object
         State = STARTED;
     }
 
-    public void stop()
+    [JavaDescriptor("()V")]
+    public JavaMethodBody stop(JavaClass cls)
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
-
-        if (State == STARTED)
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
+        b.AppendThis();
+        b.AppendVirtcall(nameof(getState), typeof(int));
+        b.AppendConstant(STARTED);
+        using (b.AppendGoto(JavaOpcode.if_icmpeq))
         {
-            Toolkit.Media.Stop(Handle);
-            State = PREFETCHED;
+            b.AppendReturn();
         }
+
+        AppendMediaTimeCallbackConstruction(b, PlayerListener.STOPPED);
+
+        b.AppendThis();
+        b.AppendVirtcall(nameof(stopInternal), typeof(void));
+
+        b.AppendVirtcall(nameof(PlayerCallbacksRunnable.run), typeof(void));
+        b.AppendReturn();
+
+        return b.Build(7, 1);
+    }
+
+    public void stopInternal()
+    {
+        Toolkit.Media.Stop(Handle);
+        State = PREFETCHED;
     }
 
     public void deallocate()
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
 
         if (State == STARTED)
-            stop();
+            Toolkit.Media.Stop(Handle);
         if (State == UNREALIZED || State == REALIZED)
             return;
 
@@ -90,36 +176,22 @@ public class Player : Object
         if (State == CLOSED)
             return;
         if (State == STARTED)
-            stop();
+            stopInternal();
+        Toolkit.Logger?.LogRuntime(MTLogLevel.Info, $"Closing player {Handle.Id} via close() call");
         State = CLOSED;
         Toolkit.Media.Dispose(Handle);
+        State = CLOSED;
     }
 
     public void setLoopCount(int count)
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
         Toolkit.Media.SetLoopCount(Handle, count);
-    }
-
-    public override bool OnObjectDelete()
-    {
-        if (State == STARTED)
-        {
-            // we are still playing
-            return true;
-        }
-
-        if (State != CLOSED)
-            Toolkit.Media.Dispose(Handle);
-
-        return false;
     }
 
     public long setMediaTime(long now)
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
         if (State == UNREALIZED)
             Jvm.Throw<IllegalStateException>();
         return Toolkit.Media.SetTime(Handle, now);
@@ -127,8 +199,7 @@ public class Player : Object
 
     public long getMediaTime()
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
         if (State == UNREALIZED)
             return TIME_UNKNOWN;
         return Toolkit.Media.GetTime(Handle) ?? TIME_UNKNOWN;
@@ -136,8 +207,7 @@ public class Player : Object
 
     public long getDuration()
     {
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
         if (State == UNREALIZED)
             return TIME_UNKNOWN;
         return Toolkit.Media.GetDuration(Handle) ?? TIME_UNKNOWN;
@@ -149,13 +219,18 @@ public class Player : Object
 
     public List<Reference> Listeners = new();
 
+    [return: JavaType("[Ljavax/microedition/media/PlayerListener;")]
+    public Reference getListeners()
+    {
+        return Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+    }
+
     public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference playerListener)
     {
         if (playerListener.IsNull)
             return;
 
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
 
         if (!Listeners.Contains(playerListener))
             Listeners.Add(playerListener);
@@ -166,15 +241,67 @@ public class Player : Object
         if (playerListener.IsNull)
             return;
 
-        if (State == CLOSED)
-            Jvm.Throw<IllegalStateException>();
+        checkNotClosed();
 
         Listeners.Remove(playerListener);
     }
 
+    /// <summary>
+    /// Sends events related to media end. This must be called in context.
+    /// </summary>
+    /// <param name="looped">True if player was started again.</param>
     [JavaIgnore]
-    public void Update(MediaHandle player, string eventName, Reference data)
+    public void OnMediaEnd(bool looped)
     {
+        if (State == CLOSED)
+        {
+            throw new JavaRuntimeError(
+                $"Closed player {Handle.Id} got media end event. Loop: {looped}");
+        }
+
+        if (!looped)
+        {
+            if (State == STARTED)
+                State = PREFETCHED;
+        }
+
+        if (Listeners.Count == 0)
+            return;
+
+        var targets = Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+
+        // end
+        {
+            var l = Jvm.AllocateObject<Long>();
+            l.Init(getDuration());
+            var r = Jvm.AllocateObject<PlayerCallbacksRunnable>();
+            r.Init(This, Jvm.InternalizeString(PlayerListener.END_OF_MEDIA), l.This, targets);
+            var t = Jvm.AllocateObject<Thread>();
+            t.InitTargeted(r.This);
+            lock (this)
+                listenersPending++;
+            t.start();
+        }
+        if (looped)
+        {
+            var l = Jvm.AllocateObject<Long>();
+            l.Init(0L);
+            var r = Jvm.AllocateObject<PlayerCallbacksRunnable>();
+            r.Init(This, Jvm.InternalizeString(PlayerListener.STARTED), l.This, targets);
+            var t = Jvm.AllocateObject<Thread>();
+            t.InitTargeted(r.This);
+            lock (this)
+                listenersPending++;
+            t.start();
+        }
+    }
+
+    public void ListenersThreadExited()
+    {
+        lock (this)
+        {
+            listenersPending--;
+        }
     }
 
     #endregion
@@ -184,24 +311,32 @@ public class Player : Object
     [return: JavaType("[Ljavax/microedition/media/Control;")]
     public Reference getControls()
     {
-        var volume = Jvm.AllocateObject<VolumeControl>();
-        volume.Handle = Handle;
+        checkNotClosed();
+        var volume = AllocVolomeControl();
         return Jvm.AllocateArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
     }
 
     [return: JavaType(typeof(Control))]
     public Reference getControl([String] Reference type)
     {
+        checkNotClosed();
         //TODO
         var name = Jvm.ResolveString(type);
         if (name == "javax.microedition.media.control.VolumeControl" || name == "VolumeControl")
         {
-            var ctrl = Jvm.AllocateObject<VolumeControl>();
-            ctrl.Handle = Handle;
-            return ctrl.This;
+            return AllocVolomeControl().This;
         }
 
         return Reference.Null;
+    }
+
+    [JavaIgnore]
+    private VolumeControl AllocVolomeControl()
+    {
+        var ctrl = Jvm.AllocateObject<VolumeControl>();
+        ctrl.Handle = Handle;
+        ctrl.Player = This;
+        return ctrl;
     }
 
     #endregion
@@ -209,6 +344,30 @@ public class Player : Object
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         queue.Enqueue(Listeners);
+    }
+
+    public override bool OnObjectDelete()
+    {
+        if (State == STARTED)
+        {
+            // we are still playing
+            return true;
+        }
+
+        if (listenersPending > 0)
+        {
+            // listeners are running in background
+            return true;
+        }
+
+        if (State != CLOSED)
+        {
+            Toolkit.Logger?.LogRuntime(MTLogLevel.Info, $"Closing player {Handle.Id} during object delete");
+            Toolkit.Media.Dispose(Handle);
+            State = CLOSED;
+        }
+
+        return false;
     }
 
     public const int CLOSED = 0;

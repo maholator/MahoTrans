@@ -88,19 +88,36 @@ public interface IDisplay : IToolkit
     void TickerUpdated();
 
     /// <summary>
-    ///     Notifies toolkit that screen displayable changed its content (text, subitems, etc.).
+    ///     Notifies toolkit that screen displayable changed its content (text, list of items, etc.).
     /// </summary>
     /// <param name="handle">Displayable's handle.</param>
     /// <remarks>
-    ///     Title changes are reported via <see cref="SetTitle" />.<br />
-    ///     Fullscreen mode is set via <see cref="SetFullscreen" />.<br />
-    ///     Commands changes are reported via <see cref="CommandsUpdated" />.<br />
-    ///     Framebuffer changes are reported via <see cref="Flush(DisplayableHandle)" />.<br />
-    ///     Ticker changes are reported via <see cref="TickerUpdated" />.<br />
-    ///     This is used only for LCDUI things (alert text/image, list items, form items, textbox content).
+    ///     This is used only for LCDUI things (alert text/image, list items, form items list, textbox content).
+    ///     <list type="bullet">
+    ///         <item>Title changes are reported via <see cref="SetTitle" />.</item>
+    ///         <item>Fullscreen mode is set via <see cref="SetFullscreen" />.</item>
+    ///         <item>Commands changes are reported via <see cref="CommandsUpdated" />.</item>
+    ///         <item>Framebuffer changes are reported via <see cref="Flush(DisplayableHandle)" />.</item>
+    ///         <item>Ticker changes are reported via <see cref="TickerUpdated" />.</item>
+    ///         <item>Item content changes are reported via <see cref="ItemUpdated" />.</item>
+    ///     </list>
     /// </remarks>
     void ContentUpdated(DisplayableHandle handle);
 
+    /// <summary>
+    ///     Notifies toolkit that LCDUI item was updated. Called even if item not on current screen. Never called if item is
+    ///     not on any screen.
+    /// </summary>
+    /// <param name="displayable">Displayable where this item lives.</param>
+    /// <param name="item">Reference to item.</param>
+    void ItemUpdated(DisplayableHandle displayable, Reference item);
+
+    /// <summary>
+    ///     Implementation for MIDP "setCurrentItem(Item item)". Changes displayable to passed one and focuses an item.
+    /// </summary>
+    /// <param name="displayable"></param>
+    /// <param name="item"></param>
+    void FocusItem(DisplayableHandle displayable, Reference item);
 
     /// <summary>
     ///     Gets graphics to draw on the displayable. If it's not possible to draw on the displayable, this will throw.

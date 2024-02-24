@@ -8,32 +8,25 @@ namespace MahoTrans.ToolkitImpls.Clocks;
 /// <summary>
 ///     Simple clock. Allows midlet to run as fast as possible and gives it real time information.
 /// </summary>
-public class RealTimeClock : IClock
+public class RealTimeClock : Clock
 {
     private long _startTick;
 
-    public long GetCurrentMs(long currentTick)
+    public RealTimeClock()
+    {
+        TicksPerCycleStep = 0;
+    }
+
+    public override long GetCurrentMs(long currentTick)
     {
         if (_startTick == 0)
             _startTick = DateTime.Now.Ticks;
         return DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
-    public long GetCurrentJvmMs(long currentTick)
-    {
-        return GetCurrentMs(currentTick);
-    }
+    public override long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
 
-    public bool JvmSleeping
-    {
-        set { }
-    }
+    public override long GetCurrentClrTicks(long currentCycle) => DateTime.Now.Ticks;
 
-    public long CurrentTimeClr => DateTime.Now.Ticks;
-
-    public long PassedTimeClr => DateTime.Now.Ticks - _startTick;
-
-    public long PassedTimeJvm => PassedTimeClr / TimeSpan.TicksPerMillisecond;
-
-    public long GetTicksPerCycleBunch() => 0;
+    public override long GetPassedClrTicks(long currentCycle) => DateTime.Now.Ticks - _startTick;
 }

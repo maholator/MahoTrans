@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
@@ -70,6 +71,7 @@ public static class NativeLinker
     private static JavaClass Make(Type type, TypeBuilder bridge, ILoadLogger? logger)
     {
         var name = type.FullName!.Replace('.', '/');
+
         JavaClass jc = new JavaClass
         {
             Name = name,
@@ -116,6 +118,7 @@ public static class NativeLinker
             if (i.GetCustomAttribute<JavaInterfaceAttribute>() != null)
                 javaInterfaces.Add(ii);
         }
+
         jc.Interfaces = javaInterfaces.ToArray();
 
         try

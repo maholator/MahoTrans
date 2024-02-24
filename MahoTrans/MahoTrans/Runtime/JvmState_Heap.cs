@@ -1,17 +1,19 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Abstractions;
+using MahoTrans.Runtime.Config;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
 using String = java.lang.String;
+using WeakReference = java.lang.@ref.WeakReference;
 
 namespace MahoTrans.Runtime;
 
@@ -438,8 +440,6 @@ public partial class JvmState
         {
             //TODO optimization
 
-            Stopwatch sw = new();
-            sw.Start();
             var roots = CollectObjectGraphRoots();
             Queue<Reference> enumQueue = new Queue<Reference>(roots);
 
@@ -495,6 +495,26 @@ public partial class JvmState
 
             int deletedCount = 0;
 
+            // creating weak refs map
+            // key - stored reference (where this Ref obj points to), values - the Ref objects.
+            // so, if there are 2 weakrefs pointing at object 25, this will be [25]={w1,w2}
+            // TODO pool/cache lists/dicts to reduce allocations?
+            Dictionary<int, List<WeakReference>> weakRefsMap = new();
+            foreach (var o in _heap)
+            {
+                if (o is WeakReference w)
+                {
+                    if (weakRefsMap.TryGetValue(w.StoredReference, out var l))
+                    {
+                        l.Add(w);
+                    }
+                    else
+                    {
+                        weakRefsMap[w.StoredReference] = new List<WeakReference> { w };
+                    }
+                }
+            }
+
             // we marked all alive objects as alive. Time to delete dead ones.
 
             for (int i = 0; i < _heap.Length; i++)
@@ -514,14 +534,21 @@ public partial class JvmState
                     ObjectsOnFly--;
                     _bytesAllocated -= obj.JavaClass.Size;
                     Toolkit.HeapDebugger?.ObjectDeleted(obj.This);
+                    if (weakRefsMap.TryGetValue(i, out var l))
+                    {
+                        foreach (var w in l)
+                        {
+                            w.StoredReference = 0;
+                        }
+                    }
+
                     _heap[i] = null;
                 }
             }
 
-            sw.Stop();
             GcCount++;
             Toolkit.Logger?.LogEvent(EventCategory.Gc,
-                $"Deleted {deletedCount} objects in {sw.ElapsedMilliseconds} ms");
+                $"Deleted {deletedCount} objects");
         }
     }
 

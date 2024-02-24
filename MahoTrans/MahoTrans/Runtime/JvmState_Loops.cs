@@ -37,7 +37,7 @@ public partial class JvmState
                 }
 
                 // this will be positive if we are running faster than needed
-                var target = Toolkit.Clock.GetTicksPerCycleBunch();
+                var target = Toolkit.Clock.TicksPerCycleStep;
                 while (target - (DateTime.UtcNow.Ticks - clrTicks) > 0)
                 {
                     Thread.SpinWait(50);
@@ -78,7 +78,7 @@ public partial class JvmState
                 }
 
                 // this will be positive if we are running faster than needed
-                var target = Toolkit.Clock.GetTicksPerCycleBunch();
+                var target = Toolkit.Clock.TicksPerCycleStep;
                 while (target - (DateTime.UtcNow.Ticks - clrTicks) > 0)
                 {
                     Thread.Sleep(1);

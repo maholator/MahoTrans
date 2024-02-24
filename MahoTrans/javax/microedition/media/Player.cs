@@ -1,15 +1,11 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-//using MahoTrans.Native;
+using MahoTrans.Native;
 
-//namespace javax.microedition.media;
+namespace javax.microedition.media;
 
-/*
-[JavaInterface]
-public interface Player
+[JavaInterface(typeof(PlayerImpl))]
+public interface Player : Controllable
 {
 }
-*/
-//TODO make PlayerImpl : Player
-

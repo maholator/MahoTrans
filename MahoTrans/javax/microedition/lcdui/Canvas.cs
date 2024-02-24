@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -7,6 +7,7 @@ using javax.microedition.ams.events;
 using MahoTrans;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 
@@ -14,6 +15,8 @@ namespace javax.microedition.lcdui;
 
 public class Canvas : Displayable
 {
+    [JavaType(typeof(Graphics))] public Reference CachedGraphics;
+
     [InitMethod]
     public override void Init()
     {
@@ -27,6 +30,23 @@ public class Canvas : Displayable
     [return: JavaType(typeof(Graphics))]
     public Reference ObtainGraphics()
     {
+        if (Jvm.GraphicsFlow == GraphicsFlow.CacheAndReset)
+        {
+            if (CachedGraphics.IsNull)
+            {
+                var cg = Jvm.AllocateObject<Graphics>();
+                cg.Init();
+                cg.Handle = Toolkit.Display.GetGraphics(Handle);
+                CachedGraphics = cg.This;
+            }
+            else
+            {
+                CachedGraphics.As<Graphics>().Reset();
+            }
+
+            return CachedGraphics;
+        }
+
         var g = Jvm.AllocateObject<Graphics>();
         g.Init();
         g.Handle = Toolkit.Display.GetGraphics(Handle);
@@ -44,7 +64,14 @@ public class Canvas : Displayable
         Jvm.EventQueue.Enqueue<RepaintEvent>(s => s.Target = This);
     }
 
-    public void flushGraphics() => Toolkit.Display.Flush(Handle);
+    public void flushGraphics()
+    {
+        Toolkit.Display.Flush(Handle);
+        if (!CachedGraphics.IsNull)
+        {
+            CachedGraphics.As<Graphics>().Reset();
+        }
+    }
 
     [JavaDescriptor("()V")]
     public JavaMethodBody serviceRepaints(JavaClass cls)

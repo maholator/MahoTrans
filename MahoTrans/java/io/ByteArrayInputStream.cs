@@ -12,7 +12,7 @@ public class ByteArrayInputStream : InputStream
     // as per MIDP docs
     [JavaType("[B")] public Reference buf;
     public int count;
-    public new int mark;
+    public int markPos;
     public int pos;
 
     [InitMethod]
@@ -80,6 +80,18 @@ public class ByteArrayInputStream : InputStream
         pos = (int)(pos + read);
         return read;
     }
+
+    public new void mark(int readlimit)
+    {
+        markPos = pos;
+    }
+
+    public new void reset()
+    {
+        pos = markPos;
+    }
+
+    public new bool markSupported() => true;
 
     public new int available() => count - pos;
 

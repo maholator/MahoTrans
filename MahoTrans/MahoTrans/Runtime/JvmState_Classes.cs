@@ -1,10 +1,11 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
 using MahoTrans.Abstractions;
 using MahoTrans.Loader;
 using MahoTrans.Native;
+using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Object = java.lang.Object;
@@ -35,29 +36,35 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
     {
-        ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
-        foreach (var cls in classes)
+        using (new JvmContext(this))
         {
-            Classes.Add(cls.Name, cls);
-        }
+            ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
+            foreach (var cls in classes)
+            {
+                Classes.Add(cls.Name, cls);
+            }
 
-        RefreshState(classes);
-        foreach (var cls in classes)
-            BytecodeLinker.Verify(cls, this);
+            RefreshState(classes);
+            foreach (var cls in classes)
+                BytecodeLinker.Link(cls);
+        }
     }
 
     public void AddClrClasses(IEnumerable<Type> types)
     {
-        var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
-        foreach (var cls in classes)
+        using (new JvmContext(this))
         {
-            cls.Flags |= ClassFlags.Public;
-            Classes.Add(cls.Name, cls);
-        }
+            var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
+            foreach (var cls in classes)
+            {
+                cls.Flags |= ClassFlags.Public;
+                Classes.Add(cls.Name, cls);
+            }
 
-        RefreshState(classes);
-        foreach (var cls in classes)
-            BytecodeLinker.Verify(cls, this);
+            RefreshState(classes);
+            foreach (var cls in classes)
+                BytecodeLinker.Link(cls);
+        }
     }
 
     /// <summary>
@@ -100,11 +107,21 @@ public partial class JvmState
     }
 
     /// <summary>
+    ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
+    /// </summary>
+    /// <param name="name">Class name to search.</param>
+    /// <returns>Found or created class object.</returns>
+    public JavaClass GetClass(string name)
+    {
+        return GetClassOrNull(name) ?? throw new JavaRuntimeError($"Class {name} is not loaded!");
+    }
+
+    /// <summary>
     ///     Gets class object from <see cref="Classes" />. Automatically handles array types.
     /// </summary>
     /// <param name="name">Class name to search.</param>
-    /// <returns></returns>
-    public JavaClass GetClass(string name)
+    /// <returns>Class object if found or created, null otherwise.</returns>
+    public JavaClass? GetClassOrNull(string name)
     {
         if (Classes.TryGetValue(name, out var o))
             return o;
@@ -158,9 +175,11 @@ public partial class JvmState
             return ac;
         }
 
-        throw new JavaRuntimeError($"Class {name} is not loaded!");
+        return null;
     }
 
+    [Obsolete("Faulty method, see TODO",true)]
+    //TODO: for java/lang/abc it returns... "[java/lang/abc"? No "L;"?
     public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
 
     #endregion

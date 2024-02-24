@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
-using MahoTrans;
+using javax.microedition.midlet;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 
@@ -54,8 +54,9 @@ public class System : Object
 
     public static void exit(int status)
     {
-        // afaik, midlets can't call this method.
-        // If it's called, midlet doesn't want to work further anyway, so throw.
-        throw new JavaRuntimeError("Attempt to call System.exit()");
+        Toolkit.AmsCallbacks?.Exited(status);
     }
+
+    [return: JavaType(typeof(MIDlet))]
+    public static Reference GetRunningMIDlet() => Jvm.MidletObject;
 }

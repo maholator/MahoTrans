@@ -43,7 +43,7 @@ public class Timer : Object
     }
 */
     [JavaDescriptor("(Ljava/util/TimerTask;JJ)V")]
-    public JavaMethodBody schedule___dp(JavaClass cls)
+    public JavaMethodBody schedule___tp(JavaClass cls)
     {
         var b = new JavaMethodBuilder(cls);
 
@@ -80,13 +80,47 @@ public class Timer : Object
         return b.Build(5, 4);
     }
 
-    /*
-    public void schedule([JavaType(typeof(TimerTask))] Reference task, [JavaType(typeof(Date))] Reference whenRef,
-        long period)
+    [JavaDescriptor("(Ljava/util/TimerTask;Ljava/util/Date;J)V")]
+    public JavaMethodBody schedule___dp(JavaClass cls)
     {
-        long delay = AsTime(whenRef) - java.lang.System.currentTimeMillis();
-        scheduleImpl(task, delay < 0 ? 0 : delay, period, false);
+        var b = new JavaMethodBuilder(cls);
+
+        b.AppendThis();
+        b.AppendGetLocalField(nameof(Thread), typeof(TimerThread));
+        b.Append(JavaOpcode.monitorenter);
+        using (var tr = b.BeginTry<Throwable>())
+        {
+            b.AppendThis();
+            b.Append(JavaOpcode.aload_1);
+            b.AppendThis();
+            b.Append(JavaOpcode.aload_2);
+            b.AppendVirtcall(nameof(AsDelay), typeof(long), typeof(Date));
+            b.Append(JavaOpcode.lload_3);
+            b.Append(JavaOpcode.iconst_0);
+            b.AppendVirtcall(nameof(scheduleImpl), typeof(void), typeof(Reference), typeof(long), typeof(long),
+                typeof(bool));
+
+            b.AppendThis();
+            b.AppendGetLocalField(nameof(Thread), typeof(TimerThread));
+            b.Append(JavaOpcode.monitorexit);
+
+            b.Append(JavaOpcode.@return);
+
+            tr.CatchSection();
+
+            b.AppendThis();
+            b.AppendGetLocalField(nameof(Thread), typeof(TimerThread));
+            b.Append(JavaOpcode.monitorexit);
+
+            b.Append(JavaOpcode.athrow);
+        }
+
+        b.Append(JavaOpcode.@return);
+
+        return b.Build(5, 4);
     }
+
+    /*
 
     public void scheduleAtFixedRate([JavaType(typeof(TimerTask))] Reference task, long delay, long period)
     {
@@ -102,7 +136,7 @@ public class Timer : Object
     */
 
     /// <summary>
-    ///     Takes date's time. Throws it time is less than zero.
+    ///     Takes date's time. Throws if time is less than zero.
     /// </summary>
     /// <param name="date">Date to unwrap.</param>
     /// <returns>JVM ticks.</returns>
@@ -111,6 +145,14 @@ public class Timer : Object
         var time = date.As<Date>().getTime();
         if (time < 0) Jvm.Throw<IllegalArgumentException>();
 
+        return time;
+    }
+
+    public long AsDelay([JavaType(typeof(Date))] Reference date)
+    {
+        var time = AsTime(date) - lang.System.currentTimeMillis();
+        if (time < 0)
+            return 0;
         return time;
     }
 

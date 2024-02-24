@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
@@ -9,15 +9,21 @@ namespace MahoTrans.Utils;
 
 public static class JavaConversions
 {
+    /// <summary>
+    ///     Takes sbyte[] as byte[]. This does not change actual data, runtime type and so on. No copy is made.
+    /// </summary>
+    /// <param name="arr">Array to cast.</param>
+    /// <returns>sbyte[] taken as byte[].</returns>
     public static byte[] ToUnsigned(this sbyte[] arr) => (byte[])(Array)arr;
 
     /// <summary>
-    ///     Force-casts byte[] to sbyte[]. This does not change actual data. Consider using <see cref="ConvertToSigned" />
-    ///     instead.
+    ///     Takes byte[] as sbyte[]. This does not change actual data, runtime type and so on. No copy is made. MT and
+    ///     NewtonsoftJson rely on runtime type of objects, but usage of this method doesn't change it. If resulting array
+    ///     is going to be used inside JVM, <see cref="ConvertToSigned" /> must be used.
     /// </summary>
     /// <param name="arr">Array to cast.</param>
     /// <returns>byte[] taken as sbyte[].</returns>
-    [Obsolete("Use ConvertToSigned instead.")]
+    [Obsolete("Use ConvertToSigned instead. See xmldocs for details.", true)]
     public static sbyte[] ToSigned(this byte[] arr) => (sbyte[])(Array)arr;
 
     /// <summary>

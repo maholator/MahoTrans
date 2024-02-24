@@ -16,11 +16,12 @@ public class Manager : Object
     public static Reference createPlayer(Reference stream, Reference type)
     {
         var str = stream.As<InputStream>();
+
         if (str is ByteArrayInputStream bais)
         {
             var buf = bais.buf.As<Array<sbyte>>().Value;
             var mem = new ReadOnlySpan<sbyte>(buf, bais.pos, bais.count - bais.pos);
-            var player = Jvm.AllocateObject<Player>();
+            var player = Jvm.AllocateObject<PlayerImpl>();
             player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrDefault(type), player.This);
             return player.This;
         }
@@ -33,5 +34,16 @@ public class Manager : Object
     {
         Jvm.Throw<MediaException>();
         return Reference.Null;
+    }
+
+    [return: JavaType("[Ljava/lang/String;")]
+    public static Reference getSupportedContentTypes([String] Reference pr)
+    {
+        return new[]
+        {
+            "audio/midi",
+            "audio/mpeg",
+            "audio/x-wav"
+        }.AsJavaArray();
     }
 }
