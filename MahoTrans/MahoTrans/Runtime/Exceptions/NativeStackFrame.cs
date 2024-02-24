@@ -3,7 +3,7 @@
 
 using System.Reflection;
 using System.Text;
-using MahoTrans.Loader;
+using MahoTrans.Compiler;
 using MahoTrans.Runtime.Types;
 
 namespace MahoTrans.Runtime.Exceptions;
@@ -64,7 +64,7 @@ public class NativeStackFrame : IMTStackFrame
 
     public int? LineNumber => _lineNumber == 0 ? null : _lineNumber;
 
-    public bool IsBridge => _method.DeclaringType?.Name == BridgeCompiler.METHODS_BRIDGE_CLASS_NAME;
+    public bool IsBridge => _method.DeclaringType?.Name == CompilerUtils.BRIDGE_CLASS_NAME;
 
     public bool IsInterpreter => _method.DeclaringType == typeof(JavaRunner);
 

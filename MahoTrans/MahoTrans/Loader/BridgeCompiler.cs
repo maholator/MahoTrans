@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using MahoTrans.Compiler;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Errors;
@@ -13,51 +14,10 @@ using Object = java.lang.Object;
 namespace MahoTrans.Loader;
 
 /// <summary>
-///     Set of tools to build IL bridges for JVM communication with CLR fields.
+///     Set of tools to build IL bridges for JVM communication with CLR fields and methods.
 /// </summary>
 public static class BridgeCompiler
 {
-    public const string METHODS_BRIDGE_CLASS_NAME = "Bridge";
-
-    public static readonly Dictionary<Type, MethodInfo> STACK_POPPERS = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLong))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PopFloat))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PopDouble))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PopBool))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PopByte))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PopChar))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShort))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReference))! }
-    };
-
-    public static readonly Dictionary<Type, MethodInfo> STACK_REVERSE_POPPERS = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopIntFrom))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PopLongFrom))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PopFloatFrom))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PopDoubleFrom))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PopBoolFrom))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PopByteFrom))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PopCharFrom))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PopShortFrom))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PopReferenceFrom))! }
-    };
-
-    public static readonly Dictionary<Type, MethodInfo> STACK_PUSHERS = new()
-    {
-        { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PushInt))! },
-        { typeof(long), typeof(Frame).GetMethod(nameof(Frame.PushLong))! },
-        { typeof(float), typeof(Frame).GetMethod(nameof(Frame.PushFloat))! },
-        { typeof(double), typeof(Frame).GetMethod(nameof(Frame.PushDouble))! },
-        { typeof(bool), typeof(Frame).GetMethod(nameof(Frame.PushBool))! },
-        { typeof(sbyte), typeof(Frame).GetMethod(nameof(Frame.PushByte))! },
-        { typeof(char), typeof(Frame).GetMethod(nameof(Frame.PushChar))! },
-        { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PushShort))! },
-        { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PushReference))! },
-    };
-
     #region Fields
 
     public static void BuildBridges(TypeBuilder typeBuilder, FieldInfo field, NameDescriptor name, JavaClass cls)
@@ -78,7 +38,7 @@ public static class BridgeCompiler
                 // frame > heap
                 getter.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
-                getter.Emit(OpCodes.Call, STACK_POPPERS[typeof(Reference)]);
+                getter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[typeof(Reference)]);
                 // frame > heap > ref
                 getter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // frame > object
@@ -86,7 +46,7 @@ public static class BridgeCompiler
             }
 
             // frame > value
-            getter.Emit(OpCodes.Call, STACK_PUSHERS[field.FieldType]);
+            getter.Emit(OpCodes.Call, CompilerUtils.StackPushMethods[field.FieldType]);
             // -
             getter.Emit(OpCodes.Ret);
         }
@@ -97,7 +57,7 @@ public static class BridgeCompiler
             {
                 setter.Emit(OpCodes.Ldarg_0);
                 // frame
-                setter.Emit(OpCodes.Call, STACK_POPPERS[field.FieldType]);
+                setter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[field.FieldType]);
                 // value
                 setter.Emit(OpCodes.Stsfld, field);
                 // -
@@ -108,7 +68,7 @@ public static class BridgeCompiler
                 var val = setter.DeclareLocal(field.FieldType);
                 setter.Emit(OpCodes.Ldarg_0);
                 // frame
-                setter.Emit(OpCodes.Call, STACK_POPPERS[field.FieldType]);
+                setter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[field.FieldType]);
                 // value
                 setter.Emit(OpCodes.Stloc, val);
                 // -
@@ -116,7 +76,7 @@ public static class BridgeCompiler
                 // heap
                 setter.Emit(OpCodes.Ldarg_0);
                 // heap > frame
-                setter.Emit(OpCodes.Call, STACK_POPPERS[typeof(Reference)]);
+                setter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[typeof(Reference)]);
                 // heap > ref
                 setter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // target
@@ -153,7 +113,7 @@ public static class BridgeCompiler
         // frame > statics
         getter.Emit(OpCodes.Ldfld, field);
         // frame > value
-        getter.Emit(OpCodes.Call, STACK_PUSHERS[field.FieldType]);
+        getter.Emit(OpCodes.Call, CompilerUtils.StackPushMethods[field.FieldType]);
         // -
         getter.Emit(OpCodes.Ret);
 
@@ -222,7 +182,7 @@ public static class BridgeCompiler
                 // frame > heap
                 il.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
-                il.Emit(OpCodes.Call, STACK_REVERSE_POPPERS[typeof(Reference)]);
+                il.Emit(OpCodes.Call, CompilerUtils.StackReversePopMethods[typeof(Reference)]);
                 // frame > heap > ref
                 il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
                 // frame > object
@@ -231,7 +191,7 @@ public static class BridgeCompiler
             foreach (var parameter in method.GetParameters())
             {
                 il.Emit(OpCodes.Ldarg_0);
-                var popper = STACK_REVERSE_POPPERS[parameter.ParameterType];
+                var popper = CompilerUtils.StackReversePopMethods[parameter.ParameterType];
                 il.Emit(OpCodes.Call, popper);
             }
 
@@ -245,7 +205,7 @@ public static class BridgeCompiler
         if (method.ReturnType != typeof(void))
         {
             // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, STACK_PUSHERS[method.ReturnType]);
+            il.Emit(OpCodes.Call, CompilerUtils.StackPushMethods[method.ReturnType]);
         }
         else
         {

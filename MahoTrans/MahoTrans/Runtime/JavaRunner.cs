@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
-using MahoTrans.Loader;
+using MahoTrans.Compiler;
 using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
@@ -1220,7 +1220,7 @@ public class JavaRunner
                     return;
                 }
 
-                var popper = BridgeCompiler.STACK_POPPERS[d.Field.FieldType];
+                var popper = CompilerUtils.StackPopMethods[d.Field.FieldType];
                 var value = popper.Invoke(frame, System.Array.Empty<object>());
 
                 if (d.Field.IsStatic)

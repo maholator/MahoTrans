@@ -4,6 +4,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Abstractions;
+using MahoTrans.Compiler;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Errors;
@@ -35,7 +36,7 @@ public static class NativeLinker
         _bridgeAsmCounter++;
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
         var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
-        var bridge = module.DefineType(BridgeCompiler.METHODS_BRIDGE_CLASS_NAME,
+        var bridge = module.DefineType(CompilerUtils.BRIDGE_CLASS_NAME,
             TypeAttributes.Public | TypeAttributes.Sealed);
 
         // building java classes
