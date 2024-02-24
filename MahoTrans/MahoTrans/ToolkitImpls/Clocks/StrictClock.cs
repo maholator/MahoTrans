@@ -9,9 +9,8 @@ namespace MahoTrans.ToolkitImpls.Clocks;
 /// <summary>
 ///     Clock that locks JVM to specific tickrate and provides time based on it.
 /// </summary>
-public class StrictClock : IClock
+public class StrictClock : Clock
 {
-    public long TicksPerBunch;
     public readonly long StartTicks;
 
     private static readonly long UnixEpoch = DateTimeOffset.UnixEpoch.Ticks;
@@ -26,14 +25,14 @@ public class StrictClock : IClock
     /// </param>
     public StrictClock(int ticksPerBunch, long startTicks)
     {
-        TicksPerBunch = ticksPerBunch;
+        TicksPerCycleStep = ticksPerBunch;
         StartTicks = startTicks;
     }
 
-    public long GetCurrentMs(long currentTick)
+    public override long GetCurrentMs(long currentTick)
     {
         // this is passed time in CLR ticks since JVM start
-        var passedTime = currentTick * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+        var passedTime = currentTick * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
         // this is a total passed time in global CLR ticks
         var absTick = passedTime + StartTicks;
         // this is a time in CLR ticks since unix epoch
@@ -41,27 +40,20 @@ public class StrictClock : IClock
         return sinceUnix / TimeSpan.TicksPerMillisecond;
     }
 
-    public long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
+    public override long GetCurrentJvmMs(long currentTick) => GetCurrentMs(currentTick);
 
-    public long GetCurrentClrTicks(long currentCycle)
+    public override long GetCurrentClrTicks(long currentCycle)
     {
         // this is passed time in CLR ticks since JVM start
-        var passedTime = currentCycle * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
+        var passedTime = currentCycle * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
         // this is a total passed time in global CLR ticks
         var absTick = passedTime + StartTicks;
 
         return absTick;
     }
 
-    public long GetPassedClrTicks(long currentCycle)
+    public override long GetPassedClrTicks(long currentCycle)
     {
-        return currentCycle * TicksPerBunch / JvmState.CYCLES_PER_BUNCH;
-    }
-
-    public long TicksPerCycleBunch => TicksPerBunch;
-
-    public bool JvmSleeping
-    {
-        set { }
+        return currentCycle * TicksPerCycleStep / JvmState.CYCLES_PER_BUNCH;
     }
 }
