@@ -5,7 +5,7 @@ using MahoTrans.Native;
 
 namespace java.util;
 
-[JavaInterface(typeof(ArrayEnumerator))]
+[JavaInterface]
 public interface Enumeration
 {
 }

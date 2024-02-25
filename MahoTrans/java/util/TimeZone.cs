@@ -60,9 +60,9 @@ public class TimeZone : Object
     public virtual Reference getID() => Reference.Null;
 
     public virtual int getOffset(int era, int year, int month, int day, int dayOfWeek, int time) =>
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
 
-    public virtual int getRawOffset() => throw new AbstractJavaMethodCallError();
+    public virtual int getRawOffset() => throw new AbstractCall();
 
     [return: JavaType(typeof(TimeZone))]
     public static Reference getTimeZone([String] Reference nameString)
@@ -198,5 +198,5 @@ public class TimeZone : Object
         NativeStatics.DefaultTimeZone = getTimeZone(Jvm.InternalizeString(systemZone));
     }
 
-    public virtual bool useDaylightTime() => throw new AbstractJavaMethodCallError();
+    public virtual bool useDaylightTime() => throw new AbstractCall();
 }

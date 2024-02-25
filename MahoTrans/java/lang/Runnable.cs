@@ -5,7 +5,8 @@ using MahoTrans.Native;
 
 namespace java.lang;
 
-[JavaInterface(typeof(Thread))]
+[JavaInterface]
 public interface Runnable
 {
+    public void run() => throw new AbstractCall();
 }

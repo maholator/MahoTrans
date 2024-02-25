@@ -6,7 +6,7 @@ using MahoTrans.Native;
 
 namespace com.nokia.mid.ui;
 
-[JavaInterface(typeof(Graphics))]
+[JavaInterface]
 public interface DirectGraphics
 {
     public const int FLIP_HORIZONTAL = 8192;

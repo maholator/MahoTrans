@@ -51,7 +51,7 @@ public class Layer : Object
 
     public void paint(Reference g)
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
 
 }

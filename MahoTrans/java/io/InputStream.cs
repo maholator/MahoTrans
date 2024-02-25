@@ -24,7 +24,7 @@ public class InputStream : Object
 
     public int read()
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
 
     [JavaDescriptor("([B)I")]

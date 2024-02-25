@@ -1,9 +1,7 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Reflection;
 using MahoTrans.Abstractions;
-using MahoTrans.Native;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -2072,35 +2070,6 @@ public static class BytecodeLinker
             pointer = 0;
             argsCount = 0;
             return false;
-        }
-
-        if (c.IsInterface)
-        {
-            var attr = c.ClrType?.GetCustomAttribute<JavaInterfaceAttribute>();
-            // this may be an interface from java code.
-            if (attr != null)
-            {
-                var reference = attr.ReferenceImplementation;
-                // to check reference impl, it must exist.
-                if (reference != null)
-                {
-                    try
-                    {
-                        c = jvm.GetClass(reference.FullName!.Replace('.', '/'));
-                        // checking reference impl if found
-                    }
-                    catch
-                    {
-                        logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
-                            $"Interface \"{c.Name}\" has invalid reference implementation.");
-                    }
-                }
-                else
-                {
-                    logger?.Log(LoadIssueType.QuestionableNativeCode, cls.Name,
-                        $"Interface \"{c.Name}\" should have reference implementation.");
-                }
-            }
         }
 
         var m = c.GetMethodRecursiveOrNull(ndc.Descriptor);

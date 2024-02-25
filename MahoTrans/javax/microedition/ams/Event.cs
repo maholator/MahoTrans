@@ -11,5 +11,5 @@ namespace javax.microedition.ams;
 /// </summary>
 public class Event : Object
 {
-    public void invoke() => throw new AbstractJavaMethodCallError();
+    public void invoke() => throw new AbstractCall();
 }

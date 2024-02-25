@@ -109,9 +109,9 @@ public class Calendar : Object
         }
     }
 
-    public virtual void computeFields() => throw new AbstractJavaMethodCallError();
+    public virtual void computeFields() => throw new AbstractCall();
 
-    public virtual void computeTime() => throw new AbstractJavaMethodCallError();
+    public virtual void computeTime() => throw new AbstractCall();
 
     public new bool equals(Reference obj)
     {

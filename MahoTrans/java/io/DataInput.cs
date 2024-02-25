@@ -5,7 +5,7 @@ using MahoTrans.Native;
 
 namespace java.io;
 
-[JavaInterface(typeof(DataInputStream))]
+[JavaInterface]
 public interface DataInput
 {
 }

@@ -29,7 +29,7 @@ public class OutputStream : Object
 
     public void write(int b)
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
 
     [JavaDescriptor("([B)V")]

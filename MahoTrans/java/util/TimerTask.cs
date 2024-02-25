@@ -26,7 +26,7 @@ public class TimerTask : Object, Runnable
 
     public void run()
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
 
     public long scheduledExecutionTime()
