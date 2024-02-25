@@ -24,21 +24,23 @@ public partial class JvmState
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
     private int _virtualPointerRoller = 1;
 
+    public const string DYNAMIC_DLL_PREFIX = "MahoTransJvmTypesHost_";
+
     #region Class loading
 
-    public void AddJvmClasses(JarPackage jar, string assemblyName, string moduleName)
+    public void AddJvmClasses(JarPackage jar, string moduleName)
     {
         foreach (var kvp in jar.Resources)
             _resources.Add(kvp.Key, kvp.Value);
 
-        AddJvmClasses(jar.Classes, assemblyName, moduleName);
+        AddJvmClasses(jar.Classes, moduleName);
     }
 
-    public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
+    public void AddJvmClasses(JavaClass[] classes, string moduleName)
     {
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
+            ClassCompiler.CompileTypes(Classes, classes, $"{DYNAMIC_DLL_PREFIX}{moduleName}", moduleName, this, Toolkit.LoadLogger);
             foreach (var cls in classes)
             {
                 Classes.Add(cls.Name, cls);

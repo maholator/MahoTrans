@@ -339,7 +339,7 @@ public partial class JvmState
 
         public Type BindToType(string? assemblyName, string typeName)
         {
-            if (assemblyName == "jar")
+            if (assemblyName?.StartsWith(DYNAMIC_DLL_PREFIX) == true)
             {
                 return _jvm.Classes[typeName].ClrType ??
                        throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");
