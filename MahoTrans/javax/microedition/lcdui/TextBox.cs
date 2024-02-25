@@ -20,7 +20,7 @@ public class TextBox : Screen, HasText
             Jvm.Throw<IllegalArgumentException>();
         base.Init();
         setTitle(title);
-        Content = Jvm.ResolveStringOrDefault(text) ?? "";
+        Content = Jvm.ResolveStringOrNull(text) ?? "";
         MaxSize = maxSize;
     }
 
@@ -31,7 +31,7 @@ public class TextBox : Screen, HasText
 
     public void setString([String] Reference text)
     {
-        var t = Jvm.ResolveStringOrDefault(text) ?? "";
+        var t = Jvm.ResolveStringOrNull(text) ?? "";
         if (t.Length > MaxSize)
             Jvm.Throw<IllegalArgumentException>();
         Content = t;

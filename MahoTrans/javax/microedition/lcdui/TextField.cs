@@ -20,7 +20,7 @@ public class TextField : Item, HasText
             Jvm.Throw<IllegalArgumentException>();
         base.Init();
         Label = label;
-        Content = Jvm.ResolveStringOrDefault(text) ?? string.Empty;
+        Content = Jvm.ResolveStringOrNull(text) ?? string.Empty;
         MaxSize = maxSize;
     }
 

@@ -54,7 +54,7 @@ public class Throwable : Object
         base.Init();
         CaptureStackTrace();
         Message = message;
-        MessageClr = Jvm.ResolveStringOrDefault(message);
+        MessageClr = Jvm.ResolveStringOrNull(message);
     }
 
     public void printStackTrace()
@@ -121,6 +121,6 @@ public class Throwable : Object
         var name = JavaClass.Name.Replace('/', '.');
         if (Message == Reference.Null)
             return name;
-        return $"{name}: {Jvm.ResolveStringOrDefault(Message)}";
+        return $"{name}: {Jvm.ResolveStringOrNull(Message)}";
     }
 }

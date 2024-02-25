@@ -273,7 +273,7 @@ public partial class JvmState
 #endif
     }
 
-    public T? ResolveNullable<T>(Reference r) where T : Object
+    public T? ResolveOrNull<T>(Reference r) where T : Object
     {
         if (r.IsNull)
             return null;
@@ -299,7 +299,7 @@ public partial class JvmState
     /// </summary>
     /// <param name="r">Reference to resolve.</param>
     /// <returns>String value.</returns>
-    public string? ResolveStringOrDefault(Reference r)
+    public string? ResolveStringOrNull(Reference r)
     {
         if (r.IsNull)
             return null;
@@ -315,7 +315,7 @@ public partial class JvmState
         return obj.Value;
     }
 
-    public T[]? ResolveArrayOrDefault<T>(Reference r) where T : struct
+    public T[]? ResolveArrayOrNull<T>(Reference r) where T : struct
     {
         if (r.IsNull)
             return null;
@@ -323,6 +323,9 @@ public partial class JvmState
         return obj?.Value;
     }
 
+    /// <summary>
+    ///     Helper for interpreter and bridges.
+    /// </summary>
     public void SetArrayElement<T>(Reference r, int index, T value) where T : struct
     {
         if (r.IsNull)

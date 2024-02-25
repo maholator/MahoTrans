@@ -52,7 +52,7 @@ public class JavaRunner
             if (thread.ActiveFrame == null)
             {
                 // no more frames: aborting interpreter
-                var exRealMsg = state.ResolveStringOrDefault(t.Message);
+                var exRealMsg = state.ResolveStringOrNull(t.Message);
                 var exMsg = string.IsNullOrEmpty(exRealMsg)
                     ? "Exception has no attached message."
                     : $"Message: {exRealMsg}";

@@ -30,7 +30,7 @@ public class InputStreamReader : Reader
     public void Init([JavaType(typeof(InputStream))] Reference stream, [String] Reference enc)
     {
         Stream = stream;
-        _decoder = (Jvm.ResolveStringOrDefault(enc) ?? "UTF-8").GetEncodingByName().GetDecoder();
+        _decoder = (Jvm.ResolveStringOrNull(enc) ?? "UTF-8").GetEncodingByName().GetDecoder();
     }
 
     public int decodeChar(int b)

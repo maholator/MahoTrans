@@ -160,7 +160,7 @@ public class Sprite : Layer
 
     public void setFrameSequence([JavaType("[I")] Reference r)
     {
-        int[]? a = Jvm.ResolveArrayOrDefault<int>(r);
+        int[]? a = Jvm.ResolveArrayOrNull<int>(r);
         setFrameSequenceInternal(a);
     }
 
