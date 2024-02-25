@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
+using MahoTrans.Loader;
 using MahoTrans.Runtime;
 
 namespace MahoTrans.Compiler;
@@ -81,7 +82,7 @@ public static class CallBridgeCompiler
     }
 
     /// <summary>
-    ///     Emits code to convert java primitive to something suitable for passing to the method.
+    ///     Emits code to convert java primitive to something suitable for passing to the method. This must be synchronized with parameter conversion in <see cref="NativeLinker"/>.
     /// </summary>
     /// <param name="il">Generator.</param>
     /// <param name="parameter">Parameter to convert.</param>
