@@ -13,7 +13,7 @@ public static class StubToolkit
         new RealTimeClock(),
         new StubImages(),
         new StubFonts(),
-        null!,
+        new NotImplementedDisplay(),
         new VirtualRms(),
         new StubMedia()
     );
