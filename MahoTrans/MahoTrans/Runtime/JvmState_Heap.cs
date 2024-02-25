@@ -241,16 +241,23 @@ public partial class JvmState
 
     #region Resolution
 
-#if DEBUG
     public Object ResolveObject(Reference r)
     {
+#if DEBUG
         return Resolve<Object>(r);
+#else
+        if (r.IsNull)
+            Throw<NullPointerException>();
+        return _heap[r.Index]!;
+#endif
     }
+
 
     public T Resolve<T>(Reference r) where T : Object
     {
         if (r.IsNull)
             Throw<NullPointerException>();
+#if DEBUG
         if (r.Index >= _heap.Length)
             throw new JavaRuntimeError($"Reference {r.Index} is out of bounds ({_heap.Length})");
         var obj = _heap[r.Index];
@@ -261,22 +268,10 @@ public partial class JvmState
             return t;
 
         throw new JavaRuntimeError($"Reference {r.Index} pointers to {obj.GetType()} object, {typeof(T)} expected.");
-    }
 #else
-    public Object ResolveObject(Reference r)
-    {
-        if (r.IsNull)
-            Throw<NullPointerException>();
-        return _heap[r.Index]!;
-    }
-
-    public T Resolve<T>(Reference r) where T : Object
-    {
-        if (r.IsNull)
-            Throw<NullPointerException>();
         return (T)_heap[r.Index]!;
-    }
 #endif
+    }
 
     public T? ResolveNullable<T>(Reference r) where T : Object
     {
