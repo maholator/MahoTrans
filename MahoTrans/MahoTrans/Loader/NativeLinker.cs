@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -24,7 +24,7 @@ public static class NativeLinker
     private static int _bridgeAsmCounter = 1;
 
     /// <summary>
-    /// Converts list of CLR types to list of JVM types.
+    ///     Converts list of CLR types to list of JVM types.
     /// </summary>
     /// <param name="types">Types to convert.</param>
     /// <param name="logger">Logger to log issues to.</param>
@@ -205,7 +205,7 @@ public static class NativeLinker
         if (isCtor && isClinit)
             throw new JavaLinkageException(
                 $"{ms} must be either instance or static.");
-        if (isCtor && ret.Native != typeof(void))
+        if (isCtor && !ret.IsVoid)
             throw new JavaLinkageException(
                 $"{ms} must return void.");
         if (isCtor && nativeMethod.IsStatic)
@@ -214,7 +214,7 @@ public static class NativeLinker
         if (isClinit && !nativeMethod.IsStatic)
             throw new JavaLinkageException(
                 $"{ms} must be static.");
-        if (isClinit && ret.Native != typeof(void))
+        if (isClinit && !ret.IsVoid)
             throw new JavaLinkageException(
                 $"{ms} must return void.");
 
@@ -278,25 +278,34 @@ public static class NativeLinker
 
     private readonly struct Parameter
     {
-        public readonly Type Native;
-        public readonly string? Java;
+        /// <summary>
+        ///     Captures real type of parameter or field.
+        /// </summary>
+        private readonly Type _native;
 
-        public Parameter(Type native, string? java)
+        /// <summary>
+        ///     Captures value of <see cref="JavaTypeAttribute" />.
+        /// </summary>
+        private readonly string? _java;
+
+        private Parameter(Type native, string? java)
         {
-            Native = native;
-            Java = java;
+            _native = native;
+            _java = java;
         }
+
+        public bool IsVoid => _native == typeof(void);
 
         public override string ToString()
         {
-            if (Java == null)
-                return Native.ToJavaDescriptorNative();
-            if (Java.StartsWith('['))
-                return Java;
-            if (Java.StartsWith('L') && Java.EndsWith(';'))
-                return Java;
+            if (_java == null)
+                return _native.ToJavaDescriptorNative();
+            if (_java.StartsWith('['))
+                return _java;
+            if (_java.StartsWith('L') && _java.EndsWith(';'))
+                return _java;
 
-            return $"L{Java};";
+            return $"L{_java};";
         }
 
         public static Parameter FromParam(ParameterInfo info)
