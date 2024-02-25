@@ -249,20 +249,11 @@ public static class DescriptorUtils
 
     /// <summary>
     ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
-    ///     If you want to convert native primitives like bool->Z, use <see cref="ToJavaDescriptorNative" /> instead.
-    /// </summary>
-    /// <param name="t">Type to get name from.</param>
-    /// <returns>Name with dots replaced by slashes int L; form.</returns>
-    public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
-
-    /// <summary>
-    ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
-    ///     If the type if a native primitive, handles it correctly, i.e. bool->Z, void->V and so on.
-    ///     If the type is guaranteed to be a java class, use <see cref="ToJavaDescriptor" /> directly.
+    ///     If the type if a native primitive, handles it, i.e. bool->Z, void->V and so on.
     /// </summary>
     /// <param name="t">Type to get name from.</param>
     /// <returns>Type descriptor.</returns>
-    public static string ToJavaDescriptorNative(this Type t)
+    public static string ToJavaDescriptor(this Type t)
     {
         if (t == typeof(Reference))
             return "Ljava/lang/Object;";
@@ -286,7 +277,10 @@ public static class DescriptorUtils
             return "Ljava/lang/String;";
         if (t == typeof(void))
             return "V";
-        return t.ToJavaDescriptor();
+        if (t.IsEnum)
+            return Enum.GetUnderlyingType(t).ToJavaDescriptor();
+
+        return $"L{t.ToJavaName()};";
     }
 
     public static string BuildMethodDescriptor(Type returnType, params Type[] args)
@@ -294,11 +288,11 @@ public static class DescriptorUtils
         var sb = new StringBuilder("(");
         foreach (var type in args)
         {
-            sb.Append(type.ToJavaDescriptorNative());
+            sb.Append(type.ToJavaDescriptor());
         }
 
         sb.Append(')');
-        sb.Append(returnType.ToJavaDescriptorNative());
+        sb.Append(returnType.ToJavaDescriptor());
         return sb.ToString();
     }
 }

@@ -94,7 +94,7 @@ public class JavaMethodBuilder
 
     public void AppendVirtcall(string name, Type returns)
     {
-        AppendVirtcall(name, $"(){returns.ToJavaDescriptorNative()}");
+        AppendVirtcall(name, $"(){returns.ToJavaDescriptor()}");
     }
 
     public void AppendVirtcall(string name, Type returns, params Type[] args)
@@ -138,7 +138,7 @@ public class JavaMethodBuilder
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
-    public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
+    public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptor());
 
     /// <summary>
     ///     Gets field from arbitrary type.
@@ -159,7 +159,7 @@ public class JavaMethodBuilder
     /// <param name="type">Type of the field.</param>
     /// <param name="cls">Type that contains the field.</param>
     public void AppendGetField(string name, Type type, Type cls) =>
-        AppendGetField(name, type.ToJavaDescriptorNative(), cls);
+        AppendGetField(name, type.ToJavaDescriptor(), cls);
 
     /// <summary>
     ///     Puts field to arbitrary type.
@@ -180,7 +180,7 @@ public class JavaMethodBuilder
     /// <param name="type">Type of the field.</param>
     /// <param name="cls">Type that contains the field.</param>
     public void AppendPutField(string name, Type type, Type cls) =>
-        AppendPutField(name, type.ToJavaDescriptorNative(), cls);
+        AppendPutField(name, type.ToJavaDescriptor(), cls);
 
     public void AppendNewObject<T>() where T : Object
     {

@@ -318,7 +318,7 @@ public static class NativeLinker
         private string toDescriptor(Type t)
         {
             if (_java == null)
-                return t.ToJavaDescriptorNative();
+                return t.ToJavaDescriptor();
             if (_java.StartsWith('['))
                 return _java;
             if (_java.StartsWith('L') && _java.EndsWith(';'))

@@ -24,7 +24,7 @@ public class NativeStaticAttribute : Attribute
 
     public NameDescriptor AsDescriptor()
     {
-        return new NameDescriptor(Name, FieldType.ToJavaDescriptorNative());
+        return new NameDescriptor(Name, FieldType.ToJavaDescriptor());
     }
 
     public string OwnerName => OwnerType.FullName!.Replace('.', '/');
