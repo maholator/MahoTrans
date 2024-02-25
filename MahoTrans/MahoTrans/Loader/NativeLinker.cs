@@ -298,8 +298,27 @@ public static class NativeLinker
 
         public override string ToString()
         {
+            if (!_native.IsArray)
+                return toDescriptor(_native);
+            // for arrays, we should add [[[[[ things ourselves.
+
+            if (_native.GetArrayRank() != 1)
+                throw new NotSupportedException("Multidimensional arrays are not supported");
+            if (!_native.HasElementType) // no idea when it may happen but why not to check
+                throw new NotSupportedException("Array must have element type");
+            var udrType = _native.GetElementType()!;
+
+            if (udrType.IsArray)
+                throw new NotSupportedException("Nested arrays are not supported");
+
+            // one more dimension
+            return "[" + toDescriptor(udrType);
+        }
+
+        private string toDescriptor(Type t)
+        {
             if (_java == null)
-                return _native.ToJavaDescriptorNative();
+                return t.ToJavaDescriptorNative();
             if (_java.StartsWith('['))
                 return _java;
             if (_java.StartsWith('L') && _java.EndsWith(';'))
