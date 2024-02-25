@@ -75,7 +75,7 @@ public class Sprite : Layer
         Sprite sprite = Jvm.Resolve<Sprite>(r);
         Init(sprite.getWidth(), sprite.getHeight());
 
-        Image = lcdui.Image.createImage(sprite.Image);
+        Image = lcdui.Image.createImage(sprite.Image).This;
         RawFrameCount = sprite.RawFrameCount;
         FramesX = new int[RawFrameCount];
         FramesY = new int[RawFrameCount];

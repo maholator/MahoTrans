@@ -69,14 +69,22 @@ public static class CallBridgeCompiler
 
         il.Emit(OpCodes.Call, method);
 
-        if (method.ReturnType != typeof(void))
+        if (method.ReturnType == typeof(void))
         {
-            // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, StackPushMethods[method.ReturnType]);
+            // stack is here, delete it.
+            il.Emit(OpCodes.Pop);
+        }
+        else if (method.ReturnType.IsAssignableTo(typeof(Object)))
+        {
+            // we need to take the reference
+            il.Emit(OpCodes.Ldfld, typeof(Object).GetField(nameof(Object.HeapAddress))!);
+            // now push
+            il.Emit(OpCodes.Call, StackPushMethods[typeof(int)]);
         }
         else
         {
-            il.Emit(OpCodes.Pop);
+            // frame reference is here from the beginning
+            il.Emit(OpCodes.Call, StackPushMethods[method.ReturnType]);
         }
 
         il.Emit(OpCodes.Ret);
