@@ -35,9 +35,8 @@ public class JavaTest
         _jvm.AddClrClasses(typeof(JavaRunner).Assembly);
         var cl = new ClassLoader(new ConsoleLogger());
         var cls = cl.ReadJarFile(jarFile, true);
-        _jvm.AddJvmClasses(cls, "jar", "jar");
+        _jvm.AddJvmClasses(cls, "jar");
         var obj = _jvm.AllocateObject(_jvm.GetClass(className));
-
 
         var thread = JavaThread.CreateSynthetic(new NameDescriptor(methodName, "()V"), obj, _jvm);
         using (new JvmContext(_jvm))
