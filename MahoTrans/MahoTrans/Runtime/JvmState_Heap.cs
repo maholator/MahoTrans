@@ -132,14 +132,14 @@ public partial class JvmState
     {
         if (data == null!)
             throw new JavaRuntimeError("Attempt to wrap null array");
-        if (typeof(T) == typeof(byte))
-            throw new JavaRuntimeError("Attempt to wrap array of unsigned bytes!");
-        if (typeof(T) == typeof(Reference))
-            throw new JavaRuntimeError("Reference array must have assigned class!");
+
+        // this does all the checks (i.e. sbyte/ubyte)
+        var arrayClass = PrimitiveToArrayType<T>();
+
         return PutToHeap(new Array<T>
         {
             Value = data,
-            JavaClass = PrimitiveToArrayType<T>(),
+            JavaClass = arrayClass,
         });
     }
 
@@ -159,14 +159,14 @@ public partial class JvmState
             Throw<NegativeArraySizeException>();
         return arrayType switch
         {
-            ArrayType.T_BOOLEAN => AllocateArray<bool>(length),
-            ArrayType.T_CHAR => AllocateArray<char>(length),
-            ArrayType.T_FLOAT => AllocateArray<float>(length),
-            ArrayType.T_DOUBLE => AllocateArray<double>(length),
-            ArrayType.T_BYTE => AllocateArray<sbyte>(length),
-            ArrayType.T_SHORT => AllocateArray<short>(length),
-            ArrayType.T_INT => AllocateArray<int>(length),
-            ArrayType.T_LONG => AllocateArray<long>(length),
+            ArrayType.T_BOOLEAN => AllocateArrayInternal<bool>(length),
+            ArrayType.T_CHAR => AllocateArrayInternal<char>(length),
+            ArrayType.T_FLOAT => AllocateArrayInternal<float>(length),
+            ArrayType.T_DOUBLE => AllocateArrayInternal<double>(length),
+            ArrayType.T_BYTE => AllocateArrayInternal<sbyte>(length),
+            ArrayType.T_SHORT => AllocateArrayInternal<short>(length),
+            ArrayType.T_INT => AllocateArrayInternal<int>(length),
+            ArrayType.T_LONG => AllocateArrayInternal<long>(length),
             _ => Reference.Null
         };
     }
@@ -192,7 +192,7 @@ public partial class JvmState
 
     #region Array allocation (utils)
 
-    private Reference AllocateArray<T>(int length) where T : struct
+    private Reference AllocateArrayInternal<T>(int length) where T : struct
     {
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
@@ -203,6 +203,12 @@ public partial class JvmState
         });
     }
 
+    /// <summary>
+    ///     Gets JVM class for "[primitive" object. Must not be used with references.
+    /// </summary>
+    /// <typeparam name="T">CLR type to get type for.</typeparam>
+    /// <returns>JVM class.</returns>
+    /// <exception cref="JavaRuntimeError">Something wrong is passed.</exception>
     private JavaClass PrimitiveToArrayType<T>()
     {
         string name;
@@ -222,6 +228,10 @@ public partial class JvmState
             name = "[Z";
         else if (typeof(T) == typeof(sbyte))
             name = "[B";
+        else if (typeof(T) == typeof(byte))
+            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes");
+        else if (typeof(T) == typeof(Reference))
+            throw new JavaRuntimeError("Attempt to allocate reference array as primitive array");
         else
             throw new JavaRuntimeError($"Attempt to allocate an array of non-supported primitive type {typeof(T)}");
         return GetClass(name);
