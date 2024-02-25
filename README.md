@@ -127,5 +127,6 @@ static void Main(string midletClass) {
 
 ## Docs
 
+- [`Reference`, heap and serializer](docs/heap.md)
 - [Marshalling and `JavaType` attribute: creating CLR library methods](docs/marshalling.md)
 - [Builders and descriptors: creating JVM library methods](docs/javaemit.md)

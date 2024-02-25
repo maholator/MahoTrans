@@ -68,7 +68,7 @@ method does two virtual calls.
 [Hashtable](../MahoTrans/java/util/Hashtable.cs) and [InputStream](../MahoTrans/java/io/InputStream.cs) are good
 examples of building complex loops with branches and try-catches.
 
-**This is the most "young" and recommended tool.**
+**This is the "youngest" and recommended tool.**
 
 ### Direct construction of method
 
