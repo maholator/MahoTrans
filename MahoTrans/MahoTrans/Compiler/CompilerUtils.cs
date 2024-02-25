@@ -6,6 +6,9 @@ using MahoTrans.Runtime;
 
 namespace MahoTrans.Compiler;
 
+/// <summary>
+///     Single place for all stuff used by all compilers.
+/// </summary>
 public static class CompilerUtils
 {
     /// <summary>

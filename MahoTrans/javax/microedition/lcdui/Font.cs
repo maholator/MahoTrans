@@ -28,7 +28,7 @@ public class Font : Object
     public static Reference getFont(int face, int style, int size)
     {
         //TODO checks
-        var font = Jvm.AllocateObject<Font>();
+        var font = Jvm.Allocate<Font>();
         font.Face = (FontFace)face;
         font.Style = (FontStyle)style;
         font.Size = (FontSize)size;
@@ -39,7 +39,7 @@ public class Font : Object
     [return: JavaType(typeof(Font))]
     public static Reference getDefaultFont()
     {
-        var font = Jvm.AllocateObject<Font>();
+        var font = Jvm.Allocate<Font>();
         font.Face = 0;
         font.Style = 0;
         font.Size = FontSize.Medium;

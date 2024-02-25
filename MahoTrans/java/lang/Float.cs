@@ -77,7 +77,7 @@ public class Float : Object
     [return: JavaType(typeof(Float))]
     public Reference valueOf([String] Reference str)
     {
-        var i = Jvm.AllocateObject<Float>();
+        var i = Jvm.Allocate<Float>();
         i.Init(parseFloat(str));
         return i.This;
     }

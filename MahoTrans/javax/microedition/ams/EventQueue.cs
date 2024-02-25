@@ -63,11 +63,11 @@ public class EventQueue : Thread
     }
 
     [JavaIgnore]
-    public void Enqueue<T>(Action<T> setup) where T : Event
+    public void Enqueue<T>(Action<T> setup) where T : Event, new()
     {
         lock (_lock)
         {
-            var e = OwningJvm.AllocateObject<T>();
+            var e = OwningJvm.Allocate<T>();
             setup.Invoke(e);
             if (e is RepaintEvent re)
             {

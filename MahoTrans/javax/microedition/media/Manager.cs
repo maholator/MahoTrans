@@ -21,7 +21,7 @@ public class Manager : Object
         {
             var buf = bais.buf.As<Array<sbyte>>().Value;
             var mem = new ReadOnlySpan<sbyte>(buf, bais.pos, bais.count - bais.pos);
-            var player = Jvm.AllocateObject<PlayerImpl>();
+            var player = Jvm.Allocate<PlayerImpl>();
             player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrDefault(type), player.This);
             return player.This;
         }

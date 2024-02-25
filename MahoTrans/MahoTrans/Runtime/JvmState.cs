@@ -54,7 +54,7 @@ public partial class JvmState
         if (_eventQueue != null)
             throw new InvalidOperationException("Attempt to create a second queue");
 
-        _eventQueue = AllocateObject<EventQueue>();
+        _eventQueue = Allocate<EventQueue>();
         _eventQueue.OwningJvm = this;
         _eventQueue.start();
     }

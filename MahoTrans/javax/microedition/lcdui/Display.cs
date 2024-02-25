@@ -20,7 +20,7 @@ public class Display : Object
         var midlet = Jvm.Resolve<MIDlet>(midletRef);
         if (midlet.Display.IsNull)
         {
-            var disp = Jvm.AllocateObject<Display>();
+            var disp = Jvm.Allocate<Display>();
             midlet.Display = disp.This;
         }
 

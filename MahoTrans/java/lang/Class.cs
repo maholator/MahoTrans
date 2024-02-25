@@ -41,7 +41,7 @@ public class Class : Object
         var name = Jvm.ResolveString(r);
         if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
             Jvm.Throw<ClassNotFoundException>(name);
-        var cls = Jvm.AllocateObject<Class>();
+        var cls = Jvm.Allocate<Class>();
         cls.InternalClass = jc;
         return cls.This;
     }
@@ -85,8 +85,8 @@ public class Class : Object
         if (data == null)
             return Reference.Null;
 
-        var stream = Jvm.AllocateObject<ByteArrayInputStream>();
-        var buf = Jvm.AllocateArray(data, "[B");
+        var stream = Jvm.Allocate<ByteArrayInputStream>();
+        var buf = Jvm.WrapPrimitiveArray(data);
         stream.Init(buf);
         return stream.This;
     }

@@ -12,6 +12,6 @@ public class PushRegistry : Object
     [JavaDescriptor("(Z)[Ljava/lang/String;")]
     public static Reference listConnections(bool b)
     {
-        return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljava/lang/String;");
+        return Jvm.WrapReferenceArray(Array.Empty<Reference>(), "[Ljava/lang/String;");
     }
 }

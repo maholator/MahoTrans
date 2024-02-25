@@ -57,7 +57,7 @@ public class Vector : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference elements()
     {
-        var e = Jvm.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.Allocate<ArrayEnumerator>();
         e.Value = List.ToArray();
         return e.This;
     }

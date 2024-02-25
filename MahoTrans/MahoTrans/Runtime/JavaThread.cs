@@ -131,10 +131,10 @@ public class JavaThread
     /// <returns></returns>
     public static Thread CreateSynthetic(NameDescriptor nd, Reference target, JvmState state)
     {
-        var bridge = state.AllocateObject<AnyCallBridge>();
+        var bridge = state.Allocate<AnyCallBridge>();
         bridge.Init(target, state.AllocateString(nd.Name), state.AllocateString(nd.Descriptor));
 
-        var model = state.AllocateObject<Thread>();
+        var model = state.Allocate<Thread>();
         model.InitTargeted(bridge.This);
 
         return model;
@@ -147,7 +147,7 @@ public class JavaThread
     /// <returns>MT thread object.</returns>
     /// <remarks>
     ///     If you want to start a java thread from native code, this is not for you. Allocate a <see cref="Thread" /> via
-    ///     <see cref="JvmState.AllocateObject{T}" />, initialize it with a runnable via <see cref="Thread.InitTargeted" /> and
+    ///     <see cref="JvmState.Allocate{T}" />, initialize it with a runnable via <see cref="Thread.InitTargeted" /> and
     ///     call <see cref="Thread" />.<see cref="Thread.start" />.
     /// </remarks>
     public static unsafe JavaThread CreateReal(Thread thread)

@@ -39,8 +39,15 @@ public partial class JvmState
 
     private bool _gcPending;
 
-    #region Object allocation
+    #region Object/string allocation
 
+    /// <summary>
+    ///     Creates new CLR object for given JVM class. This used by interpreter. This can be used by native code if caller
+    ///     doesn't know what it is doing.
+    /// </summary>
+    /// <param name="class">Class object.</param>
+    /// <returns>Reference to newly created object.</returns>
+    /// <remarks>Use <see cref="Allocate{T}" /> if possible.</remarks>
     public Reference AllocateObject(JavaClass @class)
     {
         Object o = (Activator.CreateInstance(@class.ClrType!) as Object)!;
@@ -48,14 +55,27 @@ public partial class JvmState
         return PutToHeap(o);
     }
 
-    public T AllocateObject<T>() where T : Object
+    /// <summary>
+    ///     Creates new CLR object of CLR class that represents given JVM type.
+    /// </summary>
+    /// <typeparam name="T">Class to instantiate.</typeparam>
+    /// <returns>Newly created object.</returns>
+    /// <remarks>
+    ///     This calls default constructor, assigns java class object and adds the object to heap.
+    /// </remarks>
+    public T Allocate<T>() where T : Object, new()
     {
-        var o = Activator.CreateInstance<T>();
+        var o = new T();
         o.JavaClass = Classes[typeof(T).ToJavaName()];
         PutToHeap(o);
         return o;
     }
 
+    /// <summary>
+    ///     Wraps CLR string into JVM object.
+    /// </summary>
+    /// <param name="str">String to wrap.</param>
+    /// <returns>Created string object.</returns>
     public Reference AllocateString(string str)
     {
         return PutToHeap(new String
@@ -65,6 +85,11 @@ public partial class JvmState
         });
     }
 
+    /// <summary>
+    ///     Wraps CLR string into JVM object. Attempts to use cached "internalized" string.
+    /// </summary>
+    /// <param name="str">String to wrap.</param>
+    /// <returns>Reference to internalized string wrapper.</returns>
     public Reference InternalizeString(string str)
     {
         if (_internalizedStrings.TryGetValue(str, out var i))
@@ -79,29 +104,19 @@ public partial class JvmState
     #region Array allocation (for native)
 
     /// <summary>
-    ///     Creates an array. This is for native code.
+    ///     Creates JVM array wrapper over CLR array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
+    /// <param name="className">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
     /// <returns>Reference to newly created array.</returns>
-    public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
-        AllocateArray(data, GetClass(cls));
-
-    /// <summary>
-    ///     Creates an array. This is for native code.
-    /// </summary>
-    /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
-    /// <returns>Reference to newly created array.</returns>
-    public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
+    public Reference WrapReferenceArray(Reference[] data, string className)
     {
         if (data == null!)
-            throw new JavaRuntimeError("Attempt to convert null array");
+            throw new JavaRuntimeError("Attempt to wrap null array");
 
-        if (typeof(T) == typeof(byte))
-            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
+        JavaClass cls = GetClass(className);
 
-        return PutToHeap(new Array<T>
+        return PutToHeap(new Array<Reference>
         {
             Value = data,
             JavaClass = cls
@@ -109,16 +124,16 @@ public partial class JvmState
     }
 
     /// <summary>
-    ///     Creates an array of primitives (ints, chars, etc.). This is for native code.
+    ///     Creates JVM array wrapper over CLR array of primitives (ints, chars, etc.). This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
     /// <returns>Reference to newly created array.</returns>
-    public Reference AllocatePrimitiveArray<T>(T[] data) where T : struct
+    public Reference WrapPrimitiveArray<T>(T[] data) where T : struct
     {
         if (data == null!)
-            throw new JavaRuntimeError("Attempt to convert null array");
+            throw new JavaRuntimeError("Attempt to wrap null array");
         if (typeof(T) == typeof(byte))
-            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
+            throw new JavaRuntimeError("Attempt to wrap array of unsigned bytes!");
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
         return PutToHeap(new Array<T>
@@ -321,9 +336,9 @@ public partial class JvmState
     /// <typeparam name="T">Type of exception.</typeparam>
     /// <exception cref="JavaThrowable">Always thrown CLR exception. Contains java exception to be processed by handler.</exception>
     [DoesNotReturn]
-    public void Throw<T>() where T : Throwable
+    public void Throw<T>() where T : Throwable, new()
     {
-        var ex = AllocateObject<T>();
+        var ex = Allocate<T>();
         ex.Init();
         ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);
@@ -331,9 +346,9 @@ public partial class JvmState
     }
 
     [DoesNotReturn]
-    public void Throw<T>(string message) where T : Throwable
+    public void Throw<T>(string message) where T : Throwable, new()
     {
-        var ex = AllocateObject<T>();
+        var ex = Allocate<T>();
         ex.Init(AllocateString(message));
         ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);

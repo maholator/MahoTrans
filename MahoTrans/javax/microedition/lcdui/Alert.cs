@@ -18,7 +18,7 @@ public class Alert : Screen
     [ClassInit]
     public static void ClInit()
     {
-        var dismiss = Jvm.AllocateObject<Command>();
+        var dismiss = Jvm.Allocate<Command>();
         dismiss.Init(Jvm.AllocateString(""), Command.OK, 0);
         NativeStatics.AlertDismissCommand = dismiss.This;
     }
@@ -40,7 +40,7 @@ public class Alert : Screen
         Type = alertType;
         Timeout = getDefaultTimeout();
         Commands.Add(NativeStatics.AlertDismissCommand);
-        setCommandListener(Jvm.AllocateObject<DefaultAlertHandler>().This);
+        setCommandListener(Jvm.Allocate<DefaultAlertHandler>().This);
         // invalidate is necessary to notify toolkit about non-null implicit command
         Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }

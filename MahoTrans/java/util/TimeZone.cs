@@ -15,7 +15,7 @@ public class TimeZone : Object
     [ClassInit]
     public static void ClInit()
     {
-        var gmt = Jvm.AllocateObject<SimpleTimeZone>();
+        var gmt = Jvm.Allocate<SimpleTimeZone>();
         gmt.Init(0, Jvm.InternalizeString("GMT"));
         NativeStatics.GmtTimeZone = gmt.This;
     }
@@ -108,7 +108,7 @@ public class TimeZone : Object
                     }
 
                     if (sign == '-') raw = -raw;
-                    var stz = Jvm.AllocateObject<SimpleTimeZone>();
+                    var stz = Jvm.Allocate<SimpleTimeZone>();
                     stz.Init(raw, Jvm.InternalizeString(formattedName));
                     return stz.This;
                 }

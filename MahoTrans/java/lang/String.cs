@@ -114,20 +114,20 @@ public sealed class String : Object
     public Reference getBytes()
     {
         var data = Encoding.UTF8.GetBytes(Value).ConvertToSigned();
-        return Jvm.AllocateArray(data, "[B");
+        return Jvm.WrapPrimitiveArray(data);
     }
 
     [JavaDescriptor("(Ljava/lang/String;)[B")]
     public Reference getBytes(Reference enc)
     {
         byte[] data = Jvm.ResolveString(enc).GetEncodingByName().GetBytes(Value);
-        return Jvm.AllocateArray(data.ConvertToSigned(), "[B");
+        return Jvm.WrapPrimitiveArray(data.ConvertToSigned());
     }
 
     [return: JavaType("[C")]
     public Reference toCharArray()
     {
-        return Jvm.AllocateArray(Value.ToCharArray(), "[C");
+        return Jvm.WrapPrimitiveArray(Value.ToCharArray());
     }
 
     [return: JavaType(typeof(String))]

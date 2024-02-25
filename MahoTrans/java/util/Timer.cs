@@ -20,7 +20,7 @@ public class Timer : Object
     public new void Init()
     {
         base.Init();
-        var th = Jvm.AllocateObject<TimerThread>();
+        var th = Jvm.Allocate<TimerThread>();
         th.Init();
         Thread = th.This;
     }

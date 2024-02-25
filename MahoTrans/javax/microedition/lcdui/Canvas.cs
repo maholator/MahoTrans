@@ -34,7 +34,7 @@ public class Canvas : Displayable
         {
             if (CachedGraphics.IsNull)
             {
-                var cg = Jvm.AllocateObject<Graphics>();
+                var cg = Jvm.Allocate<Graphics>();
                 cg.Init();
                 cg.Handle = Toolkit.Display.GetGraphics(Handle);
                 CachedGraphics = cg.This;
@@ -47,7 +47,7 @@ public class Canvas : Displayable
             return CachedGraphics;
         }
 
-        var g = Jvm.AllocateObject<Graphics>();
+        var g = Jvm.Allocate<Graphics>();
         g.Init();
         g.Handle = Toolkit.Display.GetGraphics(Handle);
         return g.This;

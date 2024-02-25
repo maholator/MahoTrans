@@ -26,7 +26,7 @@ public class Image : Object
         if (blob == null)
             Jvm.Throw<IOException>();
 
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(blob.ToUnsigned());
         return image.This;
     }
@@ -36,7 +36,7 @@ public class Image : Object
     {
         var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
 
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(new ReadOnlySpan<byte>(blob, from, len));
         return image.This;
     }
@@ -44,7 +44,7 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage(int w, int h)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateBuffer(w, h);
         return image.This;
     }
@@ -52,7 +52,7 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateFromRgb(Jvm.ResolveArray<int>(rgb), width, height, alpha);
         return image.This;
     }
@@ -60,7 +60,7 @@ public class Image : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage___copy([JavaType(typeof(Image))] Reference source)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle);
         return image.This;
     }
@@ -69,7 +69,7 @@ public class Image : Object
     public static Reference createImage___copy([JavaType(typeof(Image))] Reference source, int x, int y, int w, int h,
         int tr)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle, x, y, w, h, (SpriteTransform)tr);
         return image.This;
     }
@@ -179,7 +179,7 @@ public class Image : Object
     {
         if (!isMutable())
             Jvm.Throw<IllegalStateException>();
-        var g = Jvm.AllocateObject<Graphics>();
+        var g = Jvm.Allocate<Graphics>();
         g.Init();
         g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;

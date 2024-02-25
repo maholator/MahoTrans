@@ -136,7 +136,7 @@ public class Calendar : Object
     [return: JavaType(typeof(Calendar))]
     public static Reference getInstance()
     {
-        var c = Jvm.AllocateObject<GregorianCalendar>();
+        var c = Jvm.Allocate<GregorianCalendar>();
         c.Init();
         return c.This;
     }
@@ -145,7 +145,7 @@ public class Calendar : Object
     [return: JavaType(typeof(Calendar))]
     public static Reference getInstance([JavaType(typeof(TimeZone))] Reference timezone)
     {
-        var c = Jvm.AllocateObject<GregorianCalendar>();
+        var c = Jvm.Allocate<GregorianCalendar>();
         c.Init(timezone);
         return c.This;
     }
@@ -153,7 +153,7 @@ public class Calendar : Object
     [return: JavaType(typeof(Date))]
     public Reference getTime()
     {
-        var d = Jvm.AllocateObject<Date>();
+        var d = Jvm.Allocate<Date>();
         d.Init(getTimeInMillis());
         return d.This;
     }

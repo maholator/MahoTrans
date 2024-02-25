@@ -151,7 +151,7 @@ public class RecordStore : Object
         var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(StoreName), recordId);
         if (buf == null)
             Jvm.Throw<InvalidRecordIDException>();
-        return Jvm.AllocateArray(buf.ConvertToSigned(), "[B");
+        return Jvm.WrapPrimitiveArray(buf.ConvertToSigned());
     }
 
     public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
@@ -226,10 +226,10 @@ public class RecordStore : Object
             return opened;
         }
 
-        var store = Jvm.AllocateObject<RecordStore>();
+        var store = Jvm.Allocate<RecordStore>();
         store._openCount = 1;
         store.StoreName = name;
-        var vec = Jvm.AllocateObject<Vector>();
+        var vec = Jvm.Allocate<Vector>();
         vec.Init();
         store.Listeners = vec.This;
         NativeStatics.OpenedRecordStores.Add(nameStr, store.This);

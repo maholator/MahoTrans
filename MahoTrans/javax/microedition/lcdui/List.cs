@@ -36,7 +36,7 @@ public class List : Screen, Choice
     [ClassInit]
     public static void ClInit()
     {
-        var select = Jvm.AllocateObject<Command>();
+        var select = Jvm.Allocate<Command>();
         select.Init(Jvm.AllocateString(""), Command.SCREEN, 0);
         NativeStatics.ListSelectCommand = select.This;
     }

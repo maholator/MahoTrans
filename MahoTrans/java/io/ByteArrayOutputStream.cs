@@ -31,7 +31,7 @@ public class ByteArrayOutputStream : OutputStream
     [JavaDescriptor("()[B")]
     public Reference toByteArray()
     {
-        return Jvm.AllocateArray(buf.ToArray(), "[B");
+        return Jvm.WrapPrimitiveArray(buf.ToArray());
     }
 
     [return: String]

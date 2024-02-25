@@ -13,12 +13,12 @@ public class System : Object
     [ClassInit]
     public static void Clinit()
     {
-        var outPrinter = Jvm.AllocateObject<PrintStream>();
-        outPrinter.Init(Jvm.AllocateObject<StdOut>().This);
+        var outPrinter = Jvm.Allocate<PrintStream>();
+        outPrinter.Init(Jvm.Allocate<StdOut>().This);
         NativeStatics.OutStream = outPrinter.This;
 
-        var errPrinter = Jvm.AllocateObject<PrintStream>();
-        errPrinter.Init(Jvm.AllocateObject<StdErr>().This);
+        var errPrinter = Jvm.Allocate<PrintStream>();
+        errPrinter.Init(Jvm.Allocate<StdErr>().This);
         NativeStatics.ErrStream = errPrinter.This;
     }
 

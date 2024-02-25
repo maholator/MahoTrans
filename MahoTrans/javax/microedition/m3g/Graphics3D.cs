@@ -13,7 +13,7 @@ public class Graphics3D : Object
     public static Reference getInstance()
     {
         if (NativeStatics.Graphics3DInstance.IsNull)
-            NativeStatics.Graphics3DInstance = Jvm.AllocateObject<Graphics3D>().This;
+            NativeStatics.Graphics3DInstance = Jvm.Allocate<Graphics3D>().This;
         return NativeStatics.Graphics3DInstance;
     }
 

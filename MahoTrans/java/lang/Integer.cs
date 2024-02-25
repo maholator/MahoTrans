@@ -147,7 +147,7 @@ public class Integer : Object
     [return: JavaType(typeof(Integer))]
     public static Reference valueOf([String] Reference str)
     {
-        var i = Jvm.AllocateObject<Integer>();
+        var i = Jvm.Allocate<Integer>();
         i.Init(parseInt(str));
         return i.This;
     }
@@ -155,7 +155,7 @@ public class Integer : Object
     [return: JavaType(typeof(Integer))]
     public static Reference valueOf([String] Reference str, int radix)
     {
-        var i = Jvm.AllocateObject<Integer>();
+        var i = Jvm.Allocate<Integer>();
         i.Init(parseInt(str, radix));
         return i.This;
     }

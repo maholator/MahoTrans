@@ -11,11 +11,11 @@ public class Boolean : Object
     [ClassInit]
     public static void Clinit()
     {
-        var t = Jvm.AllocateObject<Boolean>();
+        var t = Jvm.Allocate<Boolean>();
         t.Init(true);
         NativeStatics.True = t.This;
 
-        var f = Jvm.AllocateObject<Boolean>();
+        var f = Jvm.Allocate<Boolean>();
         f.Init(true);
         NativeStatics.False = f.This;
     }

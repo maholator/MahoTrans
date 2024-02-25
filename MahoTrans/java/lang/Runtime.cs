@@ -19,7 +19,7 @@ public class Runtime : Object
     {
         if (NativeStatics.RuntimeInstance.IsNull)
         {
-            NativeStatics.RuntimeInstance = Jvm.AllocateObject<Runtime>().This;
+            NativeStatics.RuntimeInstance = Jvm.Allocate<Runtime>().This;
         }
 
         return NativeStatics.RuntimeInstance;

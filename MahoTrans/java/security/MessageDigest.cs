@@ -20,7 +20,7 @@ public class MessageDigest : Object
         string s = Jvm.ResolveString(algorithm).ToUpper().Trim();
         if (s.Length < 3)
             Jvm.Throw<NoSuchAlgorithmException>(s);
-        MessageDigest md = Jvm.AllocateObject<MessageDigest>();
+        MessageDigest md = Jvm.Allocate<MessageDigest>();
         md.Algorithm = s;
         md.InitHash();
         return md.This;

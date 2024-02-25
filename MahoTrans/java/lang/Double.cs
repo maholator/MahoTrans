@@ -74,7 +74,7 @@ public class Double : Object
     [return: JavaType(typeof(Double))]
     public static Reference valueOf([String] Reference str)
     {
-        var i = Jvm.AllocateObject<Double>();
+        var i = Jvm.Allocate<Double>();
         i.Init(parseDouble(str));
         return i.This;
     }

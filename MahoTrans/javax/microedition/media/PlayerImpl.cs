@@ -222,7 +222,7 @@ public class PlayerImpl : Object, Player
     [return: JavaType("[Ljavax/microedition/media/PlayerListener;")]
     public Reference getListeners()
     {
-        return Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+        return Jvm.WrapReferenceArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
     }
 
     public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference playerListener)
@@ -268,15 +268,15 @@ public class PlayerImpl : Object, Player
         if (Listeners.Count == 0)
             return;
 
-        var targets = Jvm.AllocateArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
+        var targets = Jvm.WrapReferenceArray(Listeners.ToArray(), "[Ljavax/microedition/media/PlayerListener;");
 
         // end
         {
-            var l = Jvm.AllocateObject<Long>();
+            var l = Jvm.Allocate<Long>();
             l.Init(getDuration());
-            var r = Jvm.AllocateObject<PlayerCallbacksRunnable>();
+            var r = Jvm.Allocate<PlayerCallbacksRunnable>();
             r.Init(This, Jvm.InternalizeString(PlayerListener.END_OF_MEDIA), l.This, targets);
-            var t = Jvm.AllocateObject<Thread>();
+            var t = Jvm.Allocate<Thread>();
             t.InitTargeted(r.This);
             lock (this)
                 listenersPending++;
@@ -284,11 +284,11 @@ public class PlayerImpl : Object, Player
         }
         if (looped)
         {
-            var l = Jvm.AllocateObject<Long>();
+            var l = Jvm.Allocate<Long>();
             l.Init(0L);
-            var r = Jvm.AllocateObject<PlayerCallbacksRunnable>();
+            var r = Jvm.Allocate<PlayerCallbacksRunnable>();
             r.Init(This, Jvm.InternalizeString(PlayerListener.STARTED), l.This, targets);
-            var t = Jvm.AllocateObject<Thread>();
+            var t = Jvm.Allocate<Thread>();
             t.InitTargeted(r.This);
             lock (this)
                 listenersPending++;
@@ -313,7 +313,7 @@ public class PlayerImpl : Object, Player
     {
         checkNotClosed();
         var volume = AllocVolomeControl();
-        return Jvm.AllocateArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
+        return Jvm.WrapReferenceArray(new[] { volume.This }, "[Ljavax/microedition/media/Control;");
     }
 
     [return: JavaType(typeof(Control))]
@@ -333,7 +333,7 @@ public class PlayerImpl : Object, Player
     [JavaIgnore]
     private VolumeControl AllocVolomeControl()
     {
-        var ctrl = Jvm.AllocateObject<VolumeControl>();
+        var ctrl = Jvm.Allocate<VolumeControl>();
         ctrl.Handle = Handle;
         ctrl.Player = This;
         return ctrl;

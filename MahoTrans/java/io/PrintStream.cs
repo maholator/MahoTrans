@@ -24,7 +24,7 @@ public class PrintStream : OutputStream
     {
         char[] chars = { c };
         var bytes = Encoding.UTF8.GetBytes(chars).ConvertToSigned();
-        return Jvm.AllocateArray(bytes, "[B");
+        return Jvm.WrapPrimitiveArray(bytes);
     }
 
     public bool checkError() => false;

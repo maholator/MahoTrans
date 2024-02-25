@@ -8,4 +8,9 @@ namespace javax.microedition.media.control;
 [JavaInterface]
 public interface RateControl : Control
 {
+    public int setRate(int rate) => throw new AbstractJavaMethodCallError();
+
+    public int getMinRate() => throw new AbstractJavaMethodCallError();
+
+    public int getMaxRate() => throw new AbstractJavaMethodCallError();
 }

@@ -274,7 +274,7 @@ public class DataOutputStream : OutputStream
     public static Reference encodeUTF(Reference r)
     {
         var data = Jvm.ResolveString(r).EncodeJavaUnicode().ConvertToSigned();
-        return Jvm.AllocateArray(data, "[B");
+        return Jvm.WrapPrimitiveArray(data);
     }
 
     [JavaDescriptor("()V")]

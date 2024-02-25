@@ -15,7 +15,7 @@ public class LifecycleUtils : Object
     [JavaIgnore]
     public static void StartMidlet(string className, Dictionary<string, string> manifest)
     {
-        var thread = Jvm.AllocateObject<StartupThread>();
+        var thread = Jvm.Allocate<StartupThread>();
         thread.MidletClassName = className;
         thread.Manifest = manifest;
         thread.start();
@@ -24,21 +24,21 @@ public class LifecycleUtils : Object
     [JavaIgnore]
     public static void PauseMidlet()
     {
-        var thread = Jvm.AllocateObject<PauseThread>();
+        var thread = Jvm.Allocate<PauseThread>();
         thread.start();
     }
 
     [JavaIgnore]
     public static void ResumeMidlet()
     {
-        var thread = Jvm.AllocateObject<ResumeThread>();
+        var thread = Jvm.Allocate<ResumeThread>();
         thread.start();
     }
 
     [JavaIgnore]
     public static void DestroyMidlet()
     {
-        var thread = Jvm.AllocateObject<DestroyThread>();
+        var thread = Jvm.Allocate<DestroyThread>();
         thread.start();
     }
 }
