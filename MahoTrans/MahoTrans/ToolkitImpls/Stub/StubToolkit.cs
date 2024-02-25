@@ -15,6 +15,6 @@ public static class StubToolkit
         new StubFonts(),
         null!,
         new VirtualRms(),
-        null!
+        new StubMedia()
     );
 }
