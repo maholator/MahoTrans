@@ -196,25 +196,22 @@ public class Graphics : Object, DirectGraphics
 
     #endregion
 
-    public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
+    public void drawImage(Image image, int x, int y, int a)
     {
-        var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, (GraphicsAnchor)a);
     }
 
-    public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a, int tr)
+    public void drawImage(Image image, int x, int y, int a, int tr)
     {
-        var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a);
     }
 
-    public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
+    public void drawRegion(Image image, int x_src, int y_src, int width, int height,
         int transform, int x_dest, int y_dest, int anchor)
     {
-        var res = Jvm.Resolve<Image>(image);
         var t = (SpriteTransform)transform;
         var a = (GraphicsAnchor)anchor;
-        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
+        Implementation.DrawImage(image.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
     }
 
     public void drawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width,

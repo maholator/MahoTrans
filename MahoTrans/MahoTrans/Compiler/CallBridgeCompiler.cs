@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
 using static MahoTrans.Compiler.CompilerUtils;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -135,8 +136,24 @@ public static class CallBridgeCompiler
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
 
             // resolve array
-            var resolver = IsNullable(parameter)? ResolveArrOrNull : ResolveArr;
+            var resolver = IsNullable(parameter) ? ResolveArrOrNull : ResolveArr;
             il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType.GetElementType()!));
+
+            return;
+        }
+
+        if (paramType.IsAssignableTo(typeof(Object)))
+        {
+            // take jvm
+            il.Emit(OpCodes.Ldsfld, Context);
+
+            // take reference
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
+
+            // resolve
+            var resolver = IsNullable(parameter) ? ResolveObjectOrNull : ResolveObject;
+            il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType));
 
             return;
         }

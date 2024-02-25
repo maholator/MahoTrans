@@ -72,6 +72,16 @@ public static class CompilerUtils
     public static readonly MethodInfo ResolveAnyObject = Jvm.GetMethod(nameof(JvmState.ResolveObject))!;
 
     /// <summary>
+    ///     <see cref="JvmState.Resolve{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveObject = Jvm.GetMethod(nameof(JvmState.Resolve))!;
+
+    /// <summary>
+    ///     <see cref="JvmState.ResolveOrNull{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveObjectOrNull = Jvm.GetMethod(nameof(JvmState.ResolveOrNull))!;
+
+    /// <summary>
     ///     <see cref="JvmState.ResolveString" />
     /// </summary>
     public static readonly MethodInfo ResolveString = Jvm.GetMethod(nameof(JvmState.ResolveString))!;

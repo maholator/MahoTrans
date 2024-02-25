@@ -19,9 +19,10 @@ public class TestBasicMarshallingLink
         jvm.AddClrClasses(new[] { typeof(TestCls) });
         var cls = jvm.GetClass("MahoTrans/Tests/Linker/TestCls");
 
-        Assert.That(cls.Methods.Count, Is.EqualTo(10));
+        Assert.That(cls.Methods.Count, Is.EqualTo(11));
 
         Assert.That(GetDescriptor(cls, "R1"), Is.EqualTo("(Ljava/lang/Object;)V"));
+        Assert.That(GetDescriptor(cls, "R2"), Is.EqualTo("(Ljava/lang/Object;)V"));
 
         Assert.That(GetDescriptor(cls, "A1"), Is.EqualTo("([Ljava/lang/Object;)V"));
         Assert.That(GetDescriptor(cls, "A2"), Is.EqualTo("([Ljava/lang/Object;)V"));
@@ -49,6 +50,10 @@ public class TestCls : Object
     {
     }
 
+    public static void R2(Object r)
+    {
+    }
+
     public static void A1(Reference[] r)
     {
     }
@@ -69,7 +74,7 @@ public class TestCls : Object
     {
     }
 
-    public static void M1(int a, bool[] b, string d, [JavaType(typeof(Thread))] Reference t)
+    public static void M1(int a, bool[] b, string d, Thread t)
     {
     }
 

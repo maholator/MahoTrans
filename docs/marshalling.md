@@ -31,6 +31,8 @@ Type checks are done from first line to last line.
 | Primitive[]? | Ref is popped from stack. Ref safely resolved as array.                  |
 | Ref[]        | Ref is popped from stack. Ref resolved as array. NPE may be thrown.      |
 | Ref[]?       | Ref is popped from stack. Ref safely resolved as array.                  |
+| Object       | Ref is popped from stack. Ref resolved. NPE may be thrown.               |
+| Object?      | Ref is popped from stack. Ref safely resolved.                           |
 
 ## `JavaType` attributes
 

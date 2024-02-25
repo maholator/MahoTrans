@@ -4,6 +4,7 @@
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 using Math = java.lang.Math;
 
 namespace javax.microedition.lcdui.game;
@@ -153,7 +154,7 @@ public class Sprite : Layer
         Graphics g = Jvm.Resolve<Graphics>(r);
         if (Visible)
         {
-            g.drawRegion(Image, FramesX[FrameSequence[CurrentFrame]], FramesY[FrameSequence[CurrentFrame]],
+            g.drawRegion(Image.As<Image>(), FramesX[FrameSequence[CurrentFrame]], FramesY[FrameSequence[CurrentFrame]],
                 FrameWidth, FrameHeight, Transform, X, Y, 20);
         }
     }
