@@ -107,6 +107,11 @@ public partial class JvmState
     }
 
     /// <summary>
+    ///     Imports MT assembly to this JVM.
+    /// </summary>
+    public void AddMahoTransLibrary() => AddClrClasses(typeof(JvmState).Assembly);
+
+    /// <summary>
     ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
     /// </summary>
     /// <param name="name">Class name to search.</param>
@@ -178,7 +183,7 @@ public partial class JvmState
         return null;
     }
 
-    [Obsolete("Faulty method, see TODO",true)]
+    [Obsolete("Faulty method, see TODO", true)]
     //TODO: for java/lang/abc it returns... "[java/lang/abc"? No "L;"?
     public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
 
