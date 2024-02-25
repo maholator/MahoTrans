@@ -19,32 +19,30 @@ public sealed class String : Object
     #region Constructors
 
     [InitMethod]
-    [JavaDescriptor("([B)V")]
-    public void InitBytes(Reference arr)
+    public void InitBytes(sbyte[] arr)
     {
-        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned();
+        var buf = arr.ToUnsigned();
         Value = Encoding.UTF8.GetString(buf);
     }
 
     [InitMethod]
-    [JavaDescriptor("([BII)V")]
-    public void InitBytes(Reference arr, int from, int len)
+    public void InitBytes(sbyte[] arr, int from, int len)
     {
-        var span = new ReadOnlySpan<byte>(Jvm.ResolveArray<sbyte>(arr).ToUnsigned(), from, len);
+        var span = new ReadOnlySpan<byte>(arr.ToUnsigned(), from, len);
         Value = Encoding.UTF8.GetString(span);
     }
 
     [InitMethod]
-    public void InitBytes([JavaType("[B")] Reference arr, int from, int len, [String] Reference enc)
+    public void InitBytes(sbyte[] arr, int from, int len, string enc)
     {
-        var span = new ReadOnlySpan<byte>(Jvm.ResolveArray<sbyte>(arr).ToUnsigned(), from, len);
-        Value = Jvm.ResolveString(enc).GetEncodingByName().GetString(span);
+        var span = new ReadOnlySpan<byte>(arr.ToUnsigned(), from, len);
+        Value = enc.GetEncodingByName().GetString(span);
     }
 
     [InitMethod]
-    public void InitBytes([JavaType("[B")] Reference arr, [String] Reference enc)
+    public void InitBytes(sbyte[] arr, [String] Reference enc)
     {
-        var buf = Jvm.ResolveArray<sbyte>(arr).ToUnsigned();
+        var buf = arr.ToUnsigned();
         Value = Jvm.ResolveString(enc).GetEncodingByName().GetString(buf);
     }
 
@@ -55,23 +53,21 @@ public sealed class String : Object
     }
 
     [InitMethod]
-    [JavaDescriptor("([C)V")]
-    public void Init(Reference charArr)
+    public void Init(char[] charArr)
     {
-        Value = new string(Jvm.ResolveArray<char>(charArr));
+        Value = new string(charArr);
     }
 
     [InitMethod]
-    [JavaDescriptor("([CII)V")]
-    public void Init(Reference charArr, int from, int len)
+    public void Init(char[] charArr, int from, int len)
     {
-        Value = new string(Jvm.ResolveArray<char>(charArr), from, len);
+        Value = new string(charArr, from, len);
     }
 
     [InitMethod]
-    public void InitCopy([String] Reference value)
+    public void InitCopy(string value)
     {
-        Value = new string(Jvm.ResolveString(value));
+        Value = value;
     }
 
     [InitMethod]
@@ -93,16 +89,14 @@ public sealed class String : Object
         return Value.StartsWith(other);
     }
 
-    public bool startsWith([String] Reference prefix, int from)
+    public bool startsWith(string prefix, int from)
     {
-        var other = Jvm.ResolveString(prefix);
-        return Value.IndexOf(other, from, StringComparison.Ordinal) == from;
+        return Value.IndexOf(prefix, from, StringComparison.Ordinal) == from;
     }
 
-    public bool endsWith([JavaType(typeof(String))] Reference s)
+    public bool endsWith(string s)
     {
-        var other = Jvm.ResolveString(s);
-        return Value.EndsWith(other);
+        return Value.EndsWith(s);
     }
 
     public char charAt(int i)
@@ -118,9 +112,9 @@ public sealed class String : Object
     }
 
     [JavaDescriptor("(Ljava/lang/String;)[B")]
-    public Reference getBytes(Reference enc)
+    public Reference getBytes(string enc)
     {
-        byte[] data = Jvm.ResolveString(enc).GetEncodingByName().GetBytes(Value);
+        byte[] data = enc.GetEncodingByName().GetBytes(Value);
         return Jvm.WrapPrimitiveArray(data.ConvertToSigned());
     }
 
