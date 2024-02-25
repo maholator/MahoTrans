@@ -51,7 +51,7 @@ public class TestStaticRefReturnType
         Assert.Fail("nameof() used, the test must fail due to assert!");
     }
 
-    private static JvmState createJvm()
+    public static JvmState createJvm()
     {
         var jvm = new JvmState(
             new ToolkitCollection(new DummySystem(), new RealTimeClock(), null!, new DummyFonts(), null!,

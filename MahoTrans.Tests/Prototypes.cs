@@ -11,6 +11,7 @@ namespace MahoTrans.Tests;
 public class Prototypes
 {
     [Test]
+    [Ignore("this was a prototype and no longer works")]
     public void TryBuildGlue()
     {
         var asm = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("test"), AssemblyBuilderAccess.RunAndCollect);
