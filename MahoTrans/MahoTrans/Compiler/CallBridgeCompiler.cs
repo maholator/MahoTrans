@@ -55,8 +55,7 @@ public static class CallBridgeCompiler
             foreach (var parameter in method.GetParameters())
             {
                 il.Emit(OpCodes.Ldarg_0);
-                var popper = CompilerUtils.StackReversePopMethods[parameter.ParameterType];
-                il.Emit(OpCodes.Call, popper);
+                EmitParameterMarshalling(il, parameter);
             }
 
             il.Emit(OpCodes.Ldarg_0);
@@ -79,5 +78,21 @@ public static class CallBridgeCompiler
         il.Emit(OpCodes.Ret);
 
         return num;
+    }
+
+    /// <summary>
+    ///     Emits code to convert java primitive to something suitable for passing to the method.
+    /// </summary>
+    /// <param name="il">Generator.</param>
+    /// <param name="parameter">Parameter to convert.</param>
+    /// <remarks>
+    ///     This enters with frame on stack. Call reverse popper. Then apply any conversions needed. This must exit with ready
+    ///     value on stack.
+    /// </remarks>
+    private static void EmitParameterMarshalling(ILGenerator il, ParameterInfo parameter)
+    {
+        var paramType = parameter.ParameterType;
+        var popper = CompilerUtils.StackReversePopMethods[paramType];
+        il.Emit(OpCodes.Call, popper);
     }
 }
