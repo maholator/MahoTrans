@@ -4,9 +4,9 @@
 using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 
-namespace MahoTrans.ToolkitImpls.Systems;
+namespace MahoTrans.ToolkitImpls.Stub;
 
-public class DummySystem : ISystem
+public class StubSystem : ISystem
 {
     public void PrintException(Reference t)
     {

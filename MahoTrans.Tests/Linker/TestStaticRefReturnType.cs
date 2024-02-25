@@ -6,10 +6,9 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Config;
 using MahoTrans.ToolkitImpls.Clocks;
-using MahoTrans.ToolkitImpls.Dummy;
 using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.ToolkitImpls.Rms;
-using MahoTrans.ToolkitImpls.Systems;
+using MahoTrans.ToolkitImpls.Stub;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Tests.Linker;
@@ -54,7 +53,7 @@ public class TestStaticRefReturnType
     public static JvmState createJvm()
     {
         var jvm = new JvmState(
-            new ToolkitCollection(new DummySystem(), new RealTimeClock(), null!, new DummyFonts(), null!,
+            new ToolkitCollection(new StubSystem(), new RealTimeClock(), null!, new StubFonts(), null!,
                 new VirtualRms(), null!)
             {
                 Logger = new ConsoleLogger(),
