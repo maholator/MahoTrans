@@ -17,12 +17,10 @@ namespace MahoTrans.Compiler;
 /// </summary>
 public static class FieldBridgeCompiler
 {
-    #region Fields
-
     public static void BuildBridges(TypeBuilder typeBuilder, FieldInfo field, NameDescriptor name, JavaClass cls)
     {
         {
-            var getter = DefineBridge(GetFieldGetterName(name, cls.Name), typeBuilder);
+            var getter = DefineBridge(GetGetterName(name, cls.Name), typeBuilder);
 
             getter.Emit(OpCodes.Ldarg_0);
             // frame
@@ -50,7 +48,7 @@ public static class FieldBridgeCompiler
             getter.Emit(OpCodes.Ret);
         }
         {
-            var setter = DefineBridge(GetFieldSetterName(name, cls.Name), typeBuilder);
+            var setter = DefineBridge(GetSetterName(name, cls.Name), typeBuilder);
 
             if (field.IsStatic)
             {
@@ -104,7 +102,7 @@ public static class FieldBridgeCompiler
             throw new JavaLinkageException(
                 $"{field.Name} does not have {nameof(NativeStaticAttribute)} attached and can't be accessed via bridge.");
 
-        var getter = DefineBridge(GetFieldGetterName(attr.AsDescriptor(), attr.OwnerName), typeBuilder);
+        var getter = DefineBridge(GetGetterName(attr.AsDescriptor(), attr.OwnerName), typeBuilder);
 
         getter.Emit(OpCodes.Ldarg_0);
         // frame
@@ -138,11 +136,21 @@ public static class FieldBridgeCompiler
         return $"{className.Length}_{descriptor.GetSnapshotHash()}_{className}_{descriptor}";
     }
 
-    public static string GetFieldGetterName(NameDescriptor descriptor, string className) =>
+    public static string GetGetterName(NameDescriptor descriptor, string className) =>
         GetFieldName(descriptor, className) + "_bridge_get";
 
-    public static string GetFieldSetterName(NameDescriptor descriptor, string className) =>
+    public static string GetSetterName(NameDescriptor descriptor, string className) =>
         GetFieldName(descriptor, className) + "_bridge_set";
 
-    #endregion
+    public static Action<Frame>? CaptureGetter(Type bridgeHost, JavaClass cls, Field field)
+    {
+        var method = bridgeHost.GetMethod(GetGetterName(field.Descriptor, cls.Name));
+        return method?.CreateDelegate<Action<Frame>>();
+    }
+
+    public static Action<Frame>? CaptureSetter(Type bridgeHost, JavaClass cls, Field field)
+    {
+        var method = bridgeHost.GetMethod(GetSetterName(field.Descriptor, cls.Name));
+        return method?.CreateDelegate<Action<Frame>>();
+    }
 }

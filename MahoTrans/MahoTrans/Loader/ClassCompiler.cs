@@ -191,10 +191,10 @@ public static class ClassCompiler
                 field.NativeField = type.GetField(FieldBridgeCompiler.GetFieldName(field.Descriptor, item.Key.Name),
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance |
                     BindingFlags.DeclaredOnly)!;
-                field.GetValue = type.GetMethod(FieldBridgeCompiler.GetFieldGetterName(field.Descriptor, item.Key.Name),
+                field.GetValue = type.GetMethod(FieldBridgeCompiler.GetGetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = type.GetMethod(FieldBridgeCompiler.GetFieldSetterName(field.Descriptor, item.Key.Name),
+                field.SetValue = type.GetMethod(FieldBridgeCompiler.GetSetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
             }

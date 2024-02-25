@@ -58,10 +58,8 @@ public static class NativeLinker
 
             foreach (var field in @class.Fields.Values)
             {
-                field.GetValue = loaded.GetMethod(FieldBridgeCompiler.GetFieldGetterName(field.Descriptor, @class.Name))?
-                    .CreateDelegate<Action<Frame>>();
-                field.SetValue = loaded.GetMethod(FieldBridgeCompiler.GetFieldSetterName(field.Descriptor, @class.Name))?
-                    .CreateDelegate<Action<Frame>>();
+                field.GetValue = FieldBridgeCompiler.CaptureGetter(loaded, @class, field);
+                field.SetValue = FieldBridgeCompiler.CaptureSetter(loaded, @class, field);
             }
         }
 
