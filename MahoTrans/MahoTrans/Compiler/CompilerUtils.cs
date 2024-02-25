@@ -59,7 +59,13 @@ public static class CompilerUtils
 
     public static readonly MethodInfo StackDiscard = typeof(Frame).GetMethod(nameof(Frame.Discard))!;
 
+    /// <summary>
+    /// Static field where context JVM is stored.
+    /// </summary>
     public static readonly FieldInfo Context = typeof(JvmContext).GetField(nameof(JvmContext.Jvm))!;
 
+    /// <summary>
+    /// <see cref="JvmState.ResolveObject"/>
+    /// </summary>
     public static readonly MethodInfo ResolveAnyObject = typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!;
 }

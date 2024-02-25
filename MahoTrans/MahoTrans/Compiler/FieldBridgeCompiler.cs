@@ -33,13 +33,13 @@ public static class FieldBridgeCompiler
             }
             else
             {
-                getter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
+                getter.Emit(OpCodes.Ldsfld, CompilerUtils.Context);
                 // frame > heap
                 getter.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
                 getter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[typeof(Reference)]);
                 // frame > heap > ref
-                getter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
+                getter.Emit(OpCodes.Call, CompilerUtils.ResolveAnyObject);
                 // frame > object
                 getter.Emit(OpCodes.Ldfld, field);
             }
@@ -71,13 +71,13 @@ public static class FieldBridgeCompiler
                 // value
                 setter.Emit(OpCodes.Stloc, val);
                 // -
-                setter.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
+                setter.Emit(OpCodes.Ldsfld, CompilerUtils.Context);
                 // heap
                 setter.Emit(OpCodes.Ldarg_0);
                 // heap > frame
                 setter.Emit(OpCodes.Call, CompilerUtils.StackPopMethods[typeof(Reference)]);
                 // heap > ref
-                setter.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
+                setter.Emit(OpCodes.Call, CompilerUtils.ResolveAnyObject);
                 // target
                 setter.Emit(OpCodes.Ldloc, val);
                 // target > value
