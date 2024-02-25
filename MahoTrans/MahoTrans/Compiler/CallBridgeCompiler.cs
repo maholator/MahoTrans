@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
+using static MahoTrans.Compiler.CompilerUtils;
 
 namespace MahoTrans.Compiler;
 
@@ -15,6 +16,8 @@ namespace MahoTrans.Compiler;
 public static class CallBridgeCompiler
 {
     private static int _bridgeCounter = 1;
+
+    private static NullabilityInfoContext _nullability = new NullabilityInfoContext();
 
     public static int BuildCallBridge(MethodInfo method, TypeBuilder bridgeContainer)
     {
@@ -37,31 +40,30 @@ public static class CallBridgeCompiler
             // setting stack pointer for pops
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, CompilerUtils.StackSetFrom);
+            il.Emit(OpCodes.Call, StackSetFrom);
 
 
             if (!method.IsStatic)
             {
                 // frame
-                il.Emit(OpCodes.Ldsfld, CompilerUtils.Context);
+                il.Emit(OpCodes.Ldsfld, Context);
                 // frame > heap
                 il.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
-                il.Emit(OpCodes.Call, CompilerUtils.StackReversePopMethods[typeof(Reference)]);
+                il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
                 // frame > heap > ref
-                il.Emit(OpCodes.Call, CompilerUtils.ResolveAnyObject);
+                il.Emit(OpCodes.Call, ResolveAnyObject);
                 // frame > object
             }
 
             foreach (var parameter in method.GetParameters())
             {
-                il.Emit(OpCodes.Ldarg_0);
                 EmitParameterMarshalling(il, parameter);
             }
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, CompilerUtils.StackDiscard);
+            il.Emit(OpCodes.Call, StackDiscard);
         }
 
         il.Emit(OpCodes.Call, method);
@@ -69,7 +71,7 @@ public static class CallBridgeCompiler
         if (method.ReturnType != typeof(void))
         {
             // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, CompilerUtils.StackPushMethods[method.ReturnType]);
+            il.Emit(OpCodes.Call, StackPushMethods[method.ReturnType]);
         }
         else
         {
@@ -82,18 +84,47 @@ public static class CallBridgeCompiler
     }
 
     /// <summary>
-    ///     Emits code to convert java primitive to something suitable for passing to the method. This must be synchronized with parameter conversion in <see cref="NativeLinker"/>.
+    ///     Emits code to convert java primitive to something suitable for passing to the method. This must be synchronized
+    ///     with parameter conversion in <see cref="NativeLinker" />. See docs for details.
     /// </summary>
     /// <param name="il">Generator.</param>
     /// <param name="parameter">Parameter to convert.</param>
     /// <remarks>
-    ///     This enters with frame on stack. Call reverse popper. Then apply any conversions needed. This must exit with ready
+    ///     This enters with "empty" stack (there are previous args). Take arg0. Call reverse popper. Then apply any conversions needed. This must exit with ready
     ///     value on stack.
     /// </remarks>
     private static void EmitParameterMarshalling(ILGenerator il, ParameterInfo parameter)
     {
         var paramType = parameter.ParameterType;
-        var popper = CompilerUtils.StackReversePopMethods[paramType];
-        il.Emit(OpCodes.Call, popper);
+
+        // primitive & ref
+        if (StackReversePopMethods.TryGetValue(paramType, out var popper))
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, popper);
+
+            return;
+        }
+
+        // strings
+        if (paramType == typeof(string))
+        {
+            // take jvm
+            il.Emit(OpCodes.Ldsfld, Context);
+
+            // take reference
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
+
+            // resolve string
+            il.Emit(OpCodes.Call, IsNullable(parameter) ? ResolveStringOrNull : ResolveString);
+
+            return;
+        }
+    }
+
+    private static bool IsNullable(ParameterInfo param)
+    {
+        return _nullability.Create(param).WriteState == NullabilityState.Nullable;
     }
 }

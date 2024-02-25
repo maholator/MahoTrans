@@ -16,6 +16,8 @@ public static class CompilerUtils
     /// </summary>
     public const string BRIDGE_CLASS_NAME = "MTBridgesHost";
 
+    private static Type Jvm => typeof(JvmState);
+
     public static readonly Dictionary<Type, MethodInfo> StackPopMethods = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
@@ -60,12 +62,22 @@ public static class CompilerUtils
     public static readonly MethodInfo StackDiscard = typeof(Frame).GetMethod(nameof(Frame.Discard))!;
 
     /// <summary>
-    /// Static field where context JVM is stored.
+    ///     Static field where context JVM is stored.
     /// </summary>
     public static readonly FieldInfo Context = typeof(JvmContext).GetField(nameof(JvmContext.Jvm))!;
 
     /// <summary>
-    /// <see cref="JvmState.ResolveObject"/>
+    ///     <see cref="JvmState.ResolveObject" />
     /// </summary>
-    public static readonly MethodInfo ResolveAnyObject = typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!;
+    public static readonly MethodInfo ResolveAnyObject = Jvm.GetMethod(nameof(JvmState.ResolveObject))!;
+
+    /// <summary>
+    ///     <see cref="JvmState.ResolveString" />
+    /// </summary>
+    public static readonly MethodInfo ResolveString = Jvm.GetMethod(nameof(JvmState.ResolveString))!;
+
+    /// <summary>
+    ///     <see cref="JvmState.ResolveStringOrNull" />
+    /// </summary>
+    public static readonly MethodInfo ResolveStringOrNull = Jvm.GetMethod(nameof(JvmState.ResolveStringOrNull))!;
 }
