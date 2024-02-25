@@ -54,4 +54,12 @@ public static class CompilerUtils
         { typeof(short), typeof(Frame).GetMethod(nameof(Frame.PushShort))! },
         { typeof(Reference), typeof(Frame).GetMethod(nameof(Frame.PushReference))! },
     };
+
+    public static readonly MethodInfo StackSetFrom = typeof(Frame).GetMethod(nameof(Frame.SetFrom))!;
+
+    public static readonly MethodInfo StackDiscard = typeof(Frame).GetMethod(nameof(Frame.Discard))!;
+
+    public static readonly FieldInfo Context = typeof(JvmContext).GetField(nameof(JvmContext.Jvm))!;
+
+    public static readonly MethodInfo ResolveAnyObject = typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!;
 }

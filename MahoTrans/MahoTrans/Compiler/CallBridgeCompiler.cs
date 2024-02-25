@@ -4,7 +4,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -37,19 +36,19 @@ public static class CallBridgeCompiler
             // setting stack pointer for pops
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.SetFrom))!);
+            il.Emit(OpCodes.Call, CompilerUtils.StackSetFrom);
 
 
             if (!method.IsStatic)
             {
                 // frame
-                il.Emit(OpCodes.Call, typeof(Object).GetProperty(nameof(Object.Jvm))!.GetMethod!);
+                il.Emit(OpCodes.Ldsfld, CompilerUtils.Context);
                 // frame > heap
                 il.Emit(OpCodes.Ldarg_0);
                 // frame > heap > frame
                 il.Emit(OpCodes.Call, CompilerUtils.StackReversePopMethods[typeof(Reference)]);
                 // frame > heap > ref
-                il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.ResolveObject))!);
+                il.Emit(OpCodes.Call, CompilerUtils.ResolveAnyObject);
                 // frame > object
             }
 
@@ -62,7 +61,7 @@ public static class CallBridgeCompiler
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldc_I4, argsLength);
-            il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.Discard))!);
+            il.Emit(OpCodes.Call, CompilerUtils.StackDiscard);
         }
 
         il.Emit(OpCodes.Call, method);
