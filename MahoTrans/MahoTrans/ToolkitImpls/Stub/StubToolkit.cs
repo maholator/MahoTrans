@@ -11,7 +11,7 @@ public static class StubToolkit
     public static ToolkitCollection Create() => new(
         new StubSystem(),
         new RealTimeClock(),
-        null!,
+        new StubImages(),
         new StubFonts(),
         null!,
         new VirtualRms(),
