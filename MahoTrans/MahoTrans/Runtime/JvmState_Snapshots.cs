@@ -16,14 +16,12 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private JsonSerializerSettings HeapSerializeSettings => new JsonSerializerSettings
+    private JsonSerializerSettings HeapJsonSettings => new()
     {
         TypeNameHandling = TypeNameHandling.All,
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
-        Converters = { new CustomConvertorAssembly() },
-        EqualityComparer = CustomJsonEqualityComparer.Instance,
         SerializationBinder = new Binder(this),
     };
 
@@ -94,7 +92,7 @@ public partial class JvmState
             zip.AddTextEntry(heap_next_txt, s => s.Write(_nextObjectId));
             zip.AddTextEntry(heap_heap_json, s =>
             {
-                var t = JsonConvert.SerializeObject(_heap, HeapSerializeSettings);
+                var t = JsonConvert.SerializeObject(_heap, HeapJsonSettings);
                 s.Write(t);
             });
             zip.AddTextEntry(heap_statics_json, s =>
@@ -102,7 +100,7 @@ public partial class JvmState
                 SerializedStatics ss = default;
                 ss.Java = StaticFields;
                 ss.Native = StaticMemory;
-                var t = JsonConvert.SerializeObject(ss, HeapSerializeSettings);
+                var t = JsonConvert.SerializeObject(ss, HeapJsonSettings);
                 s.Write(t);
             });
         }
@@ -195,23 +193,20 @@ public partial class JvmState
             }
 
             // heap
+            using (new JvmContext(this))
             {
                 _nextObjectId = int.Parse(zip.ReadTextEntry(heap_next_txt));
                 _internalizedStrings =
                     JsonConvert.DeserializeObject<Dictionary<string, int>>(zip.ReadTextEntry(heap_strings_json))!;
-                JvmContext.Jvm = this;
-                _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
-                    HeapSerializeSettings)!;
 
-                var ss = JsonConvert.DeserializeObject<SerializedStatics>(zip.ReadTextEntry(heap_statics_json),
-                    HeapSerializeSettings);
+
+                _heap = DeserializeBound<Object[]>(zip.ReadTextEntry(heap_heap_json));
+                var ss = DeserializeBound<SerializedStatics>(zip.ReadTextEntry(heap_statics_json));
                 if (ss.Java.Length != StaticFieldsOwners.Count)
                     throw new SnapshotLoadError(
                         $"Statics count do not match. Expected {StaticFieldsOwners.Count}, {ss.Java.Length} was in snapshot.");
                 StaticFields = ss.Java;
                 StaticMemory = ss.Native;
-
-                JvmContext.Jvm = null;
             }
         }
 
@@ -339,7 +334,12 @@ public partial class JvmState
 
         public Type BindToType(string? assemblyName, string typeName)
         {
-            if (assemblyName?.StartsWith(DYNAMIC_DLL_PREFIX) == true)
+            if (assemblyName == null)
+            {
+                throw new JavaRuntimeError();
+            }
+
+            if (assemblyName.StartsWith(DYNAMIC_DLL_PREFIX))
             {
                 return _jvm.Classes[typeName].ClrType ??
                        throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");
@@ -353,4 +353,6 @@ public partial class JvmState
             _binder.BindToName(serializedType, out assemblyName, out typeName);
         }
     }
+
+    private T DeserializeBound<T>(string json) => JsonConvert.DeserializeObject<T>(json, HeapJsonSettings)!;
 }
