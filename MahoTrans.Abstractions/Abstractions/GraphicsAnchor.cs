@@ -7,7 +7,7 @@ namespace MahoTrans.Abstractions;
 ///     Anchor constants from LCDUI.
 /// </summary>
 [Flags]
-public enum GraphicsAnchor
+public enum GraphicsAnchor : int
 {
     HCenter = 1,
     VCenter = 2,

@@ -170,47 +170,47 @@ public class Graphics : Object, DirectGraphics
 
     #region Text
 
-    public void drawString(string text, int x, int y, int a)
+    public void drawString(string text, int x, int y, GraphicsAnchor a)
     {
-        Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Implementation.DrawString(text, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawSubstring(string text, int offset, int len, int x, int y, int a)
+    public void drawSubstring(string text, int offset, int len, int x, int y, GraphicsAnchor a)
     {
         var sub = text.AsSpan(offset, len);
-        Implementation.DrawString(sub, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Implementation.DrawString(sub, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawChar(char c, int x, int y, int a)
+    public void drawChar(char c, int x, int y, GraphicsAnchor a)
     {
         Span<char> s = stackalloc char[1];
         s[0] = c;
-        Implementation.DrawString(s, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Implementation.DrawString(s, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawChars(char[] data, int offset, int length, int x, int y, int a)
+    public void drawChars(char[] data, int offset, int length, int x, int y, GraphicsAnchor a)
     {
         var sub = data.AsSpan(offset, length);
-        Implementation.DrawString(sub, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Implementation.DrawString(sub, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
     #endregion
 
-    public void drawImage(Image image, int x, int y, int a)
+    public void drawImage(Image image, int x, int y, GraphicsAnchor a)
     {
-        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, a);
     }
 
-    public void drawImage(Image image, int x, int y, int a, int tr)
+    public void drawImage(Image image, int x, int y, GraphicsAnchor a, ImageManipulation tr)
     {
-        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, tr, a);
     }
 
     public void drawRegion(Image image, int x_src, int y_src, int width, int height,
-        int transform, int x_dest, int y_dest, int anchor)
+        SpriteTransform transform, int x_dest, int y_dest, GraphicsAnchor anchor)
     {
-        var t = (SpriteTransform)transform;
-        var a = (GraphicsAnchor)anchor;
+        var t = transform;
+        var a = anchor;
         Implementation.DrawImage(image.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
     }
 

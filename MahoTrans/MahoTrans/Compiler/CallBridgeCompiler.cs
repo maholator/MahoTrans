@@ -158,6 +158,14 @@ public static class CallBridgeCompiler
             return;
         }
 
+        if (paramType.IsEnum)
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, StackReversePopMethods[Enum.GetUnderlyingType(paramType)]);
+
+            return;
+        }
+
         throw new NotImplementedException($"This parameter ({paramType}) can't be marshalled.");
     }
 

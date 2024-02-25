@@ -1,10 +1,12 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
+using Array = System.Array;
 using Math = java.lang.Math;
 
 namespace javax.microedition.lcdui.game;
@@ -42,22 +44,22 @@ public class Sprite : Layer
     private int TransformedCollisionH;
 
     [InitMethod]
-    public void InitImage([JavaType(typeof(lcdui.Image))] Reference r)
+    public void InitImage([JavaType(typeof(Image))] Reference r)
     {
         Image image = Jvm.Resolve<Image>(r);
         Image = r;
-        base.Init(image.getWidth(), image.getHeight());
+        Init(image.getWidth(), image.getHeight());
         SetImage(image, image.getWidth(), image.getHeight(), false);
         InitCollision();
         setTransformInternal(0);
     }
 
     [InitMethod]
-    public void InitImage([JavaType(typeof(lcdui.Image))] Reference r, int w, int h)
+    public void InitImage([JavaType(typeof(Image))] Reference r, int w, int h)
     {
         Image image = Jvm.Resolve<Image>(r);
         Image = r;
-        base.Init(w, h);
+        Init(w, h);
         if (w < 1 || h < 1 || image.getWidth() % w != 0 || image.getHeight() % h != 0)
             Jvm.Throw<IllegalArgumentException>();
         SetImage(image, image.getWidth(), image.getHeight(), false);
@@ -71,14 +73,14 @@ public class Sprite : Layer
         if (r.IsNull)
             Jvm.Throw<NullPointerException>();
         Sprite sprite = Jvm.Resolve<Sprite>(r);
-        base.Init(sprite.getWidth(), sprite.getHeight());
+        Init(sprite.getWidth(), sprite.getHeight());
 
         Image = lcdui.Image.createImage(sprite.Image);
         RawFrameCount = sprite.RawFrameCount;
         FramesX = new int[RawFrameCount];
         FramesY = new int[RawFrameCount];
-        System.Array.Copy(sprite.FramesX, 0, FramesX, 0, sprite.getRawFrameCount());
-        System.Array.Copy(sprite.FramesY, 0, FramesY, 0, sprite.getRawFrameCount());
+        Array.Copy(sprite.FramesX, 0, FramesX, 0, sprite.getRawFrameCount());
+        Array.Copy(sprite.FramesY, 0, FramesY, 0, sprite.getRawFrameCount());
         X = sprite.getX();
         Y = sprite.getY();
         RefX = sprite.RefX;
@@ -155,7 +157,7 @@ public class Sprite : Layer
         if (Visible)
         {
             g.drawRegion(Image.As<Image>(), FramesX[FrameSequence[CurrentFrame]], FramesY[FrameSequence[CurrentFrame]],
-                FrameWidth, FrameHeight, Transform, X, Y, 20);
+                FrameWidth, FrameHeight, (SpriteTransform)Transform, X, Y, (GraphicsAnchor)20);
         }
     }
 
@@ -177,6 +179,7 @@ public class Sprite : Layer
                 var5 = false;
                 abool407 = false;
             }
+
             Image = r;
             if (FrameWidth == w && FrameHeight == h)
             {
@@ -290,10 +293,8 @@ public class Sprite : Layer
             return imagesCollideByPixels(var17, var18, var19, var20, Image, Transform, another.Image,
                 another.Transform, var15, var16);
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     public bool collidesWith___tiledLayer([JavaType(typeof(TiledLayer))] Reference r, bool pixelLevel)
@@ -339,96 +340,92 @@ public class Sprite : Layer
 
             return false;
         }
-        else
+
+        if (TransformedCollisionX < 0)
         {
-            if (TransformedCollisionX < 0)
-            {
-                bx1 = X;
-            }
+            bx1 = X;
+        }
 
-            if (TransformedCollisionY < 0)
-            {
-                by1 = Y;
-            }
+        if (TransformedCollisionY < 0)
+        {
+            by1 = Y;
+        }
 
-            if (TransformedCollisionX + TransformedCollisionW > Width)
-            {
-                bx2 = X + Width;
-            }
+        if (TransformedCollisionX + TransformedCollisionW > Width)
+        {
+            bx2 = X + Width;
+        }
 
-            if (TransformedCollisionY + TransformedCollisionH > Height)
-            {
-                by2 = Y + Height;
-            }
+        if (TransformedCollisionY + TransformedCollisionH > Height)
+        {
+            by2 = Y + Height;
+        }
 
-            if (!CheckCollision(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2))
-            {
-                return false;
-            }
-            else
-            {
-                var15 = bx1 <= ax1 ? 0 : (bx1 - ax1) / cw;
-                var16 = by1 <= ay1 ? 0 : (by1 - ay1) / ch;
-                var17 = bx2 < ax2 ? (bx2 - 1 - ax1) / cw : cols - 1;
-                var18 = by2 < ay2 ? (by2 - 1 - ay1) / ch : rows - 1;
-                cx = (cy = var16 * ch + ay1) + ch;
+        if (!CheckCollision(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2))
+        {
+            return false;
+        }
 
-                for (int var21 = var16; var21 <= var18; cx += ch)
+        var15 = bx1 <= ax1 ? 0 : (bx1 - ax1) / cw;
+        var16 = by1 <= ay1 ? 0 : (by1 - ay1) / ch;
+        var17 = bx2 < ax2 ? (bx2 - 1 - ax1) / cw : cols - 1;
+        var18 = by2 < ay2 ? (by2 - 1 - ay1) / ch : rows - 1;
+        cx = (cy = var16 * ch + ay1) + ch;
+
+        for (int var21 = var16; var21 <= var18; cx += ch)
+        {
+            int var22;
+            int var23 = (var22 = var15 * cw + ax1) + cw;
+
+            for (int var24 = var15; var24 <= var17; var23 += cw)
+            {
+                int var25;
+                if ((var25 = another.getCell(var24, var21)) != 0)
                 {
-                    int var22;
-                    int var23 = (var22 = var15 * cw + ax1) + cw;
-
-                    for (int var24 = var15; var24 <= var17; var23 += cw)
+                    int var26 = bx1 < var22 ? var22 : bx1;
+                    int var27 = by1 < cy ? cy : by1;
+                    int var28 = bx2 < var23 ? bx2 : var23;
+                    int var29 = by2 < cx ? by2 : cx;
+                    int var30;
+                    if (var26 > var28)
                     {
-                        int var25;
-                        if ((var25 = another.getCell(var24, var21)) != 0)
-                        {
-                            int var26 = bx1 < var22 ? var22 : bx1;
-                            int var27 = by1 < cy ? cy : by1;
-                            int var28 = bx2 < var23 ? bx2 : var23;
-                            int var29 = by2 < cx ? by2 : cx;
-                            int var30;
-                            if (var26 > var28)
-                            {
-                                var30 = var28;
-                                var28 = var26;
-                                var26 = var30;
-                            }
-
-                            if (var27 > var29)
-                            {
-                                var30 = var29;
-                                var29 = var27;
-                                var27 = var30;
-                            }
-
-                            var30 = var28 - var26;
-                            int var31 = var29 - var27;
-                            int var32 = method205(var26, var27, var28, var29);
-                            int var33 = method207(var26, var27, var28, var29);
-                            int var34 = another.CellsX[var25] + (var26 - var22);
-                            int var35 = another.CellsY[var25] + (var27 - cy);
-                            if (imagesCollideByPixels(var32, var33, var34, var35, Image, Transform,
-                                    another.Image, 0, var30, var31))
-                            {
-                                return true;
-                            }
-                        }
-
-                        ++var24;
-                        var22 += cw;
+                        var30 = var28;
+                        var28 = var26;
+                        var26 = var30;
                     }
 
-                    ++var21;
-                    cy += ch;
+                    if (var27 > var29)
+                    {
+                        var30 = var29;
+                        var29 = var27;
+                        var27 = var30;
+                    }
+
+                    var30 = var28 - var26;
+                    int var31 = var29 - var27;
+                    int var32 = method205(var26, var27, var28, var29);
+                    int var33 = method207(var26, var27, var28, var29);
+                    int var34 = another.CellsX[var25] + (var26 - var22);
+                    int var35 = another.CellsY[var25] + (var27 - cy);
+                    if (imagesCollideByPixels(var32, var33, var34, var35, Image, Transform,
+                            another.Image, 0, var30, var31))
+                    {
+                        return true;
+                    }
                 }
 
-                return false;
+                ++var24;
+                var22 += cw;
             }
+
+            ++var21;
+            cy += ch;
         }
+
+        return false;
     }
 
-    public bool collidesWith___image([JavaType(typeof(lcdui.Image))] Reference r, int x, int y, bool pixelLevel)
+    public bool collidesWith___image([JavaType(typeof(Image))] Reference r, int x, int y, bool pixelLevel)
     {
         if (!Visible)
             return false;
@@ -467,20 +464,18 @@ public class Sprite : Layer
             {
                 return false;
             }
-            else
-            {
-                int var13 = bx1 < x ? x : bx1;
-                int var14 = by1 < y ? y : by1;
-                int var15 = bx2 < x2 ? bx2 : x2;
-                int var16 = by2 < y2 ? by2 : y2;
-                int var17 = Math.abs(var15 - var13);
-                int var18 = Math.abs(var16 - var14);
-                int var19 = method205(var13, var14, var15, var16);
-                int var20 = method207(var13, var14, var15, var16);
-                int var21 = var13 - x;
-                int var22 = var14 - y;
-                return imagesCollideByPixels(var19, var20, var21, var22, Image, Transform, r, 0, var17, var18);
-            }
+
+            int var13 = bx1 < x ? x : bx1;
+            int var14 = by1 < y ? y : by1;
+            int var15 = bx2 < x2 ? bx2 : x2;
+            int var16 = by2 < y2 ? by2 : y2;
+            int var17 = Math.abs(var15 - var13);
+            int var18 = Math.abs(var16 - var14);
+            int var19 = method205(var13, var14, var15, var16);
+            int var20 = method207(var13, var14, var15, var16);
+            int var21 = var13 - x;
+            int var22 = var14 - y;
+            return imagesCollideByPixels(var19, var20, var21, var22, Image, Transform, r, 0, var17, var18);
         }
 
         return false;
@@ -513,7 +508,7 @@ public class Sprite : Layer
 
             abool407 = true;
             FrameSequence = new int[sequence.Length];
-            System.Array.Copy(sequence, 0, FrameSequence, 0, sequence.Length);
+            Array.Copy(sequence, 0, FrameSequence, 0, sequence.Length);
             CurrentFrame = 0;
         }
     }
@@ -589,7 +584,8 @@ public class Sprite : Layer
     }
 
     [JavaIgnore]
-    private static bool imagesCollideByPixels(int var0, int var1, int var2, int var3, Reference r1, int var5, Reference r2,
+    private static bool imagesCollideByPixels(int var0, int var1, int var2, int var3, Reference r1, int var5,
+        Reference r2,
         int var7, int var8, int var9)
     {
         Image img1 = Jvm.Resolve<Image>(r1);

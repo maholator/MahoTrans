@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
@@ -185,7 +186,7 @@ public class TiledLayer : Layer
                             {
                                 animatedTile = getAnimatedTile(animatedTile);
                             }
-                            g.drawRegion(Image.As<Image>(), CellsX[animatedTile], CellsY[animatedTile], CellWidth, CellHeight, 0, x, y, 20);
+                            g.drawRegion(Image.As<Image>(), CellsX[animatedTile], CellsY[animatedTile], CellWidth, CellHeight, 0, x, y, (GraphicsAnchor)20);
                         }
                     }
                 }

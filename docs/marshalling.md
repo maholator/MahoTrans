@@ -33,6 +33,7 @@ Type checks are done from first line to last line.
 | Ref[]?       | Ref is popped from stack. Ref safely resolved as array.                  |
 | Object       | Ref is popped from stack. Ref resolved. NPE may be thrown.               |
 | Object?      | Ref is popped from stack. Ref safely resolved.                           |
+| `enum`       | Enum underlying type is popped from stack as primitive.                  |
 
 ## `JavaType` attributes
 
