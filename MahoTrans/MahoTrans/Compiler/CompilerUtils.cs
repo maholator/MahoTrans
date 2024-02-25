@@ -80,4 +80,14 @@ public static class CompilerUtils
     ///     <see cref="JvmState.ResolveStringOrNull" />
     /// </summary>
     public static readonly MethodInfo ResolveStringOrNull = Jvm.GetMethod(nameof(JvmState.ResolveStringOrNull))!;
+
+    /// <summary>
+    ///     <see cref="JvmState.ResolveArray{T}" />. Make sure to construct generic method.
+    /// </summary>
+    public static readonly MethodInfo ResolveArr = Jvm.GetMethod(nameof(JvmState.ResolveArray))!;
+
+    /// <summary>
+    ///     <see cref="JvmState.ResolveArrayOrNull{T}" />. Make sure to construct generic method.
+    /// </summary>
+    public static readonly MethodInfo ResolveArrOrNull = Jvm.GetMethod(nameof(JvmState.ResolveArrayOrNull))!;
 }

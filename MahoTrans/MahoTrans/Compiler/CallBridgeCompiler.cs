@@ -121,6 +121,27 @@ public static class CallBridgeCompiler
 
             return;
         }
+
+
+        // array
+        // check for popper works as check for supported primitive.
+        if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
+        {
+            // take jvm
+            il.Emit(OpCodes.Ldsfld, Context);
+
+            // take reference
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
+
+            // resolve array
+            var resolver = IsNullable(parameter)? ResolveArrOrNull : ResolveArr;
+            il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType.GetElementType()!));
+
+            return;
+        }
+
+        throw new NotImplementedException($"This parameter ({paramType}) can't be marshalled.");
     }
 
     private static bool IsNullable(ParameterInfo param)
