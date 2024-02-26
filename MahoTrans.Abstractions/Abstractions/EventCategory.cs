@@ -12,8 +12,6 @@ public enum EventCategory
 {
     Common = 1,
     [Description("Class initializers")] ClassInitializer,
-    [Description("JIT")] Jit,
-
     [Description("Resources")] Resources,
     [Description("GC")] Gc,
     Threading,
