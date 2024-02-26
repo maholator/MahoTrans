@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Reflection;
 using System.Text;
 using MahoTrans.Runtime;
 
@@ -294,5 +295,23 @@ public static class DescriptorUtils
         sb.Append(')');
         sb.Append(returnType.ToJavaDescriptor());
         return sb.ToString();
+    }
+
+    public static string PrettyPrintNativeArgs(this MethodBase method)
+    {
+        StringBuilder s = new StringBuilder();
+        var p = method.GetParameters();
+        s.Append('(');
+        for (int k = 0; k < p.Length; k++)
+        {
+            s.Append(p[k].ParameterType.Name);
+            s.Append(' ');
+            s.Append(p[k].Name);
+            if (k + 1 != p.Length)
+                s.Append(", ");
+        }
+
+        s.Append(')');
+        return s.ToString();
     }
 }
