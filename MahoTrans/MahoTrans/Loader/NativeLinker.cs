@@ -166,9 +166,9 @@ public static class NativeLinker
         if (descriptor != null)
         {
             if (!descriptor.StartsWith('('))
-                throw new JavaLinkageException($"Descriptor {descriptor} has no opening bracket!");
+                throw new JavaLinkageException($"Descriptor {descriptor} has no opening bracket! Check {clrType.FullName}.");
             if (descriptor.Count(x => x == ')') != 1)
-                throw new JavaLinkageException($"Descriptor {descriptor} has invalid closing brackets!");
+                throw new JavaLinkageException($"Descriptor {descriptor} has invalid closing brackets! Check {clrType.FullName}.");
         }
 
         var flags = MethodFlags.Public;
@@ -181,10 +181,12 @@ public static class NativeLinker
         if (nativeMethod.ReturnParameter.ParameterType == typeof(JavaMethodBody))
         {
             if (isCtor || isClinit)
-                throw new JavaLinkageException("Java method builder can't build initialization method.");
+                throw new JavaLinkageException(
+                    $"Java method builder can't build initialization method. There was an attempt in {clrType.FullName}.");
 
             if (args.Length != 1 || args[0].ParameterType != typeof(JavaClass))
-                throw new JavaLinkageException("Java method builder must take 1 argument - containing JVM type.");
+                throw new JavaLinkageException(
+                    $"Java method builder must take 1 argument - containing JVM type. Method {nativeName} in {clrType.FullName} doesn't.");
 
             if (descriptor == null)
                 throw new JavaLinkageException(
