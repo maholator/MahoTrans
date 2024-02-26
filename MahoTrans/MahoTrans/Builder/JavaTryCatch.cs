@@ -39,7 +39,8 @@ public class JavaTryCatch : IDisposable
     /// </summary>
     public void CatchSection()
     {
-        Builder.AppendGoto(JavaOpcode.@goto, CatchEnd);
+        if (!Builder.LastOpcodePerformsJump)
+            Builder.AppendGoto(JavaOpcode.@goto, CatchEnd);
         Builder.BringLabel(CatchBegin);
     }
 

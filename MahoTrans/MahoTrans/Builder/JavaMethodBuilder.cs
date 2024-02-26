@@ -268,6 +268,25 @@ public class JavaMethodBuilder
 
     #endregion
 
+    public bool LastOpcodePerformsJump
+    {
+        get
+        {
+            if (_code.Count == 0)
+                return false;
+
+            switch (_code[^1])
+            {
+                case GotoEntry gotoEntry:
+                    return gotoEntry.Opcode.IsJumpOpcode();
+                case InstructionEntry instructionEntry:
+                    return instructionEntry.Instruction.Opcode.IsJumpOpcode();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
     public Instruction[] Build()
     {
         var offsets = CalculateOffsets();
