@@ -11,9 +11,14 @@ namespace MahoTrans.Abstractions;
 public enum LoadIssueType : byte
 {
     /// <summary>
-    ///     Method doesn't return or contains invalid jumps.
+    ///     Method doesn't return.
     /// </summary>
-    [Description("Method doesn't return")] BrokenFlow = 1,
+    [Description("Method doesn't return")] NoReturn = 1,
+
+    /// <summary>
+    ///     Method jumps to nowhere.
+    /// </summary>
+    [Description("Broken execution flow")] BrokenFlow,
 
     /// <summary>
     ///     xload/xstore opcode is used on an invalid local variable.
@@ -39,7 +44,8 @@ public enum LoadIssueType : byte
     /// <summary>
     ///     There is an access to existing class' method via virtual call, but this method is not available.
     /// </summary>
-    [Description("Missing virtual access")] MissingVirtualAccess,
+    [Description("Missing virtual access")]
+    MissingVirtualAccess,
 
     /// <summary>
     ///     There is an access to existing class' field, but that field is not available.
