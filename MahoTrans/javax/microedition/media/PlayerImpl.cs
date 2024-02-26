@@ -71,7 +71,7 @@ public class PlayerImpl : Object, Player
         b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
         b.AppendThis();
         b.AppendVirtcall(nameof(getState), typeof(int));
-        b.AppendConstant(STARTED);
+        b.AppendShort(STARTED);
         using (b.AppendGoto(JavaOpcode.if_icmpne))
         {
             b.AppendReturn();
@@ -135,7 +135,7 @@ public class PlayerImpl : Object, Player
         b.AppendVirtcall(nameof(checkNotClosed), typeof(void));
         b.AppendThis();
         b.AppendVirtcall(nameof(getState), typeof(int));
-        b.AppendConstant(STARTED);
+        b.AppendShort(STARTED);
         using (b.AppendGoto(JavaOpcode.if_icmpeq))
         {
             b.AppendReturn();

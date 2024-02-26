@@ -218,7 +218,7 @@ public class Object
         b.AppendVirtcall(nameof(getClass), "()Ljava/lang/Class;");
         b.AppendVirtcall(nameof(Class.getName), "()Ljava/lang/String;");
         b.AppendVirtcall(nameof(StringBuffer.append), "(Ljava/lang/String;)Ljava/lang/StringBuffer;");
-        b.AppendConstant('@');
+        b.AppendChar('@');
         b.AppendVirtcall(nameof(StringBuffer.append), "(C)Ljava/lang/StringBuffer;");
         b.AppendThis();
         b.AppendVirtcall(nameof(hashCode), typeof(int));

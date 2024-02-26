@@ -74,7 +74,7 @@ public class Image : Object
         var b = new JavaMethodBuilder(cls);
 
         // buf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_1);
 
@@ -83,7 +83,7 @@ public class Image : Object
         b.Append(JavaOpcode.istore_2);
 
         // readBuf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_3);
 

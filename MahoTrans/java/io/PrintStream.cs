@@ -208,7 +208,7 @@ public class PrintStream : OutputStream
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
-        b.AppendConstant('\n');
+        b.AppendChar('\n');
         b.AppendVirtcall("print", "(C)V");
         b.AppendReturn();
         return b.Build(2, 1);

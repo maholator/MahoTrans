@@ -61,7 +61,7 @@ public class BuilderTests
         var cls = new JavaClass { Name = "java/util/Vector" };
         Assert.That(cls.Constants, Is.Empty);
         var b = new JavaMethodBuilder(cls);
-        Assert.That(b.Build(), Is.Empty);
+        Assert.That(b.BuildCode(), Is.Empty);
 
         b.AppendThis();
         b.AppendVirtcall("field", typeof(bool));
@@ -84,7 +84,7 @@ public class BuilderTests
             new Instruction(12, JavaOpcode.ireturn)
         };
 
-        Assert.That(b.Build(), Is.EquivalentTo(res));
+        Assert.That(b.BuildCode(), Is.EquivalentTo(res));
     }
 
     [Test]
@@ -93,7 +93,7 @@ public class BuilderTests
         var cls = new JavaClass { Name = "java/util/Vector" };
         Assert.That(cls.Constants, Is.Empty);
         var b = new JavaMethodBuilder(cls);
-        Assert.That(b.Build(), Is.Empty);
+        Assert.That(b.BuildCode(), Is.Empty);
 
         b.AppendThis();
         b.AppendVirtcall("elements", typeof(Enumeration));
@@ -124,7 +124,7 @@ public class BuilderTests
         b.Append(JavaOpcode.iconst_m1);
         b.Append(JavaOpcode.ireturn);
 
-        Assert.That(b.Build(), Is.EquivalentTo(_vectorLoopEq));
+        Assert.That(b.BuildCode(), Is.EquivalentTo(_vectorLoopEq));
     }
 
     [Test]
@@ -151,7 +151,7 @@ public class BuilderTests
         var built = b.BuildTryCatches();
         Assert.That(built[0].TryStart, Is.EqualTo(0));
         Assert.That(built[0].TryEnd, Is.EqualTo(7));
-        Assert.That(b.Build()[3], Is.EqualTo(new Instruction(7, JavaOpcode.pop)));
+        Assert.That(b.BuildCode()[3], Is.EqualTo(new Instruction(7, JavaOpcode.pop)));
         Assert.That(built[0].CatchStart, Is.EqualTo(7));
         Assert.That(cls.Constants[built[0].Type], Is.EqualTo(typeof(NullPointerException).ToJavaName()));
     }
