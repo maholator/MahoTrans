@@ -155,4 +155,26 @@ public class BuilderTests
         Assert.That(built[0].CatchStart, Is.EqualTo(7));
         Assert.That(cls.Constants[built[0].Type], Is.EqualTo(typeof(NullPointerException).ToJavaName()));
     }
+
+    [Test]
+    public void TestTailCatch()
+    {
+        var cls = new JavaClass { Name = "java/util/Vector" };
+        var b = new JavaMethodBuilder(cls);
+
+        using (var c = b.BeginTry<Throwable>())
+        {
+            b.AppendReturn();
+
+            c.CatchSection();
+
+            b.Append(JavaOpcode.pop);
+
+            b.AppendReturn();
+        }
+
+        b.Build(292, 292);
+
+        // this must not throw
+    }
 }
