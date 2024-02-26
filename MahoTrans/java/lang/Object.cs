@@ -75,9 +75,9 @@ public class Object
 
     #region Monitors
 
-    [JavaIgnore] [JsonProperty] public int MonitorOwner;
+    [JavaIgnore] [JsonProperty] private int _monitorOwner;
 
-    [JavaIgnore] [JsonProperty] public uint MonitorReEnterCount;
+    [JavaIgnore] [JsonProperty] private uint _monitorReEnterCount;
 
     [JavaIgnore] [JsonProperty] public List<MonitorWait>? Waiters;
 
@@ -94,9 +94,12 @@ public class Object
             Jvm.Throw<IllegalArgumentException>();
 
         // adding self to waitlist
-        Debug.Assert(MonitorOwner != 0);
-        Debug.Assert(This.Index != 0);
-        var mw = new MonitorWait(MonitorReEnterCount, MonitorOwner);
+        if (_monitorOwner == 0)
+            throw new JavaRuntimeError(
+                $"Monitor of object {HeapAddress} was not owned by anybody. Wait() was invoked from thread {Thread.CurrentThread?.ThreadId}.");
+        if (HeapAddress == 0)
+            throw new JavaRuntimeError("Can't wait on object with zero address.");
+        var mw = new MonitorWait(_monitorReEnterCount, _monitorOwner);
         Waiters ??= new();
         Waiters.Add(mw);
 
@@ -105,8 +108,8 @@ public class Object
         jvm.Detach(Thread.CurrentThread!, timeout, This);
 
         // leaving the monitor
-        MonitorOwner = 0;
-        MonitorReEnterCount = 0;
+        _monitorOwner = 0;
+        _monitorReEnterCount = 0;
 
         return mw; //TODO force thread yield when running AOT
     }
@@ -114,12 +117,56 @@ public class Object
     public void FixMonitorAfterWait(long mwPacked)
     {
         MonitorWait mw = mwPacked;
-        MonitorReEnterCount = mw.MonitorReEnterCount;
-        if (MonitorOwner != mw.MonitorOwner)
+        _monitorReEnterCount = mw.MonitorReEnterCount;
+        //MonitorOwner = mw.MonitorOwner;
+        if (_monitorOwner != mw.MonitorOwner)
             throw new JavaRuntimeError("After wait, thread that owns the object was changed.");
 
         // pending interrupt?
         Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
+    }
+
+    /// <summary>
+    /// Attempt to lock monitor to specified thread. If the monitor is owned by another thread, this does nothing and returns false.
+    /// </summary>
+    /// <param name="thread">Thread to lock monitor to.</param>
+    /// <returns>True if monitor was entered, false if not.</returns>
+    /// <remarks>
+    ///This API is for interpreter.
+    /// </remarks>
+    public bool TryEnterMonitor(JavaThread thread)
+    {
+        if (_monitorOwner == 0)
+        {
+            Debug.Assert(_monitorReEnterCount == 0, "Free monitor must be entered on zero level");
+            _monitorOwner = thread.ThreadId;
+            _monitorReEnterCount = 1;
+            return true;
+        }
+
+        if (_monitorOwner == thread.ThreadId)
+        {
+            Debug.Assert(_monitorReEnterCount >= 1, "Locked monitor must be entered on at least one level");
+            _monitorReEnterCount++;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Exits the monitor. If there is an attempt to exit with thread that did not own the monitor, java exception will be thrown.
+    /// </summary>
+    /// <param name="thread">Thread to exit monitor with.</param>
+    public void ExitMonitor(JavaThread thread)
+    {
+        if (_monitorOwner != thread.ThreadId)
+            Jvm.Throw<IllegalMonitorStateException>();
+
+        Debug.Assert(_monitorReEnterCount >= 1, "Monitor must be entered when exiting");
+        _monitorReEnterCount--;
+        if (_monitorReEnterCount == 0)
+            _monitorOwner = 0;
     }
 
     #endregion
@@ -204,7 +251,8 @@ public class Object
         }
 
         // waiters list must be cleared by attach calls
-        Debug.Assert(Waiters.Count == 0);
+        if (Waiters.Count != 0)
+            throw new JavaRuntimeError($"NotifyAll() left some ({Waiters.Count}) threads still waiting.");
     }
 
     [JavaDescriptor("()Ljava/lang/String;")]

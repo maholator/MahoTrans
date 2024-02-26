@@ -1114,17 +1114,7 @@ public class JavaRunner
                     jvm.Throw<NullPointerException>();
 
                 var obj = jvm.ResolveObject(r);
-                if (obj.MonitorOwner != thread.ThreadId)
-                {
-                    jvm.Throw<IllegalMonitorStateException>();
-                }
-                else
-                {
-                    obj.MonitorReEnterCount--;
-                    if (obj.MonitorReEnterCount == 0)
-                        obj.MonitorOwner = 0;
-                }
-
+                obj.ExitMonitor(thread);
                 pointer++;
 
                 break;
@@ -1319,16 +1309,7 @@ public class JavaRunner
             monitorHost = caller.Stack[caller.StackTop];
 
         var obj = state.ResolveObject(monitorHost);
-        if (obj.MonitorOwner != thread.ThreadId)
-        {
-            state.Throw<IllegalMonitorStateException>();
-        }
-        else
-        {
-            obj.MonitorReEnterCount--;
-            if (obj.MonitorReEnterCount == 0)
-                obj.MonitorOwner = 0;
-        }
+        obj.ExitMonitor(thread);
     }
 
     private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP,
@@ -1368,21 +1349,14 @@ public class JavaRunner
         if (r.IsNull)
             state.Throw<NullPointerException>();
 
-        var obj = state.ResolveObject(r);
-        if (obj.MonitorReEnterCount == 0)
+        if (TryEnterInstanceMonitor(r, thread, state))
         {
-            obj.MonitorOwner = thread.ThreadId;
-            obj.MonitorReEnterCount = 1;
-            frame.Pointer++;
-        }
-        else if (obj.MonitorOwner == thread.ThreadId)
-        {
-            obj.MonitorReEnterCount++;
+            // if monitor entered, go to next opcode
             frame.Pointer++;
         }
         else
         {
-            // wait
+            // else wait
             frame.PushReference(r);
             // not going to next instruction!
         }
@@ -1402,20 +1376,7 @@ public class JavaRunner
     private static bool TryEnterInstanceMonitor(Reference r, JavaThread thread, JvmState state)
     {
         var obj = state.ResolveObject(r);
-        if (obj.MonitorReEnterCount == 0)
-        {
-            obj.MonitorOwner = thread.ThreadId;
-            obj.MonitorReEnterCount = 1;
-            return true;
-        }
-
-        if (obj.MonitorOwner == thread.ThreadId)
-        {
-            obj.MonitorReEnterCount++;
-            return true;
-        }
-
-        return false;
+        return obj.TryEnterMonitor(thread);
     }
 
     #region Numbers manipulation
