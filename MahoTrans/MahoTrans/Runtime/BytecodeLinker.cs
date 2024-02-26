@@ -126,25 +126,8 @@ public static class BytecodeLinker
             return true;
         var lastOpcode = code[^1].Opcode;
 
-        switch (lastOpcode)
-        {
-            case JavaOpcode.@goto:
-            case JavaOpcode.jsr:
-            case JavaOpcode.ret:
-            case JavaOpcode.tableswitch:
-            case JavaOpcode.lookupswitch:
-            case JavaOpcode.ireturn:
-            case JavaOpcode.lreturn:
-            case JavaOpcode.freturn:
-            case JavaOpcode.dreturn:
-            case JavaOpcode.areturn:
-            case JavaOpcode.@return:
-            case JavaOpcode.athrow:
-            case JavaOpcode.goto_w:
-            case JavaOpcode.jsr_w:
-            case JavaOpcode._inplacereturn:
-                return true;
-        }
+        if (lastOpcode.IsJumpOpcode())
+            return true;
 
         JvmContext.Toolkit?.LoadLogger?.Log(LoadIssueType.BrokenFlow, cls.Name,
             $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
