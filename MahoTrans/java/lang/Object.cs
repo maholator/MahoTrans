@@ -95,13 +95,11 @@ public class Object
             Jvm.Throw<IllegalArgumentException>();
 
         // thread MUST own the monitor as per docs.
-        //TODO java exception must be here
         var thrId = Thread.CurrentThread!.ThreadId;
         if (_monitorOwner == 0)
-            throw new JavaRuntimeError(
-                $"Monitor {HeapAddress} was not locked to anybody. Wait() was invoked from thread {thrId}.");
+            Jvm.Throw<IllegalMonitorStateException>($"Monitor {HeapAddress} was not locked to anybody. Wait() was invoked from thread {thrId}.");
         if (_monitorOwner != thrId)
-            throw new JavaRuntimeError(
+            Jvm.Throw<IllegalMonitorStateException>(
                 $"Monitor {HeapAddress} was locked by {_monitorOwner}, {thrId} attempts to wait().");
 
         // we must not wait on objects which not in heap.
@@ -247,6 +245,8 @@ public class Object
 
     public void notify()
     {
+        //TODO check monitor owner per CLDC specs?
+
         if (Waiters == null || Waiters.Count == 0)
             return;
 
@@ -262,6 +262,8 @@ public class Object
 
     public void notifyAll()
     {
+        //TODO check monitor owner per CLDC specs?
+
         if (Waiters == null || Waiters.Count == 0)
             return;
 
