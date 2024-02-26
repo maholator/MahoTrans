@@ -129,8 +129,8 @@ public static class BytecodeLinker
         if (lastOpcode.IsJumpOpcode())
             return true;
 
-        JvmContext.Toolkit?.LoadLogger?.Log(LoadIssueType.BrokenFlow, cls.Name,
-            $"{method}'s last instruction is {lastOpcode}, which does not terminate the method.");
+        JvmContext.Toolkit?.LoadLogger?.Log(LoadIssueType.NoReturn, cls.Name,
+            $"{method}'s last instruction is {lastOpcode}, so this method does not return.");
         return false;
     }
 
