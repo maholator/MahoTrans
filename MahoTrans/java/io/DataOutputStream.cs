@@ -30,12 +30,12 @@ public class DataOutputStream : OutputStream
     /// <summary>
     ///     Writes one byte into <see cref="@out" />. Do all operations via this method.
     /// </summary>
-    /// <param name="class"></param>
+    /// <param name="cls"></param>
     /// <returns></returns>
     [JavaDescriptor("(I)V")]
-    public JavaMethodBody write___byte(JavaClass @class)
+    public JavaMethodBody write___byte(JavaClass cls)
     {
-        JavaMethodBuilder j = new JavaMethodBuilder(@class);
+        JavaMethodBuilder j = new JavaMethodBuilder(cls);
         j.AppendThis();
         j.AppendGetLocalField("out", typeof(OutputStream));
         j.Append(JavaOpcode.iload_1);
@@ -45,9 +45,9 @@ public class DataOutputStream : OutputStream
     }
 
     [JavaDescriptor("([B)V")]
-    public JavaMethodBody write___buf(JavaClass @class)
+    public JavaMethodBody write___buf(JavaClass cls)
     {
-        byte[] streamWrite = @class.PushConstant(_write).Split();
+        byte[] streamWrite = cls.PushConstant(_write).Split();
         return new JavaMethodBody(3, 3)
         {
             // Locals: this > arr > index
@@ -60,7 +60,7 @@ public class DataOutputStream : OutputStream
                 new(JavaOpcode.@goto, new byte[] { 0, 16 }),
 
                 new(JavaOpcode.aload_0),
-                new(JavaOpcode.getfield, @class.PushConstant(_streamDescriptor).Split()),
+                new(JavaOpcode.getfield, cls.PushConstant(_streamDescriptor).Split()),
                 // > stream
                 new(JavaOpcode.aload_1),
                 // > stream > arr

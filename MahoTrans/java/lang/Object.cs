@@ -146,7 +146,7 @@ public class Object
     //TODO nanoseconds precision
 
     [JavaDescriptor("(J)V")]
-    public JavaMethodBody wait(JavaClass @class)
+    public JavaMethodBody wait(JavaClass cls)
     {
         return new JavaMethodBody
         {
@@ -158,7 +158,7 @@ public class Object
                 new(JavaOpcode.dup),
                 new(JavaOpcode.lload_1),
                 new(JavaOpcode.invokespecial,
-                    @class.PushConstant(new NameDescriptorClass("WaitMonitor", "(J)J", "java/lang/Object")).Split()),
+                    cls.PushConstant(new NameDescriptorClass("WaitMonitor", "(J)J", "java/lang/Object")).Split()),
                 // at this point thread is detached
 
                 // running further? seems we have notified.
@@ -168,7 +168,7 @@ public class Object
                 new(JavaOpcode.monitorenter),
                 // stack: obj > wait_cache
                 new(JavaOpcode.invokespecial,
-                    @class.PushConstant(new NameDescriptorClass("FixMonitorAfterWait", "(J)V", "java/lang/Object"))
+                    cls.PushConstant(new NameDescriptorClass("FixMonitorAfterWait", "(J)V", "java/lang/Object"))
                         .Split()),
                 // at this point monitor state is restored and thread is attached.
                 new(JavaOpcode.@return),

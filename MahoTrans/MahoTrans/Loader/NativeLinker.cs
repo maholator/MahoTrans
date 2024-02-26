@@ -196,7 +196,7 @@ public static class NativeLinker
 
             if (args[0].Name != "cls")
                 logger?.Log(LoadIssueType.QuestionableNativeCode, clrType.ToJavaName(),
-                    $"Method builder {nativeMethod.Name} argument should be named \"cls\", but it is named \"{args[0].Name}\".");
+                    $"Method builder \"{nativeMethod.Name}\" argument should be named \"cls\", but it is named \"{args[0].Name}\".");
 
             var d = new NameDescriptor(name, descriptor);
             var target = nativeMethod.IsStatic ? null : Activator.CreateInstance(clrType);
