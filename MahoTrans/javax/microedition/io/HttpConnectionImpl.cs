@@ -48,6 +48,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         InputStream = Reference.Null;
         OutputStream = Reference.Null;
         ByteOutputStream = Reference.Null;
+        RequestLock = Reference.Null;
+        RequestException = Reference.Null;
     }
 
     [JavaIgnore]
@@ -499,18 +501,27 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendPutField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
         b.AppendThis();
         b.AppendVirtcall(nameof(DoRequestAsync), "()V");
-        using (var tr = b.BeginTry<InterruptedException>())
+        using (var tr1 = b.BeginTry<InterruptedException>())
         {
             b.AppendThis();
             b.AppendGetField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
             b.Append(JavaOpcode.dup);
             b.Append(JavaOpcode.astore_1);
             b.Append(JavaOpcode.monitorenter);
-            b.AppendThis();
-            b.AppendGetField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
-            b.AppendVirtcall("wait", "()V");
-            b.Append(JavaOpcode.aload_1);
-            b.Append(JavaOpcode.monitorexit);
+            using (var tr2 = b.BeginTry<Throwable>())
+            {
+                b.AppendThis();
+                b.AppendGetField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
+                b.AppendVirtcall("wait", "()V");
+                b.Append(JavaOpcode.aload_1);
+                b.Append(JavaOpcode.monitorexit);
+
+                tr2.CatchSection();
+
+                b.Append(JavaOpcode.aload_1);
+                b.Append(JavaOpcode.monitorexit);
+                b.Append(JavaOpcode.athrow);
+            }
 
             b.AppendThis();
             b.AppendGetField(nameof(HttpConnectionImpl.RequestException), typeof(IOException), typeof(HttpConnectionImpl));
@@ -520,9 +531,11 @@ public class HttpConnectionImpl : Object, HttpConnection
                 b.AppendGetField(nameof(HttpConnectionImpl.RequestException), typeof(IOException), typeof(HttpConnectionImpl));
                 b.Append(JavaOpcode.athrow);
             }
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
             b.AppendReturn();
 
-            tr.CatchSection();
+            tr1.CatchSection();
 
             b.Append(JavaOpcode.astore_1);
             b.AppendNewObject<IOException>();
@@ -901,7 +914,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall(nameof(GetEncodingInternal), "()J");
+            b.AppendVirtcall(nameof(GetLengthInternal), "()J");
             b.AppendReturnLong();
 
             tr.CatchSection();
