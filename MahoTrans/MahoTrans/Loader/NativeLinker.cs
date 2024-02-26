@@ -104,7 +104,7 @@ public static class NativeLinker
             if (nm.Name == nameof(Object.OnObjectDelete))
                 continue;
 
-            var built = BuildMethod(nm, jc, type, bridge);
+            var built = BuildMethod(nm, jc, type, bridge, logger);
             javaMethods.Add(built);
         }
 
@@ -156,7 +156,7 @@ public static class NativeLinker
     }
 
     private static Method BuildMethod(MethodInfo nativeMethod, JavaClass javaType, Type clrType,
-        TypeBuilder bridgeBuilder)
+        TypeBuilder bridgeBuilder, ILoadLogger? logger)
     {
         // collecting info
 
@@ -166,9 +166,11 @@ public static class NativeLinker
         if (descriptor != null)
         {
             if (!descriptor.StartsWith('('))
-                throw new JavaLinkageException($"Descriptor {descriptor} has no opening bracket! Check {clrType.FullName}.");
+                throw new JavaLinkageException(
+                    $"Descriptor {descriptor} has no opening bracket! Check {clrType.FullName}.");
             if (descriptor.Count(x => x == ')') != 1)
-                throw new JavaLinkageException($"Descriptor {descriptor} has invalid closing brackets! Check {clrType.FullName}.");
+                throw new JavaLinkageException(
+                    $"Descriptor {descriptor} has invalid closing brackets! Check {clrType.FullName}.");
         }
 
         var flags = MethodFlags.Public;
@@ -192,9 +194,27 @@ public static class NativeLinker
                 throw new JavaLinkageException(
                     $"Java method builder must have a descriptor attribute - method {nativeName} in {clrType.FullName} doesn't.");
 
+            if (args[0].Name != "cls")
+                logger?.Log(LoadIssueType.QuestionableNativeCode, clrType.ToJavaName(),
+                    $"Method builder {nativeMethod.Name} argument should be named \"cls\", but it is named \"{args[0].Name}\".");
+
             var d = new NameDescriptor(name, descriptor);
             var target = nativeMethod.IsStatic ? null : Activator.CreateInstance(clrType);
-            var body = (JavaMethodBody)nativeMethod.Invoke(target, new object[] { javaType })!;
+
+            JavaMethodBody? body;
+            try
+            {
+                body = nativeMethod.Invoke(target, new object[] { javaType })! as JavaMethodBody;
+            }
+            catch (Exception e)
+            {
+                throw new JavaLinkageException(
+                    $"Method builder {nativeName} in {clrType.FullName} crashed.", e);
+            }
+
+            if (body == null)
+                throw new JavaLinkageException(
+                    $"Method builder {nativeName} in {clrType.FullName} returned invalid or null body.");
 
             return new Method(d, flags, javaType)
             {
