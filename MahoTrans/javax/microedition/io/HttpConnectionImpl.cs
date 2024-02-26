@@ -528,7 +528,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Interrupted");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendReturn(); // XXX
@@ -548,13 +548,13 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Stream already open");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
-        b.AppendVirtcall("OpenInputStreamInternal", "()Ljava/lang/InputStream;");
+        b.AppendVirtcall(nameof(OpenInputStreamInternal), "()Ljava/lang/InputStream;");
         b.AppendReturnReference();
         return b.Build(3, 1);
     }
@@ -572,7 +572,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Request sent");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
@@ -582,7 +582,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Stream already open");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
@@ -658,7 +658,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Request sent");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
@@ -687,7 +687,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Request sent");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
@@ -839,7 +839,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         using (var tr = b.BeginTry<NumberFormatException>())
         {
             b.Append(JavaOpcode.aload_3);
-            b.AppendStaticCall<Integer>(nameof(Integer.parseInt), typeof(String), typeof(int));
+            b.AppendStaticCall<Integer>(nameof(Integer.parseInt), typeof(int), typeof(String));
             b.AppendReturnInt();
 
             tr.CatchSection();
@@ -949,7 +949,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendNewObject<IOException>();
             b.Append(JavaOpcode.dup);
             b.AppendConstant("Closed");
-            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.AppendVirtcall("<init>", "(Ljava/lang/String;)V");
             b.Append(JavaOpcode.athrow);
         }
         b.AppendReturn();
