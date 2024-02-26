@@ -498,7 +498,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("<init>", "()V");
         b.AppendPutField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
         b.AppendThis();
-        b.AppendVirtcall("DoRequestAsync", "()V");
+        b.AppendVirtcall(nameof(DoRequestAsync), "()V");
         using (var tr = b.BeginTry<InterruptedException>())
         {
             b.AppendThis();
@@ -554,7 +554,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendThis();
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
-        b.AppendVirtcall(nameof(OpenInputStreamInternal), "()Ljava/lang/InputStream;");
+        b.AppendVirtcall(nameof(OpenInputStreamInternal), "()Ljava/io/InputStream;");
         b.AppendReturnReference();
         return b.Build(3, 1);
     }
@@ -586,7 +586,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.Append(JavaOpcode.athrow);
         }
         b.AppendThis();
-        b.AppendVirtcall("OpenOutputStreamInternal", "()Ljava/lang/OutputStream;");
+        b.AppendVirtcall(nameof(OpenOutputStreamInternal), "()Ljava/io/OutputStream;");
         b.AppendReturnReference();
         return b.Build(3, 1);
     }
@@ -626,7 +626,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendThis();
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
-        b.AppendVirtcall("GetResponseCodeInternal", "()I");
+        b.AppendVirtcall(nameof(GetResponseCodeInternal), "()I");
         b.AppendReturnInt();
         return b.Build(1, 1);
     }
@@ -640,7 +640,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendThis();
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
-        b.AppendVirtcall("GetResponseMessageInternal", "()Ljava/lang/String;");
+        b.AppendVirtcall(nameof(GetResponseMessageInternal), "()Ljava/lang/String;");
         b.AppendReturnReference();
         return b.Build(1, 1);
     }
@@ -669,7 +669,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("SetRequestMethodInternal", "(Ljava/lang/String;)V");
+        b.AppendVirtcall(nameof(SetRequestMethodInternal), "(Ljava/lang/String;)V");
         b.AppendReturn();
         return b.Build(3, 2);
     }
@@ -699,7 +699,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.aload_2);
-        b.AppendVirtcall("SetRequestPropertyInternal", "(Ljava/lang/String;Ljava/lang/String;)V");
+        b.AppendVirtcall(nameof(SetRequestPropertyInternal), "(Ljava/lang/String;Ljava/lang/String;)V");
         b.AppendReturn();
         return b.Build(3, 3);
     }
@@ -715,7 +715,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetExpirationInternal", "()J");
+            b.AppendVirtcall(nameof(GetExpirationInternal), "()J");
             b.AppendReturnLong();
 
             tr.CatchSection();
@@ -738,7 +738,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetDateInternal", "()J");
+            b.AppendVirtcall(nameof(GetDateInternal), "()J");
             b.AppendReturnLong();
 
             tr.CatchSection();
@@ -761,7 +761,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetLastModifiedInternal", "()J");
+            b.AppendVirtcall(nameof(GetLastModifiedInternal), "()J");
             b.AppendReturnLong();
 
             tr.CatchSection();
@@ -783,7 +783,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("GetHeaderFieldInternal", "(Ljava/lang/String;)Ljava/lang/String;");
+        b.AppendVirtcall(nameof(GetHeaderFieldInternal), "(Ljava/lang/String;)Ljava/lang/String;");
         b.AppendReturnReference();
         return b.Build(2, 2);
     }
@@ -798,7 +798,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
         b.Append(JavaOpcode.iload_1);
-        b.AppendVirtcall("GetHeaderFieldInternal", "(I)Ljava/lang/String;");
+        b.AppendVirtcall(nameof(GetHeaderFieldInternal), "(I)Ljava/lang/String;");
         b.AppendReturnReference();
         return b.Build(2, 2);
     }
@@ -813,7 +813,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
         b.Append(JavaOpcode.iload_1);
-        b.AppendVirtcall("GetHeaderFieldKeyInternal", "(I)Ljava/lang/String;");
+        b.AppendVirtcall(nameof(GetHeaderFieldKeyInternal), "(I)Ljava/lang/String;");
         b.AppendReturnReference();
         return b.Build(2, 2);
     }
@@ -828,7 +828,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendVirtcall("doRequest", "()V");
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("GetHeaderField", "(Ljava/lang/String;)Ljava/lang/String;");
+        b.AppendVirtcall("getHeaderField", "(Ljava/lang/String;)Ljava/lang/String;");
         b.Append(JavaOpcode.astore_3);
         b.Append(JavaOpcode.aload_3);
         using (b.AppendGoto(JavaOpcode.ifnonnull))
@@ -862,7 +862,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
         b.Append(JavaOpcode.lload_2);
-        b.AppendVirtcall("GetHeaderFieldDateInternal", "(Ljava/lang/String;J)J");
+        b.AppendVirtcall(nameof(GetHeaderFieldDateInternal), "(Ljava/lang/String;J)J");
         b.AppendReturnLong();
         return b.Build(4, 4);
     }
@@ -878,7 +878,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetEncodingInternal", "()Ljava/lang/String;");
+            b.AppendVirtcall(nameof(GetEncodingInternal), "()Ljava/lang/String;");
             b.AppendReturnReference();
 
             tr.CatchSection();
@@ -901,7 +901,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetEncodingInternal", "()J");
+            b.AppendVirtcall(nameof(GetEncodingInternal), "()J");
             b.AppendReturnLong();
 
             tr.CatchSection();
@@ -925,7 +925,7 @@ public class HttpConnectionImpl : Object, HttpConnection
             b.AppendThis();
             b.AppendVirtcall("doRequest", "()V");
             b.AppendThis();
-            b.AppendVirtcall("GetTypeInternal", "()Ljava/lang/String;");
+            b.AppendVirtcall(nameof(GetTypeInternal), "()Ljava/lang/String;");
             b.AppendReturnReference();
 
             tr.CatchSection();
