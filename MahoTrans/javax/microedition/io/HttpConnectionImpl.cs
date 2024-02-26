@@ -11,6 +11,8 @@ using MahoTrans.Builder;
 using MahoTrans.Runtime.Types;
 using Object = java.lang.Object;
 using IOException = java.io.IOException;
+using Thread = System.Threading.Thread;
+using String = java.lang.String;
 
 namespace javax.microedition.io;
 
@@ -31,11 +33,14 @@ public class HttpConnectionImpl : Object, HttpConnection
     private Reference ByteOutputStream;
 
     public bool Closed;
-    private bool Destroyed;
-    private bool RequestSent;
+    public bool Destroyed;
+    public bool RequestSent;
 
     public int InputState;
     public int OutputState;
+
+    public Reference RequestLock;
+    [JavaType(typeof(IOException))] public Reference RequestException;
 
     [InitMethod]
     public new void Init()
@@ -53,13 +58,8 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     // Sends http request
     [JavaIgnore]
-    private void DoRequest()
+    private void SendRequest(JvmState Jvm)
     {
-        if (RequestSent)
-        {
-            return;
-        }
-        RequestSent = true;
         try
         {
             if (OutputState != 0)
@@ -99,8 +99,25 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
         catch (System.Exception e)
         {
-            Jvm.Throw<IOException>(e.ToString());
+            IOException ioe = Jvm.AllocateObject<IOException>();
+            ioe.Init(Jvm.AllocateString(e.ToString()));
+            RequestException = ioe.This;
         }
+        // XXX
+        var rl = Jvm.ResolveObject(RequestLock);
+        if (rl.Waiters == null || rl.Waiters.Count == 0)
+            return;
+        var mw = rl.Waiters[^1];
+        rl.Waiters.RemoveAt(rl.Waiters.Count - 1);
+
+        Jvm.Attach(mw.MonitorOwner);
+    }
+
+    public void DoRequestAsync()
+    {
+        JvmState jvm = Jvm;
+        Thread thread = new Thread(() => SendRequest(jvm));
+        thread.Start();
     }
 
     [JavaIgnore]
@@ -116,13 +133,9 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     // Streams
 
-    [JavaDescriptor("()Ljava/io/InputStream;")]
-    public Reference openInputStream()
+    [return: JavaType(typeof(InputStream))]
+    public Reference OpenInputStreamInternal()
     {
-        CheckOpen();
-        if (InputState != 0)
-            Jvm.Throw<IOException>("Open already");
-        DoRequest();
         InputState = 1;
         HttpInputStream i = Jvm.AllocateObject<HttpInputStream>();
         i.Stream = Response.Content.ReadAsStream();
@@ -130,14 +143,9 @@ public class HttpConnectionImpl : Object, HttpConnection
         return InputStream = i.This;
     }
 
-    [JavaDescriptor("()Ljava/io/OutputStream;")]
-    public Reference openOutputStream()
+    [return: JavaType(typeof(OutputStream))]
+    public Reference OpenOutputStreamInternal()
     {
-        CheckOpen();
-        if (RequestSent)
-            Jvm.Throw<IOException>("Request sent");
-        if (OutputState != 0)
-            Jvm.Throw<IOException>("Open already");
         Request.Method = new HttpMethod("POST"); // force POST method
 
         OutputState = 1;
@@ -150,32 +158,6 @@ public class HttpConnectionImpl : Object, HttpConnection
         return OutputStream = o.This;
     }
 
-    [JavaDescriptor("()Ljava/io/DataInputStream;")]
-    public JavaMethodBody openDataInputStream(JavaClass cls)
-    {
-        var b = new JavaMethodBuilder(cls);
-        b.AppendNewObject<DataInputStream>();
-        b.Append(JavaOpcode.dup);
-        b.AppendThis();
-        b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
-        b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
-        b.AppendReturnReference();
-        return b.Build(3, 1);
-    }
-
-    [JavaDescriptor("()Ljava/io/DataOutputStream;")]
-    public JavaMethodBody openDataOutputStream(JavaClass cls)
-    {
-        var b = new JavaMethodBuilder(cls);
-        b.AppendNewObject<DataOutputStream>();
-        b.Append(JavaOpcode.dup);
-        b.AppendThis();
-        b.AppendVirtcall("openOutputStream", "()Ljava/io/OutputStream;");
-        b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
-        b.AppendReturnReference();
-        return b.Build(3, 1);
-    }
-
     public void close()
     {
         if (Closed)
@@ -184,48 +166,32 @@ public class HttpConnectionImpl : Object, HttpConnection
         InternalClose();
     }
 
-    public int getResponseCode()
+    public int GetResponseCodeInternal()
     {
-        CheckOpen();
-        DoRequest();
         return (int)Response.StatusCode;
     }
 
     [return: String]
-    public Reference getResponseMessage()
+    public Reference GetResponseMessageInternal()
     {
-        CheckOpen();
-        DoRequest();
         return Jvm.AllocateString(Response.ReasonPhrase!);
     }
 
-    public void setRequestMethod([String] Reference method)
+    public void SetRequestMethodInternal([String] Reference method)
     {
-        CheckOpen();
-        if (RequestSent)
-            Jvm.Throw<IOException>("Request sent");
-        if (OutputState != 0)
-            return;
         string s = Jvm.ResolveString(method);
         if (!s.Equals("GET") && !s.Equals("POST") && !s.Equals("HEAD"))
             Jvm.Throw<IOException>("Invalid method");
         Request.Method = new HttpMethod(s);
     }
 
-    public void setRequestProperty([String] Reference field, [String] Reference value)
+    public void SetRequestPropertyInternal([String] Reference field, [String] Reference value)
     {
-        CheckOpen();
-        if (RequestSent)
-            Jvm.Throw<IOException>("Request sent");
-        if (OutputState != 0)
-            return;
         SetRequestHeader(Jvm.ResolveString(field), Jvm.ResolveString(value));
     }
 
-    public long getExpiration()
+    public long GetExpirationInternal()
     {
-        CheckOpen();
-        DoRequest();
         try
         {
             return Response.Content.Headers.Expires!.Value.ToUnixTimeMilliseconds();
@@ -236,10 +202,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    public long getDate()
+    public long GetDateInternal()
     {
-        CheckOpen();
-        DoRequest();
         try
         {
             return Response.Headers.Date!.Value.ToUnixTimeMilliseconds();
@@ -250,10 +214,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    public long getLastModified()
+    public long GetLastModifiedInternal()
     {
-        CheckOpen();
-        DoRequest();
         try
         {
             return Response.Content.Headers.LastModified!.Value.ToUnixTimeMilliseconds();
@@ -369,10 +331,8 @@ public class HttpConnectionImpl : Object, HttpConnection
     }
 
     [return: String]
-    public Reference getHeaderField([String] Reference key)
+    public Reference GetHeaderFieldInternal([String] Reference key)
     {
-        CheckOpen();
-        DoRequest();
         if (key.IsNull)
             return key;
         string k = Jvm.ResolveString(key).ToLower();
@@ -382,10 +342,8 @@ public class HttpConnectionImpl : Object, HttpConnection
     }
 
     [return: String]
-    public Reference getHeaderField(int n)
+    public Reference GetHeaderFieldInternal(int n)
     {
-        CheckOpen();
-        DoRequest();
         n = (n * 2) + 1;
         if (n >= ResHeaders.Count)
             return Reference.Null;
@@ -393,43 +351,24 @@ public class HttpConnectionImpl : Object, HttpConnection
     }
 
     [return: String]
-    public Reference getHeaderFieldKey(int n)
+    public Reference GetHeaderFieldKeyInternal(int n)
     {
-        CheckOpen();
-        DoRequest();
         n *= 2;
         if (n >= ResHeaders.Count)
             return Reference.Null;
         return Jvm.AllocateString(ResHeaders[n]);
     }
 
-    public int getHeaderFieldInt([String] Reference name, int def)
+    public long GetHeaderFieldDateInternal([String] Reference name, long def)
     {
-        CheckOpen();
-        try
-        {
-            return Integer.parseInt(getHeaderField(name));
-        }
-        catch
-        {
-            return def;
-        }
-    }
-
-    public long getHeaderFieldDate([String] Reference name, long def)
-    {
-        CheckOpen();
-        DoRequest();
         return GetHeaderDate(Jvm.ResolveString(name), def);
     }
 
     // ContentConnection methods
 
     [return: String]
-    public Reference getEncoding()
+    public Reference GetEncodingInternal()
     {
-        CheckOpen();
-        DoRequest();
         try
         {
             return Jvm.AllocateString(Response.Content.Headers.ContentEncoding.First());
@@ -440,10 +379,8 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
     }
 
-    public long getLength()
+    public long GetLengthInternal()
     {
-        CheckOpen();
-        DoRequest();
         long? l = Response.Content.Headers.ContentLength;
         if (l == null)
             return -1;
@@ -451,10 +388,8 @@ public class HttpConnectionImpl : Object, HttpConnection
     }
 
     [return: String]
-    public Reference getType()
+    public Reference GetTypeInternal()
     {
-        CheckOpen();
-        DoRequest();
         try
         {
             return Jvm.AllocateString(Response.Content.Headers.ContentType!.MediaType!);
@@ -482,7 +417,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     // on inputstream closed
     public void InputClosed()
     {
-        if(InputState != 2)
+        if (InputState != 2)
         {
             InputState = 2;
             InternalClose();
@@ -493,12 +428,6 @@ public class HttpConnectionImpl : Object, HttpConnection
     {
         if (OutputState != 2)
             OutputState = 2;
-    }
-
-    private void CheckOpen()
-    {
-        if (Closed)
-            Jvm.Throw<IOException>("Closed");
     }
 
     [JavaIgnore]
@@ -536,7 +465,7 @@ public class HttpConnectionImpl : Object, HttpConnection
 
     public override bool OnObjectDelete()
     {
-        if(InputState != 0 && InputState != 2)
+        if (InputState != 0 && InputState != 2)
         {
             // reading right now
             return true;
@@ -546,6 +475,485 @@ public class HttpConnectionImpl : Object, HttpConnection
         Request.Dispose();
         Response.Dispose();
         return false;
+    }
+
+    // bytecode
+
+    [JavaDescriptor("()V")]
+    public JavaMethodBody doRequest(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendGetField(nameof(HttpConnectionImpl.RequestSent), typeof(bool), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendReturn();
+        }
+        b.AppendThis();
+        b.Append(JavaOpcode.iconst_1);
+        b.AppendPutField(nameof(HttpConnectionImpl.RequestSent), typeof(bool), typeof(HttpConnectionImpl));
+        b.AppendThis();
+        b.AppendNewObject<Object>();
+        b.Append(JavaOpcode.dup);
+        b.AppendVirtcall("<init>", "()V");
+        b.AppendPutField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
+        b.AppendThis();
+        b.AppendVirtcall("DoRequestAsync", "()V");
+        using (var tr = b.BeginTry<InterruptedException>())
+        {
+            b.AppendThis();
+            b.AppendGetField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
+            b.Append(JavaOpcode.dup);
+            b.Append(JavaOpcode.astore_1);
+            b.Append(JavaOpcode.monitorenter);
+            b.AppendThis();
+            b.AppendGetField(nameof(HttpConnectionImpl.RequestLock), typeof(Object), typeof(HttpConnectionImpl));
+            b.AppendVirtcall("wait", "()V");
+            b.Append(JavaOpcode.aload_1);
+            b.Append(JavaOpcode.monitorexit);
+
+            b.AppendThis();
+            b.AppendGetField(nameof(HttpConnectionImpl.RequestException), typeof(IOException), typeof(HttpConnectionImpl));
+            using (b.AppendGoto(JavaOpcode.ifnull))
+            {
+                b.AppendThis();
+                b.AppendGetField(nameof(HttpConnectionImpl.RequestException), typeof(IOException), typeof(HttpConnectionImpl));
+                b.Append(JavaOpcode.athrow);
+            }
+            b.AppendReturn();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Interrupted");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendReturn(); // XXX
+        return b.Build(4, 2);
+    }
+
+    [JavaDescriptor("()Ljava/io/InputStream;")]
+    public JavaMethodBody openInputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendGetField(nameof(InputState), typeof(int), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Stream already open");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("OpenInputStreamInternal", "()Ljava/lang/InputStream;");
+        b.AppendReturnReference();
+        return b.Build(3, 1);
+    }
+
+    [JavaDescriptor("()Ljava/io/OutputStream;")]
+    public JavaMethodBody openOutputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendGetField(nameof(RequestSent), typeof(bool), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Request sent");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendThis();
+        b.AppendGetField(nameof(OutputState), typeof(int), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Stream already open");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendThis();
+        b.AppendVirtcall("OpenOutputStreamInternal", "()Ljava/lang/OutputStream;");
+        b.AppendReturnReference();
+        return b.Build(3, 1);
+    }
+
+    [JavaDescriptor("()Ljava/io/DataInputStream;")]
+    public JavaMethodBody openDataInputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataInputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openInputStream", "()Ljava/io/InputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/InputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(3, 1);
+    }
+
+    [JavaDescriptor("()Ljava/io/DataOutputStream;")]
+    public JavaMethodBody openDataOutputStream(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject<DataOutputStream>();
+        b.Append(JavaOpcode.dup);
+        b.AppendThis();
+        b.AppendVirtcall("openOutputStream", "()Ljava/io/OutputStream;");
+        b.AppendVirtcall("<init>", "(Ljava/io/OutputStream;)V");
+        b.AppendReturnReference();
+        return b.Build(3, 1);
+    }
+
+    [JavaDescriptor("()I")]
+    public JavaMethodBody getResponseCode(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("GetResponseCodeInternal", "()I");
+        b.AppendReturnInt();
+        return b.Build(1, 1);
+    }
+
+    [JavaDescriptor("()Ljava/lang/String;")]
+    public JavaMethodBody getResponseMessage(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("GetResponseMessageInternal", "()Ljava/lang/String;");
+        b.AppendReturnReference();
+        return b.Build(1, 1);
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;)V")]
+    public JavaMethodBody setRequestMethod(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendGetField(nameof(RequestSent), typeof(bool), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Request sent");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendThis();
+        b.AppendGetField(nameof(OutputState), typeof(int), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendReturn();
+        }
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.AppendVirtcall("SetRequestMethodInternal", "(Ljava/lang/String;)V");
+        b.AppendReturn();
+        return b.Build(3, 2);
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;Ljava/lang/String;)V")]
+    public JavaMethodBody setRequestProperty(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendGetField(nameof(RequestSent), typeof(bool), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Request sent");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendThis();
+        b.AppendGetField(nameof(OutputState), typeof(int), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendReturn();
+        }
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.aload_2);
+        b.AppendVirtcall("SetRequestPropertyInternal", "(Ljava/lang/String;Ljava/lang/String;)V");
+        b.AppendReturn();
+        return b.Build(3, 3);
+    }
+
+    [JavaDescriptor("()J")]
+    public JavaMethodBody getExpiration(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<IOException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetExpirationInternal", "()J");
+            b.AppendReturnLong();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        b.Append(JavaOpcode.lconst_0);
+        b.AppendReturnLong();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("()J")]
+    public JavaMethodBody getDate(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<IOException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetDateInternal", "()J");
+            b.AppendReturnLong();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        b.Append(JavaOpcode.lconst_0);
+        b.AppendReturnLong();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("()J")]
+    public JavaMethodBody getLastModifed(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<IOException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetLastModifiedInternal", "()J");
+            b.AppendReturnLong();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        b.Append(JavaOpcode.lconst_0);
+        b.AppendReturnLong();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;)Ljava/lang/String;")]
+    public JavaMethodBody getHeaderField(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.AppendVirtcall("GetHeaderFieldInternal", "(Ljava/lang/String;)Ljava/lang/String;");
+        b.AppendReturnReference();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("(I)Ljava/lang/String;")]
+    public JavaMethodBody getHeaderField___int(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.Append(JavaOpcode.iload_1);
+        b.AppendVirtcall("GetHeaderFieldInternal", "(I)Ljava/lang/String;");
+        b.AppendReturnReference();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("(I)Ljava/lang/String;")]
+    public JavaMethodBody getHeaderFieldKey(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.Append(JavaOpcode.iload_1);
+        b.AppendVirtcall("GetHeaderFieldKeyInternal", "(I)Ljava/lang/String;");
+        b.AppendReturnReference();
+        return b.Build(2, 2);
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;I)I")]
+    public JavaMethodBody getHeaderFieldInt(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.AppendVirtcall("GetHeaderField", "(Ljava/lang/String;)Ljava/lang/String;");
+        b.Append(JavaOpcode.astore_3);
+        b.Append(JavaOpcode.aload_3);
+        using (b.AppendGoto(JavaOpcode.ifnonnull))
+        {
+            b.Append(JavaOpcode.iload_2);
+            b.AppendReturnInt();
+        }
+        using (var tr = b.BeginTry<NumberFormatException>())
+        {
+            b.Append(JavaOpcode.aload_3);
+            b.AppendStaticCall<Integer>(nameof(Integer.parseInt), typeof(String), typeof(int));
+            b.AppendReturnInt();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore, 4);
+        }
+        b.Append(JavaOpcode.iload_2);
+        b.AppendReturnInt();
+        return b.Build(2, 5);
+    }
+
+    [JavaDescriptor("(Ljava/lang/String;J)J")]
+    public JavaMethodBody getHeaderFieldDate(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendVirtcall("checkOpen", "()V");
+        b.AppendThis();
+        b.AppendVirtcall("doRequest", "()V");
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.lload_2);
+        b.AppendVirtcall("GetHeaderFieldDateInternal", "(Ljava/lang/String;J)J");
+        b.AppendReturnLong();
+        return b.Build(4, 4);
+    }
+
+    [JavaDescriptor("()Ljava/lang/String;")]
+    public JavaMethodBody getEncoding(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<NumberFormatException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetEncodingInternal", "()Ljava/lang/String;");
+            b.AppendReturnReference();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        b.Append(JavaOpcode.aconst_null);
+        b.AppendReturnReference();
+        return b.Build(4, 4);
+    }
+
+    [JavaDescriptor("()J")]
+    public JavaMethodBody getLength(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<NumberFormatException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetEncodingInternal", "()J");
+            b.AppendReturnLong();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        var c = cls.PushConstant(-1L).Split();
+        b.Append(new Instruction(JavaOpcode.ldc2_w, c));
+        b.AppendReturnLong();
+        return b.Build(4, 4);
+    }
+
+    [JavaDescriptor("()Ljava/lang/String;")]
+    public JavaMethodBody getType(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        using (var tr = b.BeginTry<NumberFormatException>())
+        {
+            b.AppendThis();
+            b.AppendVirtcall("checkOpen", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("doRequest", "()V");
+            b.AppendThis();
+            b.AppendVirtcall("GetTypeInternal", "()Ljava/lang/String;");
+            b.AppendReturnReference();
+
+            tr.CatchSection();
+
+            b.Append(JavaOpcode.astore_1);
+        }
+        b.Append(JavaOpcode.aconst_null);
+        b.AppendReturnReference();
+        return b.Build(4, 4);
+    }
+
+
+    [JavaDescriptor("()V")]
+    public JavaMethodBody checkOpen(JavaClass cls)
+    {
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.AppendGetField(nameof(Closed), typeof(bool), typeof(HttpConnectionImpl));
+        using (b.AppendGoto(JavaOpcode.ifeq))
+        {
+            b.AppendNewObject<IOException>();
+            b.Append(JavaOpcode.dup);
+            b.AppendConstant("Closed");
+            b.AppendVirtcall("init", "(Ljava/lang/String;)V");
+            b.Append(JavaOpcode.athrow);
+        }
+        b.AppendReturn();
+        return b.Build(3, 1);
     }
 }
 
