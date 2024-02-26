@@ -114,7 +114,6 @@ public class Display : Object
         }
     }
 
-
     public const int ALERT = 3;
     public const int CHOICE_GROUP_ELEMENT = 2;
     public const int COLOR_BACKGROUND = 0;

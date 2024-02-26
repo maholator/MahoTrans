@@ -183,6 +183,13 @@ public static class BytecodeLinker
 
         void SetStack(int target)
         {
+            if (target < 0 || target >= stackBeforeInstruction.Length)
+            {
+                logger?.Log(LoadIssueType.BrokenFlow, cls.Name,
+                    $"Attempt to set stack for instruction {target} in method {method.Method}, but it has only {code.Length} instructions.");
+                return;
+            }
+
             var now = emulatedStack.ToArray();
             var was = stackBeforeInstruction[target];
             if (was == null)
@@ -1985,12 +1992,12 @@ public static class BytecodeLinker
         }
         catch (StackMismatchException e)
         {
-            logger?.Log(LoadIssueType.StackMismatch, cls.Name, e.Message);
+            logger?.Log(LoadIssueType.StackMismatch, cls.Name, $"Method {method.Method.Descriptor}: " + e.Message);
             stubCode(ref output, out stackBeforeInstruction);
         }
         catch (BrokenFlowException e)
         {
-            logger?.Log(LoadIssueType.BrokenFlow, cls.Name, e.Message);
+            logger?.Log(LoadIssueType.BrokenFlow, cls.Name, $"Method {method.Method.Descriptor}: " + e.Message);
             stubCode(ref output, out stackBeforeInstruction);
         }
 
