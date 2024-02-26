@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
@@ -87,27 +87,37 @@ public class Object
     /// <returns>Waiter object to store on stack.</returns>
     public long WaitMonitor(long timeout)
     {
-        // pending interrupt?
+        // pending interrupt? throwing right now.
         Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
 
+        // cldc check
         if (timeout < 0)
             Jvm.Throw<IllegalArgumentException>();
 
-        // adding self to waitlist
+        // thread MUST own the monitor as per docs.
+        //TODO java exception must be here
+        var thrId = Thread.CurrentThread!.ThreadId;
         if (_monitorOwner == 0)
             throw new JavaRuntimeError(
-                $"Monitor of object {HeapAddress} was not owned by anybody. Wait() was invoked from thread {Thread.CurrentThread?.ThreadId}.");
+                $"Monitor {HeapAddress} was not locked to anybody. Wait() was invoked from thread {thrId}.");
+        if (_monitorOwner != thrId)
+            throw new JavaRuntimeError(
+                $"Monitor {HeapAddress} was locked by {_monitorOwner}, {thrId} attempts to wait().");
+
+        // we must not wait on objects which not in heap.
         if (HeapAddress == 0)
             throw new JavaRuntimeError("Can't wait on object with zero address.");
+
+        // adding self to wait list at this object
         var mw = new MonitorWait(_monitorReEnterCount, _monitorOwner);
         Waiters ??= new();
         Waiters.Add(mw);
 
         // detaching from scheduler
         var jvm = Jvm;
-        jvm.Detach(Thread.CurrentThread!, timeout, This);
+        jvm.Detach(Thread.CurrentThread, timeout, This);
 
-        // leaving the monitor
+        // leaving the monitor (so other thread can enter this monitor and call notify())
         _monitorOwner = 0;
         _monitorReEnterCount = 0;
 
@@ -117,22 +127,27 @@ public class Object
     public void FixMonitorAfterWait(long mwPacked)
     {
         MonitorWait mw = mwPacked;
-        _monitorReEnterCount = mw.MonitorReEnterCount;
-        //MonitorOwner = mw.MonitorOwner;
+
+        // monitor owner was set by monitorenter opcode.
+        // MW was stored on thread stack, so if enter instruction in wait() glue was done correctly, owners must match.
         if (_monitorOwner != mw.MonitorOwner)
             throw new JavaRuntimeError("After wait, thread that owns the object was changed.");
+
+        // fix enter level
+        _monitorReEnterCount = mw.MonitorReEnterCount;
 
         // pending interrupt?
         Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
     }
 
     /// <summary>
-    /// Attempt to lock monitor to specified thread. If the monitor is owned by another thread, this does nothing and returns false.
+    ///     Attempt to lock monitor to specified thread. If the monitor is owned by another thread, this does nothing and
+    ///     returns false.
     /// </summary>
     /// <param name="thread">Thread to lock monitor to.</param>
     /// <returns>True if monitor was entered, false if not.</returns>
     /// <remarks>
-    ///This API is for interpreter.
+    ///     This API is for interpreter.
     /// </remarks>
     public bool TryEnterMonitor(JavaThread thread)
     {
@@ -155,9 +170,13 @@ public class Object
     }
 
     /// <summary>
-    /// Exits the monitor. If there is an attempt to exit with thread that did not own the monitor, java exception will be thrown.
+    ///     Exits the monitor. If there is an attempt to exit with thread that did not own the monitor, java exception will be
+    ///     thrown.
     /// </summary>
     /// <param name="thread">Thread to exit monitor with.</param>
+    /// <remarks>
+    ///     This API is for interpreter.
+    /// </remarks>
     public void ExitMonitor(JavaThread thread)
     {
         if (_monitorOwner != thread.ThreadId)
@@ -205,17 +224,20 @@ public class Object
                 new(JavaOpcode.dup),
                 new(JavaOpcode.lload_1),
                 new(JavaOpcode.invokespecial,
-                    cls.PushConstant(new NameDescriptorClass("WaitMonitor", "(J)J", "java/lang/Object")).Split()),
+                    cls.PushConstant(new NameDescriptorClass(nameof(WaitMonitor), "(J)J", "java/lang/Object")).Split()),
                 // at this point thread is detached
 
                 // running further? seems we have notified.
                 // stack: obj > wait_cache
                 new(JavaOpcode.aload_0),
                 // stack: obj > wait_cache > obj
+                // monitorenter is here because we must REENTER it.
+                // There could be several thread waiting for it (i.e. notifyAll on 2+), so this goes through retry logic in interpreter.
                 new(JavaOpcode.monitorenter),
                 // stack: obj > wait_cache
+                // "fixer" checks that we really entered the monitor on previous instruction (throws if not) and resets "enter level".
                 new(JavaOpcode.invokespecial,
-                    cls.PushConstant(new NameDescriptorClass("FixMonitorAfterWait", "(J)V", "java/lang/Object"))
+                    cls.PushConstant(new NameDescriptorClass(nameof(FixMonitorAfterWait), "(J)V", "java/lang/Object"))
                         .Split()),
                 // at this point monitor state is restored and thread is attached.
                 new(JavaOpcode.@return),
@@ -229,10 +251,11 @@ public class Object
             return;
 
         var mw = Waiters[^1];
-        Waiters.RemoveAt(Waiters.Count - 1);
 
         if (Jvm.Attach(mw.MonitorOwner))
             return;
+
+        // attach logic will delete us from wait list.
 
         throw new JavaRuntimeError($"Attempt to notify thread {mw.MonitorOwner}, but it didn't wait for anything.");
     }

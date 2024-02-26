@@ -91,7 +91,8 @@ public partial class JvmState
         {
             if (WaitingThreads.Remove(id, out var th))
             {
-                for (int i = 0; i < _wakeupHooks.Count; i++)
+                // this 2 loops must be reversed because we delete items and want to enumerate FULL list.
+                for (int i = _wakeupHooks.Count - 1; i >= 0; i--)
                 {
                     if (_wakeupHooks[i].ThreadId == id)
                     {
@@ -99,14 +100,17 @@ public partial class JvmState
                         var monitor = _wakeupHooks[i].MonitorObject;
                         if (!monitor.IsNull)
                         {
+                            bool alreadyDeleted = false;
                             var waiters = ResolveObject(monitor).Waiters!;
                             for (int j = waiters.Count - 1; j >= 0; j--)
                             {
                                 if (waiters[j].MonitorOwner == id)
                                 {
-                                    // we assume that one thread can't own the same monitor twice
+                                    if (alreadyDeleted)
+                                        throw new JavaRuntimeError("One thread was waiting same object twice");
+
                                     waiters.RemoveAt(j);
-                                    break;
+                                    alreadyDeleted = true;
                                 }
                             }
                         }

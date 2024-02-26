@@ -1,8 +1,11 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Runtime.InteropServices;
+
 namespace MahoTrans.Runtime;
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct MonitorWait
 {
     public readonly uint MonitorReEnterCount;
