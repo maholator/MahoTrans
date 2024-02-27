@@ -1504,6 +1504,7 @@ public static class BytecodeLinker
                         {
                             int target = CalcTargetInstruction();
                             SetStack(target);
+                            SetDiff();
                             entryPoints.Push(target);
                             output[instrIndex] = new LinkedInstruction(MTOpcode.jump, target);
                             isLinked[instrIndex] = true;
@@ -1546,6 +1547,7 @@ public static class BytecodeLinker
 
                             data = d;
                             entryPoints.Push(d[0]);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.tableswitch, shortData, intData, data);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
@@ -1580,37 +1582,44 @@ public static class BytecodeLinker
 
                             data = d;
                             entryPoints.Push(d[0]);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.lookupswitch, shortData, intData, data);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         }
                         case JavaOpcode.ireturn:
                             emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.lreturn:
                             emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.freturn:
                             emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.dreturn:
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.areturn:
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.@return:
                         {
+                            SetDiff();
                             opcode = isClinit ? MTOpcode.return_void_inplace : MTOpcode.return_void;
                             output[instrIndex] = new LinkedInstruction(opcode);
                             isLinked[instrIndex] = true;
@@ -1845,6 +1854,7 @@ public static class BytecodeLinker
                             break;
                         case JavaOpcode.athrow:
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.athrow);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
