@@ -47,7 +47,10 @@ public partial class JvmState
     /// </summary>
     /// <param name="class">Class object.</param>
     /// <returns>Reference to newly created object.</returns>
-    /// <remarks>Use <see cref="Allocate{T}" /> if possible.</remarks>
+    /// <remarks>
+    ///     As per benchmark, this appears to be x2 faster than generic <see cref="Allocate{T}" />:
+    ///     https://t.me/sym_ansel_dev/39 . This is because generic call does dictionary lookup to obtain java class object.
+    /// </remarks>
     public Reference AllocateObject(JavaClass @class)
     {
         Object o = (Activator.CreateInstance(@class.ClrType!) as Object)!;
@@ -61,7 +64,8 @@ public partial class JvmState
     /// <typeparam name="T">Class to instantiate.</typeparam>
     /// <returns>Newly created object.</returns>
     /// <remarks>
-    ///     This calls default constructor, assigns java class object and adds the object to heap.
+    ///     This calls default constructor, assigns java class object and adds the object to heap. This is easier to use in
+    ///     native code, but <see cref="AllocateObject" /> is faster.
     /// </remarks>
     public T Allocate<T>() where T : Object, new()
     {
