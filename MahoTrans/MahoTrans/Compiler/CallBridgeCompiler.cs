@@ -106,66 +106,46 @@ public static class CallBridgeCompiler
     {
         var paramType = parameter.ParameterType;
 
+        // frame object
+        il.Emit(OpCodes.Ldarg_0);
+
         // primitive & ref
         if (StackReversePopMethods.TryGetValue(paramType, out var popper))
         {
-            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, popper);
-
             return;
         }
 
         // strings
         if (paramType == typeof(string))
         {
-            // take jvm
-            il.Emit(OpCodes.Ldsfld, Context);
-
-            // take reference
-            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-
-            // resolve string
-            il.Emit(OpCodes.Call, IsNullable(parameter) ? ResolveStringOrNull : ResolveString);
-
+            il.Emit(OpCodes.Call, IsNullable(parameter) ? ResolveStringOrNullEx : ResolveStringEx);
             return;
         }
-
 
         // array
         // check for popper works as check for supported primitive.
         if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
         {
-            // take jvm
-            il.Emit(OpCodes.Ldsfld, Context);
-
-            // take reference
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-
-            // resolve array
-            var resolver = IsNullable(parameter) ? ResolveArrOrNull : ResolveArr;
+            var resolver = IsNullable(parameter) ? ResolveArrOrNullEx : ResolveArrEx;
             il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType.GetElementType()!));
-
             return;
         }
 
+        // object
         if (paramType.IsAssignableTo(typeof(Object)))
         {
-            // take jvm
-            il.Emit(OpCodes.Ldsfld, Context);
-
-            // take reference
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-
-            // resolve
-            var resolver = IsNullable(parameter) ? ResolveObjectOrNull : ResolveObject;
+            var resolver = IsNullable(parameter) ? ResolveObjectOrNullEx : ResolveObjectEx;
             il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType));
-
             return;
         }
 
+        // enum
         if (paramType.IsEnum)
         {
             il.Emit(OpCodes.Ldarg_0);

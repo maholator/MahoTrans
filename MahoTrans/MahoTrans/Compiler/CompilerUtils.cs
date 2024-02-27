@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 
 namespace MahoTrans.Compiler;
 
@@ -17,6 +18,8 @@ public static class CompilerUtils
     public const string BRIDGE_CLASS_NAME = "MTBridgesHost";
 
     private static Type Jvm => typeof(JvmState);
+
+    private static Type RefExt => typeof(ReferenceExtensions);
 
     public static readonly Dictionary<Type, MethodInfo> StackPopMethods = new()
     {
@@ -100,4 +103,39 @@ public static class CompilerUtils
     ///     <see cref="JvmState.ResolveArrayOrNull{T}" />. Make sure to construct generic method.
     /// </summary>
     public static readonly MethodInfo ResolveArrOrNull = Jvm.GetMethod(nameof(JvmState.ResolveArrayOrNull))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsObject" />
+    /// </summary>
+    public static readonly MethodInfo ResolveAnyObjectEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsObject))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.As{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveObjectEx = RefExt.GetMethod(nameof(ReferenceExtensions.As))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsOrNull{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveObjectOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsOrNull))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsString" />
+    /// </summary>
+    public static readonly MethodInfo ResolveStringEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsString))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsStringOrNull" />
+    /// </summary>
+    public static readonly MethodInfo ResolveStringOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsStringOrNull))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsArray{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveArrEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsArray))!;
+
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.AsArrayOrNull{T}" />
+    /// </summary>
+    public static readonly MethodInfo ResolveArrOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsArrayOrNull))!;
 }
