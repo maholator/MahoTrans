@@ -15,7 +15,7 @@ public static class BytecodeLinker
         var isClinit = method.Method.Descriptor.Name == "<clinit>";
         try
         {
-            LinkInternal(method, method.Method.Class, isClinit);
+            LinkInternal(method, isClinit);
         }
         catch (Exception e)
         {
@@ -134,8 +134,9 @@ public static class BytecodeLinker
         return false;
     }
 
-    private static void LinkInternal(JavaMethodBody method, JavaClass cls, bool isClinit)
+    private static void LinkInternal(JavaMethodBody method, bool isClinit)
     {
+        JavaClass cls = method.Method.Class;
         JvmState jvm = JvmContext.Jvm!;
         var logger = jvm.Toolkit.LoadLogger;
         {
