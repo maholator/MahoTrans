@@ -15,7 +15,7 @@ namespace MahoTrans.Runtime;
 ///     Object which holds all information about JVM - threads, objects, classes, etc and manages JVM execution.
 /// </summary>
 [PublicAPI]
-public partial class JvmState
+public sealed partial class JvmState
 {
     private bool _running;
 
