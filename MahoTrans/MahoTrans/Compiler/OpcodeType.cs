@@ -6,82 +6,82 @@ namespace MahoTrans.Compiler;
 public enum OpcodeType
 {
     /// <summary>
-    /// This opcode doesn't do anything.
+    ///     This opcode doesn't do anything.
     /// </summary>
     NoOp = 1,
 
     /// <summary>
-    /// This opcode loads a constant.
+    ///     This opcode loads a constant.
     /// </summary>
     Constant,
 
     /// <summary>
-    /// This opcode modifies or reads a local variable.
+    ///     This opcode modifies or reads a local variable.
     /// </summary>
     Local,
 
     /// <summary>
-    /// This opcode reads or modifies an array element.
+    ///     This opcode reads or modifies an array element.
     /// </summary>
     Array,
 
     /// <summary>
-    /// This opcode does a no-op stack manipulation, i.e. pop/dup/swap.
+    ///     This opcode does a no-op stack manipulation, i.e. pop/dup/swap.
     /// </summary>
     Stack,
 
     /// <summary>
-    /// This opcode does math operation.
+    ///     This opcode does math operation.
     /// </summary>
     Math,
 
     /// <summary>
-    /// This opcode converts value from one type to another.
+    ///     This opcode converts value from one type to another.
     /// </summary>
     Conversion,
 
     /// <summary>
-    /// This opcode compares two values.
+    ///     This opcode compares two values.
     /// </summary>
     Compare,
 
     /// <summary>
-    /// This opcode does branching.
+    ///     This opcode does branching.
     /// </summary>
     Branch,
 
     /// <summary>
-    /// This opcode does jump.
+    ///     This opcode does jump.
     /// </summary>
     Jump,
 
     /// <summary>
-    /// This opcode terminates a method.
+    ///     This opcode terminates a method.
     /// </summary>
     Return,
 
     /// <summary>
-    /// This opcode throws an exception.
+    ///     This opcode throws an exception.
     /// </summary>
     Throw,
 
     /// <summary>
-    /// This calls prelinked method.
+    ///     This calls prelinked method.
     /// </summary>
     Call,
 
     /// <summary>
-    /// This calls virtual method.
+    ///     This calls virtual method.
     /// </summary>
     VirtCall,
 
     /// <summary>
-    /// This reads/writes static.
+    ///     This reads/writes static.
     /// </summary>
     Static,
 
     /// <summary>
-    /// This opcode allocates something.
+    ///     This opcode allocates something.
     /// </summary>
     Alloc,
 
@@ -91,7 +91,10 @@ public enum OpcodeType
 
     Bridge,
 
-    InitBridge,
+    /// <summary>
+    ///     This opcode has attached class initializer.
+    /// </summary>
+    Initializer,
 
     Error,
 }

@@ -1121,7 +1121,7 @@ public class JavaRunner
                 pointer++;
                 break;
             }
-            case MTOpcode.bridge_init_class:
+            case MTOpcode.bridge_init:
             {
                 var p = (ClassBoundBridge)instr.Data;
                 if (p.Class.PendingInitializer)
@@ -1135,7 +1135,7 @@ public class JavaRunner
                 break;
             }
 
-            case MTOpcode.get_static:
+            case MTOpcode.get_static_init:
             {
                 var p = (JavaClass)instr.Data;
                 if (p.PendingInitializer)
@@ -1149,7 +1149,7 @@ public class JavaRunner
                 break;
             }
 
-            case MTOpcode.set_static:
+            case MTOpcode.set_static_init:
             {
                 var p = (JavaClass)instr.Data;
                 if (p.PendingInitializer)
@@ -1162,6 +1162,16 @@ public class JavaRunner
                 pointer++;
                 break;
             }
+
+            case MTOpcode.get_static:
+                frame.PushUnchecked(jvm.StaticFields[instr.IntData]);
+                pointer++;
+                break;
+
+            case MTOpcode.set_static:
+                jvm.StaticFields[instr.IntData] = frame.Pop();
+                pointer++;
+                break;
 
             case MTOpcode.error_no_class:
             {

@@ -1628,15 +1628,21 @@ public static class BytecodeLinker
                                         throw new JavaLinkageException($"Static field {d} has no static slot!");
                                     }
 
-                                    opcode = MTOpcode.bridge_init_class;
+                                    opcode = MTOpcode.bridge_init;
                                     intData = 1;
                                     data = new ClassBoundBridge(f.GetValue, c);
                                 }
+                                else if (c == cls)
+                                {
+                                    // field is in caller class. At this point initializer must be already run (method call without initializer is UB)
+                                    opcode = MTOpcode.get_static;
+                                    intData = index;
+                                }
                                 else
                                 {
+                                    opcode = MTOpcode.get_static_init;
                                     intData = index;
                                     data = c;
-                                    opcode = MTOpcode.get_static;
                                 }
                             }
 
@@ -1656,9 +1662,18 @@ public static class BytecodeLinker
                                 if (index < 0)
                                     throw new JavaLinkageException($"Static field {d} has no static slot!");
 
-                                intData = index;
-                                data = c;
-                                opcode = MTOpcode.set_static;
+                                if (c == cls)
+                                {
+                                    // field is in caller class. At this point initializer must be already run (method call without initializer is UB)
+                                    opcode = MTOpcode.set_static;
+                                    intData = index;
+                                }
+                                else
+                                {
+                                    intData = index;
+                                    data = c;
+                                    opcode = MTOpcode.set_static_init;
+                                }
                             }
 
                             SetNextStack();
@@ -1680,7 +1695,7 @@ public static class BytecodeLinker
                                 }
                                 else
                                 {
-                                    opcode = MTOpcode.bridge_init_class;
+                                    opcode = MTOpcode.bridge_init;
                                     intData = 1;
                                     data = new ClassBoundBridge(b, c);
                                 }
@@ -1708,7 +1723,7 @@ public static class BytecodeLinker
                                 }
                                 else
                                 {
-                                    opcode = MTOpcode.bridge_init_class;
+                                    opcode = MTOpcode.bridge_init;
                                     intData = 2;
                                     data = new ClassBoundBridge(b, c);
                                 }

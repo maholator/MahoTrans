@@ -215,16 +215,26 @@ public enum MTOpcode : byte
     #region Fileds (static)
 
     /// <summary>
+    ///     Gets value from <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    get_static,
+
+    /// <summary>
+    ///     Sets value in <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    set_static,
+
+    /// <summary>
     ///     Gets value from <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
     ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
     /// </summary>
-    get_static,
+    get_static_init,
 
     /// <summary>
     ///     Sets value in <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
     ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
     /// </summary>
-    set_static,
+    set_static_init,
 
     #endregion
 
@@ -267,7 +277,7 @@ public enum MTOpcode : byte
     ///     <see cref="LinkedInstruction.IntData" /> must contain count of taken values.
     ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.
     /// </summary>
-    bridge_init_class,
+    bridge_init,
 
     #endregion
 

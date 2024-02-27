@@ -256,7 +256,7 @@ public static class DebuggerUtils
                 return 1;
 
             case MTOpcode.bridge:
-            case MTOpcode.bridge_init_class:
+            case MTOpcode.bridge_init:
                 return instruction.IntData;
 
             default:
