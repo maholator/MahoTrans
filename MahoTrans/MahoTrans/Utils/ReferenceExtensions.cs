@@ -30,7 +30,7 @@ public static class ReferenceExtensions
     /// <summary>
     ///     Calls <see cref="JvmState.ResolveOrNull{T}" />.
     /// </summary>
-    public static T? AsNullable<T>(this Reference r) where T : Object
+    public static T? AsOrNull<T>(this Reference r) where T : Object
     {
         return JvmContext.Jvm!.ResolveOrNull<T>(r);
     }
