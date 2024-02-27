@@ -126,7 +126,6 @@ public static class CallBridgeCompiler
         // check for popper works as check for supported primitive.
         if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
         {
-            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
             var resolver = IsNullable(parameter) ? ResolveArrOrNullEx : ResolveArrEx;
             il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType.GetElementType()!));
@@ -136,7 +135,6 @@ public static class CallBridgeCompiler
         // object
         if (paramType.IsAssignableTo(typeof(Object)))
         {
-            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
             var resolver = IsNullable(parameter) ? ResolveObjectOrNullEx : ResolveObjectEx;
             il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType));
@@ -146,7 +144,6 @@ public static class CallBridgeCompiler
         // enum
         if (paramType.IsEnum)
         {
-            il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[Enum.GetUnderlyingType(paramType)]);
             return;
         }
