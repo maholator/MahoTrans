@@ -37,7 +37,7 @@ public static class OpcodeExtensions
         }
     }
 
-    public static OpcodeType GetType(this MTOpcode opcode)
+    public static OpcodeType GetOpcodeType(this MTOpcode opcode)
     {
         return opcode switch
         {
