@@ -18,8 +18,6 @@ public static class CallBridgeCompiler
 {
     private static int _bridgeCounter = 1;
 
-    private static NullabilityInfoContext _nullability = new NullabilityInfoContext();
-
     public static int BuildCallBridge(MethodInfo method, TypeBuilder bridgeContainer)
     {
         int num = _bridgeCounter;
@@ -150,15 +148,9 @@ public static class CallBridgeCompiler
         {
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Call, StackReversePopMethods[Enum.GetUnderlyingType(paramType)]);
-
             return;
         }
 
         throw new NotImplementedException($"This parameter ({paramType}) can't be marshalled.");
-    }
-
-    private static bool IsNullable(ParameterInfo param)
-    {
-        return _nullability.Create(param).WriteState == NullabilityState.Nullable;
     }
 }

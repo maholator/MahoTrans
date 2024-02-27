@@ -12,6 +12,8 @@ namespace MahoTrans.Compiler;
 /// </summary>
 public static class CompilerUtils
 {
+    private static NullabilityInfoContext _nullability = new();
+
     /// <summary>
     ///     Name of a class that will host all bridge methods.
     /// </summary>
@@ -127,7 +129,8 @@ public static class CompilerUtils
     /// <summary>
     ///     <see cref="ReferenceExtensions.AsStringOrNull" />
     /// </summary>
-    public static readonly MethodInfo ResolveStringOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsStringOrNull))!;
+    public static readonly MethodInfo ResolveStringOrNullEx =
+        RefExt.GetMethod(nameof(ReferenceExtensions.AsStringOrNull))!;
 
     /// <summary>
     ///     <see cref="ReferenceExtensions.AsArray{T}" />
@@ -138,4 +141,9 @@ public static class CompilerUtils
     ///     <see cref="ReferenceExtensions.AsArrayOrNull{T}" />
     /// </summary>
     public static readonly MethodInfo ResolveArrOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsArrayOrNull))!;
+
+    public static bool IsNullable(ParameterInfo param)
+    {
+        return _nullability.Create(param).WriteState == NullabilityState.Nullable;
+    }
 }
