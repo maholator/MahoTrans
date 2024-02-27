@@ -114,10 +114,9 @@ public class Object
     public void FixMonitorAfterWait(long mwPacked)
     {
         MonitorWait mw = mwPacked;
-        MonitorReEnterCount = mw.MonitorReEnterCount;
         if (MonitorOwner != mw.MonitorOwner)
             throw new JavaRuntimeError("After wait, thread that owns the object was changed.");
-
+        MonitorReEnterCount = mw.MonitorReEnterCount;
         // pending interrupt?
         Jvm.Resolve<Thread>(Thread.currentThread()).CheckInterrupt();
     }
@@ -182,7 +181,7 @@ public class Object
             return;
 
         var mw = Waiters[^1];
-        Waiters.RemoveAt(Waiters.Count - 1);
+        //Waiters.RemoveAt(Waiters.Count - 1);
 
         if (Jvm.Attach(mw.MonitorOwner))
             return;

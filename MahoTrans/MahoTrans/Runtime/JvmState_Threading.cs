@@ -77,6 +77,13 @@ public partial class JvmState
                 _wakeupHooks.Add(new ThreadWakeupHook(Toolkit.Clock.GetCurrentJvmMs(_cycleNumber) + returnAfter,
                     thread.ThreadId, monitor));
             }
+            else if (!monitor.IsNull)
+            {
+                // we still need a hook due to monitor object.
+                // for example, if thread stopped on wait() and then was interrupted by someone else,
+                // it needs to delete itself from wait list.
+                _wakeupHooks.Add(new ThreadWakeupHook(long.MaxValue - 1, thread.ThreadId, monitor));
+            }
         }
     }
 
