@@ -35,6 +35,7 @@ public class MIDlet : Object
         if (Properties.TryGetValue(Jvm.ResolveString(r), out var val))
             return Jvm.InternalizeString(val);
 
+        // never try to return empty string here. NEVER. If you need a local hack, do a LOCAL hack to some manifest field.
         return Reference.Null;
     }
 
