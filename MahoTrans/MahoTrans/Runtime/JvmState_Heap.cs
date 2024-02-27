@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Abstractions;
@@ -253,7 +254,7 @@ public partial class JvmState
 
         throw new JavaRuntimeError($"Reference {r.Index} pointers to {obj.GetType()} object, {typeof(T)} expected.");
 #else
-        return (T)_heap[r.Index]!;
+        return Unsafe.As<T>(_heap[r.Index]!);
 #endif
     }
 
@@ -273,7 +274,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (String)_heap[r.Index]!;
+        var obj = Unsafe.As<String>(_heap[r.Index]!);
         return obj.Value;
     }
 
@@ -295,7 +296,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (Array<T>)_heap[r.Index]!;
+        var obj = Unsafe.As<Array<T>>(_heap[r.Index]!);
         return obj.Value;
     }
 
@@ -314,7 +315,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (Array<T>)_heap[r.Index]!;
+        var obj = Unsafe.As<Array<T>>(_heap[r.Index]!);
         obj[index] = value;
     }
 
