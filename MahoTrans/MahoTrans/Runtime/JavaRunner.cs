@@ -10,6 +10,7 @@ using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Array = java.lang.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
@@ -316,8 +317,7 @@ public class JavaRunner
 
             case MTOpcode.array_length:
             {
-                var arr = jvm.Resolve<Array>(frame.PopReference());
-                frame.PushInt(arr.BaseValue.Length);
+                frame.PushInt(frame.PopReference().As<Array>().Length);
                 pointer++;
                 break;
             }

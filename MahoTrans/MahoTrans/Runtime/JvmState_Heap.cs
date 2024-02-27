@@ -116,11 +116,7 @@ public partial class JvmState
 
         JavaClass cls = GetClass(className);
 
-        return PutToHeap(new Array<Reference>
-        {
-            Value = data,
-            JavaClass = cls
-        });
+        return PutToHeap(Array<Reference>.Create(data, cls));
     }
 
     /// <summary>
@@ -136,11 +132,7 @@ public partial class JvmState
         // this does all the checks (i.e. sbyte/ubyte)
         var arrayClass = PrimitiveToArrayType<T>();
 
-        return PutToHeap(new Array<T>
-        {
-            Value = data,
-            JavaClass = arrayClass,
-        });
+        return PutToHeap(Array<T>.Create(data, arrayClass));
     }
 
     #endregion
@@ -181,11 +173,7 @@ public partial class JvmState
     {
         if (length < 0)
             Throw<NegativeArraySizeException>();
-        return PutToHeap(new Array<Reference>
-        {
-            Value = new Reference[length],
-            JavaClass = cls
-        });
+        return PutToHeap(Array<Reference>.CreateEmpty(length, cls));
     }
 
     #endregion
@@ -196,11 +184,7 @@ public partial class JvmState
     {
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
-        return PutToHeap(new Array<T>
-        {
-            Value = new T[length],
-            JavaClass = PrimitiveToArrayType<T>(),
-        });
+        return PutToHeap(Array<T>.CreateEmpty(length, PrimitiveToArrayType<T>()));
     }
 
     /// <summary>

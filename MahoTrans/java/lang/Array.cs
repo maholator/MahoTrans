@@ -1,8 +1,9 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Runtime.Types;
 using Newtonsoft.Json;
 using ClrArray = System.Array;
 
@@ -12,14 +13,16 @@ namespace java.lang;
 public class Array<T> : Array where T : struct
 {
     /// <summary>
-    /// Underlying CLR array. Do not do direct accesses to it if there is a chance that index is invalid, use <see cref="this"/> instead for proper bounds checks.
+    ///     Underlying CLR array. Do not do direct accesses to it if there is a chance that index is invalid, use
+    ///     <see cref="this" /> instead for proper bounds checks.
     /// </summary>
     [JavaIgnore] public T[] Value = null!;
 
     [JsonIgnore] public override ClrArray BaseValue => Value;
 
     /// <summary>
-    /// Gets/sets values in <see cref="Value"/>, performs bounds checks. Throws <see cref="ArrayIndexOutOfBoundsException"/> in case of failure.
+    ///     Gets/sets values in <see cref="Value" />, performs bounds checks. Throws
+    ///     <see cref="ArrayIndexOutOfBoundsException" /> in case of failure.
     /// </summary>
     /// <param name="index"></param>
     public T this[int index]
@@ -47,9 +50,25 @@ public class Array<T> : Array where T : struct
         foreach (var r in (Reference[])(object)Value)
             queue.Enqueue(r);
     }
+
+    public static Array<T> Create(T[] underlying, JavaClass cls)
+    {
+        var arr = new Array<T>();
+        arr.Value = underlying;
+        arr.Length = underlying.Length;
+        arr.JavaClass = cls;
+        return arr;
+    }
+
+    public static Array<T> CreateEmpty(int length, JavaClass cls)
+    {
+        return Create(new T[length], cls);
+    }
 }
 
 public abstract class Array : Object
 {
     [JsonIgnore] public abstract ClrArray BaseValue { get; }
+
+    [JavaIgnore] [JsonProperty] public int Length;
 }
