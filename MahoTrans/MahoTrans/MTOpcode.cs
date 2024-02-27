@@ -61,15 +61,7 @@ public enum MTOpcode : byte
     #region Locals
 
     load,
-    load_0,
-    load_1,
-    load_2,
-    load_3,
     store,
-    store_0,
-    store_1,
-    store_2,
-    store_3,
     iinc,
 
     #endregion

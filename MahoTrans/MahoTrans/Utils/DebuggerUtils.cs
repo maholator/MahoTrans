@@ -52,18 +52,10 @@ public static class DebuggerUtils
                 return 0;
 
             case MTOpcode.load:
-            case MTOpcode.load_0:
-            case MTOpcode.load_1:
-            case MTOpcode.load_2:
-            case MTOpcode.load_3:
                 // loads load 1 value and take nothing.
                 return 0;
 
             case MTOpcode.store:
-            case MTOpcode.store_0:
-            case MTOpcode.store_1:
-            case MTOpcode.store_2:
-            case MTOpcode.store_3:
                 // stores take 1 value.
                 return 1;
 

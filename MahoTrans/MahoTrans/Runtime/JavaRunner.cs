@@ -217,48 +217,8 @@ public class JavaRunner
                 pointer++;
                 break;
 
-            case MTOpcode.load_0:
-                frame.PushFromLocal(0);
-                pointer++;
-                break;
-
-            case MTOpcode.load_1:
-                frame.PushFromLocal(1);
-                pointer++;
-                break;
-
-            case MTOpcode.load_2:
-                frame.PushFromLocal(2);
-                pointer++;
-                break;
-
-            case MTOpcode.load_3:
-                frame.PushFromLocal(3);
-                pointer++;
-                break;
-
             case MTOpcode.store:
                 frame.PopToLocal(instr.IntData);
-                pointer++;
-                break;
-
-            case MTOpcode.store_0:
-                frame.PopToLocal(0);
-                pointer++;
-                break;
-
-            case MTOpcode.store_1:
-                frame.PopToLocal(1);
-                pointer++;
-                break;
-
-            case MTOpcode.store_2:
-                frame.PopToLocal(2);
-                pointer++;
-                break;
-
-            case MTOpcode.store_3:
-                frame.PopToLocal(3);
                 pointer++;
                 break;
 

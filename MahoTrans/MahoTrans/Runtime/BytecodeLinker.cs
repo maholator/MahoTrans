@@ -439,102 +439,122 @@ public static class BytecodeLinker
                             SetNextStack();
                             break;
                         case JavaOpcode.iload_0:
-                            opcode = MTOpcode.load_0;
+                            opcode = MTOpcode.load;
+                            intData = 0;
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.iload_1:
-                            opcode = MTOpcode.load_1;
+                            opcode = MTOpcode.load;
+                            intData = 1;
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.iload_2:
-                            opcode = MTOpcode.load_2;
+                            opcode = MTOpcode.load;
+                            intData = 2;
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.iload_3:
-                            opcode = MTOpcode.load_3;
+                            opcode = MTOpcode.load;
+                            intData = 3;
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.lload_0:
-                            opcode = MTOpcode.load_0;
+                            opcode = MTOpcode.load;
+                            intData = 0;
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lload_1:
-                            opcode = MTOpcode.load_1;
+                            opcode = MTOpcode.load;
+                            intData = 1;
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lload_2:
-                            opcode = MTOpcode.load_2;
+                            opcode = MTOpcode.load;
+                            intData = 2;
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lload_3:
-                            opcode = MTOpcode.load_3;
+                            opcode = MTOpcode.load;
+                            intData = 3;
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.fload_0:
-                            opcode = MTOpcode.load_0;
+                            opcode = MTOpcode.load;
+                            intData = 0;
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fload_1:
-                            opcode = MTOpcode.load_1;
+                            opcode = MTOpcode.load;
+                            intData = 1;
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fload_2:
-                            opcode = MTOpcode.load_2;
+                            opcode = MTOpcode.load;
+                            intData = 2;
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fload_3:
-                            opcode = MTOpcode.load_3;
+                            opcode = MTOpcode.load;
+                            intData = 3;
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.dload_0:
-                            opcode = MTOpcode.load_0;
+                            opcode = MTOpcode.load;
+                            intData = 0;
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dload_1:
-                            opcode = MTOpcode.load_1;
+                            opcode = MTOpcode.load;
+                            intData = 1;
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dload_2:
-                            opcode = MTOpcode.load_2;
+                            opcode = MTOpcode.load;
+                            intData = 2;
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dload_3:
-                            opcode = MTOpcode.load_3;
+                            opcode = MTOpcode.load;
+                            intData = 3;
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.aload_0:
-                            opcode = MTOpcode.load_0;
+                            opcode = MTOpcode.load;
+                            intData = 0;
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.aload_1:
-                            opcode = MTOpcode.load_1;
+                            opcode = MTOpcode.load;
+                            intData = 1;
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.aload_2:
-                            opcode = MTOpcode.load_2;
+                            opcode = MTOpcode.load;
+                            intData = 2;
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.aload_3:
-                            opcode = MTOpcode.load_3;
+                            opcode = MTOpcode.load;
+                            intData = 3;
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStack();
                             break;
@@ -625,102 +645,122 @@ public static class BytecodeLinker
                             SetNextStack();
                             break;
                         case JavaOpcode.istore_0:
-                            opcode = MTOpcode.store_0;
+                            opcode = MTOpcode.store;
+                            intData = 0;
                             emulatedStack.PopWithAssert(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.istore_1:
-                            opcode = MTOpcode.store_1;
+                            opcode = MTOpcode.store;
+                            intData = 1;
                             emulatedStack.PopWithAssert(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.istore_2:
-                            opcode = MTOpcode.store_2;
+                            opcode = MTOpcode.store;
+                            intData = 2;
                             emulatedStack.PopWithAssert(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.istore_3:
-                            opcode = MTOpcode.store_3;
+                            opcode = MTOpcode.store;
+                            intData = 3;
                             emulatedStack.PopWithAssert(PrimitiveType.Int);
                             SetNextStack();
                             break;
                         case JavaOpcode.lstore_0:
-                            opcode = MTOpcode.store_0;
+                            opcode = MTOpcode.store;
+                            intData = 0;
                             emulatedStack.PopWithAssert(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lstore_1:
-                            opcode = MTOpcode.store_1;
+                            opcode = MTOpcode.store;
+                            intData = 1;
                             emulatedStack.PopWithAssert(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lstore_2:
-                            opcode = MTOpcode.store_2;
+                            opcode = MTOpcode.store;
+                            intData = 2;
                             emulatedStack.PopWithAssert(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.lstore_3:
-                            opcode = MTOpcode.store_3;
+                            opcode = MTOpcode.store;
+                            intData = 3;
                             emulatedStack.PopWithAssert(PrimitiveType.Long);
                             SetNextStack();
                             break;
                         case JavaOpcode.fstore_0:
-                            opcode = MTOpcode.store_0;
+                            opcode = MTOpcode.store;
+                            intData = 0;
                             emulatedStack.PopWithAssert(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fstore_1:
-                            opcode = MTOpcode.store_1;
+                            opcode = MTOpcode.store;
+                            intData = 1;
                             emulatedStack.PopWithAssert(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fstore_2:
-                            opcode = MTOpcode.store_2;
+                            opcode = MTOpcode.store;
+                            intData = 2;
                             emulatedStack.PopWithAssert(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.fstore_3:
-                            opcode = MTOpcode.store_3;
+                            opcode = MTOpcode.store;
+                            intData = 3;
                             emulatedStack.PopWithAssert(PrimitiveType.Float);
                             SetNextStack();
                             break;
                         case JavaOpcode.dstore_0:
-                            opcode = MTOpcode.store_0;
+                            opcode = MTOpcode.store;
+                            intData = 0;
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dstore_1:
-                            opcode = MTOpcode.store_1;
+                            opcode = MTOpcode.store;
+                            intData = 1;
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dstore_2:
-                            opcode = MTOpcode.store_2;
+                            opcode = MTOpcode.store;
+                            intData = 2;
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.dstore_3:
-                            opcode = MTOpcode.store_3;
+                            opcode = MTOpcode.store;
+                            intData = 3;
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             SetNextStack();
                             break;
                         case JavaOpcode.astore_0:
-                            opcode = MTOpcode.store_0;
+                            opcode = MTOpcode.store;
+                            intData = 0;
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.astore_1:
-                            opcode = MTOpcode.store_1;
+                            opcode = MTOpcode.store;
+                            intData = 1;
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.astore_2:
-                            opcode = MTOpcode.store_2;
+                            opcode = MTOpcode.store;
+                            intData = 2;
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             SetNextStack();
                             break;
                         case JavaOpcode.astore_3:
-                            opcode = MTOpcode.store_3;
+                            opcode = MTOpcode.store;
+                            intData = 3;
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             SetNextStack();
                             break;
