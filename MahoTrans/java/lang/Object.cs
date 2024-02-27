@@ -97,7 +97,8 @@ public class Object
         // thread MUST own the monitor as per docs.
         var thrId = Thread.CurrentThread!.ThreadId;
         if (_monitorOwner == 0)
-            Jvm.Throw<IllegalMonitorStateException>($"Monitor {HeapAddress} was not locked to anybody. Wait() was invoked from thread {thrId}.");
+            Jvm.Throw<IllegalMonitorStateException>(
+                $"Monitor {HeapAddress} was not locked to anybody. Wait() was invoked from thread {thrId}.");
         if (_monitorOwner != thrId)
             Jvm.Throw<IllegalMonitorStateException>(
                 $"Monitor {HeapAddress} was locked by {_monitorOwner}, {thrId} attempts to wait().");
@@ -147,6 +148,7 @@ public class Object
     /// <remarks>
     ///     This API is for interpreter.
     /// </remarks>
+    [JavaIgnore]
     public bool TryEnterMonitor(JavaThread thread)
     {
         if (_monitorOwner == 0)
@@ -175,6 +177,7 @@ public class Object
     /// <remarks>
     ///     This API is for interpreter.
     /// </remarks>
+    [JavaIgnore]
     public void ExitMonitor(JavaThread thread)
     {
         if (_monitorOwner != thread.ThreadId)
