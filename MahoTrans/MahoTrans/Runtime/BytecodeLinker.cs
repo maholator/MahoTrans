@@ -160,8 +160,8 @@ public static class BytecodeLinker
         var consts = cls.Constants;
         var output = new LinkedInstruction[code.Length];
         var isLinked = new bool[code.Length];
-        var stackBeforeInstruction = new PredictedStackState[code.Length];
-        stackBeforeInstruction[0].StackBeforeExecution = Array.Empty<PrimitiveType>(); // we enter with empty stack
+        var predStackOutput = new PredictedStackState[code.Length];
+        predStackOutput[0].StackBeforeExecution = Array.Empty<PrimitiveType>(); // we enter with empty stack
 
         // offsets cache
         // key is offset, value is instruction index
@@ -177,7 +177,7 @@ public static class BytecodeLinker
         foreach (var methodCatch in method.Catches)
         {
             entryPoints.Push(offsets[methodCatch.CatchStart]);
-            stackBeforeInstruction[offsets[methodCatch.CatchStart]].StackBeforeExecution =
+            predStackOutput[offsets[methodCatch.CatchStart]].StackBeforeExecution =
                 new[] { PrimitiveType.Reference };
         }
 
@@ -185,7 +185,7 @@ public static class BytecodeLinker
 
         void SetStack(int target)
         {
-            if (target < 0 || target >= stackBeforeInstruction.Length)
+            if (target < 0 || target >= predStackOutput.Length)
             {
                 logger?.Log(LoadIssueType.BrokenFlow, cls.Name,
                     $"Attempt to set stack for instruction {target} in method {method.Method}, but it has only {code.Length} instructions.");
@@ -193,9 +193,9 @@ public static class BytecodeLinker
             }
 
             var now = emulatedStack.ToArray();
-            var was = stackBeforeInstruction[target].StackBeforeExecution;
+            var was = predStackOutput[target].StackBeforeExecution;
             if (was == null)
-                stackBeforeInstruction[target].StackBeforeExecution = now;
+                predStackOutput[target].StackBeforeExecution = now;
             else if (!was.SequenceEqual(now))
                 throw new StackMismatchException($"Stack mismatch at instruction {target}");
         }
@@ -213,7 +213,7 @@ public static class BytecodeLinker
 
                 // bringing stack to valid state
                 emulatedStack.Clear();
-                var stackOnEntry = stackBeforeInstruction[entryPoint].StackBeforeExecution;
+                var stackOnEntry = predStackOutput[entryPoint].StackBeforeExecution;
                 if (stackOnEntry == null)
                     throw new JavaLinkageException($"Method can't be entered at {entryPoint}");
                 foreach (var el in stackOnEntry.Reverse())
@@ -2056,7 +2056,7 @@ public static class BytecodeLinker
                     void SetDiff()
                     {
                         var values = emulatedStack.GetPopsCountAndReset();
-                        stackBeforeInstruction[instrIndex].ValuesPoppedOnExecution = values;
+                        predStackOutput[instrIndex].ValuesPoppedOnExecution = values;
                     }
                 }
             }
@@ -2064,12 +2064,12 @@ public static class BytecodeLinker
         catch (StackMismatchException e)
         {
             logger?.Log(LoadIssueType.StackMismatch, cls.Name, $"Method {method.Method.Descriptor}: " + e.Message);
-            stubCode(ref output, out stackBeforeInstruction);
+            stubCode(ref output, out predStackOutput);
         }
         catch (BrokenFlowException e)
         {
             logger?.Log(LoadIssueType.BrokenFlow, cls.Name, $"Method {method.Method.Descriptor}: " + e.Message);
-            stubCode(ref output, out stackBeforeInstruction);
+            stubCode(ref output, out predStackOutput);
         }
 
         if (!CheckMethodExit(code, method.Method.Descriptor, cls))
@@ -2081,7 +2081,7 @@ public static class BytecodeLinker
 
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
-        method.StackTypes = stackBeforeInstruction;
+        method.StackTypes = predStackOutput;
     }
 
     private static void stubCode(ref LinkedInstruction[] output, out PredictedStackState[] stackBeforeInstruction)
