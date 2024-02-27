@@ -1329,12 +1329,14 @@ public static class BytecodeLinker
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             emulatedStack.Push(PrimitiveType.Int);
+                            SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dcmpg:
                             opcode = MTOpcode.dcmpg;
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             emulatedStack.PopWithAssert(PrimitiveType.Double);
                             emulatedStack.Push(PrimitiveType.Int);
+                            SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ifeq:
                         {
