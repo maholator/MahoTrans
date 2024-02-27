@@ -2026,7 +2026,7 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.goto_w:
                         case JavaOpcode.jsr_w:
-                            throw new NotImplementedException("No wide jumps!");
+                            throw new NotImplementedException("Wide jumps not implemented yet.");
                         case JavaOpcode.breakpoint:
                             throw new NotImplementedException("No breakpoint opcode!");
                         case JavaOpcode._inplacereturn:
