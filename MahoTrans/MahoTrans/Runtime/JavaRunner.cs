@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
-using MahoTrans.Compiler;
 using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
@@ -1132,58 +1131,6 @@ public class JavaRunner
                 }
 
                 p.Bridge(frame);
-                pointer++;
-                break;
-            }
-            case MTOpcode.get_field:
-            {
-                var d = (ReflectionFieldPointer)instr.Data;
-                // attempt to init class
-                if (d.Class.PendingInitializer)
-                {
-                    d.Class.Initialize(thread);
-                    return;
-                }
-
-                if (d.Field.IsStatic)
-                {
-                    frame.Push(d.Field.GetValue(null));
-                }
-                else
-                {
-                    var r = frame.PopReference();
-                    var obj = jvm.ResolveObject(r);
-                    var val = d.Field.GetValue(obj);
-                    frame.Push(val);
-                }
-
-                pointer++;
-                break;
-            }
-            case MTOpcode.set_field:
-            {
-                var d = (ReflectionFieldPointer)instr.Data;
-                // attempt to init class
-                if (d.Class.PendingInitializer)
-                {
-                    d.Class.Initialize(thread);
-                    return;
-                }
-
-                var popper = CompilerUtils.StackPopMethods[d.Field.FieldType];
-                var value = popper.Invoke(frame, System.Array.Empty<object>());
-
-                if (d.Field.IsStatic)
-                {
-                    d.Field.SetValue(null, value);
-                }
-                else
-                {
-                    var r = frame.PopReference();
-                    var obj = jvm.ResolveObject(r);
-                    d.Field.SetValue(obj, value);
-                }
-
                 pointer++;
                 break;
             }

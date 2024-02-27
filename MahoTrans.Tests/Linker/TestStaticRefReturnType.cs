@@ -62,7 +62,6 @@ public class TestStaticRefReturnType
             ExecutionManner.Unlocked)
         {
             OnOverflow = AllocatorBehaviourOnOverflow.ThrowOutOfMem,
-            UseBridgesForFields = false
         };
         jvm.AddClrClasses(typeof(JavaRunner).Assembly);
         return jvm;

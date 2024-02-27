@@ -16,5 +16,4 @@ public partial class JvmState
     public AllocatorBehaviourOnOverflow OnOverflow;
     public GraphicsFlow GraphicsFlow;
     public MissingThingsHandling MissingHandling;
-    public bool UseBridgesForFields = true;
 }

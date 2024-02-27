@@ -1669,18 +1669,10 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
-                                if (jvm.UseBridgesForFields)
-                                {
-                                    var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                                    opcode = MTOpcode.bridge_init_class;
-                                    intData = 1;
-                                    data = new ClassBoundBridge(b, c);
-                                }
-                                else
-                                {
-                                    opcode = MTOpcode.get_field;
-                                    data = new ReflectionFieldPointer(f.NativeField!, c);
-                                }
+                                var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
+                                opcode = MTOpcode.bridge_init_class;
+                                intData = 1;
+                                data = new ClassBoundBridge(b, c);
                             }
 
                             if (d != default)
@@ -1695,18 +1687,10 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out _, out var c);
                             if (f != null)
                             {
-                                if (jvm.UseBridgesForFields)
-                                {
-                                    var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                                    opcode = MTOpcode.bridge_init_class;
-                                    intData = 2;
-                                    data = new ClassBoundBridge(b, c);
-                                }
-                                else
-                                {
-                                    opcode = MTOpcode.set_field;
-                                    data = new ReflectionFieldPointer(f.NativeField!, c);
-                                }
+                                var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
+                                opcode = MTOpcode.bridge_init_class;
+                                intData = 2;
+                                data = new ClassBoundBridge(b, c);
                             }
 
                             SetNextStack();

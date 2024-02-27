@@ -212,20 +212,6 @@ public enum MTOpcode : byte
 
     #endregion
 
-    #region Fields (reflection)
-
-    /// <summary>
-    ///     Gets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
-    /// </summary>
-    get_field,
-
-    /// <summary>
-    ///     Sets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
-    /// </summary>
-    set_field,
-
-    #endregion
-
     #region Fileds (static)
 
     /// <summary>
@@ -239,8 +225,6 @@ public enum MTOpcode : byte
     ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
     /// </summary>
     set_static,
-
-    get_native_static,
 
     #endregion
 
