@@ -160,8 +160,8 @@ public static class BytecodeLinker
         var consts = cls.Constants;
         var output = new LinkedInstruction[code.Length];
         var isLinked = new bool[code.Length];
-        PrimitiveType[]?[] stackBeforeInstruction = new PrimitiveType[]?[code.Length];
-        stackBeforeInstruction[0] = Array.Empty<PrimitiveType>(); // we enter with empty stack
+        var stackBeforeInstruction = new PredictedStackState[code.Length];
+        stackBeforeInstruction[0].StackBeforeExecution = Array.Empty<PrimitiveType>(); // we enter with empty stack
 
         // offsets cache
         // key is offset, value is instruction index
@@ -177,7 +177,7 @@ public static class BytecodeLinker
         foreach (var methodCatch in method.Catches)
         {
             entryPoints.Push(offsets[methodCatch.CatchStart]);
-            stackBeforeInstruction[offsets[methodCatch.CatchStart]] = new[] { PrimitiveType.Reference };
+            stackBeforeInstruction[offsets[methodCatch.CatchStart]].StackBeforeExecution = new[] { PrimitiveType.Reference };
         }
 
         entryPoints.Push(0);
@@ -192,9 +192,9 @@ public static class BytecodeLinker
             }
 
             var now = emulatedStack.ToArray();
-            var was = stackBeforeInstruction[target];
+            var was = stackBeforeInstruction[target].StackBeforeExecution;
             if (was == null)
-                stackBeforeInstruction[target] = now;
+                stackBeforeInstruction[target].StackBeforeExecution = now;
             else if (!was.SequenceEqual(now))
                 throw new StackMismatchException($"Stack mismatch at instruction {target}");
         }
@@ -212,7 +212,7 @@ public static class BytecodeLinker
 
                 // bringing stack to valid state
                 emulatedStack.Clear();
-                var stackOnEntry = stackBeforeInstruction[entryPoint];
+                var stackOnEntry = stackBeforeInstruction[entryPoint].StackBeforeExecution;
                 if (stackOnEntry == null)
                     throw new JavaLinkageException($"Method can't be entered at {entryPoint}");
                 foreach (var el in stackOnEntry.Reverse())
@@ -2070,17 +2070,17 @@ public static class BytecodeLinker
 
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
-        method.StackTypes = stackBeforeInstruction!;
+        method.StackTypes = stackBeforeInstruction;
     }
 
-    private static void stubCode(ref LinkedInstruction[] output, out PrimitiveType[]?[] stackBeforeInstruction)
+    private static void stubCode(ref LinkedInstruction[] output, out PredictedStackState[] stackBeforeInstruction)
     {
         for (int i = 0; i < output.Length; i++)
         {
             output[i] = new LinkedInstruction(MTOpcode.error_bytecode);
         }
 
-        stackBeforeInstruction = null!;
+        stackBeforeInstruction = new PredictedStackState[output.Length];
     }
 
     private static bool LinkVirtualCall(JavaClass cls, byte[] args, ref MTOpcode opcode, ref object data,

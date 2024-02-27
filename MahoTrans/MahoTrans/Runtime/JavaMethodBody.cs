@@ -7,8 +7,15 @@ namespace MahoTrans.Runtime;
 
 public class JavaMethodBody
 {
+    /// <summary>
+    ///     Method that this body belongs to.
+    /// </summary>
     public Method Method = null!;
+
+    #region Data from class file
+
     public ushort StackSize;
+
     public ushort LocalsCount;
 
     /// <summary>
@@ -18,9 +25,11 @@ public class JavaMethodBody
 
     public Catch[] Catches = Array.Empty<Catch>();
 
-    public JavaAttribute[] Attrs = Array.Empty<JavaAttribute>();
+    public JavaAttribute[] RawAttributes = Array.Empty<JavaAttribute>();
 
-    #region Caches
+    #endregion
+
+    #region Data calculated by linker
 
     /// <summary>
     ///     Linked bytecode of this method. This method must be linked.
@@ -41,7 +50,7 @@ public class JavaMethodBody
     ///     Types of values on stack. This method must be linked. This reflects
     ///     stack state BEFORE opcode execution.
     /// </summary>
-    public PrimitiveType[][] StackTypes = null!;
+    public PredictedStackState[] StackTypes = null!;
 
     /// <summary>
     ///     Sizes of arguments. Array size is equal to args count WITH "this" arg. Each size is one, if argument is 32-bit and
@@ -52,6 +61,12 @@ public class JavaMethodBody
     ///     For instance method (IFD)V: 1,1,1,2 (first "1" is "this" arg, last "2" is the third argument - double)
     /// </example>
     public byte[] ArgsSizes = null!;
+
+    /// <summary>
+    ///     Slot for everything that may be helpful for other subsystems but not needed in runtime. This is filled by linker.
+    ///     This may contain references to methods, fields or other objects.
+    /// </summary>
+    public object[] AuxiliaryLinkerOutput = null!;
 
     #endregion
 

@@ -503,7 +503,7 @@ public class ClassLoader
                     LocalsCount = (ushort)locals,
                     Code = instrs.ToArray(),
                     Catches = exs,
-                    Attrs = attrs
+                    RawAttributes = attrs
                 };
             }
         }
