@@ -162,6 +162,7 @@ public static class BytecodeLinker
         var isLinked = new bool[code.Length];
         var predStackOutput = new PredictedStackState[code.Length];
         predStackOutput[0].StackBeforeExecution = Array.Empty<PrimitiveType>(); // we enter with empty stack
+        var auxData = new object?[code.Length];
 
         // offsets cache
         // key is offset, value is instruction index
@@ -1630,6 +1631,7 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, true, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
+                                auxData[instrIndex] = f;
                                 var index = jvm.StaticFieldsOwners.IndexOf(f);
                                 if (index < 0)
                                 {
@@ -1669,6 +1671,7 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, true, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
+                                auxData[instrIndex] = f;
                                 // set to "native" static is forbidden in MIDP/CLDC specs. we do not check this case.
                                 var index = jvm.StaticFieldsOwners.IndexOf(f);
                                 if (index < 0)
@@ -1697,6 +1700,7 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
+                                auxData[instrIndex] = f;
                                 var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
                                 if (c == cls)
                                 {
@@ -1725,6 +1729,7 @@ public static class BytecodeLinker
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out _, out var c);
                             if (f != null)
                             {
+                                auxData[instrIndex] = f;
                                 var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
                                 if (c == cls)
                                 {
@@ -1761,6 +1766,8 @@ public static class BytecodeLinker
                                     "Unable to predict stack state when no method signature is known.");
                             }
 
+                            auxData[instrIndex] = d.args;
+
                             foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
                             emulatedStack.PopWithAssert(PrimitiveType.Reference);
                             if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
@@ -1775,6 +1782,7 @@ public static class BytecodeLinker
                             var m = getMethodSafely(cls, args, isStatic, ref opcode, ref data, out var ndc);
                             if (m != null)
                             {
+                                auxData[instrIndex] = m;
                                 data = m;
                                 opcode = isStatic ? MTOpcode.invoke_static : MTOpcode.invoke_instance;
                             }

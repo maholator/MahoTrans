@@ -66,7 +66,7 @@ public class JavaMethodBody
     ///     Slot for everything that may be helpful for other subsystems but not needed in runtime. This is filled by linker.
     ///     This may contain references to methods, fields or other objects.
     /// </summary>
-    public object[] AuxiliaryLinkerOutput = null!;
+    public object?[] AuxiliaryLinkerOutput = null!;
 
     #endregion
 
