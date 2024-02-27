@@ -1671,9 +1671,19 @@ public static class BytecodeLinker
                             if (f != null)
                             {
                                 var b = f.GetValue ?? throw new JavaLinkageException("Not get bridge!");
-                                opcode = MTOpcode.bridge_init_class;
-                                intData = 1;
-                                data = new ClassBoundBridge(b, c);
+                                if (c == cls)
+                                {
+                                    // field is in caller class. At this point initializer must be already run (method call without initializer is UB)
+                                    opcode = MTOpcode.bridge;
+                                    intData = 1;
+                                    data = b;
+                                }
+                                else
+                                {
+                                    opcode = MTOpcode.bridge_init_class;
+                                    intData = 1;
+                                    data = new ClassBoundBridge(b, c);
+                                }
                             }
 
                             if (d != default)
@@ -1689,9 +1699,19 @@ public static class BytecodeLinker
                             if (f != null)
                             {
                                 var b = f.SetValue ?? throw new JavaLinkageException("Not set bridge!");
-                                opcode = MTOpcode.bridge_init_class;
-                                intData = 2;
-                                data = new ClassBoundBridge(b, c);
+                                if (c == cls)
+                                {
+                                    // field is in caller class. At this point initializer must be already run (method call without initializer is UB)
+                                    opcode = MTOpcode.bridge;
+                                    intData = 2;
+                                    data = b;
+                                }
+                                else
+                                {
+                                    opcode = MTOpcode.bridge_init_class;
+                                    intData = 2;
+                                    data = new ClassBoundBridge(b, c);
+                                }
                             }
 
                             SetNextStack();
