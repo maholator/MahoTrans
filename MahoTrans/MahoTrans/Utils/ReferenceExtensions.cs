@@ -34,4 +34,12 @@ public static class ReferenceExtensions
     {
         return JvmContext.Jvm!.ResolveOrNull<T>(r);
     }
+
+    public static string AsString(this Reference r) => JvmContext.Jvm!.ResolveString(r);
+
+    public static string? AsStringOrNull(this Reference r) => JvmContext.Jvm!.ResolveStringOrNull(r);
+
+    public static T[] AsArray<T>(this Reference r) where T : struct => JvmContext.Jvm!.ResolveArray<T>(r);
+
+    public static T[]? AsArrayOrNull<T>(this Reference r) where T : struct => JvmContext.Jvm!.ResolveArrayOrNull<T>(r);
 }
