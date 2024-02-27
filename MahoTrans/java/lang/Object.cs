@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using MahoTrans;
 using MahoTrans.Builder;
@@ -37,7 +38,11 @@ public class Object
     /// </summary>
     [JsonIgnore]
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public Reference This => new Reference(HeapAddress);
+    public Reference This
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        get => new(HeapAddress);
+    }
 
     /// <summary>
     ///     Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass" /> to take object's

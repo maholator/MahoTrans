@@ -4,6 +4,7 @@
 using System.Reflection;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -142,8 +143,46 @@ public static class CompilerUtils
     /// </summary>
     public static readonly MethodInfo ResolveArrOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsArrayOrNull))!;
 
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.GetAddrSafely" />
+    /// </summary>
+    public static readonly MethodInfo GetAddressSafely = RefExt.GetMethod(nameof(ReferenceExtensions.GetAddrSafely))!;
+
     public static bool IsNullable(ParameterInfo param)
     {
         return _nullability.Create(param).WriteState == NullabilityState.Nullable;
+    }
+
+    /// <summary>
+    ///     Gets type that needs to be taken from stack if you need to pass it as a parameter. You may need to apply marshaller
+    ///     to it. This also may be used in opposite situation.
+    /// </summary>
+    /// <param name="parameter">Parameter to get type for.</param>
+    /// <returns>Type to pop/push from stack. This is guaranteed to be supported by <see cref="StackReversePopMethods" />.</returns>
+    public static Type GetStackTypeFor(ParameterInfo parameter)
+    {
+        var paramType = parameter.ParameterType;
+
+        // primitive & ref
+        if (StackReversePopMethods.ContainsKey(paramType))
+            return paramType;
+
+        // strings
+        if (paramType == typeof(string))
+            return typeof(Reference);
+
+        // array
+        if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
+            return typeof(Reference);
+
+        // object
+        if (paramType.IsAssignableTo(typeof(Object)))
+            return typeof(Reference);
+
+        // enum
+        if (paramType.IsEnum)
+            return Enum.GetUnderlyingType(paramType);
+
+        throw new NotImplementedException($"This parameter ({paramType}) can't be popped from stack directly.");
     }
 }

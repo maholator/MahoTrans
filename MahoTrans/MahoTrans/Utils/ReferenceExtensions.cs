@@ -50,4 +50,12 @@ public static class ReferenceExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static T[]? AsArrayOrNull<T>(this Reference r) where T : struct => JvmContext.Jvm!.ResolveArrayOrNull<T>(r);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static Reference GetAddrSafely(this Object? obj)
+    {
+        if (obj is null)
+            return Reference.Null;
+        return obj.This;
+    }
 }

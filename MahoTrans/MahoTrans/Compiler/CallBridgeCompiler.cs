@@ -6,7 +6,6 @@ using System.Reflection.Emit;
 using MahoTrans.Loader;
 using MahoTrans.Runtime;
 using static MahoTrans.Compiler.CompilerUtils;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -67,23 +66,7 @@ public static class CallBridgeCompiler
 
         il.Emit(OpCodes.Call, method);
 
-        if (method.ReturnType == typeof(void))
-        {
-            // stack is here, delete it.
-            il.Emit(OpCodes.Pop);
-        }
-        else if (method.ReturnType.IsAssignableTo(typeof(Object)))
-        {
-            // we need to take the reference
-            il.Emit(OpCodes.Ldfld, typeof(Object).GetField(nameof(Object.HeapAddress))!);
-            // now push
-            il.Emit(OpCodes.Call, StackPushMethods[typeof(int)]);
-        }
-        else
-        {
-            // frame reference is here from the beginning
-            il.Emit(OpCodes.Call, StackPushMethods[method.ReturnType]);
-        }
+        EmitReturnerMarshalling(il, method);
 
         il.Emit(OpCodes.Ret);
 
@@ -97,57 +80,41 @@ public static class CallBridgeCompiler
     /// <param name="il">Generator.</param>
     /// <param name="parameter">Parameter to convert.</param>
     /// <remarks>
-    ///     This enters with "empty" stack (there are previous args). Take arg0. Call reverse popper. Then apply any conversions needed. This must exit with ready
-    ///     value on stack.
+    ///     Notes for implementation of this: this enters with "empty" stack (there are previous args). Take arg0. Call reverse
+    ///     popper. Then apply any conversions needed. This must exit with ready value on stack.
     /// </remarks>
     private static void EmitParameterMarshalling(ILGenerator il, ParameterInfo parameter)
     {
         var paramType = parameter.ParameterType;
 
-        // frame object
         il.Emit(OpCodes.Ldarg_0);
+        var poppedType = GetStackTypeFor(parameter);
+        il.Emit(OpCodes.Call, StackReversePopMethods[poppedType]);
 
-        // primitive & ref
-        if (StackReversePopMethods.TryGetValue(paramType, out var popper))
+        var marshaller = MarshalUtils.GetMarshallerFor(poppedType, false, paramType, IsNullable(parameter));
+        if (marshaller != null)
+            il.Emit(OpCodes.Call, marshaller);
+    }
+
+    private static void EmitReturnerMarshalling(ILGenerator il, MethodInfo method)
+    {
+        var retPar = method.ReturnParameter;
+        var retType = retPar.ParameterType;
+
+        if (retType == typeof(void))
         {
-            il.Emit(OpCodes.Call, popper);
-            return;
+            // stack is here, delete it.
+            il.Emit(OpCodes.Pop);
         }
-
-        // strings
-        if (paramType == typeof(string))
+        else
         {
-            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-            il.Emit(OpCodes.Call, IsNullable(parameter) ? ResolveStringOrNullEx : ResolveStringEx);
-            return;
+            var stType = GetStackTypeFor(retPar);
+            // apply marshaller if needed
+            var marshaller = MarshalUtils.GetMarshallerFor(retPar.ParameterType, IsNullable(retPar), stType, false);
+            if (marshaller != null)
+                il.Emit(OpCodes.Call, marshaller);
+            // now push
+            il.Emit(OpCodes.Call, StackPushMethods[stType]);
         }
-
-        // array
-        // check for popper works as check for supported primitive.
-        if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
-        {
-            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-            var resolver = IsNullable(parameter) ? ResolveArrOrNullEx : ResolveArrEx;
-            il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType.GetElementType()!));
-            return;
-        }
-
-        // object
-        if (paramType.IsAssignableTo(typeof(Object)))
-        {
-            il.Emit(OpCodes.Call, StackReversePopMethods[typeof(Reference)]);
-            var resolver = IsNullable(parameter) ? ResolveObjectOrNullEx : ResolveObjectEx;
-            il.Emit(OpCodes.Call, resolver.MakeGenericMethod(paramType));
-            return;
-        }
-
-        // enum
-        if (paramType.IsEnum)
-        {
-            il.Emit(OpCodes.Call, StackReversePopMethods[Enum.GetUnderlyingType(paramType)]);
-            return;
-        }
-
-        throw new NotImplementedException($"This parameter ({paramType}) can't be marshalled.");
     }
 }
