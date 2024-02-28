@@ -27,7 +27,7 @@ public class JavaStackFrame : IMTStackFrame
 
     public Type? MethodNativeClass => _method.Class.ClrType;
 
-    public JavaMethodBody JavaMethod => _method.JavaBody;
+    public JavaMethodBody JavaMethod => _method.JavaBody!;
 
     public int? OpcodeNumber => _opcodeIndex;
 

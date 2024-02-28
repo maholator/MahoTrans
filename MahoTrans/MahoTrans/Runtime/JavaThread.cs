@@ -158,7 +158,7 @@ public class JavaThread
         var jvm = Object.Jvm;
         var method = jvm.Classes["java/lang/Thread"].Methods[new NameDescriptor(nameof(Thread.runInternal), "()V")];
 
-        var f = new Frame(method.JavaBody);
+        var f = new Frame(method.JavaBody!);
         f.LocalVariables[0] = thread.This;
 
         var javaThread = new JavaThread(f, thread.This);

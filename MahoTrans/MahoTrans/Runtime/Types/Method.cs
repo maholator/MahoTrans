@@ -11,7 +11,8 @@ public class Method : IDisposable
     public readonly MethodFlags Flags;
     public readonly NameDescriptor Descriptor;
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
-    private object _methodBody = null!;
+    public MethodInfo? NativeBody;
+    public JavaMethodBody? JavaBody;
     public int BridgeNumber;
     public Action<Frame>? Bridge;
     public readonly JavaClass Class;
@@ -35,22 +36,6 @@ public class Method : IDisposable
 
     public bool IsCritical => (Flags & MethodFlags.Synchronized) != 0;
 
-    public MethodInfo NativeBody
-    {
-        get => (MethodInfo)_methodBody;
-        set => _methodBody = value;
-    }
-
-    public JavaMethodBody JavaBody
-    {
-        get => (JavaMethodBody)_methodBody;
-        set
-        {
-            value.Method = this;
-            _methodBody = value;
-        }
-    }
-
     public override string ToString()
     {
         var s = $"{Class.Name}.{Descriptor}";
@@ -62,13 +47,14 @@ public class Method : IDisposable
 
     public uint GetSnapshotHash()
     {
-        return Descriptor.GetSnapshotHash() ^ ((_methodBody as JavaMethodBody)?.GetSnapshotHash() ?? 0U) ^ (uint)Flags;
+        return Descriptor.GetSnapshotHash() ^ (JavaBody?.GetSnapshotHash() ?? 0U) ^ (uint)Flags;
     }
 
     public void Dispose()
     {
         Attributes = null!;
-        _methodBody = null!;
+        JavaBody = null!;
+        NativeBody = null!;
         Bridge = null!;
     }
 }

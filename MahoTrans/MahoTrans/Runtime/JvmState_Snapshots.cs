@@ -251,7 +251,7 @@ public partial class JvmState
 
         foreach (var sh in x.Frames)
         {
-            var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
+            var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody!;
             var f = new Frame(method) { Pointer = sh.Pointer, StackTop = sh.StackTop };
             unsafe
             {

@@ -28,12 +28,12 @@ public static class BytecodeLinker
     {
         foreach (var method in cls.Methods.Values)
         {
-            // we don't have bytecode at all.
-            if (method.IsNative)
+            // we don't have bytecode.
+            if (method.JavaBody == null)
                 continue;
 
-            // we don't have bytecode because we have no implementation.
-            if (method.IsAbstract)
+            // we won't be called
+            if (method.IsAbstract || method.IsNative)
                 continue;
 
             Link(method.JavaBody);

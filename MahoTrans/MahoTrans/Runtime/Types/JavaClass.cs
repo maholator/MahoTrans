@@ -281,7 +281,7 @@ public class JavaClass
             }
             else
             {
-                thread.Push(m.JavaBody);
+                thread.Push(m.JavaBody!);
             }
         }
         else

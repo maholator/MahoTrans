@@ -1602,11 +1602,11 @@ public class JavaRunner
 
         var java = m.JavaBody;
 
-        var f = thread.Push(java);
+        var f = thread.Push(java!);
         frame.SetFrom(argsLength);
         unsafe
         {
-            var sizes = java.ArgsSizes;
+            var sizes = java!.ArgsSizes;
             var argIndex = 0;
             var localIndex = 0;
             for (; argIndex < argsLength; argIndex++)
