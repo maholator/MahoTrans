@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using java.lang;
@@ -226,13 +227,13 @@ public class JavaClass
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
     /// <returns>Field object. Null if field was not found.</returns>
-    public Field? GetFieldRecursiveOrNull(NameDescriptor descriptor)
+    public (JavaClass, Field)? GetFieldRecursiveOrNull(NameDescriptor descriptor)
     {
         var cls = this;
         while (true)
         {
             if (cls.Fields.TryGetValue(descriptor, out var f))
-                return f;
+                return (cls, f);
             if (cls.IsObject)
                 return null;
             cls = cls.Super;
@@ -250,7 +251,11 @@ public class JavaClass
         while (true)
         {
             if (cls.Methods.TryGetValue(descriptor, out var m))
+            {
+                Debug.Assert(m.Class == cls);
                 return m;
+            }
+
             if (cls.IsObject)
                 return null;
             cls = cls.Super;

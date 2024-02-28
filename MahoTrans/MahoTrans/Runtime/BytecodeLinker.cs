@@ -2317,9 +2317,9 @@ public static class BytecodeLinker
             return null;
         }
 
-        var f = c.GetFieldRecursiveOrNull(ndc.Descriptor);
+        var r = c.GetFieldRecursiveOrNull(ndc.Descriptor);
 
-        if (f == null)
+        if (!r.HasValue)
         {
             var msg = $"\"{ndc.ClassName}\" has no field \"{ndc.Descriptor}\"";
             logger?.Log(LoadIssueType.MissingFieldAccess, cls.Name, msg);
@@ -2327,6 +2327,8 @@ public static class BytecodeLinker
             data = ndc.Descriptor.Name;
             return null;
         }
+
+        (c, var f) = r.Value;
 
         if (f.Flags.HasFlag(FieldFlags.Static) != isStatic)
         {
