@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 namespace MahoTrans.Runtime;
@@ -7,6 +7,11 @@ namespace MahoTrans.Runtime;
 ///     Type of things on frame's stack or locals. Members starting with "is" are attributes. Their combination leads to
 ///     actual primitive type.
 /// </summary>
+/// <remarks>
+///     It's possible to make 64-bit references or "floating-point-integer" types using bitmasks, but it's not supported.
+///     Avoid constructing types from masks at all. Use constants like <see cref="Int" /> instead. Use masks like
+///     <see cref="IsInteger" /> only for checks.
+/// </remarks>
 [Flags]
 public enum PrimitiveType : byte
 {
@@ -30,7 +35,7 @@ public enum PrimitiveType : byte
     IsFloat = 0x4,
 
     /// <summary>
-    ///     This is an integer, 32 or 64 bit.
+    ///     This is an integer, i.e. int or long.
     /// </summary>
     IsInteger = 0x8,
 
