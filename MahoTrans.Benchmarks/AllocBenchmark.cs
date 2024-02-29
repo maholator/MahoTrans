@@ -11,10 +11,11 @@ using MahoTrans.ToolkitImpls.Stub;
 namespace MahoTrans.Benchmarks;
 
 [MemoryDiagnoser]
-[InvocationCount(65536)]
-[MaxIterationCount(40)]
+[MaxIterationCount(20)]
 public class AllocBenchmark
 {
+#pragma warning disable CS0618 // Type or member is obsolete
+
     [GlobalSetup]
     public void Setup()
     {
@@ -31,12 +32,16 @@ public class AllocBenchmark
     public Reference AllocGeneric()
     {
         var form = JvmContext.Jvm!.Allocate<Form>();
+        JvmContext.Jvm.ForceDeleteObject(form.This);
         return form.This;
     }
 
     [Benchmark]
     public Reference AllocByName()
     {
-        return JvmContext.Jvm!.AllocateObject(_formClass);
+        var r = JvmContext.Jvm!.AllocateObject(_formClass);
+        JvmContext.Jvm.ForceDeleteObject(r);
+        return r;
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 }

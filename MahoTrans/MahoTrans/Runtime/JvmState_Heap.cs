@@ -630,5 +630,16 @@ public partial class JvmState
         return roots;
     }
 
+    /// <summary>
+    ///     Sets object in heap to null. No checks are done. No events are invoked. This is for internal usage.
+    /// </summary>
+    /// <param name="r">Reference to clear.</param>
+    /// <remarks>This is for internal usage only.</remarks>
+    [Obsolete("Objects must not be deleted from heap directly. Never call this outside from tests/benchmarks.")]
+    public void ForceDeleteObject(Reference r)
+    {
+        _heap[r] = null;
+    }
+
     #endregion
 }
