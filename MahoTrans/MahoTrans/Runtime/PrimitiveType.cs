@@ -15,12 +15,12 @@ public enum PrimitiveType : byte
     /// <summary>
     ///     This takes 4 bytes.
     /// </summary>
-    IsSingle = 0x1,
+    Is32 = 0x1,
 
     /// <summary>
     ///     This takes 8 bytes.
     /// </summary>
-    IsDouble = 0x2,
+    Is64 = 0x2,
 
     // type
 
@@ -32,7 +32,7 @@ public enum PrimitiveType : byte
     /// <summary>
     ///     This is an integer, 32 or 64 bit.
     /// </summary>
-    IsInt = 0x8,
+    IsInteger = 0x8,
 
     /// <summary>
     ///     This is a reference.
@@ -49,30 +49,30 @@ public enum PrimitiveType : byte
     /// <summary>
     ///     Int32 primitive.
     /// </summary>
-    Int = IsSingle | IsInt,
+    Int = Is32 | IsInteger,
 
     /// <summary>
     ///     Int64 primitive.
     /// </summary>
-    Long = IsDouble | IsInt,
+    Long = Is64 | IsInteger,
 
     /// <summary>
     ///     Float32 primitive.
     /// </summary>
-    Float = IsSingle | IsFloat,
+    Float = Is32 | IsFloat,
 
     /// <summary>
     ///     Float64 primitive.
     /// </summary>
-    Double = IsDouble | IsFloat,
+    Double = Is64 | IsFloat,
 
     /// <summary>
     ///     Reference primitive.
     /// </summary>
-    Reference = IsSingle | IsReference,
+    Reference = Is32 | IsReference,
 
     /// <summary>
     ///     Pointer primitive.
     /// </summary>
-    SubroutinePointer = IsSingle | IsSubroutinePointer,
+    SubroutinePointer = Is32 | IsSubroutinePointer,
 }

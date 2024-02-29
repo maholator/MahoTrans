@@ -151,7 +151,7 @@ public static class BytecodeLinker
 
             for (int i = 0; i < argsSizes.Length; i++)
             {
-                argsSizes[i] = ((primargs[i] & PrimitiveType.IsDouble) != 0) ? (byte)2 : (byte)1;
+                argsSizes[i] = ((primargs[i] & PrimitiveType.Is64) != 0) ? (byte)2 : (byte)1;
             }
 
             method.ArgsSizes = argsSizes;
@@ -836,7 +836,7 @@ public static class BytecodeLinker
                         case JavaOpcode.pop2:
                         {
                             var t = emulatedStack.Pop();
-                            if ((t & PrimitiveType.IsDouble) != 0)
+                            if ((t & PrimitiveType.Is64) != 0)
                             {
                                 opcode = MTOpcode.pop;
                             }
@@ -874,7 +874,7 @@ public static class BytecodeLinker
                             data = null!;
                             var t1 = emulatedStack.PopWithAssertIs32();
                             var t2 = emulatedStack.Pop();
-                            if ((t2 & PrimitiveType.IsDouble) != 0)
+                            if ((t2 & PrimitiveType.Is64) != 0)
                             {
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t2);
@@ -898,7 +898,7 @@ public static class BytecodeLinker
                         {
                             data = null!;
                             var t1 = emulatedStack.Pop();
-                            if ((t1 & PrimitiveType.IsDouble) != 0)
+                            if ((t1 & PrimitiveType.Is64) != 0)
                             {
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t1);
@@ -922,7 +922,7 @@ public static class BytecodeLinker
                             data = null!;
                             var t1 = emulatedStack.Pop();
 
-                            if ((t1 & PrimitiveType.IsDouble) != 0)
+                            if ((t1 & PrimitiveType.Is64) != 0)
                             {
                                 var t2 = emulatedStack.PopWithAssertIs32();
                                 emulatedStack.Push(t1);
@@ -2477,7 +2477,7 @@ public static class BytecodeLinker
             var real = Pop();
             if (real == default)
                 return real; // faulty instruction
-            if ((real & PrimitiveType.IsDouble) != 0)
+            if ((real & PrimitiveType.Is64) != 0)
                 throw new StackMismatchException(
                     $"{Current()} expects 32-bit value on stack but got {real}");
             return real;
