@@ -183,4 +183,61 @@ public static class CrossCompilerUtils
 
         return list;
     }
+
+    /// <summary>
+    ///     Attempts to predict purposes of values on stack.
+    /// </summary>
+    /// <param name="jmb">Method body.</param>
+    /// <param name="ccrfr">Range to process.</param>
+    /// <returns>
+    ///     Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
+    ///     I in the range. The last element is stack state after last instruction (and before CCR exit). Each element is array
+    ///     of purposes for each value. Indexing from zero. Array lengths are equal to stack sizes.
+    /// </returns>
+    public static StackValuePurpose[][] PredictPurposes(JavaMethodBody jmb, CCRFR ccrfr)
+    {
+        var purps = new StackValuePurpose[ccrfr.Length + 1][];
+
+        // filling last element
+
+        if (ccrfr.Start + ccrfr.Length >= jmb.LinkedCode.Length)
+        {
+            // we terminate the method
+            purps[^1] = Array.Empty<StackValuePurpose>();
+        }
+        else
+        {
+            // there is something after us...
+            var s = jmb.StackTypes[ccrfr.Start + ccrfr.Length].StackBeforeExecution;
+            if (s == null)
+                throw new ArgumentException();
+            var arr = new StackValuePurpose[s.Length];
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = StackValuePurpose.ReturnToStack;
+            }
+        }
+
+        // now iterating over code
+
+        for (int i = ccrfr.Length - 1; i >= 0; i--)
+        {
+            var globalIndex = i + ccrfr.Start;
+
+            var np = new StackValuePurpose[jmb.StackTypes[globalIndex].StackBeforeExecution!.Length];
+            purps[i] = np;
+            // [ notTouched taken taken ]
+            // consumed=2 left=1 np.len=3
+            var consumed = jmb.StackTypes[globalIndex].ValuesPoppedOnExecution;
+            var left = np.Length - consumed;
+            // coping untouched
+            Array.Copy(purps[i + 1], 0, np, 0, left);
+            // taken
+            Span<StackValuePurpose> taken = np.AsSpan(left);
+
+            var opcode = jmb.LinkedCode[globalIndex].Opcode;
+        }
+        //TODO
+        return purps;
+    }
 }
