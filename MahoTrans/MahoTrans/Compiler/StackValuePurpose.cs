@@ -12,7 +12,7 @@ public enum StackValuePurpose
     /// <summary>
     ///     This will be consumed as is by IL opcode.
     /// </summary>
-    Consume,
+    Consume = 1,
 
     /// <summary>
     ///     This will be a target of field get/set or native call.
