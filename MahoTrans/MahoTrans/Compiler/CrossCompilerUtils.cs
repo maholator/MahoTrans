@@ -102,22 +102,33 @@ public static class CrossCompilerUtils
         }
     }
 
-    public static List<Range> GetPossiblyCompilableRanges(JavaMethodBody jmb)
+    public static List<CCRFR> GetPossiblyCompilableRanges(JavaMethodBody jmb)
     {
         LinkedInstruction[] instructions = jmb.LinkedCode;
 
-        List<Range> list = new();
+        List<CCRFR> list = new();
 
         {
-            int? begin = 0;
+            int? begin = null;
+            int maxStack = 0;
+            bool stackOnEnter = false;
 
             for (int i = 0; i < instructions.Length; i++)
             {
                 if (begin.HasValue)
                 {
+                    var currStack = jmb.StackTypes[i].StackBeforeExecution?.Length ?? 0;
+                    maxStack = Math.Max(maxStack, currStack);
                     if (!CanCompileMethodWith(instructions[i]))
                     {
-                        list.Add(new Range(begin.Value, i));
+                        list.Add(new CCRFR
+                        {
+                            Start = begin.Value,
+                            Length = i - begin.Value,
+                            MaxStackSize = (ushort)maxStack,
+                            StackOnEnter = stackOnEnter,
+                            StackOnExit = (ushort)currStack
+                        });
                         begin = null;
                     }
                 }
@@ -130,9 +141,12 @@ public static class CrossCompilerUtils
                         if (stack.StackBeforeExecution != null)
                         {
                             // there must be 0 or 1 values on stack (i.e. only returned value)
-                            if (stack.StackBeforeExecution.Length < 2)
+                            var stackLenOnEnter = stack.StackBeforeExecution.Length;
+                            if (stackLenOnEnter < 2)
                             {
+                                stackOnEnter = stackLenOnEnter == 1;
                                 begin = i;
+                                maxStack = stackLenOnEnter;
                             }
                         }
                     }
@@ -140,15 +154,21 @@ public static class CrossCompilerUtils
             }
 
             if (begin.HasValue)
-                list.Add(new Range(begin.Value, instructions.Length));
+            {
+                list.Add(new CCRFR
+                {
+                    Start = begin.Value,
+                    Length = instructions.Length - begin.Value - 1,
+                    MaxStackSize = (ushort)maxStack,
+                    StackOnEnter = stackOnEnter,
+                    StackOnExit = 0,
+                });
+            }
         }
 
         for (int i = list.Count - 1; i >= 0; i--)
         {
-            var r = list[i];
-            var len = r.GetOffsetAndLength(instructions.Length).Length;
-
-            if (len <= 3)
+            if (list[i].Length <= 3)
             {
                 // too short ranges are bad.
                 list.RemoveAt(i);
