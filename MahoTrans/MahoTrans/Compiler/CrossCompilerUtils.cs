@@ -10,7 +10,8 @@ public static class CrossCompilerUtils
 {
     public static bool CanCompileSingleOpcode(in LinkedInstruction instruction)
     {
-        var type = instruction.Opcode.GetOpcodeType();
+        var opcode = instruction.Opcode;
+        var type = opcode.GetOpcodeType();
         switch (type)
         {
             case OpcodeType.NoOp:
@@ -22,7 +23,12 @@ public static class CrossCompilerUtils
             case OpcodeType.Array:
                 return true;
             case OpcodeType.Stack:
-                return true;
+                return opcode switch
+                {
+                    MTOpcode.pop => true,
+                    MTOpcode.dup => true,
+                    _ => false
+                };
             case OpcodeType.Math:
                 return true;
             case OpcodeType.Conversion:
