@@ -8,6 +8,25 @@ namespace MahoTrans.Compiler;
 
 public static class CrossCompilerUtils
 {
+    /// <summary>
+    ///     Finds out can this method be compiled or not.
+    /// </summary>
+    /// <returns>False if this must not be compiled.</returns>
+    public static bool CanCompileMethodWith(this JavaMethodBody method)
+    {
+        if (method.LinkedCatches.Length != 0)
+            // methods with try-catches may have VERY CURSED execution flow, i don't want to solve bugs related to that.
+            return false;
+
+        foreach (var instruction in method.LinkedCode)
+        {
+            if (!CanCompileMethodWith(instruction))
+                return false;
+        }
+
+        return true;
+    }
+
     public static bool CanCompileSingleOpcode(in LinkedInstruction instruction)
     {
         var opcode = instruction.Opcode;
@@ -214,7 +233,7 @@ public static class CrossCompilerUtils
             var arr = new StackValuePurpose[s.Length];
             for (int i = 0; i < arr.Length; i++)
             {
-                arr[i] = StackValuePurpose.ReturnToFrame;
+                arr[i] = StackValuePurpose.ToLocal;
             }
         }
 
@@ -224,7 +243,7 @@ public static class CrossCompilerUtils
         {
             var globalIndex = i + ccrfr.Start;
 
-            var np = new StackValuePurpose[jmb.StackTypes[globalIndex].StackBeforeExecution!.Length];
+            var np = new StackValuePurpose[jmb.StackTypes[globalIndex].StackBeforeExecution.Length];
             purps[i] = np;
             // [ notTouched taken taken ]
             // consumed=2 left=1 np.len=3
@@ -237,5 +256,18 @@ public static class CrossCompilerUtils
         }
 
         return purps;
+    }
+
+    public static Type ToType(this PrimitiveType p)
+    {
+        return p switch
+        {
+            PrimitiveType.Int => typeof(int),
+            PrimitiveType.Long => typeof(long),
+            PrimitiveType.Float => typeof(float),
+            PrimitiveType.Double => typeof(double),
+            PrimitiveType.Reference => typeof(Reference),
+            _ => throw new ArgumentOutOfRangeException(nameof(p), p, null)
+        };
     }
 }

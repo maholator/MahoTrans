@@ -88,7 +88,7 @@ public static class CallBridgeCompiler
         var paramType = parameter.ParameterType;
 
         il.Emit(OpCodes.Ldarg_0);
-        var poppedType = GetStackTypeFor(parameter);
+        var poppedType = GetStackTypeFor(parameter.ParameterType);
         il.Emit(OpCodes.Call, StackReversePopMethods[poppedType]);
 
         var marshaller = MarshalUtils.GetMarshallerFor(poppedType, false, paramType, IsNullable(parameter));
@@ -108,7 +108,7 @@ public static class CallBridgeCompiler
         }
         else
         {
-            var stType = GetStackTypeFor(retPar);
+            var stType = GetStackTypeFor(retPar.ParameterType);
             // apply marshaller if needed
             var marshaller = MarshalUtils.GetMarshallerFor(retPar.ParameterType, IsNullable(retPar), stType, false);
             if (marshaller != null)

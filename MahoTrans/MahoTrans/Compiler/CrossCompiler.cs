@@ -37,7 +37,7 @@ public class CrossCompiler
         if (_fired)
             throw new InvalidOperationException();
 
-        if (CanCompile())
+        if (true)
         {
             CompileInternal();
         }
@@ -47,25 +47,5 @@ public class CrossCompiler
 
     private void CompileInternal()
     {
-    }
-
-
-    /// <summary>
-    ///     Finds out can this method be compiled or not.
-    /// </summary>
-    /// <returns>False if this won't be compiled.</returns>
-    public bool CanCompile()
-    {
-        if (_method.LinkedCatches.Length != 0)
-            // methods with try-catches may have VERY CURSED execution flow, i don't want to solve bugs related to that.
-            return false;
-
-        foreach (var instruction in _method.LinkedCode)
-        {
-            if (!CrossCompilerUtils.CanCompileMethodWith(instruction))
-                return false;
-        }
-
-        return true;
     }
 }

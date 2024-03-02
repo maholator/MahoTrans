@@ -20,7 +20,7 @@ public enum StackValuePurpose
     Target,
 
     /// <summary>
-    /// This will be a target of array get/set.
+    ///     This will be a target of array get/set.
     /// </summary>
     ArrayTarget,
 
@@ -35,7 +35,12 @@ public enum StackValuePurpose
     FieldValue,
 
     /// <summary>
-    ///     This will be pushed to local or to stack.
+    ///     This will be pushed to local.
     /// </summary>
-    ReturnToFrame,
+    ToLocal,
+
+    /// <summary>
+    ///     This will be returned to stack. This must be used only inside compiler.
+    /// </summary>
+    ReturnToStack,
 }

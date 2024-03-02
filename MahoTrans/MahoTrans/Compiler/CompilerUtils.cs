@@ -157,32 +157,30 @@ public static class CompilerUtils
     ///     Gets type that needs to be taken from stack if you need to pass it as a parameter. You may need to apply marshaller
     ///     to it. This also may be used in opposite situation.
     /// </summary>
-    /// <param name="parameter">Parameter to get type for.</param>
+    /// <param name="t">Parameter to get type for.</param>
     /// <returns>Type to pop/push from stack. This is guaranteed to be supported by <see cref="StackReversePopMethods" />.</returns>
-    public static Type GetStackTypeFor(ParameterInfo parameter)
+    public static Type GetStackTypeFor(Type t)
     {
-        var paramType = parameter.ParameterType;
-
         // primitive & ref
-        if (StackReversePopMethods.ContainsKey(paramType))
-            return paramType;
+        if (StackReversePopMethods.ContainsKey(t))
+            return t;
 
         // strings
-        if (paramType == typeof(string))
+        if (t == typeof(string))
             return typeof(Reference);
 
         // array
-        if (paramType.IsArray && StackReversePopMethods.ContainsKey(paramType.GetElementType()!))
+        if (t.IsArray && StackReversePopMethods.ContainsKey(t.GetElementType()!))
             return typeof(Reference);
 
         // object
-        if (paramType.IsAssignableTo(typeof(Object)))
+        if (t.IsAssignableTo(typeof(Object)))
             return typeof(Reference);
 
         // enum
-        if (paramType.IsEnum)
-            return Enum.GetUnderlyingType(paramType);
+        if (t.IsEnum)
+            return Enum.GetUnderlyingType(t);
 
-        throw new NotImplementedException($"This parameter ({paramType}) can't be popped from stack directly.");
+        throw new NotImplementedException($"This parameter ({t}) can't be popped from stack directly.");
     }
 }
