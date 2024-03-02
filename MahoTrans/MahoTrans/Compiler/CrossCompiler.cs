@@ -3,7 +3,6 @@
 
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
-using MahoTrans.Utils;
 
 namespace MahoTrans.Compiler;
 

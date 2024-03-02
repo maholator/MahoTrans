@@ -214,7 +214,7 @@ public static class CrossCompilerUtils
             var arr = new StackValuePurpose[s.Length];
             for (int i = 0; i < arr.Length; i++)
             {
-                arr[i] = StackValuePurpose.ReturnToStack;
+                arr[i] = StackValuePurpose.ReturnToFrame;
             }
         }
 
@@ -229,15 +229,13 @@ public static class CrossCompilerUtils
             // [ notTouched taken taken ]
             // consumed=2 left=1 np.len=3
             var consumed = jmb.StackTypes[globalIndex].ValuesPoppedOnExecution;
-            var left = np.Length - consumed;
+            var left = np.Length - consumed.Length;
             // coping untouched
             Array.Copy(purps[i + 1], 0, np, 0, left);
             // taken
-            Span<StackValuePurpose> taken = np.AsSpan(left);
-
-            var opcode = jmb.LinkedCode[globalIndex].Opcode;
+            consumed.CopyTo(np, left);
         }
-        //TODO
+
         return purps;
     }
 }

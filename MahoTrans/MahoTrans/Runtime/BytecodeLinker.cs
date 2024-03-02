@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
+using MahoTrans.Compiler;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -195,7 +196,7 @@ public static class BytecodeLinker
 
             var now = emulatedStack.ToArray();
             var was = predStackOutput[target].StackBeforeExecution;
-            if (was == null)
+            if (was == null!)
                 predStackOutput[target].StackBeforeExecution = now;
             else if (!was.SequenceEqual(now))
                 throw new StackMismatchException($"Stack mismatch at instruction {target}");
@@ -588,57 +589,57 @@ public static class BytecodeLinker
                             break;
                         case JavaOpcode.iaload:
                             opcode = MTOpcode.iaload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.laload:
                             opcode = MTOpcode.laload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.faload:
                             opcode = MTOpcode.faload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.daload:
                             opcode = MTOpcode.daload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.aaload:
                             opcode = MTOpcode.aaload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.baload:
                             opcode = MTOpcode.baload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.caload:
                             opcode = MTOpcode.caload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.saload:
                             opcode = MTOpcode.saload;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
@@ -646,231 +647,231 @@ public static class BytecodeLinker
                             opcode = MTOpcode.store;
                             intData = args[0];
                             shortData = (ushort)PrimitiveType.Int;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lstore:
                             opcode = MTOpcode.store;
                             intData = args[0];
                             shortData = (ushort)PrimitiveType.Long;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fstore:
                             opcode = MTOpcode.store;
                             intData = args[0];
                             shortData = (ushort)PrimitiveType.Float;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dstore:
                             opcode = MTOpcode.store;
                             intData = args[0];
                             shortData = (ushort)PrimitiveType.Double;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.astore:
                             opcode = MTOpcode.store;
                             intData = args[0];
                             shortData = (ushort)PrimitiveType.Reference;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.istore_0:
                             opcode = MTOpcode.store;
                             intData = 0;
                             shortData = (ushort)PrimitiveType.Int;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.istore_1:
                             opcode = MTOpcode.store;
                             intData = 1;
                             shortData = (ushort)PrimitiveType.Int;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.istore_2:
                             opcode = MTOpcode.store;
                             intData = 2;
                             shortData = (ushort)PrimitiveType.Int;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.istore_3:
                             opcode = MTOpcode.store;
                             intData = 3;
                             shortData = (ushort)PrimitiveType.Int;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lstore_0:
                             opcode = MTOpcode.store;
                             intData = 0;
                             shortData = (ushort)PrimitiveType.Long;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lstore_1:
                             opcode = MTOpcode.store;
                             intData = 1;
                             shortData = (ushort)PrimitiveType.Long;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lstore_2:
                             opcode = MTOpcode.store;
                             intData = 2;
                             shortData = (ushort)PrimitiveType.Long;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lstore_3:
                             opcode = MTOpcode.store;
                             intData = 3;
                             shortData = (ushort)PrimitiveType.Long;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fstore_0:
                             opcode = MTOpcode.store;
                             intData = 0;
                             shortData = (ushort)PrimitiveType.Float;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fstore_1:
                             opcode = MTOpcode.store;
                             intData = 1;
                             shortData = (ushort)PrimitiveType.Float;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fstore_2:
                             opcode = MTOpcode.store;
                             intData = 2;
                             shortData = (ushort)PrimitiveType.Float;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fstore_3:
                             opcode = MTOpcode.store;
                             intData = 3;
                             shortData = (ushort)PrimitiveType.Float;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dstore_0:
                             opcode = MTOpcode.store;
                             intData = 0;
                             shortData = (ushort)PrimitiveType.Double;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dstore_1:
                             opcode = MTOpcode.store;
                             intData = 1;
                             shortData = (ushort)PrimitiveType.Double;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dstore_2:
                             opcode = MTOpcode.store;
                             intData = 2;
                             shortData = (ushort)PrimitiveType.Double;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dstore_3:
                             opcode = MTOpcode.store;
                             intData = 3;
                             shortData = (ushort)PrimitiveType.Double;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.astore_0:
                             opcode = MTOpcode.store;
                             intData = 0;
                             shortData = (ushort)PrimitiveType.Reference;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.astore_1:
                             opcode = MTOpcode.store;
                             intData = 1;
                             shortData = (ushort)PrimitiveType.Reference;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.astore_2:
                             opcode = MTOpcode.store;
                             intData = 2;
                             shortData = (ushort)PrimitiveType.Reference;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.astore_3:
                             opcode = MTOpcode.store;
                             intData = 3;
                             shortData = (ushort)PrimitiveType.Reference;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.iastore:
                             opcode = MTOpcode.iastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lastore:
                             opcode = MTOpcode.lastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fastore:
                             opcode = MTOpcode.fastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dastore:
                             opcode = MTOpcode.dastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.aastore:
                             opcode = MTOpcode.aastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.bastore:
                             opcode = MTOpcode.bastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.castore:
                             opcode = MTOpcode.castore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.sastore:
                             opcode = MTOpcode.sastore;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ArrayTarget);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.pop:
@@ -880,19 +881,19 @@ public static class BytecodeLinker
                                 PrimitiveType.Int, PrimitiveType.Float, PrimitiveType.Reference,
                                 PrimitiveType.SubroutinePointer
                             };
-                            emulatedStack.PopWithAssert(expected);
+                            emulatedStack.PopWithAssert(expected, StackValuePurpose.Consume);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.pop2:
                         {
-                            var t = emulatedStack.Pop();
+                            var t = emulatedStack.Pop(StackValuePurpose.Consume);
                             if ((t & PrimitiveType.Is64) != 0)
                             {
                                 opcode = MTOpcode.pop;
                             }
                             else
                             {
-                                emulatedStack.PopWithAssertIs32();
+                                emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                                 opcode = MTOpcode.pop2;
                             }
 
@@ -902,7 +903,7 @@ public static class BytecodeLinker
                         case JavaOpcode.dup:
                         {
                             opcode = MTOpcode.dup;
-                            var t = emulatedStack.PopWithAssertIs32();
+                            var t = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                             emulatedStack.Push(t);
                             emulatedStack.Push(t);
                             SetNextStackAndDiff();
@@ -911,8 +912,8 @@ public static class BytecodeLinker
                         case JavaOpcode.dup_x1:
                         {
                             opcode = MTOpcode.dup_x1;
-                            var t1 = emulatedStack.PopWithAssertIs32();
-                            var t2 = emulatedStack.PopWithAssertIs32();
+                            var t1 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
+                            var t2 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             emulatedStack.Push(t1);
@@ -922,8 +923,8 @@ public static class BytecodeLinker
                         case JavaOpcode.dup_x2:
                         {
                             data = null!;
-                            var t1 = emulatedStack.PopWithAssertIs32();
-                            var t2 = emulatedStack.Pop();
+                            var t1 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
+                            var t2 = emulatedStack.Pop(StackValuePurpose.Consume);
                             if ((t2 & PrimitiveType.Is64) != 0)
                             {
                                 emulatedStack.Push(t1);
@@ -933,7 +934,7 @@ public static class BytecodeLinker
                             }
                             else
                             {
-                                var t3 = emulatedStack.PopWithAssertIs32();
+                                var t3 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t3);
                                 emulatedStack.Push(t2);
@@ -947,7 +948,7 @@ public static class BytecodeLinker
                         case JavaOpcode.dup2:
                         {
                             data = null!;
-                            var t1 = emulatedStack.Pop();
+                            var t1 = emulatedStack.Pop(StackValuePurpose.Consume);
                             if ((t1 & PrimitiveType.Is64) != 0)
                             {
                                 emulatedStack.Push(t1);
@@ -956,7 +957,7 @@ public static class BytecodeLinker
                             }
                             else
                             {
-                                var t2 = emulatedStack.PopWithAssertIs32();
+                                var t2 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                                 emulatedStack.Push(t2);
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t2);
@@ -970,11 +971,11 @@ public static class BytecodeLinker
                         case JavaOpcode.dup2_x1:
                         {
                             data = null!;
-                            var t1 = emulatedStack.Pop();
+                            var t1 = emulatedStack.Pop(StackValuePurpose.Consume);
 
                             if ((t1 & PrimitiveType.Is64) != 0)
                             {
-                                var t2 = emulatedStack.PopWithAssertIs32();
+                                var t2 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t2);
                                 emulatedStack.Push(t1);
@@ -982,8 +983,8 @@ public static class BytecodeLinker
                             }
                             else
                             {
-                                var t2 = emulatedStack.PopWithAssertIs32();
-                                var t3 = emulatedStack.PopWithAssertIs32();
+                                var t2 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
+                                var t3 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                                 emulatedStack.Push(t2);
                                 emulatedStack.Push(t1);
                                 emulatedStack.Push(t3);
@@ -1001,8 +1002,8 @@ public static class BytecodeLinker
                         case JavaOpcode.swap:
                         {
                             opcode = MTOpcode.swap;
-                            var t1 = emulatedStack.PopWithAssertIs32();
-                            var t2 = emulatedStack.PopWithAssertIs32();
+                            var t1 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
+                            var t2 = emulatedStack.PopWithAssertIs32(StackValuePurpose.Consume);
                             emulatedStack.Push(t1);
                             emulatedStack.Push(t2);
                             SetNextStackAndDiff();
@@ -1010,249 +1011,249 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.iadd:
                             opcode = MTOpcode.iadd;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ladd:
                             opcode = MTOpcode.ladd;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fadd:
                             opcode = MTOpcode.fadd;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dadd:
                             opcode = MTOpcode.dadd;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.isub:
                             opcode = MTOpcode.isub;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lsub:
                             opcode = MTOpcode.lsub;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fsub:
                             opcode = MTOpcode.fsub;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dsub:
                             opcode = MTOpcode.dsub;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.imul:
                             opcode = MTOpcode.imul;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lmul:
                             opcode = MTOpcode.lmul;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fmul:
                             opcode = MTOpcode.fmul;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dmul:
                             opcode = MTOpcode.dmul;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.idiv:
                             opcode = MTOpcode.idiv;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ldiv:
                             opcode = MTOpcode.ldiv;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fdiv:
                             opcode = MTOpcode.fdiv;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ddiv:
                             opcode = MTOpcode.ddiv;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.irem:
                             opcode = MTOpcode.irem;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lrem:
                             opcode = MTOpcode.lrem;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.frem:
                             opcode = MTOpcode.frem;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.drem:
                             opcode = MTOpcode.drem;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ineg:
                             opcode = MTOpcode.ineg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lneg:
                             opcode = MTOpcode.lneg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fneg:
                             opcode = MTOpcode.fneg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dneg:
                             opcode = MTOpcode.dneg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ishl:
                             opcode = MTOpcode.ishl;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lshl:
                             opcode = MTOpcode.lshl;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ishr:
                             opcode = MTOpcode.ishr;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lshr:
                             opcode = MTOpcode.lshr;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.iushr:
                             opcode = MTOpcode.iushr;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lushr:
                             opcode = MTOpcode.lushr;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.iand:
                             opcode = MTOpcode.iand;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.land:
                             opcode = MTOpcode.land;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ior:
                             opcode = MTOpcode.ior;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lor:
                             opcode = MTOpcode.lor;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ixor:
                             opcode = MTOpcode.ixor;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lxor:
                             opcode = MTOpcode.lxor;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
@@ -1266,133 +1267,133 @@ public static class BytecodeLinker
                             break;
                         case JavaOpcode.i2l:
                             opcode = MTOpcode.i2l;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.i2f:
                             opcode = MTOpcode.i2f;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.i2d:
                             opcode = MTOpcode.i2d;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.l2i:
                             opcode = MTOpcode.l2i;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.l2f:
                             opcode = MTOpcode.l2f;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.l2d:
                             opcode = MTOpcode.l2d;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.f2i:
                             opcode = MTOpcode.f2i;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.f2l:
                             opcode = MTOpcode.f2l;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.f2d:
                             opcode = MTOpcode.f2d;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Double);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.d2i:
                             opcode = MTOpcode.d2i;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.d2l:
                             opcode = MTOpcode.d2l;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Long);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.d2f:
                             opcode = MTOpcode.d2f;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Float);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.i2b:
                             opcode = MTOpcode.i2b;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.i2c:
                             opcode = MTOpcode.i2c;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.i2s:
                             opcode = MTOpcode.i2s;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.lcmp:
                             opcode = MTOpcode.lcmp;
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fcmpl:
                             opcode = MTOpcode.fcmpl;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.fcmpg:
                             opcode = MTOpcode.fcmpg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dcmpl:
                             opcode = MTOpcode.dcmpl;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.dcmpg:
                             opcode = MTOpcode.dcmpg;
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.ifeq:
                         {
                             opcode = MTOpcode.ifeq;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1403,7 +1404,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifne:
                         {
                             opcode = MTOpcode.ifne;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1414,7 +1415,7 @@ public static class BytecodeLinker
                         case JavaOpcode.iflt:
                         {
                             opcode = MTOpcode.iflt;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1425,7 +1426,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifge:
                         {
                             opcode = MTOpcode.ifge;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1436,7 +1437,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifgt:
                         {
                             opcode = MTOpcode.ifgt;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1447,7 +1448,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifle:
                         {
                             opcode = MTOpcode.ifle;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1458,8 +1459,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmpeq:
                         {
                             opcode = MTOpcode.if_cmpeq;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1470,8 +1471,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmpne:
                         {
                             opcode = MTOpcode.if_cmpne;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1482,8 +1483,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmplt:
                         {
                             opcode = MTOpcode.if_cmplt;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1494,8 +1495,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmpge:
                         {
                             opcode = MTOpcode.if_cmpge;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1506,8 +1507,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmpgt:
                         {
                             opcode = MTOpcode.if_cmpgt;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1518,8 +1519,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_icmple:
                         {
                             opcode = MTOpcode.if_cmple;
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1530,8 +1531,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_acmpeq:
                         {
                             opcode = MTOpcode.if_cmpeq;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1542,8 +1543,8 @@ public static class BytecodeLinker
                         case JavaOpcode.if_acmpne:
                         {
                             opcode = MTOpcode.if_cmpne;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             SetNextStackAndDiff();
@@ -1566,7 +1567,7 @@ public static class BytecodeLinker
                             throw new NotImplementedException("No jsr/ret opcodes");
                         case JavaOpcode.tableswitch:
                         {
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             var i = 4 - ((instruction.Offset + 1) % 4);
                             if (i == 4)
                                 i = 0;
@@ -1605,7 +1606,7 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.lookupswitch:
                         {
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             var i = 4 - ((instruction.Offset + 1) % 4);
                             if (i == 4)
                                 i = 0;
@@ -1639,31 +1640,31 @@ public static class BytecodeLinker
                             goto entryPointsLoop;
                         }
                         case JavaOpcode.ireturn:
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.lreturn:
-                            emulatedStack.PopWithAssert(PrimitiveType.Long);
+                            emulatedStack.PopWithAssert(PrimitiveType.Long, StackValuePurpose.ReturnToFrame);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.freturn:
-                            emulatedStack.PopWithAssert(PrimitiveType.Float);
+                            emulatedStack.PopWithAssert(PrimitiveType.Float, StackValuePurpose.ReturnToFrame);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.dreturn:
-                            emulatedStack.PopWithAssert(PrimitiveType.Double);
+                            emulatedStack.PopWithAssert(PrimitiveType.Double, StackValuePurpose.ReturnToFrame);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
                             goto entryPointsLoop;
                         case JavaOpcode.areturn:
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.ReturnToFrame);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.return_value);
                             isLinked[instrIndex] = true;
@@ -1717,7 +1718,7 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.putstatic:
                         {
-                            emulatedStack.Pop(); // TODO check field type
+                            emulatedStack.Pop(StackValuePurpose.FieldValue); // TODO check field type
                             var f = getFieldSafely(cls, args, true, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
@@ -1746,7 +1747,7 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.getfield:
                         {
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Target);
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out var d, out var c);
                             if (f != null)
                             {
@@ -1774,8 +1775,8 @@ public static class BytecodeLinker
                         }
                         case JavaOpcode.putfield:
                         {
-                            emulatedStack.Pop(); // TODO check field type
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.Pop(StackValuePurpose.FieldValue); // TODO check field type
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Target);
                             var f = getFieldSafely(cls, args, false, ref opcode, ref data, out _, out var c);
                             if (f != null)
                             {
@@ -1818,8 +1819,9 @@ public static class BytecodeLinker
 
                             auxData[instrIndex] = d.args;
 
-                            foreach (var p in d.args.Reverse()) emulatedStack.PopWithAssert(p);
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            foreach (var p in d.args.Reverse())
+                                emulatedStack.PopWithAssert(p, StackValuePurpose.MethodArg);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Target);
                             if (d.returnType.HasValue) emulatedStack.Push(d.returnType.Value);
 
                             SetNextStackAndDiff();
@@ -1841,9 +1843,9 @@ public static class BytecodeLinker
                             {
                                 var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
                                 foreach (var p in d.args.Reverse())
-                                    emulatedStack.PopWithAssert(p);
+                                    emulatedStack.PopWithAssert(p, StackValuePurpose.MethodArg);
                                 if (!isStatic)
-                                    emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                                    emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Target);
 
                                 if (d.returnType.HasValue)
                                     emulatedStack.Push(d.returnType.Value);
@@ -1885,7 +1887,7 @@ public static class BytecodeLinker
                         case JavaOpcode.newarray:
                             opcode = MTOpcode.new_prim_arr;
                             intData = (int)(ArrayType)args[0];
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
                             break;
@@ -1899,19 +1901,19 @@ public static class BytecodeLinker
                             else
                                 arrType = $"[L{type};";
                             data = jvm.GetClass(arrType);
-                            emulatedStack.PopWithAssert(PrimitiveType.Int);
+                            emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
                             break;
                         }
                         case JavaOpcode.arraylength:
                             opcode = MTOpcode.array_length;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.athrow:
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             SetDiff();
                             output[instrIndex] = new LinkedInstruction(MTOpcode.athrow);
                             isLinked[instrIndex] = true;
@@ -1936,7 +1938,7 @@ public static class BytecodeLinker
                                 }
                             }
 
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
                             break;
@@ -1961,19 +1963,19 @@ public static class BytecodeLinker
                                 }
                             }
 
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Int);
                             SetNextStackAndDiff();
                             break;
                         }
                         case JavaOpcode.monitorenter:
                             opcode = MTOpcode.monitor_enter;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.monitorexit:
                             opcode = MTOpcode.monitor_exit;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.wide:
@@ -2013,23 +2015,27 @@ public static class BytecodeLinker
                                         break;
                                     case JavaOpcode.astore:
                                         opcode = MTOpcode.store;
-                                        emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                                        emulatedStack.PopWithAssert(PrimitiveType.Reference,
+                                            StackValuePurpose.ReturnToFrame);
                                         break;
                                     case JavaOpcode.istore:
                                         opcode = MTOpcode.store;
-                                        emulatedStack.PopWithAssert(PrimitiveType.Int);
+                                        emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.ReturnToFrame);
                                         break;
                                     case JavaOpcode.lstore:
                                         opcode = MTOpcode.store;
-                                        emulatedStack.PopWithAssert(PrimitiveType.Long);
+                                        emulatedStack.PopWithAssert(PrimitiveType.Long,
+                                            StackValuePurpose.ReturnToFrame);
                                         break;
                                     case JavaOpcode.fstore:
                                         opcode = MTOpcode.store;
-                                        emulatedStack.PopWithAssert(PrimitiveType.Float);
+                                        emulatedStack.PopWithAssert(PrimitiveType.Float,
+                                            StackValuePurpose.ReturnToFrame);
                                         break;
                                     case JavaOpcode.dstore:
                                         opcode = MTOpcode.store;
-                                        emulatedStack.PopWithAssert(PrimitiveType.Double);
+                                        emulatedStack.PopWithAssert(PrimitiveType.Double,
+                                            StackValuePurpose.ReturnToFrame);
                                         break;
                                     default:
                                         throw new JavaRuntimeError($"Invalid wide opcode {op}");
@@ -2051,7 +2057,7 @@ public static class BytecodeLinker
                                 if (type[i] != '[')
                                     throw new JavaLinkageException(
                                         $"Multiarray has invalid type: \"{type}\" for {dims} dimensions");
-                                emulatedStack.PopWithAssert(PrimitiveType.Int);
+                                emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             }
 
                             emulatedStack.Push(PrimitiveType.Reference);
@@ -2061,7 +2067,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifnull:
                         {
                             opcode = MTOpcode.ifeq;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             data = null!;
@@ -2073,7 +2079,7 @@ public static class BytecodeLinker
                         case JavaOpcode.ifnonnull:
                         {
                             opcode = MTOpcode.ifne;
-                            emulatedStack.PopWithAssert(PrimitiveType.Reference);
+                            emulatedStack.PopWithAssert(PrimitiveType.Reference, StackValuePurpose.Consume);
                             int target = CalcTargetInstruction();
                             intData = target;
                             data = null!;
@@ -2125,8 +2131,7 @@ public static class BytecodeLinker
 
                     void SetDiff()
                     {
-                        var values = emulatedStack.GetPopsCountAndReset();
-                        predStackOutput[instrIndex].ValuesPoppedOnExecution = values;
+                        predStackOutput[instrIndex].ValuesPoppedOnExecution = emulatedStack.GetPoppedAndReset();
                     }
                 }
             }
@@ -2477,15 +2482,13 @@ public static class BytecodeLinker
 
         public int InstrIndex;
 
-        private int _popsCount;
+        private List<StackValuePurpose> _popTargets = new();
 
-        public int PopsCount => _popsCount;
-
-        public int GetPopsCountAndReset()
+        public StackValuePurpose[] GetPoppedAndReset()
         {
-            var c = _popsCount;
-            _popsCount = 0;
-            return c;
+            var arr = _popTargets.AsEnumerable().Reverse().ToArray();
+            _popTargets.Clear();
+            return arr;
         }
 
         public EmulatedFrameStack(int maxLength, Instruction[] code)
@@ -2513,18 +2516,18 @@ public static class BytecodeLinker
                     $"{Current()} attempts to overflow stack");
         }
 
-        public PrimitiveType Pop()
+        public PrimitiveType Pop(StackValuePurpose purp)
         {
             if (_stack.Count == 0)
                 throw new StackMismatchException(
                     $"{Current()} attempts to pop from empty stack");
-            _popsCount++;
+            _popTargets.Add(purp);
             return _stack.Pop();
         }
 
-        public PrimitiveType PopWithAssertIs32()
+        public PrimitiveType PopWithAssertIs32(StackValuePurpose purp)
         {
-            var real = Pop();
+            var real = Pop(purp);
             if (real == default)
                 return real; // faulty instruction
             if ((real & PrimitiveType.Is64) != 0)
@@ -2533,18 +2536,18 @@ public static class BytecodeLinker
             return real;
         }
 
-        public void PopWithAssert(PrimitiveType expected)
+        public void PopWithAssert(PrimitiveType expected, StackValuePurpose purp)
         {
-            var real = Pop();
+            var real = Pop(purp);
             if (real == default)
                 return; // faulty instruction
             if (expected != real)
                 throw new StackMismatchException($"{Current()} expects {expected} on stack but got {real}");
         }
 
-        public void PopWithAssert(params PrimitiveType[] expected)
+        public void PopWithAssert(PrimitiveType[] expected, StackValuePurpose purp)
         {
-            var real = Pop();
+            var real = Pop(purp);
             if (real == default)
                 return; // faulty instruction
             if (!expected.Contains(real))
@@ -2561,7 +2564,7 @@ public static class BytecodeLinker
         public void Clear()
         {
             _stack.Clear();
-            _popsCount = 0;
+            _popTargets.Clear();
         }
 
         public PrimitiveType[] ToArray() => _stack.ToArray();

@@ -10,14 +10,19 @@ namespace MahoTrans.Compiler;
 public enum StackValuePurpose
 {
     /// <summary>
-    ///     This will be consumed as is by IL opcode.
+    ///     This will be consumed as is by opcode.
     /// </summary>
     Consume = 1,
 
     /// <summary>
-    ///     This will be a target of field get/set or native call.
+    ///     This will be a target of field get/set or call.
     /// </summary>
     Target,
+
+    /// <summary>
+    /// This will be a target of array get/set.
+    /// </summary>
+    ArrayTarget,
 
     /// <summary>
     ///     This will be passed as argument. Marsahlling may need to be applied.
@@ -25,7 +30,12 @@ public enum StackValuePurpose
     MethodArg,
 
     /// <summary>
-    ///     This must be left in JVM stack after range exit.
+    ///     This will be pushed to field.
     /// </summary>
-    ReturnToStack,
+    FieldValue,
+
+    /// <summary>
+    ///     This will be pushed to local or to stack.
+    /// </summary>
+    ReturnToFrame,
 }
