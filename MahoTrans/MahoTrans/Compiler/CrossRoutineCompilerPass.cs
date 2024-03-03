@@ -61,7 +61,68 @@ public class CrossRoutineCompilerPass
             performPop(_ccrfr.StackOnEnter.Value, _stackPurposes[0][0], 0);
         }
 
-        //TODO
+        for (_instrIndex = _ccrfr.Start; _instrIndex < (_ccrfr.Start + _ccrfr.Length); _instrIndex++)
+        {
+            var instr = _javaBody.LinkedCode[_instrIndex];
+            var opcode = instr.Opcode;
+            switch (opcode.GetOpcodeType())
+            {
+                case OpcodeType.NoOp:
+                    // do nothing
+                    break;
+                case OpcodeType.Constant:
+                    switch (opcode)
+                    {
+                        case MTOpcode.iconst_m1:
+                            _il.Emit(OpCodes.Ldc_I4, -1);
+                            break;
+                    }
+
+                    break;
+                case OpcodeType.Local:
+                    break;
+                case OpcodeType.Array:
+                    break;
+                case OpcodeType.Stack:
+                    break;
+                case OpcodeType.Math:
+                    break;
+                case OpcodeType.Conversion:
+                    break;
+                case OpcodeType.Compare:
+                    break;
+                case OpcodeType.Branch:
+                    break;
+                case OpcodeType.Jump:
+                    break;
+                case OpcodeType.Return:
+                    break;
+                case OpcodeType.Throw:
+                    break;
+                case OpcodeType.Call:
+                    break;
+                case OpcodeType.VirtCall:
+                    break;
+                case OpcodeType.Static:
+                    break;
+                case OpcodeType.Alloc:
+                    break;
+                case OpcodeType.Monitor:
+                    break;
+                case OpcodeType.Cast:
+                    break;
+                case OpcodeType.Bridge:
+                    break;
+                case OpcodeType.Initializer:
+                    break;
+                case OpcodeType.Error:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        _il.Emit(OpCodes.Ret);
     }
 
 
