@@ -300,16 +300,18 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = Unsafe.As<Array<T>>(_heap[r.Index]!);
-        return obj.Value;
+        var obj = Unsafe.As<java.lang.Array>(_heap[r.Index]!);
+        return Unsafe.As<T[]>(obj.BaseArray);
     }
 
     public T[]? ResolveArrayOrNull<T>(Reference r) where T : struct
     {
         if (r.IsNull)
             return null;
-        var obj = _heap[r.Index] as Array<T>;
-        return obj?.Value;
+        var obj = _heap[r.Index] as java.lang.Array;
+        if (obj == null)
+            return null;
+        return Unsafe.As<T[]>(obj.BaseArray);
     }
 
     /// <summary>

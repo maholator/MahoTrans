@@ -1493,7 +1493,7 @@ public class JavaRunner
         var index = frame.PopInt();
         var reference = frame.PopReference();
         var array = state.Resolve<Array>(reference);
-        if (index < 0 || index >= array.BaseValue.Length)
+        if (index < 0 || index >= array.BaseArray.Length)
             state.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)
             frame.PushBool(b[index]);

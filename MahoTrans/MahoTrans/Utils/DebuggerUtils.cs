@@ -283,8 +283,8 @@ public static class DebuggerUtils
                     return $"string \"{s.Value}\"";
                 case Array a:
                 {
-                    var nativeArrayElementType = a.BaseValue.GetType().GetElementType()!.Name;
-                    return $"{nativeArrayElementType}[{a.BaseValue.Length}] array, {obj.JavaClass}";
+                    var nativeArrayElementType = a.BaseArray.GetType().GetElementType()!.Name;
+                    return $"{nativeArrayElementType}[{a.BaseArray.Length}] array, {obj.JavaClass}";
                 }
                 case Class cls:
                     return $"class \"{cls.InternalClass.Name}\"";

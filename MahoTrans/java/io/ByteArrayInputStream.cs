@@ -21,7 +21,7 @@ public class ByteArrayInputStream : InputStream
     {
         buf = r;
         pos = 0;
-        count = Jvm.Resolve<Array>(r).BaseValue.Length;
+        count = Jvm.Resolve<Array>(r).BaseArray.Length;
     }
 
     [InitMethod]

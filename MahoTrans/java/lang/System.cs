@@ -47,8 +47,8 @@ public class System : Object
 
     public static void arraycopy(Reference src, int src_position, Reference dst, int dst_position, int length)
     {
-        var arr1 = Jvm.Resolve<Array>(src).BaseValue;
-        var arr2 = Jvm.Resolve<Array>(dst).BaseValue;
+        var arr1 = Jvm.Resolve<Array>(src).BaseArray;
+        var arr2 = Jvm.Resolve<Array>(dst).BaseArray;
         global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
     }
 

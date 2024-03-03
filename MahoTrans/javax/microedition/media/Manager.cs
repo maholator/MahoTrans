@@ -19,7 +19,7 @@ public class Manager : Object
 
         if (str is ByteArrayInputStream bais)
         {
-            var buf = bais.buf.As<Array<sbyte>>().Value;
+            var buf = bais.buf.As<Array<sbyte>>().TypedArray;
             var mem = new ReadOnlySpan<sbyte>(buf, bais.pos, bais.count - bais.pos);
             var player = Jvm.Allocate<PlayerImpl>();
             player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrNull(type), player.This);
