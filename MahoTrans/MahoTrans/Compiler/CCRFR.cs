@@ -1,6 +1,8 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using MahoTrans.Runtime;
+
 namespace MahoTrans.Compiler;
 
 /// <summary>
@@ -19,7 +21,7 @@ public struct CCRFR
     public int Length;
 
     public ushort MaxStackSize;
-    public bool StackOnEnter;
+    public PrimitiveType? StackOnEnter;
     public ushort StackOnExit;
 
 

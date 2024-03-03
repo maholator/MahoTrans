@@ -19,10 +19,14 @@ public enum StackValuePurpose
     /// </summary>
     Target,
 
-    /// <summary>
-    ///     This will be a target of array get/set.
-    /// </summary>
-    ArrayTarget,
+    ArrayTargetByte,
+    ArrayTargetChar,
+    ArrayTargetShort,
+    ArrayTargetInt,
+    ArrayTargetLong,
+    ArrayTargetFloat,
+    ArrayTargetDouble,
+    ArrayTargetRef,
 
     /// <summary>
     ///     This will be passed as argument. Marsahlling may need to be applied.

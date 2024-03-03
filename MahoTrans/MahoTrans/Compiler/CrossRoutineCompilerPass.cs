@@ -55,17 +55,13 @@ public class CrossRoutineCompilerPass
 
     private void CompileInternal()
     {
-        if (_ccrfr.StackOnEnter)
+        if (_ccrfr.StackOnEnter.HasValue)
         {
             // let's build our entrance...
-            if (_stackPurposes[0][0] == StackValuePurpose.ReturnToStack)
-            {
-                // ummm!?
-            }
-            else
-            {
-            }
+            performPop(_ccrfr.StackOnEnter.Value, _stackPurposes[0][0], 0);
         }
+
+        //TODO
     }
 
 
@@ -73,21 +69,11 @@ public class CrossRoutineCompilerPass
     {
         switch (purp)
         {
-            case StackValuePurpose.Consume:
-                // we need raw value
-                break;
-            case StackValuePurpose.Target:
-            case StackValuePurpose.ArrayTarget:
-                // let's resolve via extension for now
-                break;
-            case StackValuePurpose.MethodArg:
-            case StackValuePurpose.FieldValue:
-                // marshallers will be applied as is
-                break;
             case StackValuePurpose.ToLocal:
             case StackValuePurpose.ReturnToStack:
                 // well, we need a frame...
                 _il.Emit(OpCodes.Ldarg_0);
+                // others need nothing.
                 break;
         }
 
@@ -100,7 +86,6 @@ public class CrossRoutineCompilerPass
             case StackValuePurpose.Consume:
             case StackValuePurpose.ToLocal:
             case StackValuePurpose.ReturnToStack:
-            default:
                 // we need raw value
                 _il.Emit(OpCodes.Call, StackPopMethods[primitive.ToType()]);
                 break;
@@ -109,10 +94,10 @@ public class CrossRoutineCompilerPass
                 _il.Emit(OpCodes.Call, StackPopMethods[typeof(Reference)]);
                 _il.Emit(OpCodes.Call, ResolveAnyObject);
                 break;
-            case StackValuePurpose.ArrayTarget:
-                // resolve now
+            default:
+                // this is an array.
                 _il.Emit(OpCodes.Call, StackPopMethods[typeof(Reference)]);
-//TODO resolve
+                _il.Emit(OpCodes.Call, ResolveArrEx.MakeGenericMethod(purp.ToArrayType()));
                 break;
             case StackValuePurpose.MethodArg:
             case StackValuePurpose.FieldValue:

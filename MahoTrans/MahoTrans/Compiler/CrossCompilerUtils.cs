@@ -136,7 +136,7 @@ public static class CrossCompilerUtils
         {
             int? begin = null;
             int maxStack = 0;
-            bool stackOnEnter = false;
+            PrimitiveType? stackOnEnter = default;
 
             for (int i = 0; i < instructions.Length; i++)
             {
@@ -162,17 +162,13 @@ public static class CrossCompilerUtils
                     if (CanCompileMethodWith(instructions[i]))
                     {
                         var stack = jmb.StackTypes[i];
-                        // entering only if there is a prebuilt stack
-                        if (stack.StackBeforeExecution != null)
+                        // there must be 0 or 1 values on stack (i.e. only returned value)
+                        var stackLenOnEnter = stack.StackBeforeExecution.Length;
+                        if (stackLenOnEnter < 2)
                         {
-                            // there must be 0 or 1 values on stack (i.e. only returned value)
-                            var stackLenOnEnter = stack.StackBeforeExecution.Length;
-                            if (stackLenOnEnter < 2)
-                            {
-                                stackOnEnter = stackLenOnEnter == 1;
-                                begin = i;
-                                maxStack = stackLenOnEnter;
-                            }
+                            stackOnEnter = stackLenOnEnter == 1 ? stack.StackBeforeExecution[0] : null;
+                            begin = i;
+                            maxStack = stackLenOnEnter;
                         }
                     }
                 }
@@ -267,6 +263,22 @@ public static class CrossCompilerUtils
             PrimitiveType.Float => typeof(float),
             PrimitiveType.Double => typeof(double),
             PrimitiveType.Reference => typeof(Reference),
+            _ => throw new ArgumentOutOfRangeException(nameof(p), p, null)
+        };
+    }
+
+    public static Type ToArrayType(this StackValuePurpose p)
+    {
+        return p switch
+        {
+            StackValuePurpose.ArrayTargetByte => typeof(sbyte),
+            StackValuePurpose.ArrayTargetChar => typeof(char),
+            StackValuePurpose.ArrayTargetShort => typeof(short),
+            StackValuePurpose.ArrayTargetInt => typeof(int),
+            StackValuePurpose.ArrayTargetLong => typeof(long),
+            StackValuePurpose.ArrayTargetFloat => typeof(float),
+            StackValuePurpose.ArrayTargetDouble => typeof(double),
+            StackValuePurpose.ArrayTargetRef => typeof(Reference),
             _ => throw new ArgumentOutOfRangeException(nameof(p), p, null)
         };
     }
