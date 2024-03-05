@@ -1,8 +1,10 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 
 namespace MahoTrans.Compiler;
 
@@ -10,6 +12,7 @@ public partial class CrossRoutineCompilerPass
 {
     private void CrossConstant(LinkedInstruction instr)
     {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Constant);
         using (BeginMarshalSection(^1))
         {
             switch (instr.Opcode)
