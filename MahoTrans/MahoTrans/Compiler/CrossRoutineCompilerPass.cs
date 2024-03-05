@@ -294,7 +294,7 @@ public class CrossRoutineCompilerPass
             var currInstr = _pass._instrIndex;
             // looking into next instruction
             _purp = _pass.StackPurposes[currInstr + 1][stackPos];
-            _primitive = _pass._javaBody.StackTypes[currInstr + 1].StackBeforeExecution[stackPos];
+            _primitive = _pass.StackTypes[currInstr + 1][stackPos];
             _stackPos = stackPos;
         }
 
@@ -319,8 +319,10 @@ public class CrossRoutineCompilerPass
             {
                 case StackValuePurpose.Consume:
                 case StackValuePurpose.ToLocal:
-                case StackValuePurpose.ReturnToStack:
                     // we need raw value.
+                    break;
+                case StackValuePurpose.ReturnToStack:
+                    _pass._il.Emit(OpCodes.Call, StackPushMethods[_primitive.ToType()]);
                     break;
                 case StackValuePurpose.Target:
                     // resolve object
