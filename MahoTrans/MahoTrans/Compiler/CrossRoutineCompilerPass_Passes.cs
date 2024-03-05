@@ -10,7 +10,7 @@ public partial class CrossRoutineCompilerPass
 {
     public void PushConstant(LinkedInstruction instr)
     {
-        using (new MarshallerWrapper(this, ^1))
+        using (BeginMarshalSection(^1))
         {
             switch (instr.Opcode)
             {

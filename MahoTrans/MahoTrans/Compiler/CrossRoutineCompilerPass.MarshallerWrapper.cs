@@ -9,7 +9,7 @@ namespace MahoTrans.Compiler;
 public partial class CrossRoutineCompilerPass
 {
     /// <summary>
-    ///     Wrap push to CLR stack into usage of this struct.
+    ///     Manages tasks with moving value between stacks and marshalling its value. Works via using blocks.
     /// </summary>
     private struct MarshallerWrapper : IDisposable
     {
@@ -87,4 +87,6 @@ public partial class CrossRoutineCompilerPass
             }
         }
     }
+
+    private MarshallerWrapper BeginMarshalSection(Index pushIndex) => new(this, pushIndex);
 }

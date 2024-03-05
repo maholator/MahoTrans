@@ -79,7 +79,7 @@ public partial class CrossRoutineCompilerPass
         if (_ccrfr.StackOnEnter.HasValue)
         {
             // let's build our entrance: we need a value from jvm stack.
-            using (new MarshallerWrapper(this, ^1))
+            using (BeginMarshalSection(^1))
             {
                 // frame on stage!
                 _il.Emit(OpCodes.Ldarg_0);
