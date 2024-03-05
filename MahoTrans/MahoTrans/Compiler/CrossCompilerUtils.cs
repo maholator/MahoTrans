@@ -142,7 +142,7 @@ public static class CrossCompilerUtils
             {
                 if (begin.HasValue)
                 {
-                    var currStack = jmb.StackTypes[i].StackBeforeExecution?.Length ?? 0;
+                    var currStack = jmb.StackTypes[i].StackBeforeExecution.Length;
                     maxStack = Math.Max(maxStack, currStack);
                     if (!CanCompileMethodWith(instructions[i]))
                     {
