@@ -18,6 +18,7 @@ public partial class CrossRoutineCompilerPass
         private StackValuePurpose _purp;
         private Index _stackPos;
 
+        [Obsolete]
         public MarshallerWrapper(CrossRoutineCompilerPass pass, PrimitiveType primitive, StackValuePurpose purp,
             Index stackPos)
         {
