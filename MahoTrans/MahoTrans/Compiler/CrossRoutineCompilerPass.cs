@@ -26,7 +26,10 @@ public class CrossRoutineCompilerPass
 
     private ILGenerator _il = null!;
 
-    private int _instrIndex = 0;
+    /// <summary>
+    ///     Index of instruction we are working on.
+    /// </summary>
+    private int _instrIndex;
 
     public CrossRoutineCompilerPass(JavaMethodBody javaBody, CCRFR ccrfr, TypeBuilder host, string methodName)
     {
@@ -71,12 +74,7 @@ public class CrossRoutineCompilerPass
                     // do nothing
                     break;
                 case OpcodeType.Constant:
-                    switch (opcode)
-                    {
-                        case MTOpcode.iconst_m1:
-                            _il.Emit(OpCodes.Ldc_I4, -1);
-                            break;
-                    }
+                    PushConstant(instr, _il);
 
                     break;
                 case OpcodeType.Local:
@@ -125,54 +123,10 @@ public class CrossRoutineCompilerPass
         _il.Emit(OpCodes.Ret);
     }
 
-
-    private void performPop(PrimitiveType primitive, StackValuePurpose purp, int stackPos)
-    {
-        switch (purp)
-        {
-            case StackValuePurpose.ToLocal:
-            case StackValuePurpose.ReturnToStack:
-                // well, we need a frame...
-                _il.Emit(OpCodes.Ldarg_0);
-                // others need nothing.
-                break;
-        }
-
-        // frame on stage!
-        _il.Emit(OpCodes.Ldarg_0);
-
-        // now let's pop a value.
-        switch (purp)
-        {
-            case StackValuePurpose.Consume:
-            case StackValuePurpose.ToLocal:
-            case StackValuePurpose.ReturnToStack:
-                // we need raw value
-                _il.Emit(OpCodes.Call, StackPopMethods[primitive.ToType()]);
-                break;
-            case StackValuePurpose.Target:
-                // resolve now
-                _il.Emit(OpCodes.Call, StackPopMethods[typeof(Reference)]);
-                _il.Emit(OpCodes.Call, ResolveAnyObject);
-                break;
-            default:
-                // this is an array.
-                _il.Emit(OpCodes.Call, StackPopMethods[typeof(Reference)]);
-                _il.Emit(OpCodes.Call, ResolveArrEx.MakeGenericMethod(purp.ToArrayType()));
-                break;
-            case StackValuePurpose.MethodArg:
-            case StackValuePurpose.FieldValue:
-                // we need EXACT value
-                var real = GetExactType(stackPos);
-                var poppable = GetStackTypeFor(real);
-                _il.Emit(OpCodes.Call, StackPopMethods[poppable]);
-                var marshaller = MarshalUtils.GetMarshallerFor(poppable, false, real, false);
-                if (marshaller != null)
-                    _il.Emit(OpCodes.Call, marshaller);
-                break;
-        }
-    }
-
+    /// <summary>
+    ///     Looks for type that must be on stack. Starts from next instruction.
+    /// </summary>
+    /// <param name="stackPos">Position on stack from zero.</param>
     private Type GetExactType(int stackPos)
     {
         for (int i = _instrIndex + 1; i < _javaBody.AuxiliaryLinkerOutput.Length; i++)
@@ -203,8 +157,174 @@ public class CrossRoutineCompilerPass
         throw new JavaLinkageException("Failed to find value consumer");
     }
 
-    private Type GetArrayType(int stackPos)
+    public void PushConstant(LinkedInstruction instr, ILGenerator il)
     {
-        throw new NotImplementedException();
+        using (new MarshallerWrapper(this, ^1))
+        {
+            switch (instr.Opcode)
+            {
+                case MTOpcode.iconst_m1:
+                    il.Emit(OpCodes.Ldc_I4_M1);
+                    break;
+                case MTOpcode.iconst_0:
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    break;
+                case MTOpcode.iconst_1:
+                    il.Emit(OpCodes.Ldc_I4_1);
+                    break;
+                case MTOpcode.iconst_2:
+                    il.Emit(OpCodes.Ldc_I4_2);
+                    break;
+                case MTOpcode.iconst_3:
+                    il.Emit(OpCodes.Ldc_I4_3);
+                    break;
+                case MTOpcode.iconst_4:
+                    il.Emit(OpCodes.Ldc_I4_4);
+                    break;
+                case MTOpcode.iconst_5:
+                    il.Emit(OpCodes.Ldc_I4_5);
+                    break;
+                case MTOpcode.lconst_0:
+                    il.Emit(OpCodes.Ldc_I8, 0L);
+                    break;
+                case MTOpcode.lconst_1:
+                    il.Emit(OpCodes.Ldc_I8, 1L);
+                    break;
+                case MTOpcode.lconst_2:
+                    il.Emit(OpCodes.Ldc_I8, 2L);
+                    break;
+                case MTOpcode.fconst_0:
+                    il.Emit(OpCodes.Ldc_R4, 0F);
+                    break;
+                case MTOpcode.fconst_1:
+                    il.Emit(OpCodes.Ldc_R4, 1F);
+                    break;
+                case MTOpcode.fconst_2:
+                    il.Emit(OpCodes.Ldc_R4, 2F);
+                    break;
+                case MTOpcode.dconst_0:
+                    il.Emit(OpCodes.Ldc_R8, 0D);
+                    break;
+                case MTOpcode.dconst_1:
+                    il.Emit(OpCodes.Ldc_R8, 1D);
+                    break;
+                case MTOpcode.dconst_2:
+                    il.Emit(OpCodes.Ldc_R8, 2D);
+                    break;
+                case MTOpcode.iconst:
+                    il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                    break;
+                case MTOpcode.strconst:
+                    il.Emit(OpCodes.Ldstr, (string)instr.Data);
+                    break;
+                case MTOpcode.lconst:
+                    il.Emit(OpCodes.Ldc_I8, (long)instr.Data);
+                    break;
+                case MTOpcode.dconst:
+                    il.Emit(OpCodes.Ldc_R8, (double)instr.Data);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    private void performPop(PrimitiveType primitive, StackValuePurpose purp, int stackPos)
+    {
+        using (new MarshallerWrapper(this, primitive, purp, stackPos))
+        {
+            // frame on stage!
+            _il.Emit(OpCodes.Ldarg_0);
+
+            // now let's pop a value.
+            switch (purp)
+            {
+                default:
+                    _il.Emit(OpCodes.Call, StackPopMethods[primitive.ToType()]);
+                    break;
+                case StackValuePurpose.MethodArg:
+                case StackValuePurpose.FieldValue:
+                    var real = GetExactType(stackPos);
+                    var poppable = GetStackTypeFor(real);
+                    _il.Emit(OpCodes.Call, StackPopMethods[poppable]);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Wrap push to CLR stack into usage of this struct.
+    /// </summary>
+    public struct MarshallerWrapper : IDisposable
+    {
+        private CrossRoutineCompilerPass _pass;
+        private PrimitiveType _primitive;
+        private StackValuePurpose _purp;
+        private Index _stackPos;
+
+        public MarshallerWrapper(CrossRoutineCompilerPass pass, PrimitiveType primitive, StackValuePurpose purp,
+            Index stackPos)
+        {
+            _pass = pass;
+            _primitive = primitive;
+            _purp = purp;
+            _stackPos = stackPos;
+            before();
+        }
+
+        public MarshallerWrapper(CrossRoutineCompilerPass pass, Index stackPos)
+        {
+            _pass = pass;
+            var currInstr = _pass._instrIndex;
+            // looking into next instruction
+            _purp = _pass._stackPurposes[currInstr + 1][stackPos];
+            _primitive = _pass._javaBody.StackTypes[currInstr + 1].StackBeforeExecution[stackPos];
+            _stackPos = stackPos;
+        }
+
+        public void Dispose() => after();
+
+        private void before()
+        {
+            switch (_purp)
+            {
+                case StackValuePurpose.ToLocal:
+                case StackValuePurpose.ReturnToStack:
+                    // to return to frame, we need a frame.
+                    _pass._il.Emit(OpCodes.Ldarg_0);
+                    // others need nothing.
+                    break;
+            }
+        }
+
+        private void after()
+        {
+            switch (_purp)
+            {
+                case StackValuePurpose.Consume:
+                case StackValuePurpose.ToLocal:
+                case StackValuePurpose.ReturnToStack:
+                    // we need raw value.
+                    break;
+                case StackValuePurpose.Target:
+                    // resolve object
+                    _pass._il.Emit(OpCodes.Call, ResolveAnyObject);
+                    break;
+                default:
+                    // this is an array. Resolve an array.
+                    _pass._il.Emit(OpCodes.Call, ResolveArrEx.MakeGenericMethod(_purp.ToArrayType()));
+                    break;
+                case StackValuePurpose.MethodArg:
+                case StackValuePurpose.FieldValue:
+                    // we need EXACT value. Applying marshaller.
+                    var real = _pass.GetExactType(
+                        _stackPos.GetOffset(_pass._stackPurposes[_pass._instrIndex + 1].Length));
+                    var poppable = GetStackTypeFor(real);
+                    var marshaller = MarshalUtils.GetMarshallerFor(poppable, false, real, false);
+                    if (marshaller != null)
+                        _pass._il.Emit(OpCodes.Call, marshaller);
+                    break;
+            }
+        }
     }
 }

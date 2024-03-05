@@ -20,12 +20,14 @@ public class Array<T> : Array where T : struct
     [JsonIgnore]
     public T[] TypedArray
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Unsafe.As<T[]>(BaseArray);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         set => BaseArray = value;
     }
 
     /// <summary>
-    ///     Gets/sets values in <see cref="Value" />, performs bounds checks. Throws
+    ///     Gets/sets values in <see cref="TypedArray" />, performs bounds checks. Throws
     ///     <see cref="ArrayIndexOutOfBoundsException" /> in case of failure.
     /// </summary>
     /// <param name="index"></param>
@@ -33,17 +35,19 @@ public class Array<T> : Array where T : struct
     {
         get
         {
-            if ((uint)index >= (uint)TypedArray.Length)
+            var arr = TypedArray;
+            if ((uint)index >= (uint)arr.Length)
                 Jvm.Throw<ArrayIndexOutOfBoundsException>(
-                    $"Attempt to access index {index} on array with length {TypedArray.Length}");
-            return TypedArray[index];
+                    $"Attempt to access index {index} on array with length {arr.Length}");
+            return arr[index];
         }
         set
         {
-            if ((uint)index >= (uint)TypedArray.Length)
+            var arr = TypedArray;
+            if ((uint)index >= (uint)arr.Length)
                 Jvm.Throw<ArrayIndexOutOfBoundsException>(
-                    $"Attempt to access index {index} on array with length {TypedArray.Length}");
-            TypedArray[index] = value;
+                    $"Attempt to access index {index} on array with length {arr.Length}");
+            arr[index] = value;
         }
     }
 
@@ -78,4 +82,24 @@ public abstract class Array : Object
     [JavaIgnore] public ClrArray BaseArray = null!;
 
     [JavaIgnore] [JsonProperty] public int Length;
+
+    /// <summary>
+    ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
+    /// </summary>
+    public static void SetValue<T>(T[] arr, int index, T value)
+    {
+        if ((uint)index >= (uint)arr.Length)
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
+        arr[index] = value;
+    }
+
+    /// <summary>
+    ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
+    /// </summary>
+    public static T GetValue<T>(T[] arr, int index)
+    {
+        if ((uint)index >= (uint)arr.Length)
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
+        return arr[index];
+    }
 }
