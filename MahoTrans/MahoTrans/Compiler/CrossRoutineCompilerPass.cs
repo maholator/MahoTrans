@@ -14,7 +14,7 @@ namespace MahoTrans.Compiler;
 /// <summary>
 ///     State object for single cross-compiler pass.
 /// </summary>
-public class CrossRoutineCompilerPass
+public partial class CrossRoutineCompilerPass
 {
     private readonly JavaMethodBody _javaBody;
 
@@ -75,10 +75,28 @@ public class CrossRoutineCompilerPass
 
     private void CompileInternal()
     {
+        _instrIndex = _ccrfr.Start - 1;
         if (_ccrfr.StackOnEnter.HasValue)
         {
-            // let's build our entrance...
-            performPop(_ccrfr.StackOnEnter.Value, StackPurposes[0][0], 0);
+            // let's build our entrance: we need a value from jvm stack.
+            using (new MarshallerWrapper(this, ^1))
+            {
+                // frame on stage!
+                _il.Emit(OpCodes.Ldarg_0);
+
+                // now let's pop a value.
+                switch (StackPurposes[0][0])
+                {
+                    default:
+                        _il.Emit(OpCodes.Call, StackPopMethods[_ccrfr.StackOnEnter.Value.ToType()]);
+                        break;
+                    case StackValuePurpose.MethodArg:
+                    case StackValuePurpose.FieldValue:
+                        var poppable = GetStackTypeFor(GetExactType(0));
+                        _il.Emit(OpCodes.Call, StackPopMethods[poppable]);
+                        break;
+                }
+            }
         }
 
         for (_instrIndex = _ccrfr.Start; _instrIndex < _ccrfr.EndExclusive; _instrIndex++)
@@ -241,107 +259,6 @@ public class CrossRoutineCompilerPass
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }
-        }
-    }
-
-    private void performPop(PrimitiveType primitive, StackValuePurpose purp, int stackPos)
-    {
-        using (new MarshallerWrapper(this, primitive, purp, stackPos))
-        {
-            // frame on stage!
-            _il.Emit(OpCodes.Ldarg_0);
-
-            // now let's pop a value.
-            switch (purp)
-            {
-                default:
-                    _il.Emit(OpCodes.Call, StackPopMethods[primitive.ToType()]);
-                    break;
-                case StackValuePurpose.MethodArg:
-                case StackValuePurpose.FieldValue:
-                    var real = GetExactType(stackPos);
-                    var poppable = GetStackTypeFor(real);
-                    _il.Emit(OpCodes.Call, StackPopMethods[poppable]);
-                    break;
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Wrap push to CLR stack into usage of this struct.
-    /// </summary>
-    public struct MarshallerWrapper : IDisposable
-    {
-        private CrossRoutineCompilerPass _pass;
-        private PrimitiveType _primitive;
-        private StackValuePurpose _purp;
-        private Index _stackPos;
-
-        public MarshallerWrapper(CrossRoutineCompilerPass pass, PrimitiveType primitive, StackValuePurpose purp,
-            Index stackPos)
-        {
-            _pass = pass;
-            _primitive = primitive;
-            _purp = purp;
-            _stackPos = stackPos;
-            before();
-        }
-
-        public MarshallerWrapper(CrossRoutineCompilerPass pass, Index stackPos)
-        {
-            _pass = pass;
-            var currInstr = _pass._instrIndex;
-            // looking into next instruction
-            _purp = _pass.StackPurposes[currInstr + 1][stackPos];
-            _primitive = _pass.StackTypes[currInstr + 1][stackPos];
-            _stackPos = stackPos;
-        }
-
-        public void Dispose() => after();
-
-        private void before()
-        {
-            switch (_purp)
-            {
-                case StackValuePurpose.ToLocal:
-                case StackValuePurpose.ReturnToStack:
-                    // to return to frame, we need a frame.
-                    _pass._il.Emit(OpCodes.Ldarg_0);
-                    // others need nothing.
-                    break;
-            }
-        }
-
-        private void after()
-        {
-            switch (_purp)
-            {
-                case StackValuePurpose.Consume:
-                case StackValuePurpose.ToLocal:
-                    // we need raw value.
-                    break;
-                case StackValuePurpose.ReturnToStack:
-                    _pass._il.Emit(OpCodes.Call, StackPushMethods[_primitive.ToType()]);
-                    break;
-                case StackValuePurpose.Target:
-                    // resolve object
-                    _pass._il.Emit(OpCodes.Call, ResolveAnyObject);
-                    break;
-                default:
-                    // this is an array. Resolve an array.
-                    _pass._il.Emit(OpCodes.Call, ResolveArrEx.MakeGenericMethod(_purp.ToArrayType()));
-                    break;
-                case StackValuePurpose.MethodArg:
-                case StackValuePurpose.FieldValue:
-                    // we need EXACT value. Applying marshaller.
-                    var real = _pass.GetExactType(
-                        _stackPos.GetOffset(_pass.StackPurposes[_pass._instrIndex + 1].Length));
-                    var poppable = GetStackTypeFor(real);
-                    var marshaller = MarshalUtils.GetMarshallerFor(poppable, false, real, false);
-                    if (marshaller != null)
-                        _pass._il.Emit(OpCodes.Call, marshaller);
-                    break;
             }
         }
     }
