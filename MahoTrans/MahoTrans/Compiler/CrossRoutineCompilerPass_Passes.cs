@@ -8,7 +8,7 @@ namespace MahoTrans.Compiler;
 
 public partial class CrossRoutineCompilerPass
 {
-    public void PushConstant(LinkedInstruction instr)
+    private void CrossConstant(LinkedInstruction instr)
     {
         using (BeginMarshalSection(^1))
         {

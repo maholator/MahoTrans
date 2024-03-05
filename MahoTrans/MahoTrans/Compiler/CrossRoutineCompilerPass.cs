@@ -109,7 +109,7 @@ public partial class CrossRoutineCompilerPass
                     // do nothing
                     break;
                 case OpcodeType.Constant:
-                    PushConstant(instr);
+                    CrossConstant(instr);
                     break;
                 case OpcodeType.Local:
                     break;
