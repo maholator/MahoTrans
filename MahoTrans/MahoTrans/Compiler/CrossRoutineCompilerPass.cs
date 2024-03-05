@@ -22,7 +22,23 @@ public class CrossRoutineCompilerPass
     private readonly TypeBuilder _host;
     private readonly string _methodName;
 
-    private StackValuePurpose[][] _stackPurposes;
+    /// <summary>
+    ///     Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
+    ///     I in the range. The last element is stack state after last instruction (and before CCR exit). Each element is array
+    ///     of purposes for each value. Indexing from zero. Array lengths are equal to stack sizes.
+    /// </summary>
+    public readonly StackValuePurpose[][] StackPurposes;
+
+    /// <summary>
+    ///     Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
+    ///     I in the range. The last element is stack state after last instruction (and before CCR exit). Each element is array
+    ///     of each value "java primitive" types. Indexing from zero. Array lengths are equal to stack sizes.
+    /// </summary>
+    public readonly PrimitiveType[][] StackTypes;
+
+    public LinkedInstruction[] JavaCode => _javaBody.LinkedCode;
+
+    public int JavaCodeLength => JavaCode.Length;
 
     private ILGenerator _il = null!;
 
@@ -37,7 +53,8 @@ public class CrossRoutineCompilerPass
         _ccrfr = ccrfr;
         _host = host;
         _methodName = methodName;
-        _stackPurposes = CrossCompilerUtils.PredictPurposes(_javaBody, _ccrfr);
+        StackPurposes = CrossCompilerUtils.PredictPurposes(javaBody, ccrfr);
+        StackTypes = CrossCompilerUtils.PredictTypes(javaBody, ccrfr);
     }
 
     public MethodBuilder Compile()
@@ -61,12 +78,12 @@ public class CrossRoutineCompilerPass
         if (_ccrfr.StackOnEnter.HasValue)
         {
             // let's build our entrance...
-            performPop(_ccrfr.StackOnEnter.Value, _stackPurposes[0][0], 0);
+            performPop(_ccrfr.StackOnEnter.Value, StackPurposes[0][0], 0);
         }
 
-        for (_instrIndex = _ccrfr.Start; _instrIndex < (_ccrfr.Start + _ccrfr.Length); _instrIndex++)
+        for (_instrIndex = _ccrfr.Start; _instrIndex < _ccrfr.EndExclusive; _instrIndex++)
         {
-            var instr = _javaBody.LinkedCode[_instrIndex];
+            var instr = JavaCode[_instrIndex];
             var opcode = instr.Opcode;
             switch (opcode.GetOpcodeType())
             {
@@ -74,8 +91,7 @@ public class CrossRoutineCompilerPass
                     // do nothing
                     break;
                 case OpcodeType.Constant:
-                    PushConstant(instr, _il);
-
+                    PushConstant(instr);
                     break;
                 case OpcodeType.Local:
                     break;
@@ -129,7 +145,7 @@ public class CrossRoutineCompilerPass
     /// <param name="stackPos">Position on stack from zero.</param>
     private Type GetExactType(int stackPos)
     {
-        for (int i = _instrIndex + 1; i < _javaBody.AuxiliaryLinkerOutput.Length; i++)
+        for (int i = _instrIndex + 1; i < JavaCodeLength; i++)
         {
             var aux = _javaBody.AuxiliaryLinkerOutput[i];
             if (aux != null)
@@ -157,71 +173,71 @@ public class CrossRoutineCompilerPass
         throw new JavaLinkageException("Failed to find value consumer");
     }
 
-    public void PushConstant(LinkedInstruction instr, ILGenerator il)
+    public void PushConstant(LinkedInstruction instr)
     {
         using (new MarshallerWrapper(this, ^1))
         {
             switch (instr.Opcode)
             {
                 case MTOpcode.iconst_m1:
-                    il.Emit(OpCodes.Ldc_I4_M1);
+                    _il.Emit(OpCodes.Ldc_I4_M1);
                     break;
                 case MTOpcode.iconst_0:
-                    il.Emit(OpCodes.Ldc_I4_0);
+                    _il.Emit(OpCodes.Ldc_I4_0);
                     break;
                 case MTOpcode.iconst_1:
-                    il.Emit(OpCodes.Ldc_I4_1);
+                    _il.Emit(OpCodes.Ldc_I4_1);
                     break;
                 case MTOpcode.iconst_2:
-                    il.Emit(OpCodes.Ldc_I4_2);
+                    _il.Emit(OpCodes.Ldc_I4_2);
                     break;
                 case MTOpcode.iconst_3:
-                    il.Emit(OpCodes.Ldc_I4_3);
+                    _il.Emit(OpCodes.Ldc_I4_3);
                     break;
                 case MTOpcode.iconst_4:
-                    il.Emit(OpCodes.Ldc_I4_4);
+                    _il.Emit(OpCodes.Ldc_I4_4);
                     break;
                 case MTOpcode.iconst_5:
-                    il.Emit(OpCodes.Ldc_I4_5);
+                    _il.Emit(OpCodes.Ldc_I4_5);
                     break;
                 case MTOpcode.lconst_0:
-                    il.Emit(OpCodes.Ldc_I8, 0L);
+                    _il.Emit(OpCodes.Ldc_I8, 0L);
                     break;
                 case MTOpcode.lconst_1:
-                    il.Emit(OpCodes.Ldc_I8, 1L);
+                    _il.Emit(OpCodes.Ldc_I8, 1L);
                     break;
                 case MTOpcode.lconst_2:
-                    il.Emit(OpCodes.Ldc_I8, 2L);
+                    _il.Emit(OpCodes.Ldc_I8, 2L);
                     break;
                 case MTOpcode.fconst_0:
-                    il.Emit(OpCodes.Ldc_R4, 0F);
+                    _il.Emit(OpCodes.Ldc_R4, 0F);
                     break;
                 case MTOpcode.fconst_1:
-                    il.Emit(OpCodes.Ldc_R4, 1F);
+                    _il.Emit(OpCodes.Ldc_R4, 1F);
                     break;
                 case MTOpcode.fconst_2:
-                    il.Emit(OpCodes.Ldc_R4, 2F);
+                    _il.Emit(OpCodes.Ldc_R4, 2F);
                     break;
                 case MTOpcode.dconst_0:
-                    il.Emit(OpCodes.Ldc_R8, 0D);
+                    _il.Emit(OpCodes.Ldc_R8, 0D);
                     break;
                 case MTOpcode.dconst_1:
-                    il.Emit(OpCodes.Ldc_R8, 1D);
+                    _il.Emit(OpCodes.Ldc_R8, 1D);
                     break;
                 case MTOpcode.dconst_2:
-                    il.Emit(OpCodes.Ldc_R8, 2D);
+                    _il.Emit(OpCodes.Ldc_R8, 2D);
                     break;
                 case MTOpcode.iconst:
-                    il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                    _il.Emit(OpCodes.Ldc_I4, instr.IntData);
                     break;
                 case MTOpcode.strconst:
-                    il.Emit(OpCodes.Ldstr, (string)instr.Data);
+                    _il.Emit(OpCodes.Ldstr, (string)instr.Data);
                     break;
                 case MTOpcode.lconst:
-                    il.Emit(OpCodes.Ldc_I8, (long)instr.Data);
+                    _il.Emit(OpCodes.Ldc_I8, (long)instr.Data);
                     break;
                 case MTOpcode.dconst:
-                    il.Emit(OpCodes.Ldc_R8, (double)instr.Data);
+                    _il.Emit(OpCodes.Ldc_R8, (double)instr.Data);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -277,7 +293,7 @@ public class CrossRoutineCompilerPass
             _pass = pass;
             var currInstr = _pass._instrIndex;
             // looking into next instruction
-            _purp = _pass._stackPurposes[currInstr + 1][stackPos];
+            _purp = _pass.StackPurposes[currInstr + 1][stackPos];
             _primitive = _pass._javaBody.StackTypes[currInstr + 1].StackBeforeExecution[stackPos];
             _stackPos = stackPos;
         }
@@ -318,7 +334,7 @@ public class CrossRoutineCompilerPass
                 case StackValuePurpose.FieldValue:
                     // we need EXACT value. Applying marshaller.
                     var real = _pass.GetExactType(
-                        _stackPos.GetOffset(_pass._stackPurposes[_pass._instrIndex + 1].Length));
+                        _stackPos.GetOffset(_pass.StackPurposes[_pass._instrIndex + 1].Length));
                     var poppable = GetStackTypeFor(real);
                     var marshaller = MarshalUtils.GetMarshallerFor(poppable, false, real, false);
                     if (marshaller != null)

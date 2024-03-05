@@ -215,7 +215,7 @@ public static class CrossCompilerUtils
 
         // filling last element
 
-        if (ccrfr.Start + ccrfr.Length >= jmb.LinkedCode.Length)
+        if (ccrfr.TerminatesMethod(jmb))
         {
             // we terminate the method
             purps[^1] = Array.Empty<StackValuePurpose>();
@@ -252,6 +252,37 @@ public static class CrossCompilerUtils
         }
 
         return purps;
+    }
+
+    /// <summary>
+    ///     Attempts to predict types of values on stack. This is known ahead of time, basically, this just copies known values out.
+    /// </summary>
+    /// <param name="jmb">Method body.</param>
+    /// <param name="ccrfr">Range to process.</param>
+    /// <returns>
+    /// Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
+    ///     I in the range. The last element is stack state after last instruction (and before CCR exit). Each element is array
+    ///     of each value "java primitive" types. Indexing from zero. Array lengths are equal to stack sizes.
+    /// </returns>
+    public static PrimitiveType[][] PredictTypes(JavaMethodBody jmb, CCRFR ccrfr)
+    {
+        var types = new PrimitiveType[ccrfr.Length + 1][];
+        var seg = jmb.StackTypes[ccrfr];
+        for (int i = 0; i < ccrfr.Length; i++)
+        {
+            types[i] = seg[i].StackBeforeExecution;
+        }
+
+        if (ccrfr.TerminatesMethod(jmb))
+        {
+            types[^1] = Array.Empty<PrimitiveType>();
+        }
+        else
+        {
+            types[^1] = jmb.StackTypes[ccrfr.EndExclusive].StackBeforeExecution;
+        }
+
+        return types;
     }
 
     public static Type ToType(this PrimitiveType p)

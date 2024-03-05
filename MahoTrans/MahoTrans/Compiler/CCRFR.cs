@@ -24,10 +24,12 @@ public struct CCRFR
     public PrimitiveType? StackOnEnter;
     public ushort StackOnExit;
 
+    public int EndExclusive => Start + Length + 1;
+
+    public bool TerminatesMethod(JavaMethodBody jmb) => EndExclusive == jmb.LinkedCode.Length;
 
     public static implicit operator Range(CCRFR ccrfr)
     {
-        var end = ccrfr.Start + ccrfr.Length + 1;
-        return new Range(ccrfr.Start, end);
+        return new Range(ccrfr.Start, ccrfr.EndExclusive);
     }
 }
