@@ -36,6 +36,7 @@ public partial class CrossRoutineCompilerPass
             _purp = _pass.StackPurposes[currInstr + 1][stackPos];
             _primitive = _pass.StackTypes[currInstr + 1][stackPos];
             _stackPos = stackPos;
+            before();
         }
 
         public void Dispose() => after();
