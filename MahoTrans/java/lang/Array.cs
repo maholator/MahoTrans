@@ -86,6 +86,16 @@ public abstract class Array : Object
     /// <summary>
     ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
     /// </summary>
+    public static T GetValue<T>(T[] arr, int index)
+    {
+        if ((uint)index >= (uint)arr.Length)
+            Jvm.Throw<ArrayIndexOutOfBoundsException>();
+        return arr[index];
+    }
+
+    /// <summary>
+    ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
+    /// </summary>
     public static void SetValue<T>(T[] arr, int index, T value)
     {
         if ((uint)index >= (uint)arr.Length)
@@ -94,12 +104,7 @@ public abstract class Array : Object
     }
 
     /// <summary>
-    ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
+    ///     Helper for cross-compiler. Gets length of array, referenced by argument.
     /// </summary>
-    public static T GetValue<T>(T[] arr, int index)
-    {
-        if ((uint)index >= (uint)arr.Length)
-            Jvm.Throw<ArrayIndexOutOfBoundsException>();
-        return arr[index];
-    }
+    public static int GetLength(Reference r) => Jvm.Resolve<Array>(r).Length;
 }

@@ -4,6 +4,7 @@
 using System.Reflection;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
+using Array = java.lang.Array;
 using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
@@ -23,6 +24,8 @@ public static class CompilerUtils
     private static Type Jvm => typeof(JvmState);
 
     private static Type RefExt => typeof(ReferenceExtensions);
+
+    private static Type JvmArray => typeof(Array);
 
     #region Stack push / pop
 
@@ -92,6 +95,16 @@ public static class CompilerUtils
     };
 
     public static readonly MethodInfo LocalIncrement = typeof(Frame).GetMethod(nameof(Frame.IncrementLocal))!;
+
+    #endregion
+
+    #region Array
+
+    public static readonly MethodInfo ArrayGet = typeof(Array).GetMethod(nameof(Array.GetValue))!;
+
+    public static readonly MethodInfo ArraySet = typeof(Array).GetMethod(nameof(Array.SetValue))!;
+
+    public static readonly MethodInfo ArrayLength = typeof(Array).GetMethod(nameof(Array.GetLength))!;
 
     #endregion
 
