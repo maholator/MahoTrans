@@ -79,13 +79,17 @@ public abstract class Array : Object
     /// <summary>
     ///     Underlying array. Never set it manually! Note that its type may differ from "java" type due to various quirks.
     /// </summary>
-    [JavaIgnore] public ClrArray BaseArray = null!;
+    [JavaIgnore]
+    public ClrArray BaseArray = null!;
 
-    [JavaIgnore] [JsonProperty] public int Length;
+    [JavaIgnore]
+    [JsonProperty]
+    public int Length;
 
     /// <summary>
     ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
     /// </summary>
+    [JavaIgnore]
     public static T GetValue<T>(T[] arr, int index)
     {
         if ((uint)index >= (uint)arr.Length)
@@ -96,6 +100,7 @@ public abstract class Array : Object
     /// <summary>
     ///     Helper for cross-compiler. Slightly lightened version of <see cref="Array{T}.this" />.
     /// </summary>
+    [JavaIgnore]
     public static void SetValue<T>(T[] arr, int index, T value)
     {
         if ((uint)index >= (uint)arr.Length)
@@ -106,5 +111,6 @@ public abstract class Array : Object
     /// <summary>
     ///     Helper for cross-compiler. Gets length of array, referenced by argument.
     /// </summary>
+    [JavaIgnore]
     public static int GetLength(Reference r) => Jvm.Resolve<Array>(r).Length;
 }
