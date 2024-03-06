@@ -75,7 +75,7 @@ public static class CompilerUtils
 
     public static readonly Dictionary<PrimitiveType, MethodInfo> LocalGetMethods = new()
     {
-        { PrimitiveType.Int , typeof(Frame).GetMethod(nameof(Frame.GetLocalInt))! },
+        { PrimitiveType.Int, typeof(Frame).GetMethod(nameof(Frame.GetLocalInt))! },
         { PrimitiveType.Long, typeof(Frame).GetMethod(nameof(Frame.GetLocalLong))! },
         { PrimitiveType.Float, typeof(Frame).GetMethod(nameof(Frame.GetLocalFloat))! },
         { PrimitiveType.Double, typeof(Frame).GetMethod(nameof(Frame.GetLocalDouble))! },
@@ -84,12 +84,14 @@ public static class CompilerUtils
 
     public static readonly Dictionary<PrimitiveType, MethodInfo> LocalSetMethods = new()
     {
-        { PrimitiveType.Int , typeof(Frame).GetMethod(nameof(Frame.SetLocalInt))! },
+        { PrimitiveType.Int, typeof(Frame).GetMethod(nameof(Frame.SetLocalInt))! },
         { PrimitiveType.Long, typeof(Frame).GetMethod(nameof(Frame.SetLocalLong))! },
         { PrimitiveType.Float, typeof(Frame).GetMethod(nameof(Frame.SetLocalFloat))! },
         { PrimitiveType.Double, typeof(Frame).GetMethod(nameof(Frame.SetLocalDouble))! },
         { PrimitiveType.Reference, typeof(Frame).GetMethod(nameof(Frame.SetLocalReference))! },
     };
+
+    public static readonly MethodInfo LocalIncrement = typeof(Frame).GetMethod(nameof(Frame.IncrementLocal))!;
 
     #endregion
 
