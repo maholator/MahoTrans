@@ -53,7 +53,7 @@ public static class CrossCompilerUtils
             case OpcodeType.Math:
                 return true;
             case OpcodeType.Conversion:
-                return true;
+                return false;
             case OpcodeType.Compare:
                 return false;
             case OpcodeType.Branch:
