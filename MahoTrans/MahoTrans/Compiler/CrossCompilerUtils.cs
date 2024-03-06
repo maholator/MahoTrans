@@ -111,15 +111,13 @@ public static class CrossCompilerUtils
             case OpcodeType.Call:
             case OpcodeType.VirtCall:
             case OpcodeType.Static:
+            case OpcodeType.Initializer:
                 return true;
 
             case OpcodeType.Monitor:
                 // let's not now
                 return false;
 
-            case OpcodeType.Initializer:
-                // we can do nothing with initializers.
-                return false;
             case OpcodeType.Error:
                 // method is broken.
                 return false;
@@ -298,7 +296,7 @@ public static class CrossCompilerUtils
             {
                 if (purps[j].Length <= i)
                 {
-                    res.Add(j+1, i);
+                    res.Add(j + 1, i);
                     goto end;
                 }
             }
