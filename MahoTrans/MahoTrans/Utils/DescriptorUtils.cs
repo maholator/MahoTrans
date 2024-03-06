@@ -256,6 +256,16 @@ public static class DescriptorUtils
     /// <returns>Type descriptor.</returns>
     public static string ToJavaDescriptor(this Type t)
     {
+        if (t.IsArray)
+        {
+            if (t.GetArrayRank() != 1)
+                throw new NotSupportedException("Multidimensional arrays are not supported");
+            if (!t.HasElementType)
+                throw new NotSupportedException("Arrays must have element type");
+
+            return "[" + t.GetElementType()!.ToJavaDescriptor();
+        }
+
         if (t == typeof(Reference))
             return "Ljava/lang/Object;";
         if (t == typeof(int))
