@@ -11,12 +11,12 @@ public partial class CrossRoutineCompilerPass
     /// <summary>
     ///     Manages tasks with moving value between stacks and marshalling its value. Works via using blocks.
     /// </summary>
-    public struct MarshallerWrapper : IDisposable
+    public readonly struct MarshallerWrapper : IDisposable
     {
-        private CrossRoutineCompilerPass _pass;
-        private PrimitiveType _primitive;
-        private StackValuePurpose _purp;
-        private Index _stackPos;
+        private readonly CrossRoutineCompilerPass _pass;
+        private readonly PrimitiveType _primitive;
+        private readonly StackValuePurpose _purp;
+        private readonly Index _stackPos;
 
         [Obsolete]
         public MarshallerWrapper(CrossRoutineCompilerPass pass, PrimitiveType primitive, StackValuePurpose purp,
@@ -32,7 +32,7 @@ public partial class CrossRoutineCompilerPass
         public MarshallerWrapper(CrossRoutineCompilerPass pass, Index stackPos)
         {
             _pass = pass;
-            var currInstr = _pass._instrIndex;
+            var currInstr = _pass.LocalInstrIndex;
             // looking into next instruction
             _purp = _pass.StackPurposes[currInstr + 1][stackPos];
             _primitive = _pass.StackTypes[currInstr + 1][stackPos];
@@ -44,9 +44,9 @@ public partial class CrossRoutineCompilerPass
 
         private void before()
         {
-            if (_pass.StackObjectPushMap.TryGetValue(_pass._instrIndex, out var pushAt))
+            if (_pass.StackObjectPushMap.TryGetValue(_pass.LocalInstrIndex, out var pushAt))
             {
-                var wePushNow = _stackPos.GetOffset(_pass.StackPurposes[_pass._instrIndex + 1].Length);
+                var wePushNow = _stackPos.GetOffset(_pass.StackPurposes[_pass.LocalInstrIndex + 1].Length);
                 if (wePushNow == pushAt)
                 {
                     // to return to frame, we need a frame.
@@ -78,7 +78,7 @@ public partial class CrossRoutineCompilerPass
                 case StackValuePurpose.FieldValue:
                     // we need EXACT value. Applying marshaller.
                     var real = _pass.GetExactType(
-                        _stackPos.GetOffset(_pass.StackPurposes[_pass._instrIndex + 1].Length));
+                        _stackPos.GetOffset(_pass.StackPurposes[_pass.LocalInstrIndex + 1].Length));
                     var poppable = CompilerUtils.GetStackTypeFor(real);
                     var marshaller = MarshalUtils.GetMarshallerFor(poppable, false, real, false);
                     if (marshaller != null)

@@ -49,6 +49,8 @@ public partial class CrossRoutineCompilerPass
     /// </summary>
     private int _instrIndex;
 
+    public int LocalInstrIndex => _instrIndex - _ccrfr.Start;
+
     public CrossRoutineCompilerPass(JavaMethodBody javaBody, CCRFR ccrfr, TypeBuilder host, string methodName)
     {
         _javaBody = javaBody;
