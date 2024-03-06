@@ -46,7 +46,6 @@ public partial class CrossRoutineCompilerPass
         {
             switch (_purp)
             {
-                case StackValuePurpose.ToLocal:
                 case StackValuePurpose.ReturnToStack:
                     // to return to frame, we need a frame.
                     _pass._il.Emit(OpCodes.Ldarg_0);

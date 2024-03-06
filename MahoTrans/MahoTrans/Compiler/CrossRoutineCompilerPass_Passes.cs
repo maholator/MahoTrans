@@ -98,12 +98,21 @@ public partial class CrossRoutineCompilerPass
 
                 break;
             case MTOpcode.store:
-                // frame object is already here. Value is here too.
-                // 3rd thing: local index.
+            {
+                _il.BeginScope();
+                // catching value:
+                var temp = _il.DeclareLocal(StackTypes[_instrIndex][^1].ToType());
+                _il.Emit(OpCodes.Stloc, temp);
+
+                // frame > value > index
+                _il.Emit(OpCodes.Ldarg_0);
+                _il.Emit(OpCodes.Ldloc, temp);
                 _il.Emit(OpCodes.Ldc_I4, instr.IntData);
-                // now the setter
                 _il.Emit(OpCodes.Call, CompilerUtils.LocalSetMethods[(PrimitiveType)instr.ShortData]);
+
+                _il.EndScope();
                 break;
+            }
             case MTOpcode.iinc:
                 // frame object:
                 _il.Emit(OpCodes.Ldarg_0);
