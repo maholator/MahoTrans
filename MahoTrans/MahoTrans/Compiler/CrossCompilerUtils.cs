@@ -69,7 +69,7 @@ public static class CrossCompilerUtils
             case OpcodeType.Throw:
                 return true;
             case OpcodeType.Alloc:
-                return true;
+                return false;
             case OpcodeType.Call:
                 return false;
             case OpcodeType.VirtCall:
