@@ -354,6 +354,15 @@ public partial class JvmState
         throw new JavaThrowable(ex);
     }
 
+    [DoesNotReturn]
+    public void Throw(Reference r)
+    {
+        var ex = Resolve<Throwable>(r);
+        ex.Source = ThrowSource.Java;
+        Toolkit.Logger?.LogExceptionThrow(r);
+        throw new JavaThrowable(ex);
+    }
+
     #endregion
 
     #region Utils

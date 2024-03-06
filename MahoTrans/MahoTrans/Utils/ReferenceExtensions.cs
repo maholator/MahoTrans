@@ -58,4 +58,6 @@ public static class ReferenceExtensions
             return Reference.Null;
         return obj.This;
     }
+
+    public static void Throw(this Reference exception) => JvmContext.Jvm!.Throw(exception);
 }

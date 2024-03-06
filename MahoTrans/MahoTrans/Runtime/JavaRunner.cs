@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using java.lang;
 using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
-using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
 using Array = java.lang.Array;
@@ -969,20 +968,8 @@ public class JavaRunner
             }
 
             case MTOpcode.athrow:
-            {
-                var exr = frame.PopReference();
-                if (exr.IsNull)
-                    jvm.Throw<NullPointerException>();
-                else
-                {
-                    var ex = jvm.Resolve<Throwable>(exr);
-                    ex.Source = ThrowSource.Java;
-                    jvm.Toolkit.Logger?.LogExceptionThrow(exr);
-                    throw new JavaThrowable(ex);
-                }
-
+                jvm.Throw(frame.PopReference());
                 break;
-            }
 
             case MTOpcode.invoke_virtual:
                 CallVirtual(instr.IntData, instr.ShortData, frame, thread, jvm);
