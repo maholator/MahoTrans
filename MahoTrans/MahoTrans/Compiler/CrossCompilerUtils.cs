@@ -288,6 +288,29 @@ public static class CrossCompilerUtils
         return types;
     }
 
+    public static Dictionary<int, int> PredictStackObject(StackValuePurpose[][] purps)
+    {
+        Dictionary<int, int> res = new();
+        var valuesCount = purps[^1].Length;
+        for (int i = 0; i < valuesCount; i++)
+        {
+            for (int j = purps.Length - 1; j >= 0; j--)
+            {
+                if (purps[j].Length <= i)
+                {
+                    res.Add(j+1, i);
+                    goto end;
+                }
+            }
+
+            res.Add(-1, i);
+
+            end: ;
+        }
+
+        return res;
+    }
+
     /// <summary>
     ///     Gets CLR type most suitable to represent value on stack, i.e. for
     ///     <see cref="PrimitiveType" />.<see cref="PrimitiveType.Int" /> gives <see cref="Int32" />.

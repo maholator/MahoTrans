@@ -44,13 +44,14 @@ public partial class CrossRoutineCompilerPass
 
         private void before()
         {
-            switch (_purp)
+            if (_pass.StackObjectPushMap.TryGetValue(_pass._instrIndex, out var pushAt))
             {
-                case StackValuePurpose.ReturnToStack:
+                var wePushNow = _stackPos.GetOffset(_pass.StackPurposes[_pass._instrIndex + 1].Length);
+                if (wePushNow == pushAt)
+                {
                     // to return to frame, we need a frame.
                     _pass._il.Emit(OpCodes.Ldarg_0);
-                    // others need nothing.
-                    break;
+                }
             }
         }
 

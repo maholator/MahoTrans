@@ -36,6 +36,8 @@ public partial class CrossRoutineCompilerPass
     /// </summary>
     public readonly PrimitiveType[][] StackTypes;
 
+    public readonly Dictionary<int, int> StackObjectPushMap;
+
     public LinkedInstruction[] JavaCode => _javaBody.LinkedCode;
 
     public int JavaCodeLength => JavaCode.Length;
@@ -55,6 +57,7 @@ public partial class CrossRoutineCompilerPass
         _methodName = methodName;
         StackPurposes = CrossCompilerUtils.PredictPurposes(javaBody, ccrfr);
         StackTypes = CrossCompilerUtils.PredictTypes(javaBody, ccrfr);
+        StackObjectPushMap = CrossCompilerUtils.PredictStackObject(StackPurposes);
     }
 
     public MethodBuilder Compile()

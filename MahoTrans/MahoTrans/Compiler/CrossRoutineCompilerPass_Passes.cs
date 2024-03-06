@@ -157,7 +157,6 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.array_length:
                 using (BeginMarshalSection(^1))
                 {
-                    //TODO this won't work due to marshaller
                     _il.Emit(OpCodes.Call, CompilerUtils.ArrayLength);
                 }
 
