@@ -51,7 +51,7 @@ public static class CrossCompilerUtils
                     _ => false
                 };
             case OpcodeType.Math:
-                return true;
+                return false; //TODO
             case OpcodeType.Conversion:
                 return false;
             case OpcodeType.Compare:
