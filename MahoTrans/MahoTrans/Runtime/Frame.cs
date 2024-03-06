@@ -121,7 +121,6 @@ public unsafe class Frame
         CurrentStackSize = stack;
     }
 
-
     /// <summary>
     ///     Deallocates locals buffer. This will be automatically done on object destruction.
     /// </summary>
@@ -428,6 +427,16 @@ public unsafe class Frame
     /// </summary>
     /// <param name="index">Index of local variable.</param>
     public void PushFromLocal(int index) => PushUnchecked(LocalVariables[index]);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void IncrementLocal(int index, int value)
+    {
+        long i = LocalVariables[index];
+        // casting to int here to handle overflows
+        //TODO possibly this is redundant? int popper trims upper bytes anyway.
+        int res = value + (int)i;
+        LocalVariables[index] = res;
+    }
 
     #endregion
 

@@ -223,16 +223,9 @@ public class JavaRunner
                 break;
 
             case MTOpcode.iinc:
-                unsafe
-                {
-                    long val = frame.LocalVariables[instr.ShortData];
-                    // cast to int because stack is long
-                    var i = (int)val;
-                    // no casts - linker did all that he could.
-                    frame.LocalVariables[instr.ShortData] = instr.IntData + i;
-                    pointer++;
-                    break;
-                }
+                frame.IncrementLocal(instr.ShortData, instr.IntData);
+                pointer++;
+                break;
 
             case MTOpcode.iaload:
                 PushFromIntArray(frame, jvm);
