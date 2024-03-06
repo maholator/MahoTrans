@@ -32,12 +32,13 @@ public static class NativeLinker
     public static List<JavaClass> Make(Type[] types, ILoadLogger? logger)
     {
         // bridges asm init
-        var name = new AssemblyName($"Bridge-{_bridgeAsmCounter}");
-        _bridgeAsmCounter++;
+        var name = new AssemblyName($"{JvmState.NATIVE_BRIDGE_DLL_PREFIX}{_bridgeAsmCounter}");
+
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
-        var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
+        var module = builder.DefineDynamicModule($"{JvmState.NATIVE_BRIDGE_DLL_PREFIX}{_bridgeAsmCounter}");
         var bridge = module.DefineType(CompilerUtils.BRIDGE_CLASS_NAME,
             TypeAttributes.Public | TypeAttributes.Sealed);
+        _bridgeAsmCounter++;
 
         // building java classes
         List<JavaClass> java = new List<JavaClass>();

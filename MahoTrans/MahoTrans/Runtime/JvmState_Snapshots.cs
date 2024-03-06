@@ -339,7 +339,7 @@ public partial class JvmState
                 throw new JavaRuntimeError();
             }
 
-            if (assemblyName.StartsWith(DYNAMIC_DLL_PREFIX))
+            if (assemblyName.StartsWith(TYPE_HOST_DLL_PREFIX))
             {
                 return _jvm.Classes[typeName].ClrType ??
                        throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");

@@ -24,7 +24,8 @@ public partial class JvmState
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
     private int _virtualPointerRoller = 1;
 
-    public const string DYNAMIC_DLL_PREFIX = "MahoTransJvmTypesHost_";
+    public const string TYPE_HOST_DLL_PREFIX = "MTJvmTypesHost_";
+    public const string NATIVE_BRIDGE_DLL_PREFIX = "MTBridgesHost_";
 
     #region Class loading
 
@@ -40,7 +41,7 @@ public partial class JvmState
     {
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(Classes, classes, $"{DYNAMIC_DLL_PREFIX}{moduleName}", moduleName, this, Toolkit.LoadLogger);
+            ClassCompiler.CompileTypes(Classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this, Toolkit.LoadLogger);
             foreach (var cls in classes)
             {
                 Classes.Add(cls.Name, cls);
