@@ -12,7 +12,7 @@ public static class CrossCompilerUtils
     ///     Finds out can this method be compiled or not.
     /// </summary>
     /// <returns>False if this must not be compiled.</returns>
-    public static bool CanCompileMethodWith(this JavaMethodBody method)
+    public static bool CanCompileMethodWith(JavaMethodBody method)
     {
         if (method.LinkedCatches.Length != 0)
             // methods with try-catches may have VERY CURSED execution flow, i don't want to solve bugs related to that.
@@ -143,7 +143,7 @@ public static class CrossCompilerUtils
 
         List<CCRFR> list = new();
 
-        if (!jmb.CanCompileMethodWith())
+        if (!CanCompileMethodWith(jmb))
             return list;
 
         {
@@ -157,7 +157,7 @@ public static class CrossCompilerUtils
                 {
                     var currStack = jmb.StackTypes[i].StackBeforeExecution.Length;
                     maxStack = Math.Max(maxStack, currStack);
-                    if (!CanCompileMethodWith(instructions[i]))
+                    if (!CanCompileSingleOpcode(instructions[i]))
                     {
                         list.Add(new CCRFR
                         {
@@ -172,7 +172,7 @@ public static class CrossCompilerUtils
                 }
                 else
                 {
-                    if (CanCompileMethodWith(instructions[i]))
+                    if (CanCompileSingleOpcode(instructions[i]))
                     {
                         var stack = jmb.StackTypes[i];
                         // there must be 0 or 1 values on stack (i.e. only returned value)
@@ -236,14 +236,16 @@ public static class CrossCompilerUtils
         else
         {
             // there is something after us...
-            var s = jmb.StackTypes[ccrfr.Start + ccrfr.Length].StackBeforeExecution;
+            var s = jmb.StackTypes[ccrfr.EndExclusive].StackBeforeExecution;
             if (s == null)
                 throw new ArgumentException();
             var arr = new StackValuePurpose[s.Length];
             for (int i = 0; i < arr.Length; i++)
             {
-                arr[i] = StackValuePurpose.ToLocal;
+                arr[i] = StackValuePurpose.ReturnToStack;
             }
+
+            purps[^1] = arr;
         }
 
         // now iterating over code
@@ -309,7 +311,7 @@ public static class CrossCompilerUtils
             {
                 if (purps[j].Length <= i)
                 {
-                    res.Add(j + 1, i);
+                    res.Add(j, i);
                     goto end;
                 }
             }

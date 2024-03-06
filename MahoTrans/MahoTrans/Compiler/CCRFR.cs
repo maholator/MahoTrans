@@ -24,7 +24,10 @@ public struct CCRFR
     public PrimitiveType? StackOnEnter;
     public ushort StackOnExit;
 
-    public int EndExclusive => Start + Length + 1;
+    /// <summary>
+    ///     Index of first instruction after us.
+    /// </summary>
+    public int EndExclusive => Start + Length;
 
     public bool TerminatesMethod(JavaMethodBody jmb) => EndExclusive == jmb.LinkedCode.Length;
 
