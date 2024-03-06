@@ -82,4 +82,40 @@ public partial class CrossRoutineCompilerPass
             }
         }
     }
+
+    private void CrossLocal(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Local);
+        switch (instr.Opcode)
+        {
+            case MTOpcode.load:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Ldarg_0);
+                    _il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                    _il.Emit(OpCodes.Call, CompilerUtils.LocalGetMethods[(PrimitiveType)instr.ShortData]);
+                }
+
+                break;
+            case MTOpcode.store:
+                // frame object is already here. Value is here too.
+                // 3rd thing: local index.
+                _il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                // now the setter
+                _il.Emit(OpCodes.Call, CompilerUtils.LocalSetMethods[(PrimitiveType)instr.ShortData]);
+                break;
+            case MTOpcode.iinc:
+                // frame object:
+                _il.Emit(OpCodes.Ldarg_0);
+                // index goes first.
+                // ReSharper disable once RedundantCast
+                _il.Emit(OpCodes.Ldc_I4, (int)instr.ShortData);
+                // now the value.
+                _il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                // this is no-op for stack.
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 }
