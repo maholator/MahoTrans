@@ -8,4 +8,5 @@ namespace java.util;
 [JavaInterface]
 public interface Enumeration
 {
+    public bool hasMoreElements() => throw new AbstractCall();
 }
