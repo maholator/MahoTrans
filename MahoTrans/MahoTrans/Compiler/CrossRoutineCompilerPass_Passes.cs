@@ -190,8 +190,18 @@ public partial class CrossRoutineCompilerPass
                 break;
             }
             case MTOpcode.dup:
-                _il.Emit(OpCodes.Dup);
+            {
+                _il.BeginScope();
+                var temp = _il.DeclareLocal(StackTypes[_instrIndex][^1].ToType());
+                _il.Emit(OpCodes.Stloc, temp);
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Ldloc, temp);
+                }
+
+                _il.EndScope();
                 break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }
