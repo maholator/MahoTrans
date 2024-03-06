@@ -146,8 +146,13 @@ public partial class CrossRoutineCompilerPass
                 // convert int to short/byte if needed, set via helper.
                 throw new NotImplementedException();
             case MTOpcode.array_length:
-                // resolve object as Array, take length field.
-                throw new NotImplementedException();
+                using (BeginMarshalSection(^1))
+                {
+                    //TODO this won't work due to marshaller
+                    _il.Emit(OpCodes.Call, CompilerUtils.ArrayLength);
+                }
+
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
