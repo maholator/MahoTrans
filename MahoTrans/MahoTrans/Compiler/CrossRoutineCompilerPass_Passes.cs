@@ -120,6 +120,39 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
+    private void CrossArray(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Array);
+        switch (instr.Opcode)
+        {
+            case MTOpcode.iaload:
+            case MTOpcode.laload:
+            case MTOpcode.faload:
+            case MTOpcode.daload:
+            case MTOpcode.aaload:
+            case MTOpcode.baload:
+            case MTOpcode.caload:
+            case MTOpcode.saload:
+                // take value via helper.
+                throw new NotImplementedException();
+            case MTOpcode.iastore:
+            case MTOpcode.lastore:
+            case MTOpcode.fastore:
+            case MTOpcode.dastore:
+            case MTOpcode.aastore:
+            case MTOpcode.bastore:
+            case MTOpcode.castore:
+            case MTOpcode.sastore:
+                // convert int to short/byte if needed, set via helper.
+                throw new NotImplementedException();
+            case MTOpcode.array_length:
+                // resolve object as Array, take length field.
+                throw new NotImplementedException();
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
     private void CrossStack(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Stack);

@@ -115,6 +115,7 @@ public partial class CrossRoutineCompilerPass
                     CrossLocal(instr);
                     break;
                 case OpcodeType.Array:
+                    CrossArray(instr);
                     break;
                 case OpcodeType.Stack:
                     CrossStack(instr);
