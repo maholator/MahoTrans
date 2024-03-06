@@ -12,7 +12,7 @@ public class Method : IDisposable
     public readonly NameDescriptor Descriptor;
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
     public MethodInfo? NativeBody;
-    public JavaMethodBody? JavaBody;
+    private JavaMethodBody? _javaBody;
     public int BridgeNumber;
     public Action<Frame>? Bridge;
     public readonly JavaClass Class;
@@ -35,6 +35,17 @@ public class Method : IDisposable
     public bool IsAbstract => (Flags & MethodFlags.Abstract) != 0;
 
     public bool IsCritical => (Flags & MethodFlags.Synchronized) != 0;
+
+    public JavaMethodBody? JavaBody
+    {
+        get => _javaBody;
+        set
+        {
+            if (value != null)
+                value.Method = this;
+            _javaBody = value;
+        }
+    }
 
     public override string ToString()
     {
