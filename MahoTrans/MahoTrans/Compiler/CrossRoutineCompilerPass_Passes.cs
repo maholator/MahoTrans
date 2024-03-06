@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
+using static MahoTrans.Compiler.CompilerUtils;
 
 namespace MahoTrans.Compiler;
 
@@ -93,7 +94,7 @@ public partial class CrossRoutineCompilerPass
                 {
                     _il.Emit(OpCodes.Ldarg_0);
                     _il.Emit(OpCodes.Ldc_I4, instr.IntData);
-                    _il.Emit(OpCodes.Call, CompilerUtils.LocalGetMethods[(PrimitiveType)instr.ShortData]);
+                    _il.Emit(OpCodes.Call, LocalGetMethods[(PrimitiveType)instr.ShortData]);
                 }
 
                 break;
@@ -108,7 +109,7 @@ public partial class CrossRoutineCompilerPass
                 _il.Emit(OpCodes.Ldarg_0);
                 _il.Emit(OpCodes.Ldloc, temp);
                 _il.Emit(OpCodes.Ldc_I4, instr.IntData);
-                _il.Emit(OpCodes.Call, CompilerUtils.LocalSetMethods[(PrimitiveType)instr.ShortData]);
+                _il.Emit(OpCodes.Call, LocalSetMethods[(PrimitiveType)instr.ShortData]);
 
                 _il.EndScope();
                 break;
@@ -121,7 +122,7 @@ public partial class CrossRoutineCompilerPass
                 _il.Emit(OpCodes.Ldc_I4, (int)instr.ShortData);
                 // now the value.
                 _il.Emit(OpCodes.Ldc_I4, instr.IntData);
-                _il.Emit(OpCodes.Call, CompilerUtils.LocalIncrement);
+                _il.Emit(OpCodes.Call, LocalIncrement);
                 // this is no-op for stack.
                 break;
             default:
@@ -135,29 +136,87 @@ public partial class CrossRoutineCompilerPass
         switch (instr.Opcode)
         {
             case MTOpcode.iaload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(int)));
+                }
+                break;
             case MTOpcode.laload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(long)));
+                }
+                break;
             case MTOpcode.faload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(float)));
+                }
+                break;
             case MTOpcode.daload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(double)));
+                }
+                break;
             case MTOpcode.aaload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(Reference)));
+                }
+                break;
             case MTOpcode.baload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(sbyte)));
+                    _il.Emit(OpCodes.Conv_I4);
+                }
+                break;
             case MTOpcode.caload:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(char)));
+                    _il.Emit(OpCodes.Conv_I4);
+                }
+                break;
             case MTOpcode.saload:
-                // take value via helper.
-                throw new NotImplementedException();
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(short)));
+                    _il.Emit(OpCodes.Conv_I4);
+                }
+                break;
             case MTOpcode.iastore:
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(int)));
+                break;
             case MTOpcode.lastore:
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(long)));
+                break;
             case MTOpcode.fastore:
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(float)));
+                break;
             case MTOpcode.dastore:
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(double)));
+                break;
             case MTOpcode.aastore:
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(Reference)));
+                break;
             case MTOpcode.bastore:
+                _il.Emit(OpCodes.Conv_I1);
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(sbyte)));
+                break;
             case MTOpcode.castore:
+                _il.Emit(OpCodes.Conv_U2);
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(char)));
+                break;
             case MTOpcode.sastore:
-                // convert int to short/byte if needed, set via helper.
-                throw new NotImplementedException();
+                _il.Emit(OpCodes.Conv_I2);
+                _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(short)));
+                break;
             case MTOpcode.array_length:
                 using (BeginMarshalSection(^1))
                 {
-                    _il.Emit(OpCodes.Call, CompilerUtils.ArrayLength);
+                    _il.Emit(OpCodes.Call, ArrayLength);
                 }
 
                 break;
