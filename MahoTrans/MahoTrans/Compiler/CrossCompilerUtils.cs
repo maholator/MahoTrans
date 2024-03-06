@@ -75,7 +75,11 @@ public static class CrossCompilerUtils
             case OpcodeType.VirtCall:
                 return false;
             case OpcodeType.Static:
-                return true;
+                return opcode switch
+                {
+                    MTOpcode.get_static => true,
+                    _ => false,
+                };
             case OpcodeType.Monitor:
                 return false;
             case OpcodeType.Initializer:

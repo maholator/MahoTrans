@@ -144,7 +144,8 @@ public partial class CrossRoutineCompilerPass
                 case OpcodeType.VirtCall:
                     throw new NotImplementedException();
                 case OpcodeType.Static:
-                    throw new NotImplementedException();
+                    CrossStatic(instr);
+                    break;
                 case OpcodeType.Alloc:
                     throw new NotImplementedException();
                 case OpcodeType.Monitor:

@@ -292,6 +292,7 @@ public partial class CrossRoutineCompilerPass
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Math);
         switch (instr.Opcode)
         {
+            //TODO
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -303,5 +304,23 @@ public partial class CrossRoutineCompilerPass
             throw new ArgumentOutOfRangeException();
 
         _il.Emit(OpCodes.Call, ThrowEx);
+    }
+
+    private void CrossStatic(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Static);
+        switch (instr.Opcode)
+        {
+            case MTOpcode.get_static:
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Ldsfld, Context);
+                    _il.Emit(OpCodes.Call, StaticGetMethods[StackTypes[_instrIndex + 1][^1]]);
+                }
+
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }
