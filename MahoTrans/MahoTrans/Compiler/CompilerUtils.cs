@@ -24,6 +24,8 @@ public static class CompilerUtils
 
     private static Type RefExt => typeof(ReferenceExtensions);
 
+    #region Stack push / pop
+
     public static readonly Dictionary<Type, MethodInfo> StackPopMethods = new()
     {
         { typeof(int), typeof(Frame).GetMethod(nameof(Frame.PopInt))! },
@@ -66,6 +68,30 @@ public static class CompilerUtils
     public static readonly MethodInfo StackSetFrom = typeof(Frame).GetMethod(nameof(Frame.SetFrom))!;
 
     public static readonly MethodInfo StackDiscard = typeof(Frame).GetMethod(nameof(Frame.Discard))!;
+
+    #endregion
+
+    #region Locals
+
+    public static readonly Dictionary<PrimitiveType, MethodInfo> LocalGetMethods = new()
+    {
+        { PrimitiveType.Int , typeof(Frame).GetMethod(nameof(Frame.GetLocalInt))! },
+        { PrimitiveType.Long, typeof(Frame).GetMethod(nameof(Frame.GetLocalLong))! },
+        { PrimitiveType.Float, typeof(Frame).GetMethod(nameof(Frame.GetLocalFloat))! },
+        { PrimitiveType.Double, typeof(Frame).GetMethod(nameof(Frame.GetLocalDouble))! },
+        { PrimitiveType.Reference, typeof(Frame).GetMethod(nameof(Frame.GetLocalReference))! },
+    };
+
+    public static readonly Dictionary<PrimitiveType, MethodInfo> LocalSetMethods = new()
+    {
+        { PrimitiveType.Int , typeof(Frame).GetMethod(nameof(Frame.SetLocalInt))! },
+        { PrimitiveType.Long, typeof(Frame).GetMethod(nameof(Frame.SetLocalLong))! },
+        { PrimitiveType.Float, typeof(Frame).GetMethod(nameof(Frame.SetLocalFloat))! },
+        { PrimitiveType.Double, typeof(Frame).GetMethod(nameof(Frame.SetLocalDouble))! },
+        { PrimitiveType.Reference, typeof(Frame).GetMethod(nameof(Frame.SetLocalReference))! },
+    };
+
+    #endregion
 
     /// <summary>
     ///     Static field where context JVM is stored.
