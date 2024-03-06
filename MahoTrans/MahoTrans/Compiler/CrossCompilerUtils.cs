@@ -45,6 +45,7 @@ public static class CrossCompilerUtils
                 return opcode switch
                 {
                     MTOpcode.pop => true,
+                    MTOpcode.pop2 => true,
                     MTOpcode.dup => true,
                     _ => false
                 };
