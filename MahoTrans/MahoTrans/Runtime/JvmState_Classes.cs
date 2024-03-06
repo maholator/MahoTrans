@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using MahoTrans.Abstractions;
+using MahoTrans.Compiler;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Errors;
@@ -26,6 +27,7 @@ public partial class JvmState
 
     public const string TYPE_HOST_DLL_PREFIX = "MTJvmTypesHost_";
     public const string NATIVE_BRIDGE_DLL_PREFIX = "MTBridgesHost_";
+    public const string CROSS_ROUTINES_DLL_PREFIX = "MTCrossHost_";
 
     #region Class loading
 
@@ -113,6 +115,8 @@ public partial class JvmState
     ///     Imports MT assembly to this JVM.
     /// </summary>
     public void AddMahoTransLibrary() => AddClrClasses(typeof(JvmState).Assembly);
+
+    public void CrossCompileLoaded() => CrossRoutineCompilerPass.CrossCompileAll(this);
 
     /// <summary>
     ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.

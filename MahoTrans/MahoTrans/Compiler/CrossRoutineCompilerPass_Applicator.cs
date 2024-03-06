@@ -9,6 +9,8 @@ namespace MahoTrans.Compiler;
 
 public partial class CrossRoutineCompilerPass
 {
+    private static int _hostAsmCounter = 1;
+
     public static void CrossCompileMethod(JavaMethodBody method, ModuleBuilder module)
     {
         var ranges = method.GetPossiblyCompilableRanges();
@@ -33,6 +35,24 @@ public partial class CrossRoutineCompilerPass
         {
             var bridge = built.GetMethod($"Routine_{i}")!.CreateDelegate<Action<Frame>>();
             method.LinkedCode[applicationPoints[i]] = new LinkedInstruction(MTOpcode.bridge, 0, 0, bridge);
+        }
+    }
+
+    public static void CrossCompileAll(JvmState jvm)
+    {
+        var name = new AssemblyName($"{JvmState.CROSS_ROUTINES_DLL_PREFIX}{_hostAsmCounter}");
+
+        var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
+        var module = builder.DefineDynamicModule($"{JvmState.CROSS_ROUTINES_DLL_PREFIX}{_hostAsmCounter}");
+        _hostAsmCounter++;
+
+        foreach (var cls in jvm.Classes.Values)
+        {
+            foreach (var method in cls.Methods.Values)
+            {
+                if (method.JavaBody != null)
+                    CrossCompileMethod(method.JavaBody, module);
+            }
         }
     }
 }
