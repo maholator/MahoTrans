@@ -112,6 +112,7 @@ public partial class CrossRoutineCompilerPass
                 _il.Emit(OpCodes.Ldc_I4, (int)instr.ShortData);
                 // now the value.
                 _il.Emit(OpCodes.Ldc_I4, instr.IntData);
+                _il.Emit(OpCodes.Call, CompilerUtils.LocalIncrement);
                 // this is no-op for stack.
                 break;
             default:
