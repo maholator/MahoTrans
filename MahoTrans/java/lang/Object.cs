@@ -307,7 +307,6 @@ public class Object
         b.AppendVirtcall(nameof(StringBuffer.append), "(Ljava/lang/String;)Ljava/lang/StringBuffer;");
         b.AppendVirtcall(nameof(StringBuffer.toString), "()Ljava/lang/String;");
         b.AppendReturnReference();
-        b.AppendReturn();
         return b.Build(2, 1);
     }
 
