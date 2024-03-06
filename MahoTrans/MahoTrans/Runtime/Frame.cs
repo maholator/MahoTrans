@@ -434,6 +434,7 @@ public unsafe class Frame
         long i = LocalVariables[index];
         // casting to int here to handle overflows
         //TODO possibly this is redundant? int popper trims upper bytes anyway.
+        // https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA0AXEBDAzgWwB8ABAZgAIBXAO12wDMZziAmcgYXIG8BYAKHKDy/IcwoAbCNQDmAKnIAZCGGziAatigBLbMHExcAbhFCTgssxTkAktTCx8MahiUrxACi3PyXgCYwENB9vADdVShgASjNuGNFJGR9yAF5FZVUNbV19XABtPwCAXWMBUSEvDHJYXBTyMPEI8gBqck9nSK0SsqFXDM0dPQN86n8EQtrqrqEAXxiYi2IrW3sYR2de8QAxPAw2yoLA4Mr6iOjSwV5zsoTpJNSNzIGc4dHiuJ709X7soYPx1JOTBanRisz40yAA
         int res = value + (int)i;
         LocalVariables[index] = res;
     }
