@@ -11,7 +11,7 @@ namespace MahoTrans.Compiler;
 
 public partial class CrossRoutineCompilerPass
 {
-    private void CrossConstant(LinkedInstruction instr)
+    private void crossConstant(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Constant);
         using (BeginMarshalSection(^1))
@@ -84,7 +84,7 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
-    private void CrossLocal(LinkedInstruction instr)
+    private void crossLocal(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Local);
         switch (instr.Opcode)
@@ -130,7 +130,7 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
-    private void CrossArray(LinkedInstruction instr)
+    private void crossArray(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Array);
         switch (instr.Opcode)
@@ -233,7 +233,7 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
-    private void CrossStack(LinkedInstruction instr)
+    private void crossStack(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Stack);
         switch (instr.Opcode)
@@ -287,7 +287,7 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
-    private void CrossMath(LinkedInstruction instr)
+    private void crossMath(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Math);
         switch (instr.Opcode)
@@ -298,7 +298,7 @@ public partial class CrossRoutineCompilerPass
         }
     }
 
-    private void CrossThrow(LinkedInstruction instr)
+    private void crossThrow(LinkedInstruction instr)
     {
         if (instr.Opcode != MTOpcode.athrow)
             throw new ArgumentOutOfRangeException();
@@ -306,7 +306,7 @@ public partial class CrossRoutineCompilerPass
         _il.Emit(OpCodes.Call, ThrowEx);
     }
 
-    private void CrossStatic(LinkedInstruction instr)
+    private void crossStatic(LinkedInstruction instr)
     {
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Static);
         switch (instr.Opcode)

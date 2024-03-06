@@ -118,19 +118,19 @@ public partial class CrossRoutineCompilerPass
                     // do nothing
                     break;
                 case OpcodeType.Constant:
-                    CrossConstant(instr);
+                    crossConstant(instr);
                     break;
                 case OpcodeType.Local:
-                    CrossLocal(instr);
+                    crossLocal(instr);
                     break;
                 case OpcodeType.Array:
-                    CrossArray(instr);
+                    crossArray(instr);
                     break;
                 case OpcodeType.Stack:
-                    CrossStack(instr);
+                    crossStack(instr);
                     break;
                 case OpcodeType.Math:
-                    CrossMath(instr);
+                    crossMath(instr);
                     break;
                 case OpcodeType.Conversion:
                     throw new NotImplementedException();
@@ -143,14 +143,14 @@ public partial class CrossRoutineCompilerPass
                 case OpcodeType.Return:
                     throw new NotImplementedException();
                 case OpcodeType.Throw:
-                    CrossThrow(instr);
+                    crossThrow(instr);
                     break;
                 case OpcodeType.Call:
                     throw new NotImplementedException();
                 case OpcodeType.VirtCall:
                     throw new NotImplementedException();
                 case OpcodeType.Static:
-                    CrossStatic(instr);
+                    crossStatic(instr);
                     break;
                 case OpcodeType.Alloc:
                     throw new NotImplementedException();
