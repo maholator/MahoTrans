@@ -60,6 +60,10 @@ public partial class CrossRoutineCompilerPass
         StackObjectPushMap = CrossCompilerUtils.PredictStackObject(StackPurposes);
     }
 
+    /// <summary>
+    ///     Crosses the range.
+    /// </summary>
+    /// <returns>Built method.</returns>
     public MethodBuilder Compile()
     {
         var mb = _host.DefineMethod(_methodName,

@@ -131,11 +131,20 @@ public static class CrossCompilerUtils
         }
     }
 
-    public static List<CCRFR> GetPossiblyCompilableRanges(JavaMethodBody jmb)
+    /// <summary>
+    ///     Finds compilable ranges in the method. Implicitly calls
+    ///     <see cref="CanCompileMethodWith(MahoTrans.Runtime.JavaMethodBody)" />.
+    /// </summary>
+    /// <param name="jmb">Method to check.</param>
+    /// <returns>List of ranges, if any, else empty list.</returns>
+    public static List<CCRFR> GetPossiblyCompilableRanges(this JavaMethodBody jmb)
     {
         LinkedInstruction[] instructions = jmb.LinkedCode;
 
         List<CCRFR> list = new();
+
+        if (!jmb.CanCompileMethodWith())
+            return list;
 
         {
             int? begin = null;
