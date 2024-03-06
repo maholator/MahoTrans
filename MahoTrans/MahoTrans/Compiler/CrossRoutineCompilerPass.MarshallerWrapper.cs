@@ -11,7 +11,7 @@ public partial class CrossRoutineCompilerPass
     /// <summary>
     ///     Manages tasks with moving value between stacks and marshalling its value. Works via using blocks.
     /// </summary>
-    private struct MarshallerWrapper : IDisposable
+    public struct MarshallerWrapper : IDisposable
     {
         private CrossRoutineCompilerPass _pass;
         private PrimitiveType _primitive;
