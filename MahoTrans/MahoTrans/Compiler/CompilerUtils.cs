@@ -184,6 +184,8 @@ public static class CompilerUtils
     /// </summary>
     public static readonly MethodInfo ResolveArrOrNullEx = RefExt.GetMethod(nameof(ReferenceExtensions.AsArrayOrNull))!;
 
+    public static readonly MethodInfo ThrowEx = RefExt.GetMethod(nameof(ReferenceExtensions.Throw))!;
+
     /// <summary>
     ///     <see cref="ReferenceExtensions.GetAddrSafely" />
     /// </summary>

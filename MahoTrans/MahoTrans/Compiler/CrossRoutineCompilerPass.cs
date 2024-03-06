@@ -124,37 +124,39 @@ public partial class CrossRoutineCompilerPass
                     CrossStack(instr);
                     break;
                 case OpcodeType.Math:
+                    CrossMath(instr);
                     break;
                 case OpcodeType.Conversion:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Compare:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Branch:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Jump:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Return:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Throw:
+                    CrossThrow(instr);
                     break;
                 case OpcodeType.Call:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.VirtCall:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Static:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Alloc:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Monitor:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Cast:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Bridge:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Initializer:
-                    break;
+                    throw new NotImplementedException();
                 case OpcodeType.Error:
-                    break;
+                    throw new NotImplementedException();
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -140,30 +140,35 @@ public partial class CrossRoutineCompilerPass
                 {
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(int)));
                 }
+
                 break;
             case MTOpcode.laload:
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(long)));
                 }
+
                 break;
             case MTOpcode.faload:
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(float)));
                 }
+
                 break;
             case MTOpcode.daload:
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(double)));
                 }
+
                 break;
             case MTOpcode.aaload:
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(Reference)));
                 }
+
                 break;
             case MTOpcode.baload:
                 using (BeginMarshalSection(^1))
@@ -171,6 +176,7 @@ public partial class CrossRoutineCompilerPass
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(sbyte)));
                     _il.Emit(OpCodes.Conv_I4);
                 }
+
                 break;
             case MTOpcode.caload:
                 using (BeginMarshalSection(^1))
@@ -178,6 +184,7 @@ public partial class CrossRoutineCompilerPass
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(char)));
                     _il.Emit(OpCodes.Conv_I4);
                 }
+
                 break;
             case MTOpcode.saload:
                 using (BeginMarshalSection(^1))
@@ -185,6 +192,7 @@ public partial class CrossRoutineCompilerPass
                     _il.Emit(OpCodes.Call, ArrayGet.MakeGenericMethod(typeof(short)));
                     _il.Emit(OpCodes.Conv_I4);
                 }
+
                 break;
             case MTOpcode.iastore:
                 _il.Emit(OpCodes.Call, ArraySet.MakeGenericMethod(typeof(int)));
@@ -277,5 +285,23 @@ public partial class CrossRoutineCompilerPass
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void CrossMath(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Math);
+        switch (instr.Opcode)
+        {
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void CrossThrow(LinkedInstruction instr)
+    {
+        if (instr.Opcode != MTOpcode.athrow)
+            throw new ArgumentOutOfRangeException();
+
+        _il.Emit(OpCodes.Call, ThrowEx);
     }
 }
