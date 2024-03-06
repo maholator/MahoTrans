@@ -449,15 +449,15 @@ public unsafe class Frame
 
     public Reference GetLocalReference(int index) => LocalVariables[index];
 
-    public void SetLocalInt(int index, int value) => LocalVariables[index] = value;
+    public void SetLocalInt(int value, int index) => LocalVariables[index] = value;
 
-    public void SetLocalLong(int index, long value) => LocalVariables[index] = value;
+    public void SetLocalLong(long value, int index) => LocalVariables[index] = value;
 
-    public void SetLocalFloat(int index, float value) => LocalVariables[index] = BitConverter.SingleToInt32Bits(value);
+    public void SetLocalFloat(float value, int index) => LocalVariables[index] = BitConverter.SingleToInt32Bits(value);
 
-    public void SetLocalDouble(int index, double value) => LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
+    public void SetLocalDouble(double value, int index) => LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
 
-    public void SetLocalReference(int index, Reference value) => LocalVariables[index] = value;
+    public void SetLocalReference(Reference value, int index) => LocalVariables[index] = value;
 
     #endregion
 
