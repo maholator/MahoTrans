@@ -25,18 +25,23 @@ public partial class JvmState
     public long[] StaticFields = Array.Empty<long>();
     public List<Field> StaticFieldsOwners = new();
     private int _nextObjectId = 1;
-    [PublicAPI] public int ObjectsOnFly;
+
+    [PublicAPI]
+    public int ObjectsOnFly;
+
     private Dictionary<string, int> _internalizedStrings = new();
 
     private int _bytesAllocated;
 
-    [PublicAPI] public int BytesAllocated => _bytesAllocated;
+    [PublicAPI]
+    public int BytesAllocated => _bytesAllocated;
 
     //TODO
     public int TotalMemory { get; } = 1024 * 1024 * 4;
     public int FreeMemory => TotalMemory - BytesAllocated;
 
-    [PublicAPI] public int GcCount;
+    [PublicAPI]
+    public int GcCount;
 
     private bool _gcPending;
 
@@ -240,7 +245,6 @@ public partial class JvmState
         return _heap[r.Index]!;
 #endif
     }
-
 
     public T Resolve<T>(Reference r) where T : Object
     {
@@ -651,6 +655,20 @@ public partial class JvmState
     {
         _heap[r] = null;
     }
+
+    #endregion
+
+    #region Statics
+
+    public long GetStaticLong(int index) => StaticFields[index];
+
+    public int GetStaticInt(int index) => (int)StaticFields[index];
+
+    public float GetStaticFloat(int index) => BitConverter.Int32BitsToSingle((int)StaticFields[index]);
+
+    public double GetStaticDouble(int index) => BitConverter.Int64BitsToDouble(StaticFields[index]);
+
+    public Reference GetStaticReference(int index) => StaticFields[index];
 
     #endregion
 }

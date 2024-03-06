@@ -98,6 +98,19 @@ public static class CompilerUtils
 
     #endregion
 
+    #region Statics
+
+    public static readonly Dictionary<PrimitiveType, MethodInfo> StaticGetMethods = new()
+    {
+        { PrimitiveType.Int, Jvm.GetMethod(nameof(JvmState.GetStaticInt))! },
+        { PrimitiveType.Long, Jvm.GetMethod(nameof(JvmState.GetStaticLong))! },
+        { PrimitiveType.Float, Jvm.GetMethod(nameof(JvmState.GetStaticFloat))! },
+        { PrimitiveType.Double, Jvm.GetMethod(nameof(JvmState.GetStaticDouble))! },
+        { PrimitiveType.Reference, Jvm.GetMethod(nameof(JvmState.GetStaticReference))! },
+    };
+
+    #endregion
+
     #region Array
 
     public static readonly MethodInfo ArrayGet = typeof(Array).GetMethod(nameof(Array.GetValue))!;
