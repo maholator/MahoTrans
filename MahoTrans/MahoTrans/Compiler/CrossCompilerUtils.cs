@@ -46,6 +46,7 @@ public static class CrossCompilerUtils
                 {
                     MTOpcode.pop => true,
                     MTOpcode.pop2 => true,
+                    MTOpcode.swap => true,
                     MTOpcode.dup => true,
                     _ => false
                 };
@@ -256,12 +257,13 @@ public static class CrossCompilerUtils
     }
 
     /// <summary>
-    ///     Attempts to predict types of values on stack. This is known ahead of time, basically, this just copies known values out.
+    ///     Attempts to predict types of values on stack. This is known ahead of time, basically, this just copies known values
+    ///     out.
     /// </summary>
     /// <param name="jmb">Method body.</param>
     /// <param name="ccrfr">Range to process.</param>
     /// <returns>
-    /// Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
+    ///     Stack map. Length of this is range.length+1. Element at index I represents stack before instruction with index
     ///     I in the range. The last element is stack state after last instruction (and before CCR exit). Each element is array
     ///     of each value "java primitive" types. Indexing from zero. Array lengths are equal to stack sizes.
     /// </returns>
@@ -286,6 +288,12 @@ public static class CrossCompilerUtils
         return types;
     }
 
+    /// <summary>
+    ///     Gets CLR type most suitable to represent value on stack, i.e. for
+    ///     <see cref="PrimitiveType" />.<see cref="PrimitiveType.Int" /> gives <see cref="Int32" />.
+    /// </summary>
+    /// <param name="p">Type to convert.</param>
+    /// <returns>CLR type most suitable to represent the value.</returns>
     public static Type ToType(this PrimitiveType p)
     {
         return p switch
