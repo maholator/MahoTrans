@@ -439,6 +439,26 @@ public unsafe class Frame
         LocalVariables[index] = res;
     }
 
+    public int GetLocalInt(int index) => (int)LocalVariables[index];
+
+    public long GetLocalLong(int index) => LocalVariables[index];
+
+    public float GetLocalFloat(int index) => BitConverter.Int32BitsToSingle((int)LocalVariables[index]);
+
+    public double GetLocalDouble(int index) => BitConverter.Int64BitsToDouble(LocalVariables[index]);
+
+    public Reference GetLocalReference(int index) => LocalVariables[index];
+
+    public void SetLocalInt(int index, int value) => LocalVariables[index] = value;
+
+    public void SetLocalLong(int index, long value) => LocalVariables[index] = value;
+
+    public void SetLocalFloat(int index, float value) => LocalVariables[index] = BitConverter.SingleToInt32Bits(value);
+
+    public void SetLocalDouble(int index, double value) => LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
+
+    public void SetLocalReference(int index, Reference value) => LocalVariables[index] = value;
+
     #endregion
 
     public override string ToString()
