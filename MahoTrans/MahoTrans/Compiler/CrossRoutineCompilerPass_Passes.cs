@@ -102,7 +102,7 @@ public partial class CrossRoutineCompilerPass
             {
                 _il.BeginScope();
                 // catching value:
-                var temp = _il.DeclareLocal(StackTypes[_instrIndex][^1].ToType());
+                var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex][^1].ToType());
                 _il.Emit(OpCodes.Stloc, temp);
 
                 // frame > value > index
@@ -248,8 +248,8 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.swap:
             {
                 _il.BeginScope();
-                var left = _il.DeclareLocal(StackTypes[_instrIndex][^2].ToType());
-                var right = _il.DeclareLocal(StackTypes[_instrIndex][^1].ToType());
+                var left = _il.DeclareLocal(StackTypes[LocalInstrIndex][^2].ToType());
+                var right = _il.DeclareLocal(StackTypes[LocalInstrIndex][^1].ToType());
 
                 // left > right
                 _il.Emit(OpCodes.Stloc, right);
@@ -272,7 +272,7 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.dup:
             {
                 _il.BeginScope();
-                var temp = _il.DeclareLocal(StackTypes[_instrIndex][^1].ToType());
+                var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex][^1].ToType());
                 _il.Emit(OpCodes.Stloc, temp);
                 using (BeginMarshalSection(^1))
                 {
@@ -315,7 +315,7 @@ public partial class CrossRoutineCompilerPass
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Ldsfld, Context);
-                    _il.Emit(OpCodes.Call, StaticGetMethods[StackTypes[_instrIndex + 1][^1]]);
+                    _il.Emit(OpCodes.Call, StaticGetMethods[StackTypes[LocalInstrIndex + 1][^1]]);
                 }
 
                 break;
