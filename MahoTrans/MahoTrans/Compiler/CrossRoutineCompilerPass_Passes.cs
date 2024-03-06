@@ -274,6 +274,12 @@ public partial class CrossRoutineCompilerPass
                 _il.BeginScope();
                 var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex][^1].ToType());
                 _il.Emit(OpCodes.Stloc, temp);
+
+                using (BeginMarshalSection(^2))
+                {
+                    _il.Emit(OpCodes.Ldloc, temp);
+                }
+
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Ldloc, temp);
