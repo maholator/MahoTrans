@@ -218,7 +218,7 @@ public static class BytecodeLinker
                 var stackOnEntry = predStackOutput[entryPoint].StackBeforeExecution;
                 if (stackOnEntry == null)
                     throw new JavaLinkageException($"Method can't be entered at {entryPoint}");
-                foreach (var el in stackOnEntry.Reverse())
+                foreach (var el in stackOnEntry)
                     emulatedStack.Push(el);
 
                 for (int instrIndex = entryPoint; instrIndex < code.Length; instrIndex++)
@@ -2567,6 +2567,6 @@ public static class BytecodeLinker
             _popTargets.Clear();
         }
 
-        public PrimitiveType[] ToArray() => _stack.ToArray();
+        public PrimitiveType[] ToArray() => _stack.Reverse().ToArray();
     }
 }
