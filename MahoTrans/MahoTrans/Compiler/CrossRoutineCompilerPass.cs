@@ -117,6 +117,7 @@ public partial class CrossRoutineCompilerPass
                 case OpcodeType.Array:
                     break;
                 case OpcodeType.Stack:
+                    CrossStack(instr);
                     break;
                 case OpcodeType.Math:
                     break;

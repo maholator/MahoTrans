@@ -119,4 +119,26 @@ public partial class CrossRoutineCompilerPass
                 throw new ArgumentOutOfRangeException();
         }
     }
+
+    private void CrossStack(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Stack);
+        switch (instr.Opcode)
+        {
+            case MTOpcode.pop:
+                _il.Emit(OpCodes.Pop);
+                break;
+            case MTOpcode.pop2:
+                _il.Emit(OpCodes.Pop);
+                _il.Emit(OpCodes.Pop);
+                break;
+            case MTOpcode.dup:
+                _il.Emit(OpCodes.Dup);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+
 }
