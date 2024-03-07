@@ -335,7 +335,63 @@ public partial class CrossRoutineCompilerPass
                 emitRepush();
                 break;
 
-            //TODO rem, neg, shifts
+            case MTOpcode.irem:
+            case MTOpcode.lrem:
+            case MTOpcode.frem:
+            case MTOpcode.drem:
+                _il.Emit(OpCodes.Rem);
+                emitRepush();
+                break;
+
+            case MTOpcode.ineg:
+            case MTOpcode.lneg:
+            case MTOpcode.fneg:
+            case MTOpcode.dneg:
+                _il.Emit(OpCodes.Neg);
+                emitRepush();
+                break;
+
+            case MTOpcode.ishl:
+                _il.Emit(OpCodes.Ldc_I4, 31);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shl);
+                emitRepush();
+                break;
+
+            case MTOpcode.lshl:
+                _il.Emit(OpCodes.Ldc_I4, 63);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shl);
+                emitRepush();
+                break;
+
+            case MTOpcode.ishr:
+                _il.Emit(OpCodes.Ldc_I4, 31);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shr);
+                emitRepush();
+                break;
+
+            case MTOpcode.lshr:
+                _il.Emit(OpCodes.Ldc_I4, 63);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shr);
+                emitRepush();
+                break;
+
+            case MTOpcode.iushr:
+                _il.Emit(OpCodes.Ldc_I4, 31);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shr_Un);
+                emitRepush();
+                break;
+
+            case MTOpcode.lushr:
+                _il.Emit(OpCodes.Ldc_I4, 63);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Shr_Un);
+                emitRepush();
+                break;
 
             case MTOpcode.iand:
             case MTOpcode.land:
