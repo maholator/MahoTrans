@@ -321,6 +321,7 @@ public partial class CrossRoutineCompilerPass
                 using (BeginMarshalSection(^1))
                 {
                     _il.Emit(OpCodes.Ldsfld, Context);
+                    _il.Emit(OpCodes.Ldc_I4, instr.IntData);
                     _il.Emit(OpCodes.Call, StaticGetMethods[StackTypes[LocalInstrIndex + 1][^1]]);
                 }
 
