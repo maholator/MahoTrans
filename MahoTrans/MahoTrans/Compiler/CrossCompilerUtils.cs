@@ -51,7 +51,11 @@ public static class CrossCompilerUtils
                     _ => false
                 };
             case OpcodeType.Math:
-                return false; //TODO
+                if (opcode <= MTOpcode.ddiv)
+                    return true;
+                if (opcode >= MTOpcode.iand)
+                    return true;
+                return false; //TODO remaining opcodes
             case OpcodeType.Conversion:
                 return false;
             case OpcodeType.Compare:

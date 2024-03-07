@@ -306,9 +306,70 @@ public partial class CrossRoutineCompilerPass
         Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Math);
         switch (instr.Opcode)
         {
-            //TODO
+            case MTOpcode.iadd:
+            case MTOpcode.ladd:
+            case MTOpcode.fadd:
+            case MTOpcode.dadd:
+                _il.Emit(OpCodes.Add);
+                emitRepush();
+                break;
+            case MTOpcode.isub:
+            case MTOpcode.lsub:
+            case MTOpcode.fsub:
+            case MTOpcode.dsub:
+                _il.Emit(OpCodes.Sub);
+                emitRepush();
+                break;
+            case MTOpcode.imul:
+            case MTOpcode.lmul:
+            case MTOpcode.fmul:
+            case MTOpcode.dmul:
+                _il.Emit(OpCodes.Mul);
+                emitRepush();
+                break;
+            case MTOpcode.idiv:
+            case MTOpcode.ldiv:
+            case MTOpcode.fdiv:
+            case MTOpcode.ddiv:
+                _il.Emit(OpCodes.Div);
+                emitRepush();
+                break;
+
+            //TODO rem, neg, shifts
+
+            case MTOpcode.iand:
+            case MTOpcode.land:
+                _il.Emit(OpCodes.And);
+                emitRepush();
+                break;
+
+            case MTOpcode.ior:
+            case MTOpcode.lor:
+                _il.Emit(OpCodes.Or);
+                emitRepush();
+                break;
+
+            case MTOpcode.ixor:
+            case MTOpcode.lxor:
+                _il.Emit(OpCodes.Xor);
+                emitRepush();
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+
+        void emitRepush()
+        {
+            _il.BeginScope();
+            var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex + 1][^1].ToType());
+            _il.Emit(OpCodes.Stloc, temp);
+            using (BeginMarshalSection(^1))
+            {
+                _il.Emit(OpCodes.Ldloc, temp);
+            }
+
+            _il.EndScope();
         }
     }
 
