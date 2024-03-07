@@ -169,7 +169,10 @@ public partial class CrossRoutineCompilerPass
             }
         }
 
-        // all returned values were returned.
+        // all returned values were returned. But we need to fix pointer.
+        _il.Emit(OpCodes.Ldarg_0);
+        _il.Emit(OpCodes.Ldc_I4, _ccrfr.Length - 1);
+        _il.Emit(OpCodes.Call, typeof(Frame).GetMethod(nameof(Frame.IncreasePointer))!);
         _il.Emit(OpCodes.Ret);
     }
 

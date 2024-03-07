@@ -455,11 +455,14 @@ public unsafe class Frame
 
     public void SetLocalFloat(float value, int index) => LocalVariables[index] = BitConverter.SingleToInt32Bits(value);
 
-    public void SetLocalDouble(double value, int index) => LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
+    public void SetLocalDouble(double value, int index) =>
+        LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
 
     public void SetLocalReference(Reference value, int index) => LocalVariables[index] = value;
 
     #endregion
+
+    public void IncreasePointer(int value) => Pointer += value;
 
     public override string ToString()
     {
