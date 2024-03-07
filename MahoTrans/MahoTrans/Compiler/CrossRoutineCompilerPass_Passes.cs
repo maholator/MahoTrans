@@ -361,6 +361,14 @@ public partial class CrossRoutineCompilerPass
 
         void emitRepush()
         {
+            var purp = StackPurposes[LocalInstrIndex + 1][^1];
+            switch (purp)
+            {
+                case StackValuePurpose.Consume:
+                case StackValuePurpose.ToLocal:
+                    return;
+            }
+
             _il.BeginScope();
             var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex + 1][^1].ToType());
             _il.Emit(OpCodes.Stloc, temp);
