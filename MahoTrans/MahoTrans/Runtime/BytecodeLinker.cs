@@ -241,7 +241,7 @@ public static class BytecodeLinker
                             SetNextStackAndDiff();
                             break;
                         case JavaOpcode.aconst_null:
-                            opcode = MTOpcode.iconst_0;
+                            opcode = MTOpcode.aconst_0;
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
                             break;

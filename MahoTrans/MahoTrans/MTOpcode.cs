@@ -19,6 +19,7 @@ public enum MTOpcode : byte
 
     #region Constants
 
+    aconst_0,
     iconst_m1,
     iconst_0,
     iconst_1,

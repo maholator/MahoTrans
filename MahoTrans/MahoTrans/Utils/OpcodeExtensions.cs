@@ -42,6 +42,7 @@ public static class OpcodeExtensions
         return opcode switch
         {
             MTOpcode.nop => OpcodeType.NoOp,
+            MTOpcode.aconst_0 => OpcodeType.Constant,
             MTOpcode.iconst_m1 => OpcodeType.Constant,
             MTOpcode.iconst_0 => OpcodeType.Constant,
             MTOpcode.iconst_1 => OpcodeType.Constant,

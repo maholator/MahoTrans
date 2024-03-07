@@ -28,6 +28,7 @@ public static class DebuggerUtils
             case MTOpcode.nop:
                 return 0;
 
+            case MTOpcode.aconst_0:
             case MTOpcode.iconst_m1:
             case MTOpcode.iconst_0:
             case MTOpcode.iconst_1:

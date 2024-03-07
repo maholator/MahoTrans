@@ -18,6 +18,9 @@ public partial class CrossRoutineCompilerPass
         {
             switch (instr.Opcode)
             {
+                case MTOpcode.aconst_0:
+                    _il.Emit(OpCodes.Call, typeof(Reference).GetProperty(nameof(Reference.Null))!.GetMethod!);
+                    break;
                 case MTOpcode.iconst_m1:
                     _il.Emit(OpCodes.Ldc_I4_M1);
                     break;

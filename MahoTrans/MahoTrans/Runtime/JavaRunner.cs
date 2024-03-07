@@ -116,6 +116,7 @@ public class JavaRunner
                 pointer++;
                 break;
 
+            case MTOpcode.aconst_0:
             case MTOpcode.iconst_0:
                 frame.PushInt(0);
                 pointer++;
