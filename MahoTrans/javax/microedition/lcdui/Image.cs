@@ -17,7 +17,8 @@ namespace javax.microedition.lcdui;
 
 public class Image : Object
 {
-    [JavaIgnore] public ImageHandle Handle;
+    [JavaIgnore]
+    public ImageHandle Handle;
 
     public static Image createImage([String] Reference name)
     {
@@ -156,10 +157,10 @@ public class Image : Object
         return b.Build(5, 6);
     }
 
-
     public bool isMutable() => Toolkit.Images.IsMutable(Handle);
 
     public int getWidth() => Toolkit.Images.GetWidth(Handle);
+
     public int getHeight() => Toolkit.Images.GetHeight(Handle);
 
     public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,

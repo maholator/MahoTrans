@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Handles;
@@ -10,9 +10,11 @@ namespace javax.microedition.lcdui;
 
 public class Item : Object
 {
-    [JavaIgnore] public DisplayableHandle Owner;
+    [JavaIgnore]
+    public DisplayableHandle Owner;
 
-    [String] public Reference Label;
+    [String]
+    public Reference Label;
 
     [return: String]
     public Reference getLabel() => Label;
@@ -28,7 +30,6 @@ public class Item : Object
     {
         if (Owner != default) Toolkit.Display.ItemUpdated(Owner, This);
     }
-
 
     public const int BUTTON = 2;
     public const int HYPERLINK = 1;

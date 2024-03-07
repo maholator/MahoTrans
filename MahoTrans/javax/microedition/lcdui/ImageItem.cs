@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -9,8 +9,12 @@ namespace javax.microedition.lcdui;
 
 public class ImageItem : Item
 {
-    [JavaType(typeof(Image))] public Reference Image;
-    [String] public Reference AltText;
+    [JavaType(typeof(Image))]
+    public Reference Image;
+
+    [String]
+    public Reference AltText;
+
     public int Appearance;
 
     [InitMethod]

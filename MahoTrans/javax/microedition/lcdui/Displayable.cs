@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -12,15 +12,20 @@ namespace javax.microedition.lcdui;
 
 public class Displayable : Object
 {
-    [JavaIgnore] public DisplayableHandle Handle;
+    [JavaIgnore]
+    public DisplayableHandle Handle;
 
-    [String] public Reference Title = 0;
+    [String]
+    public Reference Title = 0;
 
-    [JavaType(typeof(CommandListener))] public Reference Listener;
+    [JavaType(typeof(CommandListener))]
+    public Reference Listener;
 
-    [JavaType(typeof(Ticker))] public Reference Ticker;
+    [JavaType(typeof(Ticker))]
+    public Reference Ticker;
 
-    [JavaIgnore] public List<Reference> Commands = new();
+    [JavaIgnore]
+    public List<Reference> Commands = new();
 
     [InitMethod]
     public override void Init()

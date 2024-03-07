@@ -27,7 +27,6 @@ public class AllocBenchmark
 
     private JavaClass _formClass = null!;
 
-
     [Benchmark]
     public Reference AllocGeneric()
     {

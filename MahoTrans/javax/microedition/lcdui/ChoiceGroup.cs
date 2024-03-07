@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -9,13 +9,15 @@ namespace javax.microedition.lcdui;
 
 public class ChoiceGroup : Item, Choice
 {
-    [JavaIgnore] public List<List.ListItem> Items = new();
+    [JavaIgnore]
+    public List<List.ListItem> Items = new();
 
     public ChoiceType Type;
 
     public int SelectedItem;
 
-    [JavaIgnore] public List<bool> SelectedMap = new();
+    [JavaIgnore]
+    public List<bool> SelectedMap = new();
 
     int Choice.SelectedIndex
     {

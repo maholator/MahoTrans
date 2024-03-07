@@ -14,18 +14,37 @@ namespace javax.microedition.lcdui;
 
 public class Graphics : Object, DirectGraphics
 {
-    [JavaIgnore] public GraphicsHandle Handle;
+    [JavaIgnore]
+    public GraphicsHandle Handle;
 
     private IGraphics Implementation => Toolkit.Images.ResolveGraphics(Handle);
 
-    [JavaIgnore] [JsonProperty] private uint _color;
-    [JavaIgnore] [JsonProperty] private FontStyle _style;
-    [JavaIgnore] [JsonProperty] private FontFace _face;
-    [JavaIgnore] [JsonProperty] private int _size;
-    [JavaIgnore] [JsonProperty] private int _tx;
-    [JavaIgnore] [JsonProperty] private int _ty;
+    [JavaIgnore]
+    [JsonProperty]
+    private uint _color;
 
-    [JavaType(typeof(Font))] public Reference Font;
+    [JavaIgnore]
+    [JsonProperty]
+    private FontStyle _style;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private FontFace _face;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _size;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _tx;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _ty;
+
+    [JavaType(typeof(Font))]
+    public Reference Font;
 
     [InitMethod]
     public override void Init()
@@ -102,6 +121,7 @@ public class Graphics : Object, DirectGraphics
     }
 
     public int getTranslateX() => _tx;
+
     public int getTranslateY() => _ty;
 
     #endregion
@@ -119,8 +139,11 @@ public class Graphics : Object, DirectGraphics
     }
 
     public int getClipX() => Implementation.Clip.X - _tx;
+
     public int getClipY() => Implementation.Clip.Y - _ty;
+
     public int getClipWidth() => Implementation.Clip.Width;
+
     public int getClipHeight() => Implementation.Clip.Height;
 
     #endregion

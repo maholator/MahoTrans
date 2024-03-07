@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 // ReSharper disable InconsistentNaming
@@ -13,7 +13,8 @@ public class Alert : Screen
 {
     public const int FOREVER = -2;
 
-    [JavaType(typeof(Displayable))] public Reference Next;
+    [JavaType(typeof(Displayable))]
+    public Reference Next;
 
     [ClassInit]
     public static void ClInit()
@@ -45,11 +46,14 @@ public class Alert : Screen
         Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }
 
-    [String] public Reference Text;
+    [String]
+    public Reference Text;
 
-    [JavaType(typeof(Image))] public Reference Image;
+    [JavaType(typeof(Image))]
+    public Reference Image;
 
-    [JavaType(typeof(AlertType))] public Reference Type;
+    [JavaType(typeof(AlertType))]
+    public Reference Type;
 
     public int Timeout;
 

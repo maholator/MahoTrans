@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -10,7 +10,8 @@ namespace javax.microedition.lcdui;
 
 public class Form : Screen
 {
-    [JavaIgnore] public List<Reference> Items = new();
+    [JavaIgnore]
+    public List<Reference> Items = new();
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -58,7 +59,6 @@ public class Form : Screen
         i.Init(Reference.Null, image, 0, Reference.Null);
         return append(i.This);
     }
-
 
     public void delete(int n)
     {

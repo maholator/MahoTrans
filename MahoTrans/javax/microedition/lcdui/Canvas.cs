@@ -15,7 +15,8 @@ namespace javax.microedition.lcdui;
 
 public class Canvas : Displayable
 {
-    [JavaType(typeof(Graphics))] public Reference CachedGraphics;
+    [JavaType(typeof(Graphics))]
+    public Reference CachedGraphics;
 
     [InitMethod]
     public override void Init()
@@ -162,8 +163,11 @@ public class Canvas : Displayable
     }
 
     public bool hasPointerEvents() => true;
+
     public bool isDoubleBuffered() => true;
+
     public bool hasPointerMotionEvents() => true;
+
     public bool hasRepeatEvents() => false;
 
     public void setFullScreenMode(bool mode)

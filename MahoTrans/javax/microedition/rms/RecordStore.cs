@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -15,13 +15,20 @@ namespace javax.microedition.rms;
 
 public class RecordStore : Object
 {
-    [String] public Reference StoreName;
-    [JsonProperty] private int _openCount;
+    [String]
+    public Reference StoreName;
 
-    [JavaType(typeof(Vector))] public Reference Listeners;
+    [JsonProperty]
+    private int _openCount;
 
-    [JsonProperty] private int _version;
-    [JsonProperty] private long _modifiedAt;
+    [JavaType(typeof(Vector))]
+    public Reference Listeners;
+
+    [JsonProperty]
+    private int _version;
+
+    [JsonProperty]
+    private long _modifiedAt;
 
     [ClassInit]
     public static void ClInit()
