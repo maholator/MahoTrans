@@ -694,12 +694,12 @@ public class JavaRunner
                 break;
 
             case MTOpcode.f2i:
-                FloatToInt(frame);
+                frame.PushInt(F2I(frame.PopFloat()));
                 pointer++;
                 break;
 
             case MTOpcode.f2l:
-                FloatToLong(frame);
+                frame.PushLong(F2L(frame.PopFloat()));
                 pointer++;
                 break;
 
@@ -1280,34 +1280,32 @@ public class JavaRunner
 
     #region Numbers manipulation
 
-    private static void FloatToInt(Frame frame)
+    public static int F2I(float f)
     {
-        float val = frame.PopFloat();
-        if (float.IsNaN(val))
-            frame.PushInt(0);
-        else if (float.IsFinite(val))
-            frame.PushInt((int)val);
-        else if (float.IsPositiveInfinity(val))
-            frame.PushInt(int.MaxValue);
-        else if (float.IsNegativeInfinity(val))
-            frame.PushInt(int.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round float number {val}");
+        if (float.IsNaN(f))
+            return 0;
+        if (float.IsPositiveInfinity(f))
+            return int.MaxValue;
+        if (float.IsNegativeInfinity(f))
+            return int.MinValue;
+        if (float.IsFinite(f))
+            return (int)f;
+
+        throw new JavaRuntimeError($"Can't round float number {f}");
     }
 
-    private static void FloatToLong(Frame frame)
+    public static long F2L(float f)
     {
-        float val = frame.PopFloat();
-        if (float.IsNaN(val))
-            frame.PushLong(0);
-        else if (float.IsFinite(val))
-            frame.PushLong((long)val);
-        else if (float.IsPositiveInfinity(val))
-            frame.PushLong(long.MaxValue);
-        else if (float.IsNegativeInfinity(val))
-            frame.PushLong(long.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round float number {val}");
+        if (float.IsNaN(f))
+            return 0L;
+        if (float.IsPositiveInfinity(f))
+            return long.MaxValue;
+        if (float.IsNegativeInfinity(f))
+            return long.MinValue;
+        if (float.IsFinite(f))
+            return (long)f;
+
+        throw new JavaRuntimeError($"Can't round float number {f}");
     }
 
     private static void DoubleToInt(Frame frame)
