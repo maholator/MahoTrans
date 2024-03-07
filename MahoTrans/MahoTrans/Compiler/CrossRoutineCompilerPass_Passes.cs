@@ -73,7 +73,9 @@ public partial class CrossRoutineCompilerPass
                     _il.Emit(OpCodes.Ldc_R4, BitConverter.Int32BitsToSingle(instr.IntData));
                     break;
                 case MTOpcode.strconst:
+                    _il.Emit(OpCodes.Ldsfld, Context);
                     _il.Emit(OpCodes.Ldstr, (string)instr.Data);
+                    _il.Emit(OpCodes.Call, typeof(JvmState).GetMethod(nameof(JvmState.InternalizeString))!);
                     break;
                 case MTOpcode.lconst:
                     _il.Emit(OpCodes.Ldc_I8, (long)instr.Data);
