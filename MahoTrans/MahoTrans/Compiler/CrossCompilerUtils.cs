@@ -40,6 +40,9 @@ public static class CrossCompilerUtils
             case OpcodeType.Local:
                 return true;
             case OpcodeType.Array:
+                //TODO pending https://github.com/maholator/MahoTrans/issues/24
+                if (opcode == MTOpcode.fastore || opcode == MTOpcode.faload || opcode == MTOpcode.dastore || opcode == MTOpcode.daload)
+                    return false;
                 return true;
             case OpcodeType.Stack:
                 return opcode switch
