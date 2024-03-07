@@ -45,6 +45,7 @@ public static class DebuggerUtils
             case MTOpcode.dconst_1:
             case MTOpcode.dconst_2:
             case MTOpcode.iconst:
+            case MTOpcode.fconst:
             case MTOpcode.strconst:
             case MTOpcode.lconst:
             case MTOpcode.dconst:

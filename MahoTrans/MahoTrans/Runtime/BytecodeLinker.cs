@@ -341,7 +341,7 @@ public static class BytecodeLinker
                             else if (obj is float f)
                             {
                                 emulatedStack.Push(PrimitiveType.Float);
-                                opcode = MTOpcode.iconst;
+                                opcode = MTOpcode.fconst;
                                 intData = BitConverter.SingleToInt32Bits(f);
                             }
                             else if (obj is string s)

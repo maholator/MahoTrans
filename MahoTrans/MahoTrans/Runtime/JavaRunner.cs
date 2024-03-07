@@ -192,6 +192,7 @@ public class JavaRunner
                 break;
 
             case MTOpcode.iconst:
+            case MTOpcode.fconst:
                 frame.PushInt(instr.IntData);
                 pointer++;
                 break;

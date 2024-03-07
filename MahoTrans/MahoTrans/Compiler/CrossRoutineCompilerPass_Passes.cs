@@ -69,6 +69,9 @@ public partial class CrossRoutineCompilerPass
                 case MTOpcode.iconst:
                     _il.Emit(OpCodes.Ldc_I4, instr.IntData);
                     break;
+                case MTOpcode.fconst:
+                    _il.Emit(OpCodes.Ldc_R4, BitConverter.Int32BitsToSingle(instr.IntData));
+                    break;
                 case MTOpcode.strconst:
                     _il.Emit(OpCodes.Ldstr, (string)instr.Data);
                     break;

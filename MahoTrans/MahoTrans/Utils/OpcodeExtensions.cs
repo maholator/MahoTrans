@@ -59,6 +59,7 @@ public static class OpcodeExtensions
             MTOpcode.dconst_1 => OpcodeType.Constant,
             MTOpcode.dconst_2 => OpcodeType.Constant,
             MTOpcode.iconst => OpcodeType.Constant,
+            MTOpcode.fconst => OpcodeType.Constant,
             MTOpcode.strconst => OpcodeType.Constant,
             MTOpcode.lconst => OpcodeType.Constant,
             MTOpcode.dconst => OpcodeType.Constant,

@@ -42,6 +42,11 @@ public enum MTOpcode : byte
     iconst,
 
     /// <summary>
+    ///     Pushes float from <see cref="LinkedInstruction.IntData" />.
+    /// </summary>
+    fconst,
+
+    /// <summary>
     ///     Pushes <see cref="LinkedInstruction.Data" /> as a string.
     /// </summary>
     strconst,
