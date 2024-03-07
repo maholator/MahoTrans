@@ -16,7 +16,6 @@ public struct MediaHandle : IEquatable<MediaHandle>
     /// </summary>
     public readonly int Id;
 
-
     public MediaHandle(int id)
     {
         Id = id;

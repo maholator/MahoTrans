@@ -24,11 +24,19 @@ public class Sprite : Layer
 
     public Reference Image;
     private int RawFrameCount;
-    [JavaIgnore] private int[] FramesX = null!;
-    [JavaIgnore] private int[] FramesY = null!;
+
+    [JavaIgnore]
+    private int[] FramesX = null!;
+
+    [JavaIgnore]
+    private int[] FramesY = null!;
+
     private int FrameWidth;
     private int FrameHeight;
-    [JavaIgnore] private int[] FrameSequence = null!;
+
+    [JavaIgnore]
+    private int[] FrameSequence = null!;
+
     private int CurrentFrame;
     private bool abool407;
     private int RefX;
@@ -203,7 +211,6 @@ public class Sprite : Layer
             Jvm.Throw<IllegalArgumentException>();
         }
     }
-
 
     public void defineCollisionRectangle(int x, int y, int w, int h)
     {

@@ -14,13 +14,18 @@ namespace javax.microedition.media;
 
 public class PlayerCallbacksRunnable : Object, Runnable
 {
-    [JavaType(typeof(Player))] public Reference Player;
-    [String] public Reference EventName;
+    [JavaType(typeof(Player))]
+    public Reference Player;
+
+    [String]
+    public Reference EventName;
+
     public Reference Args;
     public Reference Targets;
 
     [InitMethod]
-    public void Init([JavaType(typeof(Player))] Reference player, [String] Reference eventName, Reference args, Reference targets)
+    public void Init([JavaType(typeof(Player))] Reference player, [String] Reference eventName, Reference args,
+        Reference targets)
     {
         base.Init();
         Player = player;

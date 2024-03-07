@@ -9,7 +9,8 @@ namespace MahoTrans.Abstractions;
 public interface IAmsCallbacks : IToolkit
 {
     /// <summary>
-    ///     Fires when MIDlet enters "paused" state. This is called both when midlet pauses itself or when frontend does it. At this moment, midlet's
+    ///     Fires when MIDlet enters "paused" state. This is called both when midlet pauses itself or when frontend does it. At
+    ///     this moment, midlet's
     /// </summary>
     void MidletPaused();
 

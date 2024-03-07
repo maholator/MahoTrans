@@ -13,7 +13,8 @@ public enum DisplayableType
     /// <summary>
     ///     Canvas that is drawn using repaint events.
     /// </summary>
-    [Description("Events-driven canvas")] EventBasedCanvas,
+    [Description("Events-driven canvas")]
+    EventBasedCanvas,
 
     /// <summary>
     ///     Canvas that is drawn by MIDlet itself.
@@ -24,20 +25,24 @@ public enum DisplayableType
     /// <summary>
     ///     LCDUI form.
     /// </summary>
-    [Description("LCDUI form")] Form,
+    [Description("LCDUI form")]
+    Form,
 
     /// <summary>
     ///     LCDUI text box.
     /// </summary>
-    [Description("LCDUI text box")] TextBox,
+    [Description("LCDUI text box")]
+    TextBox,
 
     /// <summary>
     ///     LCDUI list.
     /// </summary>
-    [Description("LCDUI list")] List,
+    [Description("LCDUI list")]
+    List,
 
     /// <summary>
     ///     LCDUI alert.
     /// </summary>
-    [Description("LCDUI alert")] Alert,
+    [Description("LCDUI alert")]
+    Alert,
 }

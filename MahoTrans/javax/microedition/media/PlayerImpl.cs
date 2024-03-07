@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -20,13 +20,14 @@ namespace javax.microedition.media;
 
 public class PlayerImpl : Object, Player
 {
-    [JavaIgnore] public MediaHandle Handle;
+    [JavaIgnore]
+    public MediaHandle Handle;
 
     public int State = UNREALIZED;
     private bool inited;
 
     /// <summary>
-    /// This is >0 if there are working listener threads
+    ///     This is >0 if there are working listener threads
     /// </summary>
     public int listenersPending;
 
@@ -247,7 +248,7 @@ public class PlayerImpl : Object, Player
     }
 
     /// <summary>
-    /// Sends events related to media end. This must be called in context.
+    ///     Sends events related to media end. This must be called in context.
     /// </summary>
     /// <param name="looped">True if player was started again.</param>
     [JavaIgnore]

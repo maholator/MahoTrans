@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.lcdui;
@@ -11,7 +11,9 @@ namespace javax.microedition.ams.events;
 
 public class DisplayableResizeEvent : Event
 {
-    [JavaType(typeof(Displayable))] public Reference Target;
+    [JavaType(typeof(Displayable))]
+    public Reference Target;
+
     public int Width;
     public int Height;
 

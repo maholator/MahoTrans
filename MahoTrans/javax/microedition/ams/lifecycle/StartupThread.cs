@@ -20,12 +20,14 @@ public class StartupThread : Thread
     /// <summary>
     ///     Name of MIDlet class. This will be instantiated.
     /// </summary>
-    [JavaIgnore] public string MidletClassName = null!;
+    [JavaIgnore]
+    public string MidletClassName = null!;
 
     /// <summary>
     ///     MIDlet's manifest. Will be passed to <see cref="MIDlet.Properties" />.
     /// </summary>
-    [JavaIgnore] public Dictionary<string, string> Manifest = null!;
+    [JavaIgnore]
+    public Dictionary<string, string> Manifest = null!;
 
     [JavaDescriptor("()V")]
     public new JavaMethodBody run(JavaClass cls)

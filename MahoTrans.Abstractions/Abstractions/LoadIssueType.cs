@@ -13,33 +13,39 @@ public enum LoadIssueType : byte
     /// <summary>
     ///     Method doesn't return.
     /// </summary>
-    [Description("Method doesn't return")] NoReturn = 1,
+    [Description("Method doesn't return")]
+    NoReturn = 1,
 
     /// <summary>
     ///     Method jumps to nowhere.
     /// </summary>
-    [Description("Broken execution flow")] BrokenFlow,
+    [Description("Broken execution flow")]
+    BrokenFlow,
 
     /// <summary>
     ///     xload/xstore opcode is used on an invalid local variable.
     /// </summary>
-    [Description("Invalid local")] LocalVariableIndexOutOfBounds,
+    [Description("Invalid local")]
+    LocalVariableIndexOutOfBounds,
 
     /// <summary>
     ///     Emulated stack detected type mismatch.
     /// </summary>
-    [Description("Stack mismatch")] StackMismatch,
+    [Description("Stack mismatch")]
+    StackMismatch,
 
     /// <summary>
     ///     There is an access to class field or method, this class is going to be casted into or instantiated, but this class
     ///     is not available.
     /// </summary>
-    [Description("Missing class access")] MissingClassAccess,
+    [Description("Missing class access")]
+    MissingClassAccess,
 
     /// <summary>
     ///     There is an access to existing class' method, but this method is not available.
     /// </summary>
-    [Description("Missing method access")] MissingMethodAccess,
+    [Description("Missing method access")]
+    MissingMethodAccess,
 
     /// <summary>
     ///     There is an access to existing class' method via virtual call, but this method is not available.
@@ -50,7 +56,8 @@ public enum LoadIssueType : byte
     /// <summary>
     ///     There is an access to existing class' field, but that field is not available.
     /// </summary>
-    [Description("Missing field access")] MissingFieldAccess,
+    [Description("Missing field access")]
+    MissingFieldAccess,
 
     /// <summary>
     ///     There is an existing field in existing class, but type of this field is not available.
@@ -67,22 +74,26 @@ public enum LoadIssueType : byte
     /// <summary>
     ///     Constant has unexpected type or index.
     /// </summary>
-    [Description("Invalid constant")] InvalidConstant,
+    [Description("Invalid constant")]
+    InvalidConstant,
 
     /// <summary>
     ///     Jar package has no manifest.
     /// </summary>
-    [Description("Missing MANIFEST.MF")] NoMetaInf,
+    [Description("Missing MANIFEST.MF")]
+    NoMetaInf,
 
     /// <summary>
     ///     Class file has invalid magic code.
     /// </summary>
-    [Description("Invalid magic")] InvalidClassMagicCode,
+    [Description("Invalid magic")]
+    InvalidClassMagicCode,
 
     /// <summary>
     ///     There is a local variable that has multiple types.
     /// </summary>
-    [Description("Multitype local")] MultiTypeLocalVariable,
+    [Description("Multitype local")]
+    MultiTypeLocalVariable,
 
     /// <summary>
     ///     Something in native code looks wrong, but we can live with it.

@@ -8,7 +8,7 @@ using Object = java.lang.Object;
 namespace javax.microedition.ams;
 
 /// <summary>
-/// Set of utils to manage MIDlet state.
+///     Set of utils to manage MIDlet state.
 /// </summary>
 public class LifecycleUtils : Object
 {

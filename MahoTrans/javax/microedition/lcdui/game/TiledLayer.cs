@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -6,6 +6,7 @@ using MahoTrans.Abstractions;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
+using Array = System.Array;
 
 namespace javax.microedition.lcdui.game;
 
@@ -15,16 +16,26 @@ public class TiledLayer : Layer
     private int CellWidth;
     private int Rows;
     private int Columns;
-    [JavaIgnore] private int[][] Cells = null!;
+
+    [JavaIgnore]
+    private int[][] Cells = null!;
+
     public Reference Image;
     private int StaticTilesCount;
-    [JavaIgnore] public int[] CellsX = null!;
-    [JavaIgnore] public int[] CellsY = null!;
-    [JavaIgnore] private int[]? AnimatedTiles = null!;
+
+    [JavaIgnore]
+    public int[] CellsX = null!;
+
+    [JavaIgnore]
+    public int[] CellsY = null!;
+
+    [JavaIgnore]
+    private int[]? AnimatedTiles;
+
     private int AnimatedTilesCount;
 
     [InitMethod]
-    public void Init(int columns, int rows, [JavaType(typeof(lcdui.Image))] Reference r, int tileWidth, int tileHeight)
+    public void Init(int columns, int rows, [JavaType(typeof(Image))] Reference r, int tileWidth, int tileHeight)
     {
         Image image = Jvm.Resolve<Image>(r);
         if (image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)
@@ -33,11 +44,13 @@ public class TiledLayer : Layer
         Columns = columns;
         Rows = rows;
         Cells = new int[rows][];
-        for(int i = 0; i < rows; i++)
+        for (int i = 0; i < rows; i++)
         {
             Cells[i] = new int[columns];
         }
-        SetImage(image, image.getWidth() / tileWidth * (image.getHeight() / tileHeight) + 1, tileWidth, tileHeight, true);
+
+        SetImage(image, image.getWidth() / tileWidth * (image.getHeight() / tileHeight) + 1, tileWidth, tileHeight,
+            true);
     }
 
     public int createAnimatedTile(int staticTileIndex)
@@ -46,6 +59,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         if (AnimatedTiles == null)
         {
             AnimatedTiles = new int[4];
@@ -54,9 +68,10 @@ public class TiledLayer : Layer
         else if (AnimatedTilesCount == AnimatedTiles.Length)
         {
             int[] tmp = new int[AnimatedTiles.Length * 2];
-            System.Array.Copy(AnimatedTiles, 0, tmp, 0, AnimatedTiles.Length);
+            Array.Copy(AnimatedTiles, 0, tmp, 0, AnimatedTiles.Length);
             AnimatedTiles = tmp;
         }
+
         AnimatedTiles[AnimatedTilesCount++] = staticTileIndex;
         return -(AnimatedTilesCount - 1);
     }
@@ -67,11 +82,13 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         animatedTileIndex = -animatedTileIndex;
         if (AnimatedTiles == null || animatedTileIndex <= 0 || animatedTileIndex >= AnimatedTilesCount)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         AnimatedTiles[animatedTileIndex] = staticTileIndex;
     }
 
@@ -82,6 +99,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         return AnimatedTiles[animatedTileIndex];
     }
 
@@ -91,6 +109,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         if (tileIndex > 0)
         {
             if (tileIndex >= StaticTilesCount)
@@ -102,6 +121,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         Cells[row][col] = tileIndex;
     }
 
@@ -111,15 +131,18 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         return Cells[row][col];
     }
 
     public void fillCells(int col, int row, int numCols, int numRows, int tileIndex)
     {
-        if (col < 0 || col >= Columns || row < 0 || row >= Rows || numCols < 0 || col + numCols > Columns || numRows < 0 || row + numRows > Rows)
+        if (col < 0 || col >= Columns || row < 0 || row >= Rows || numCols < 0 || col + numCols > Columns ||
+            numRows < 0 || row + numRows > Rows)
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         if (tileIndex > 0)
         {
             if (tileIndex >= StaticTilesCount)
@@ -131,6 +154,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IndexOutOfBoundsException>();
         }
+
         for (int i = row; i < row + numRows; ++i)
         {
             for (int j = col; j < col + numCols; ++j)
@@ -155,6 +179,7 @@ public class TiledLayer : Layer
         {
             Jvm.Throw<IllegalArgumentException>();
         }
+
         Image = r;
         Width = Columns * tileWidth;
         Height = Rows * tileHeight;
@@ -186,7 +211,9 @@ public class TiledLayer : Layer
                             {
                                 animatedTile = getAnimatedTile(animatedTile);
                             }
-                            g.drawRegion(Image.As<Image>(), CellsX[animatedTile], CellsY[animatedTile], CellWidth, CellHeight, 0, x, y, (GraphicsAnchor)20);
+
+                            g.drawRegion(Image.As<Image>(), CellsX[animatedTile], CellsY[animatedTile], CellWidth,
+                                CellHeight, 0, x, y, (GraphicsAnchor)20);
                         }
                     }
                 }
@@ -214,6 +241,7 @@ public class TiledLayer : Layer
                 {
                     break;
                 }
+
                 int length = Cells[Rows].Length;
                 int anInt277 = 0;
                 while (true)
@@ -223,12 +251,16 @@ public class TiledLayer : Layer
                     {
                         break;
                     }
+
                     anInt277 = Columns + 1;
                 }
+
                 anInt276 = Rows + 1;
             }
+
             AnimatedTiles = null;
         }
+
         int n = 1;
         int n3;
         int n2 = n3 = 0;
@@ -239,6 +271,7 @@ public class TiledLayer : Layer
             {
                 break;
             }
+
             int n6;
             int n5 = n6 = 0;
             while (true)
@@ -248,11 +281,13 @@ public class TiledLayer : Layer
                 {
                     break;
                 }
+
                 CellsX[n] = n7;
                 CellsY[n] = n4;
                 ++n;
                 n5 = (n6 = n7 + tileWidth);
             }
+
             n2 = (n3 = n4 + tileHeight);
         }
     }

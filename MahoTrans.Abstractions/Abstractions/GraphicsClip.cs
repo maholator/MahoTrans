@@ -23,12 +23,14 @@ public struct GraphicsClip
     /// <summary>
     ///     Width of the area.
     /// </summary>
-    [JsonProperty(PropertyName = "W")] public int Width;
+    [JsonProperty(PropertyName = "W")]
+    public int Width;
 
     /// <summary>
     ///     Height of the area.
     /// </summary>
-    [JsonProperty(PropertyName = "H")] public int Height;
+    [JsonProperty(PropertyName = "H")]
+    public int Height;
 
     /// <summary>
     ///     Initializes new instance.
