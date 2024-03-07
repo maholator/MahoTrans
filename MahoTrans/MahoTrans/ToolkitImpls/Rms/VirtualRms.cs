@@ -14,13 +14,13 @@ public sealed class VirtualRms : ISnapshotableRecordStore
     ///     <b>Value:</b> zero-based list of records. Records are one-based so implementation must always do [index - 1].
     ///     Deleted records are null.
     /// </summary>
-    private readonly Dictionary<string, List<byte[]?>> _storage;
+    private readonly SortedDictionary<string, List<byte[]?>> _storage;
 
     public IReadOnlyDictionary<string, List<byte[]?>> Storage => _storage;
 
-    public VirtualRms() => _storage = new Dictionary<string, List<byte[]?>>();
+    public VirtualRms() => _storage = new();
 
-    public VirtualRms(Dictionary<string, List<byte[]?>> data) => _storage = data;
+    public VirtualRms(SortedDictionary<string, List<byte[]?>> data) => _storage = data;
 
     public string[] ListStores() => _storage.Keys.ToArray();
 
@@ -136,7 +136,7 @@ public sealed class VirtualRms : ISnapshotableRecordStore
 
     public VirtualRms TakeSnapshot()
     {
-        var dict = new Dictionary<string, List<byte[]?>>();
+        var dict = new SortedDictionary<string, List<byte[]?>>();
 
         foreach (var (name, slots) in _storage)
         {

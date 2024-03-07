@@ -10,7 +10,7 @@ public class VirtualRmsTests
     [Test]
     public void TestVirtualFiles()
     {
-        Dictionary<string, List<byte[]?>> data1 = new();
+        SortedDictionary<string, List<byte[]?>> data1 = new();
 
         foreach (var tuple in createData())
         {
@@ -21,7 +21,7 @@ public class VirtualRmsTests
         var stream1 = new MemoryStream();
         rms1.Write(stream1);
 
-        Dictionary<string, List<byte[]?>> data2 = new();
+        SortedDictionary<string, List<byte[]?>> data2 = new();
 
         foreach (var tuple in createData().Select(x => (x, Random.Shared.Next())).OrderBy(x => x.Item2)
                      .Select(x => x.x))
@@ -33,7 +33,14 @@ public class VirtualRmsTests
         var stream2 = new MemoryStream();
         rms2.Write(stream2);
 
-        Assert.That(stream1.ToArray().SequenceEqual(stream2.ToArray()));
+        assert(stream1, stream2);
+    }
+
+    private static void assert(MemoryStream stream1, MemoryStream stream2)
+    {
+        var blob1 = stream1.ToArray();
+        var blob2 = stream2.ToArray();
+        Assert.That(blob1.SequenceEqual(blob2));
     }
 
     private IEnumerable<(string, List<byte[]?>)> createData()
@@ -53,7 +60,7 @@ public class VirtualRmsTests
         });
 
 
-        yield return ("123", new List<byte[]?>
+        yield return ("1234", new List<byte[]?>
         {
             new byte[] { 3, 5, 98, 0, 1 },
         });
