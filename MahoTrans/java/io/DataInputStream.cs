@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -13,16 +13,19 @@ namespace java.io;
 
 public class DataInputStream : InputStream, DataInput
 {
-    [JavaType(typeof(InputStream))] public Reference @in;
+    [JavaType(typeof(InputStream))]
+    public Reference @in;
 
     private static readonly NameDescriptorClass StreamDescriptor =
         new("in", "Ljava/io/InputStream;", dis);
 
     private static readonly NameDescriptorClass ReadByteNdc = new(nameof(readUnsignedByte), "()I", dis);
 
-    [JavaIgnore] private const string dis = "java/io/DataInputStream";
+    [JavaIgnore]
+    private const string dis = "java/io/DataInputStream";
 
-    [JavaIgnore] private const string input_stream = "java/io/InputStream";
+    [JavaIgnore]
+    private const string input_stream = "java/io/InputStream";
 
     [InitMethod]
     public void Init([JavaType(typeof(InputStream))] Reference r)

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 namespace MahoTrans.Runtime;
@@ -11,12 +11,12 @@ public readonly struct ThreadWakeupHook
     public readonly long WakeupAtMs;
 
     /// <summary>
-    /// Thread that waits for wakeup.
+    ///     Thread that waits for wakeup.
     /// </summary>
     public readonly int ThreadId;
 
     /// <summary>
-    /// Object where this thread waits for notify.
+    ///     Object where this thread waits for notify.
     /// </summary>
     public readonly Reference MonitorObject;
 

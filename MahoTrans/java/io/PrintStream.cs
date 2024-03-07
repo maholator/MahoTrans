@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
@@ -14,7 +14,8 @@ namespace java.io;
 
 public class PrintStream : OutputStream
 {
-    [JavaType(typeof(OutputStream))] public Reference Output;
+    [JavaType(typeof(OutputStream))]
+    public Reference Output;
 
     [InitMethod]
     public void Init([JavaType(typeof(OutputStream))] Reference r) => Output = r;

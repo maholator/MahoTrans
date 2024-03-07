@@ -26,12 +26,16 @@ public class Object
     ///     Address of this object in attached heap. The following is always true:
     ///     <code>this.Jvm.ResolveObject(this.HeapAddress) == this</code>
     /// </summary>
-    [JavaIgnore] [JsonProperty] public int HeapAddress;
+    [JavaIgnore]
+    [JsonProperty]
+    public int HeapAddress;
 
     /// <summary>
     ///     Reference to java class, which this object is instance of.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JavaClass JavaClass = null!;
+    [JavaIgnore]
+    [JsonIgnore]
+    public JavaClass JavaClass = null!;
 
     /// <summary>
     ///     <see cref="HeapAddress" /> wrapped in <see cref="Reference" /> struct.
@@ -72,19 +76,27 @@ public class Object
         }
     }
 
-    [JsonIgnore] protected static ToolkitCollection Toolkit => JvmContext.Toolkit!;
+    [JsonIgnore]
+    protected static ToolkitCollection Toolkit => JvmContext.Toolkit!;
 
-    [JsonIgnore] public static StaticMemory NativeStatics => Jvm.StaticMemory;
+    [JsonIgnore]
+    public static StaticMemory NativeStatics => Jvm.StaticMemory;
 
     #endregion
 
     #region Monitors
 
-    [JavaIgnore] [JsonProperty] private int _monitorOwner;
+    [JavaIgnore]
+    [JsonProperty]
+    private int _monitorOwner;
 
-    [JavaIgnore] [JsonProperty] private uint _monitorReEnterCount;
+    [JavaIgnore]
+    [JsonProperty]
+    private uint _monitorReEnterCount;
 
-    [JavaIgnore] [JsonProperty] public List<MonitorWait>? Waiters;
+    [JavaIgnore]
+    [JsonProperty]
+    public List<MonitorWait>? Waiters;
 
     /// <summary>
     ///     For internal usage. Called by wait() to detach from monitor and scheduler.
@@ -331,7 +343,9 @@ public class Object
     ///     This will be false most of the time. When GC starts going through heap, it will set this field to true on objects
     ///     which will survive in the pending collection. After collection is finished, this will be changed to false again.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    [JavaIgnore]
+    [JsonIgnore]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public bool Alive;
 
     /// <summary>

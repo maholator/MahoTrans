@@ -4,11 +4,12 @@
 namespace MahoTrans.Runtime.Errors;
 
 /// <summary>
-/// Thrown by <see cref="BytecodeLinker" /> if it detected invalid jump in a method.
+///     Thrown by <see cref="BytecodeLinker" /> if it detected invalid jump in a method.
 /// </summary>
 public class BrokenFlowException : Exception
 {
-    public BrokenFlowException(string? message) : base(message)
+    public BrokenFlowException(string? message)
+        : base(message)
     {
     }
 }

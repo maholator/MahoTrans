@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -11,16 +11,20 @@ public class Calendar : Object
 {
     public bool areFieldsSet;
 
-    [JavaIgnore] protected int[] fields = null!;
+    [JavaIgnore]
+    protected int[] fields = null!;
 
-    [JavaIgnore] protected bool[] isSet = null!;
+    [JavaIgnore]
+    protected bool[] isSet = null!;
 
     bool isTimeSet;
 
     protected long time;
 
     protected int lastTimeFieldSet;
-    [JavaType(typeof(TimeZone))] public Reference Zone;
+
+    [JavaType(typeof(TimeZone))]
+    public Reference Zone;
 
     public const int
         JANUARY = 0,
@@ -141,7 +145,6 @@ public class Calendar : Object
         return c.This;
     }
 
-
     [return: JavaType(typeof(Calendar))]
     public static Reference getInstance([JavaType(typeof(TimeZone))] Reference timezone)
     {
@@ -169,13 +172,11 @@ public class Calendar : Object
         return time;
     }
 
-
     [return: JavaType(typeof(TimeZone))]
     public Reference getTimeZone()
     {
         return Zone;
     }
-
 
     public new int hashCode()
     {

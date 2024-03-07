@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -10,7 +10,9 @@ namespace java.io;
 public class ByteArrayInputStream : InputStream
 {
     // as per MIDP docs
-    [JavaType("[B")] public Reference buf;
+    [JavaType("[B")]
+    public Reference buf;
+
     public int count;
     public int markPos;
     public int pos;

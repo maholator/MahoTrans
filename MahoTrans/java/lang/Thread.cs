@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans;
@@ -21,13 +21,21 @@ public class Thread : Object, Runnable
     ///     Reference to JVM object of the thread. During wakeup, this is validated by
     ///     <see cref="JvmState.SyncHeapAfterRestore" />. This is null if thread was not started yet or was already dead.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JavaThread? JavaThread;
+    [JavaIgnore]
+    [JsonIgnore]
+    public JavaThread? JavaThread;
 
-    [JavaIgnore] [ThreadStatic] [JsonIgnore]
+    [JavaIgnore]
+    [ThreadStatic]
+    [JsonIgnore]
     public static JavaThread? CurrentThread;
 
-    [JavaType(typeof(Runnable))] public Reference _target;
-    [String] public Reference _name;
+    [JavaType(typeof(Runnable))]
+    public Reference _target;
+
+    [String]
+    public Reference _name;
+
     public bool started;
 
     public bool Interrupted;

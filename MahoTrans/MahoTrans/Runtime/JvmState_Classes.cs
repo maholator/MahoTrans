@@ -43,7 +43,8 @@ public partial class JvmState
     {
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(Classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this, Toolkit.LoadLogger);
+            ClassCompiler.CompileTypes(Classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
+                Toolkit.LoadLogger);
             foreach (var cls in classes)
             {
                 Classes.Add(cls.Name, cls);

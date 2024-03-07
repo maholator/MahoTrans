@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -80,7 +80,7 @@ public static class DescriptorUtils
     }
 
     /// <summary>
-    /// Calculate primitive type from first descriptor character.
+    ///     Calculate primitive type from first descriptor character.
     /// </summary>
     /// <param name="c">First character of descriptor.</param>
     /// <returns>Primitive type.</returns>

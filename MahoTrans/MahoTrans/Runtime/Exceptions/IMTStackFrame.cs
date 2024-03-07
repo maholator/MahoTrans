@@ -7,7 +7,8 @@ using MahoTrans.Runtime.Types;
 namespace MahoTrans.Runtime.Exceptions;
 
 /// <summary>
-///     <see cref="StackFrame" /> but suitable for mixed code. Call <see cref="object.ToString()"/> to get a quick description.
+///     <see cref="StackFrame" /> but suitable for mixed code. Call <see cref="object.ToString()" /> to get a quick
+///     description.
 /// </summary>
 public interface IMTStackFrame
 {

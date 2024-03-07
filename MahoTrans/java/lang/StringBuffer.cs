@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
@@ -14,7 +14,9 @@ namespace java.lang;
 
 public class StringBuffer : Object
 {
-    [JavaIgnore] [JsonProperty] private List<char> _buffer = null!;
+    [JavaIgnore]
+    [JsonProperty]
+    private List<char> _buffer = null!;
 
     [InitMethod]
     public new void Init() => _buffer = new List<char>();

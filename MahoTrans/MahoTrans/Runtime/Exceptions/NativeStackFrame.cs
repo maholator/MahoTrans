@@ -22,7 +22,6 @@ public class NativeStackFrame : IMTStackFrame
         _lineNumber = lineNumber;
     }
 
-
     public string MethodName => _method.Name;
 
     public string MethodSignature => _method.PrettyPrintNativeArgs();

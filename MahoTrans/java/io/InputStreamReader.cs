@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
@@ -15,9 +15,12 @@ namespace java.io;
 
 public class InputStreamReader : Reader
 {
-    [JavaType(typeof(InputStream))] public Reference Stream;
-    [JavaIgnore] [JsonProperty] private Decoder _decoder = null!;
+    [JavaType(typeof(InputStream))]
+    public Reference Stream;
 
+    [JavaIgnore]
+    [JsonProperty]
+    private Decoder _decoder = null!;
 
     [InitMethod]
     public void Init([JavaType(typeof(InputStream))] Reference stream)

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
@@ -14,7 +14,8 @@ namespace java.lang;
 
 public sealed class String : Object
 {
-    [JavaIgnore] public string Value = null!;
+    [JavaIgnore]
+    public string Value = null!;
 
     #region Constructors
 
@@ -170,7 +171,6 @@ public sealed class String : Object
         string s2 = Jvm.ResolveString(anotherString);
         return Value.ToLower(CultureInfo.InvariantCulture) == s2.ToLower(CultureInfo.InvariantCulture);
     }
-
 
     public int compareTo([String] Reference anotherString)
     {

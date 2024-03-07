@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -10,7 +10,8 @@ namespace java.util;
 
 public class TimerTree : Object
 {
-    [JavaType(typeof(TimerNode))] public Reference Root;
+    [JavaType(typeof(TimerNode))]
+    public Reference Root;
 
     public bool isEmpty()
     {

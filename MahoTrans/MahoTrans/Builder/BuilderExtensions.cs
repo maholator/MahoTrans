@@ -48,7 +48,9 @@ public static class BuilderExtensions
         JavaOpcode.bipush, new[] { (byte)value }));
 
     public static void AppendReturn(this JavaMethodBuilder b) => b.Append(JavaOpcode.@return);
+
     public static void AppendReturnReference(this JavaMethodBuilder b) => b.Append(JavaOpcode.areturn);
+
     public static void AppendReturnInt(this JavaMethodBuilder b) => b.Append(JavaOpcode.ireturn);
 
     public static void AppendReturnLong(this JavaMethodBuilder b) => b.Append(JavaOpcode.lreturn);

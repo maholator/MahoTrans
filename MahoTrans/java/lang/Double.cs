@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
@@ -36,12 +36,17 @@ public class Double : Object
         return ii.Value == Value;
     }
 
-    public sbyte byteValue() => (sbyte) Value;
-    public short shortValue() => (short) Value;
-    public int intValue() => (int) Value;
-    public long longValue() => (long) Value;
+    public sbyte byteValue() => (sbyte)Value;
+
+    public short shortValue() => (short)Value;
+
+    public int intValue() => (int)Value;
+
+    public long longValue() => (long)Value;
+
     public double doubleValue() => Value;
-    public float floatValue() => (float) Value;
+
+    public float floatValue() => (float)Value;
 
     public new int hashCode()
     {

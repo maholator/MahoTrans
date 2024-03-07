@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -20,10 +20,15 @@ public class Integer : Object
     }
 
     public sbyte byteValue() => (sbyte)Value;
+
     public short shortValue() => (short)Value;
+
     public int intValue() => Value;
+
     public long longValue() => Value;
+
     public double doubleValue() => Value;
+
     public float floatValue() => Value;
 
     public new int hashCode()
@@ -40,7 +45,6 @@ public class Integer : Object
             return false;
         return ii.Value == Value;
     }
-
 
     [return: String]
     public Reference toString()
@@ -69,18 +73,20 @@ public class Integer : Object
             count = 1;
             j = -i;
         }
+
         while ((i /= radix) != 0)
             ++count;
         char[] buffer = new char[count];
         do
         {
-            int ch = 0 - (int)(j % radix);
+            int ch = 0 - j % radix;
             if (ch > 9)
                 ch = ch - 10 + 97;
             else
                 ch += 48;
             buffer[--count] = (char)ch;
         } while ((j /= radix) != 0);
+
         if (negative)
             buffer[0] = '-';
         return Jvm.AllocateString(new string(buffer, 0, buffer.Length));
@@ -135,12 +141,14 @@ public class Integer : Object
                 Jvm.Throw<NumberFormatException>();
             result = next;
         }
+
         if (!negative)
         {
             result = -result;
             if (result < 0)
                 Jvm.Throw<NumberFormatException>();
         }
+
         return result;
     }
 

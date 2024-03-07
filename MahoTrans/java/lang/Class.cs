@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
@@ -16,7 +16,9 @@ public class Class : Object
     /// <summary>
     ///     JVM-side version of this object.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JavaClass InternalClass = null!;
+    [JavaIgnore]
+    [JsonIgnore]
+    public JavaClass InternalClass = null!;
 
     /// <summary>
     ///     Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass" /> to take object's
@@ -69,7 +71,6 @@ public class Class : Object
             }
         };
     }
-
 
     public Reference allocate()
     {
