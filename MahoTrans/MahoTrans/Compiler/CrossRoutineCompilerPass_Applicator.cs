@@ -20,21 +20,21 @@ public partial class CrossRoutineCompilerPass
         var host = module.DefineType($"CrossHost_{method.Method.Class.Name}_{method.Method.Descriptor}",
             TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed);
 
-        List<int> applicationPoints = new();
-
-        foreach (var range in ranges)
+        for (var i = 0; i < ranges.Count; i++)
         {
-            var state = new CrossRoutineCompilerPass(method, range, host, $"Routine_{applicationPoints.Count}");
+            var range = ranges[i];
+            var state = new CrossRoutineCompilerPass(method, range, host, $"Routine_{i}");
             state.Compile();
-            applicationPoints.Add(range.Start);
         }
 
         var built = host.CreateType()!;
 
-        for (int i = 0; i < applicationPoints.Count; i++)
+        for (int i = 0; i < ranges.Count; i++)
         {
             var bridge = built.GetMethod($"Routine_{i}")!.CreateDelegate<Action<Frame>>();
-            method.LinkedCode[applicationPoints[i]] = new LinkedInstruction(MTOpcode.bridge, 0, 0, bridge);
+            var poppedCount = ranges[i].StackOnEnter.HasValue ? 1 : 0;
+            method.LinkedCode[ranges[i].Start] =
+                new LinkedInstruction(MTOpcode.bridge, 0, poppedCount, bridge);
         }
     }
 
