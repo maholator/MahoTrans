@@ -133,7 +133,8 @@ public partial class CrossRoutineCompilerPass
                     crossMath(instr);
                     break;
                 case OpcodeType.Conversion:
-                    throw new NotImplementedException();
+                    crossConversion(instr);
+                    break;
                 case OpcodeType.Compare:
                     throw new NotImplementedException();
                 case OpcodeType.Branch:

@@ -311,28 +311,28 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.fadd:
             case MTOpcode.dadd:
                 _il.Emit(OpCodes.Add);
-                emitRepush();
+                EmitMathRepush();
                 break;
             case MTOpcode.isub:
             case MTOpcode.lsub:
             case MTOpcode.fsub:
             case MTOpcode.dsub:
                 _il.Emit(OpCodes.Sub);
-                emitRepush();
+                EmitMathRepush();
                 break;
             case MTOpcode.imul:
             case MTOpcode.lmul:
             case MTOpcode.fmul:
             case MTOpcode.dmul:
                 _il.Emit(OpCodes.Mul);
-                emitRepush();
+                EmitMathRepush();
                 break;
             case MTOpcode.idiv:
             case MTOpcode.ldiv:
             case MTOpcode.fdiv:
             case MTOpcode.ddiv:
                 _il.Emit(OpCodes.Div);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.irem:
@@ -340,7 +340,7 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.frem:
             case MTOpcode.drem:
                 _il.Emit(OpCodes.Rem);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.ineg:
@@ -348,93 +348,151 @@ public partial class CrossRoutineCompilerPass
             case MTOpcode.fneg:
             case MTOpcode.dneg:
                 _il.Emit(OpCodes.Neg);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.ishl:
                 _il.Emit(OpCodes.Ldc_I4, 31);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shl);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.lshl:
                 _il.Emit(OpCodes.Ldc_I4, 63);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shl);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.ishr:
                 _il.Emit(OpCodes.Ldc_I4, 31);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shr);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.lshr:
                 _il.Emit(OpCodes.Ldc_I4, 63);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shr);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.iushr:
                 _il.Emit(OpCodes.Ldc_I4, 31);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shr_Un);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.lushr:
                 _il.Emit(OpCodes.Ldc_I4, 63);
                 _il.Emit(OpCodes.And);
                 _il.Emit(OpCodes.Shr_Un);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.iand:
             case MTOpcode.land:
                 _il.Emit(OpCodes.And);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.ior:
             case MTOpcode.lor:
                 _il.Emit(OpCodes.Or);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             case MTOpcode.ixor:
             case MTOpcode.lxor:
                 _il.Emit(OpCodes.Xor);
-                emitRepush();
+                EmitMathRepush();
                 break;
 
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
 
-        void emitRepush()
+    private void crossConversion(LinkedInstruction instr)
+    {
+        Debug.Assert(instr.Opcode.GetOpcodeType() == OpcodeType.Conversion);
+        switch (instr.Opcode)
         {
-            var purp = StackPurposes[LocalInstrIndex + 1][^1];
-            switch (purp)
-            {
-                case StackValuePurpose.Consume:
-                case StackValuePurpose.ToLocal:
-                    return;
-            }
+            case MTOpcode.i2l:
+                _il.Emit(OpCodes.Conv_I8);
+                EmitMathRepush();
+                break;
 
-            _il.BeginScope();
-            var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex + 1][^1].ToType());
-            _il.Emit(OpCodes.Stloc, temp);
-            using (BeginMarshalSection(^1))
-            {
-                _il.Emit(OpCodes.Ldloc, temp);
-            }
+            case MTOpcode.i2f:
+                _il.Emit(OpCodes.Conv_R4);
+                EmitMathRepush();
+                break;
 
-            _il.EndScope();
+            case MTOpcode.i2d:
+                _il.Emit(OpCodes.Conv_R8);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.l2i:
+                _il.Emit(OpCodes.Ldc_I4_M1);
+                _il.Emit(OpCodes.Conv_U8);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Conv_U4);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.l2f:
+                _il.Emit(OpCodes.Conv_R4);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.l2d:
+                _il.Emit(OpCodes.Conv_R8);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.f2i:
+                _il.Emit(OpCodes.Call, typeof(JavaRunner).GetMethod(nameof(JavaRunner.F2I))!);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.f2l:
+                _il.Emit(OpCodes.Call, typeof(JavaRunner).GetMethod(nameof(JavaRunner.F2L))!);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.f2d:
+                _il.Emit(OpCodes.Conv_R8);
+                EmitMathRepush();
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private void EmitMathRepush()
+    {
+        var purp = StackPurposes[LocalInstrIndex + 1][^1];
+        switch (purp)
+        {
+            case StackValuePurpose.Consume:
+            case StackValuePurpose.ToLocal:
+                return;
+        }
+
+        _il.BeginScope();
+        var temp = _il.DeclareLocal(StackTypes[LocalInstrIndex + 1][^1].ToType());
+        _il.Emit(OpCodes.Stloc, temp);
+        using (BeginMarshalSection(^1))
+        {
+            _il.Emit(OpCodes.Ldloc, temp);
+        }
+
+        _il.EndScope();
     }
 
     private void crossThrow(LinkedInstruction instr)
