@@ -20,5 +20,13 @@ public enum EventCategory
 
     [Description("GC")]
     Gc,
+
+    [Description("Threading")]
     Threading,
+
+    [Description("System properties")]
+    SystemPropertyAccess,
+
+    [Description("App properties")]
+    AppPropertyAccess,
 }
