@@ -112,14 +112,22 @@ public partial class JvmState
     /// </summary>
     public void LinkNonLinked()
     {
-        foreach (var cls in Classes.Values)
+        var classes = Classes.Values.Where(x => !x.Linked).ToList();
+        for (var i = 0; i < classes.Count; i++)
         {
-            if (!cls.Linked)
-                BytecodeLinker.Link(cls);
+            var cls = classes[i];
+            Toolkit.LoadLogger?.ReportLinkProgress(i, Classes.Count, cls.Name);
+            BytecodeLinker.Link(cls);
         }
     }
 
-    public void CrossCompileLoaded() => CrossRoutineCompilerPass.CrossCompileAll(this);
+    public void CrossCompileLoaded()
+    {
+        using (new JvmContext(this))
+        {
+            CrossRoutineCompilerPass.CrossCompileAll(this);
+        }
+    }
 
     /// <summary>
     ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
