@@ -11,20 +11,6 @@ namespace MahoTrans.Runtime;
 
 public static class BytecodeLinker
 {
-    public static void Link(JavaMethodBody method)
-    {
-        var isClinit = method.Method.Descriptor.Name == "<clinit>";
-        try
-        {
-            LinkInternal(method, isClinit);
-        }
-        catch (Exception e)
-        {
-            throw new JavaLinkageException(
-                $"Failed to link {method}", e);
-        }
-    }
-
     public static void Link(JavaClass cls)
     {
         foreach (var method in cls.Methods.Values)
@@ -38,6 +24,22 @@ public static class BytecodeLinker
                 continue;
 
             Link(method.JavaBody);
+        }
+
+        cls.Linked = true;
+    }
+
+    private static void Link(JavaMethodBody method)
+    {
+        var isClinit = method.Method.Descriptor.Name == "<clinit>";
+        try
+        {
+            LinkInternal(method, isClinit);
+        }
+        catch (Exception e)
+        {
+            throw new JavaLinkageException(
+                $"Failed to link {method}", e);
         }
     }
 

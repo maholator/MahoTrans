@@ -40,6 +40,11 @@ public class JavaClass
 
     public int Size;
 
+    /// <summary>
+    ///     True, if <see cref="BytecodeLinker" /> processed this class.
+    /// </summary>
+    public bool Linked;
+
     public override string ToString() => Name;
 
     public bool IsArray => Name[0] == '[';

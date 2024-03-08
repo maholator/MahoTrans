@@ -9,7 +9,6 @@ using MahoTrans.Native;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
@@ -51,8 +50,6 @@ public partial class JvmState
             }
 
             RefreshState(classes);
-            foreach (var cls in classes)
-                BytecodeLinker.Link(cls);
         }
     }
 
@@ -68,8 +65,6 @@ public partial class JvmState
             }
 
             RefreshState(classes);
-            foreach (var cls in classes)
-                BytecodeLinker.Link(cls);
         }
     }
 
@@ -111,6 +106,18 @@ public partial class JvmState
     ///     Imports MT assembly to this JVM.
     /// </summary>
     public void AddMahoTransLibrary() => AddClrClasses(typeof(JvmState).Assembly);
+
+    /// <summary>
+    /// Links classes which were not linked yet.
+    /// </summary>
+    public void LinkNonLinked()
+    {
+        foreach (var cls in Classes.Values)
+        {
+            if (!cls.Linked)
+                BytecodeLinker.Link(cls);
+        }
+    }
 
     public void CrossCompileLoaded() => CrossRoutineCompilerPass.CrossCompileAll(this);
 
