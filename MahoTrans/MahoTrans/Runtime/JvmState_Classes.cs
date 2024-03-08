@@ -103,13 +103,8 @@ public partial class JvmState
     public void AddClrClasses(Assembly assembly)
     {
         var all = assembly.GetTypes();
-        var compatible = all.Where(x =>
-        {
-            return x.EnumerateBaseTypes().Contains(typeof(Object)) ||
-                   x.GetCustomAttribute<JavaInterfaceAttribute>() != null;
-        });
-        var nonIgnored = compatible.Where(x => x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
-        AddClrClasses(nonIgnored);
+        var pending = all.Where(x => x.IsJavaType() && x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
+        AddClrClasses(pending);
     }
 
     /// <summary>

@@ -5,7 +5,6 @@ using System.Reflection;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
 using Array = java.lang.Array;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -230,7 +229,7 @@ public static class CompilerUtils
             return typeof(Reference);
 
         // object
-        if (t.IsAssignableTo(typeof(Object)))
+        if (t.IsJavaType())
             return typeof(Reference);
 
         // enum

@@ -3,8 +3,8 @@
 
 using System.Reflection;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
 using static MahoTrans.Compiler.CompilerUtils;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Compiler;
 
@@ -57,7 +57,7 @@ public static class MarshalUtils
 
     public static MethodInfo GetMarshallerFromRef(Type to, bool toNullable)
     {
-        if (to.IsAssignableTo(typeof(Object)))
+        if (to.IsJavaType())
         {
             var resolver = toNullable ? ResolveObjectOrNullEx : ResolveObjectEx;
             return resolver.MakeGenericMethod(to);
@@ -77,7 +77,7 @@ public static class MarshalUtils
 
     private static MethodInfo GetMarshallerToRef(Type from, bool fromNullable)
     {
-        if (from.IsAssignableTo(typeof(Object)))
+        if (from.IsJavaType())
             return GetAddressSafely;
 
         throw new NotSupportedException($"Can't marshal {from} to Reference.");
