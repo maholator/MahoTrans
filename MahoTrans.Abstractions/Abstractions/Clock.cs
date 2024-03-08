@@ -8,8 +8,6 @@ namespace MahoTrans.Abstractions;
 /// </summary>
 public abstract class Clock : IToolkit
 {
-    #region JVM-side APIs
-
     /// <summary>
     ///     Gets current time of the system. This is used for System.currentTimeMillis() calls.
     /// </summary>
@@ -43,6 +41,4 @@ public abstract class Clock : IToolkit
     ///     by the clock.
     /// </summary>
     public long TicksPerCycleStep;
-
-    #endregion
 }
