@@ -19,6 +19,14 @@ public class ConsoleLogger : ILogger, ILoadLogger
         Console.WriteLine();
     }
 
+    public void ReportLinkProgress(int num, int total, string name)
+    {
+    }
+
+    public void ReportCompileProgress(int num, int total, string name)
+    {
+    }
+
     public void LogRuntime(MTLogLevel level, string message)
     {
         var c = Console.ForegroundColor;

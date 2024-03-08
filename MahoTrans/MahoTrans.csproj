@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ru.nnproject.MahoTrans.Abstractions" Version="1.0.34" />
+        <PackageReference Include="ru.nnproject.MahoTrans.Abstractions" Version="1.0.35" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     </ItemGroup>
 
