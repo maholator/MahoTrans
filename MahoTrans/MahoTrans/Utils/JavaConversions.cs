@@ -6,6 +6,7 @@ using System.Text;
 using java.io;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Object = java.lang.Object;
 
 namespace MahoTrans.Utils;
 

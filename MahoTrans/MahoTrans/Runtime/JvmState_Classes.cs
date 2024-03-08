@@ -112,12 +112,15 @@ public partial class JvmState
     /// </summary>
     public void LinkNonLinked()
     {
-        var classes = Classes.Values.Where(x => !x.Linked).ToList();
-        for (var i = 0; i < classes.Count; i++)
+        using (new JvmContext(this))
         {
-            var cls = classes[i];
-            Toolkit.LoadLogger?.ReportLinkProgress(i, Classes.Count, cls.Name);
-            BytecodeLinker.Link(cls);
+            var classes = Classes.Values.Where(x => !x.Linked).ToList();
+            for (var i = 0; i < classes.Count; i++)
+            {
+                var cls = classes[i];
+                Toolkit.LoadLogger?.ReportLinkProgress(i, Classes.Count, cls.Name);
+                BytecodeLinker.Link(cls);
+            }
         }
     }
 
