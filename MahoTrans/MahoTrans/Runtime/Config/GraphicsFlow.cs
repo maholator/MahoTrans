@@ -15,13 +15,13 @@ public enum GraphicsFlow : byte
     ///     Each time <see cref="Canvas.ObtainGraphics" /> is called, new object is created. This is how this should work
     ///     according to MIDP docs.
     /// </summary>
-    [Description("Create new each time")]
+    [Description("Create on each request (MIDP specification)")]
     CreateNewEachTime,
 
     /// <summary>
     ///     ...well, MIDP docs also say that <see cref="Graphics" /> usage outside of <see cref="Canvas.paint" /> is UB. Some
     ///     games rely on fact that the same object is kept alive and returned on each call.
     /// </summary>
-    [Description("Cache objects and reuse them")]
+    [Description("Create once and reuse (hack for some games)")]
     CacheAndReset,
 }
