@@ -185,7 +185,7 @@ public partial class CrossRoutineCompilerPass
     {
         for (int i = _instrIndex + 1; i < JavaCodeLength; i++)
         {
-            var aux = _javaBody.AuxiliaryLinkerOutput[i];
+            var aux = _javaBody.UsedEntities[i];
             if (aux != null)
             {
                 var stackLen = _javaBody.StackTypes[i].StackBeforeExecution.Length;

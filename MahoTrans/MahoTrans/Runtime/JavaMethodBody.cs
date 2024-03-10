@@ -63,10 +63,9 @@ public class JavaMethodBody
     public byte[] ArgsSizes = null!;
 
     /// <summary>
-    ///     Slot for everything that may be helpful for other subsystems but not needed in runtime. This is filled by linker.
-    ///     This may contain references to methods, fields or other objects.
+    ///     Slot for references to classes/methods/fields linked out. May help compiler, debuggers, etc.
     /// </summary>
-    public object?[] AuxiliaryLinkerOutput = null!;
+    public IJavaEntity?[] UsedEntities = null!;
 
     #endregion
 

@@ -165,7 +165,7 @@ public static class BytecodeLinker
         var isLinked = new bool[code.Length];
         var predStackOutput = new PredictedStackState[code.Length];
         predStackOutput[0].StackBeforeExecution = Array.Empty<PrimitiveType>(); // we enter with empty stack
-        var auxData = new object?[code.Length];
+        var auxData = new IJavaEntity?[code.Length];
 
         // offsets cache
         // key is offset, value is instruction index
@@ -1806,20 +1806,20 @@ public static class BytecodeLinker
                         case JavaOpcode.invokeinterface:
                         {
                             if (LinkVirtualCall(cls, args, ref opcode, ref data, out var pointer, out var argsCount,
-                                    out var d))
+                                    out var nd))
                             {
-                                opcode = MTOpcode.invoke_virtual;
+                                // opcode is set internally
                                 intData = pointer;
                                 shortData = argsCount;
                             }
 
-                            if (d == default)
+                            if (nd == default)
                             {
                                 throw new StackMismatchException(
                                     "Unable to predict stack state when no method signature is known.");
                             }
 
-                            auxData[instrIndex] = d.args;
+                            var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(nd);
 
                             foreach (var p in d.args.Reverse())
                                 emulatedStack.PopWithAssert(p, StackValuePurpose.MethodArg);
@@ -1872,6 +1872,7 @@ public static class BytecodeLinker
                                 {
                                     opcode = MTOpcode.new_obj;
                                     data = cls1;
+                                    auxData[instrIndex] = cls1;
                                 }
                                 else
                                 {
@@ -1902,7 +1903,9 @@ public static class BytecodeLinker
                                 arrType = '[' + type;
                             else
                                 arrType = $"[L{type};";
-                            data = jvm.GetClass(arrType);
+                            var arrCls = jvm.GetClass(arrType);
+                            data = arrCls;
+                            auxData[instrIndex] = arrCls;
                             emulatedStack.PopWithAssert(PrimitiveType.Int, StackValuePurpose.Consume);
                             emulatedStack.Push(PrimitiveType.Reference);
                             SetNextStackAndDiff();
@@ -1930,6 +1933,7 @@ public static class BytecodeLinker
                                 {
                                     opcode = MTOpcode.checkcast;
                                     data = cls1;
+                                    auxData[instrIndex] = cls1;
                                 }
                                 else
                                 {
@@ -1955,6 +1959,7 @@ public static class BytecodeLinker
                                 {
                                     opcode = MTOpcode.instanceof;
                                     data = cls1;
+                                    auxData[instrIndex] = cls1;
                                 }
                                 else
                                 {
@@ -2159,7 +2164,7 @@ public static class BytecodeLinker
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
         method.StackTypes = predStackOutput;
-        method.AuxiliaryLinkerOutput = auxData;
+        method.UsedEntities = auxData;
     }
 
     private static void stubCode(ref LinkedInstruction[] output, out PredictedStackState[] stackBeforeInstruction)
@@ -2173,7 +2178,7 @@ public static class BytecodeLinker
     }
 
     private static bool LinkVirtualCall(JavaClass cls, byte[] args, ref MTOpcode opcode, ref object data,
-        out int pointer, out ushort argsCount, out (PrimitiveType? returnType, PrimitiveType[] args) types)
+        out int pointer, out ushort argsCount, out NameDescriptor nd)
     {
         var logger = JvmContext.Toolkit?.LoadLogger;
         var jvm = JvmContext.Jvm!;
@@ -2185,7 +2190,8 @@ public static class BytecodeLinker
                 // this is a non-bound call
                 argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(nonBoundNd.Descriptor);
                 pointer = jvm.GetVirtualPointer(nonBoundNd);
-                types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(nonBoundNd.Descriptor);
+                nd = nonBoundNd;
+                opcode = MTOpcode.invoke_virtual;
                 return true;
             }
         }
@@ -2194,11 +2200,11 @@ public static class BytecodeLinker
         {
             pointer = 0;
             argsCount = 0;
-            types = default;
+            nd = default;
             return false;
         }
 
-        types = DescriptorUtils.ParseMethodDescriptorAsPrimitives(ndc.Descriptor.Descriptor);
+        nd = ndc.Descriptor;
 
         if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
         {
@@ -2221,6 +2227,7 @@ public static class BytecodeLinker
 
         argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor);
         pointer = jvm.GetVirtualPointer(ndc.Descriptor);
+        opcode = MTOpcode.invoke_virtual;
         return true;
     }
 
