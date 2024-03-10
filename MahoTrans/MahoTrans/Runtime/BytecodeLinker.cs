@@ -2159,6 +2159,7 @@ public static class BytecodeLinker
         method.LinkedCatches = LinkCatches(method.Catches, consts, offsets, jvm);
         method.LinkedCode = output;
         method.StackTypes = predStackOutput;
+        method.AuxiliaryLinkerOutput = auxData;
     }
 
     private static void stubCode(ref LinkedInstruction[] output, out PredictedStackState[] stackBeforeInstruction)
