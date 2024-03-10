@@ -6,7 +6,7 @@ using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime.Types;
 
-public class Method : IDisposable
+public class Method : IDisposable, IJavaEntity
 {
     public readonly MethodFlags Flags;
     public readonly NameDescriptor Descriptor;
@@ -68,4 +68,6 @@ public class Method : IDisposable
         NativeBody = null!;
         Bridge = null!;
     }
+
+    public string Name => Descriptor.Name;
 }

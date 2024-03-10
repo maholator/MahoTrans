@@ -12,13 +12,13 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime.Types;
 
-public class JavaClass
+public class JavaClass : IJavaEntity
 {
     public short MinorVersion;
     public short MajorVersion;
     public object[] Constants = Array.Empty<object>();
     public ClassFlags Flags;
-    public string Name = "java/lang/Object";
+    public string Name { get; set; } = "java/lang/Object";
     public string SuperName = "java/lang/Object";
     public JavaClass Super = null!;
     public string[] Interfaces = Array.Empty<string>();

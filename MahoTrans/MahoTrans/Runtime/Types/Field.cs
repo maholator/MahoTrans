@@ -8,7 +8,7 @@ namespace MahoTrans.Runtime.Types;
 /// <summary>
 ///     Represents a field inside JVM type.
 /// </summary>
-public class Field
+public class Field : IJavaEntity
 {
     public readonly FieldFlags Flags;
     public readonly string ClassName;
@@ -47,4 +47,6 @@ public class Field
     public override int GetHashCode() => Descriptor.GetHashCode();
 
     public uint GetSnapshotHash() => Descriptor.GetSnapshotHash();
+
+    public string Name => Descriptor.Name;
 }
