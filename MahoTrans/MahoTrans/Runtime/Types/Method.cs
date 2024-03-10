@@ -22,6 +22,8 @@ public class Method : IDisposable, IJavaEntity
     /// </summary>
     public readonly int ArgsCount;
 
+    public string? DisplayableName { get; set; }
+
     public Method(NameDescriptor descriptor, MethodFlags flags, JavaClass @class)
     {
         Descriptor = descriptor;

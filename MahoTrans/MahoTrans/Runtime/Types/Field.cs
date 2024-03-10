@@ -33,6 +33,8 @@ public class Field : IJavaEntity
 
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
 
+    public string? DisplayableName { get; set; }
+
     public Field(NameDescriptor descriptor, FieldFlags flags, string className)
     {
         Flags = flags;

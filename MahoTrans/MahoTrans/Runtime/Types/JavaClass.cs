@@ -45,6 +45,8 @@ public class JavaClass : IJavaEntity
     /// </summary>
     public bool Linked;
 
+    public string? DisplayableName { get; set; }
+
     public override string ToString() => Name;
 
     public bool IsArray => Name[0] == '[';
