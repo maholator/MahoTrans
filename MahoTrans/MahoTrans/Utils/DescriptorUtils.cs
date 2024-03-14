@@ -138,7 +138,7 @@ public static class DescriptorUtils
     public static (PrimitiveType? returnType, PrimitiveType[] args) ParseMethodDescriptorAsPrimitives(string descriptor)
     {
         if (descriptor[0] != '(')
-            throw new ArgumentException();
+            throw new ArgumentException($"Descriptor {descriptor} must start from '('");
         int argsEnd = descriptor.IndexOf(')');
         string argsD = descriptor.Substring(1, argsEnd - 1);
         var retD = descriptor[argsEnd + 1];

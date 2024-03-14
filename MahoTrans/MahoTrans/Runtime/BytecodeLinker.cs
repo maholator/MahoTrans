@@ -1819,7 +1819,7 @@ public static class BytecodeLinker
                                     "Unable to predict stack state when no method signature is known.");
                             }
 
-                            var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(nd);
+                            var d = DescriptorUtils.ParseMethodDescriptorAsPrimitives(nd.Descriptor);
 
                             foreach (var p in d.args.Reverse())
                                 emulatedStack.PopWithAssert(p, StackValuePurpose.MethodArg);
