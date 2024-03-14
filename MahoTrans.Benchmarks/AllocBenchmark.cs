@@ -22,7 +22,7 @@ public class AllocBenchmark
         var j = new JvmState(StubToolkit.Create(), ExecutionManner.Unlocked);
         j.AddMahoTransLibrary();
         _ = new JvmContext(j);
-        _formClass = j.Classes["javax/microedition/lcdui/Form"];
+        _formClass = j.GetLoadedClassOrNull("javax/microedition/lcdui/Form")!;
     }
 
     private JavaClass _formClass = null!;

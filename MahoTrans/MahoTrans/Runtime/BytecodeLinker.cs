@@ -1902,7 +1902,7 @@ public static class BytecodeLinker
                             if (getConstantSafely(cls, Combine(args[0], args[1]), ref opcode, ref data,
                                     out string type))
                             {
-                                if (jvm.Classes.TryGetValue(type, out var cls1))
+                                if (jvm.TryGetLoadedClass(type, out var cls1))
                                 {
                                     opcode = MTOpcode.new_obj;
                                     data = cls1;
@@ -2240,7 +2240,7 @@ public static class BytecodeLinker
 
         nd = ndc.Descriptor;
 
-        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        if (!jvm.TryGetLoadedClass(ndc.ClassName, out var c))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
             logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
@@ -2407,7 +2407,7 @@ public static class BytecodeLinker
             return null;
         }
 
-        if (!jvm.Classes.TryGetValue(ndc.ClassName, out c!))
+        if (!jvm.TryGetLoadedClass(ndc.ClassName, out c!))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its field \"{ndc.Descriptor}\" is going to be used";
             logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
@@ -2453,7 +2453,7 @@ public static class BytecodeLinker
             return null;
         }
 
-        if (!jvm.Classes.TryGetValue(ndc.ClassName, out var c))
+        if (!jvm.TryGetLoadedClass(ndc.ClassName, out var c))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
             logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);

@@ -146,7 +146,7 @@ public sealed class TimeZones : Object
 
         foreach (var zone in zones)
         {
-            zone.JavaClass = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+            zone.JavaClass = Jvm.GetClass(typeof(TimeZone).ToJavaName());
             Jvm.PutToHeap(zone);
         }
 

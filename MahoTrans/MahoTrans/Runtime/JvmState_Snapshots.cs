@@ -50,7 +50,7 @@ public partial class JvmState
             zip.AddTextEntry(cycle_number_txt, s => s.Write(CycleNumber));
             zip.AddTextEntry(classes_txt, s =>
             {
-                foreach (var cls in Classes.Values)
+                foreach (var cls in _classes.Values)
                 {
                     if (cls.IsArray)
                         continue;
@@ -141,7 +141,7 @@ public partial class JvmState
                     .Select(x => x.Split(' '))
                     .ToDictionary(x => x[3], x => new SerializedClass(x));
 
-                foreach (var cls in Classes.Values)
+                foreach (var cls in _classes.Values)
                 {
                     if (cls.IsArray)
                         continue;
@@ -341,7 +341,7 @@ public partial class JvmState
 
             if (assemblyName.StartsWith(TYPE_HOST_DLL_PREFIX))
             {
-                return _jvm.Classes[typeName].ClrType ??
+                return _jvm._classes[typeName].ClrType ??
                        throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");
             }
 

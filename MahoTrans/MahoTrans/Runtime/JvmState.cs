@@ -151,7 +151,7 @@ public sealed partial class JvmState
     /// </summary>
     public void Dispose()
     {
-        foreach (var cls in Classes.Values)
+        foreach (var cls in _classes.Values)
         {
             cls.VirtualTableMap?.Clear();
             cls.VirtualTableMap = null;
@@ -178,7 +178,7 @@ public sealed partial class JvmState
             cls.Interfaces = null!;
         }
 
-        Classes.Clear();
+        _classes.Clear();
         Toolkit = null!;
         _eventQueue = null;
         _internalizedStrings.Clear();

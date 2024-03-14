@@ -76,7 +76,7 @@ public partial class JvmState
     public T Allocate<T>() where T : Object, new()
     {
         var o = new T();
-        o.JavaClass = Classes[typeof(T).ToJavaName()];
+        o.JavaClass = _classes[typeof(T).ToJavaName()];
         PutToHeap(o);
         return o;
     }
@@ -91,7 +91,7 @@ public partial class JvmState
         return PutToHeap(new String
         {
             Value = str,
-            JavaClass = Classes["java/lang/String"]
+            JavaClass = _classes["java/lang/String"]
         });
     }
 
@@ -592,7 +592,7 @@ public partial class JvmState
         // building roots list
         {
             // classes
-            foreach (var cls in Classes.Values)
+            foreach (var cls in _classes.Values)
             {
                 if (!cls.ModelObject.IsNull)
                 {

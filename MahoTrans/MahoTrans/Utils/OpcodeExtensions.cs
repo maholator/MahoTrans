@@ -204,7 +204,7 @@ public static class OpcodeExtensions
     public static int CountOpcodes(this JvmState jvm, MTOpcode opcode)
     {
         int count = 0;
-        foreach (var cls in jvm.Classes.Values)
+        foreach (var cls in jvm.LoadedClasses)
         {
             foreach (var m in cls.Methods.Values)
             {

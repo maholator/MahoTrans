@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
@@ -19,7 +20,7 @@ public partial class JvmState
     ///     List of all loaded classes. Array classes are created only when needed, use <see cref="GetClass" /> to construct
     ///     them.
     /// </summary>
-    public readonly Dictionary<string, JavaClass> Classes = new();
+    private readonly Dictionary<string, JavaClass> _classes = new();
 
     private readonly Dictionary<string, byte[]> _resources = new();
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
@@ -46,11 +47,11 @@ public partial class JvmState
 
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(Classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
+            ClassCompiler.CompileTypes(_classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
                 Toolkit.LoadLogger);
             foreach (var cls in classes)
             {
-                Classes.Add(cls.Name, cls);
+                _classes.Add(cls.Name, cls);
             }
 
             refreshState(classes);
@@ -68,7 +69,7 @@ public partial class JvmState
             foreach (var cls in classes)
             {
                 cls.Flags |= ClassFlags.Public;
-                Classes.Add(cls.Name, cls);
+                _classes.Add(cls.Name, cls);
             }
 
             refreshState(classes);
@@ -85,10 +86,10 @@ public partial class JvmState
         {
             if (@class.IsObject)
                 continue;
-            @class.Super = Classes[@class.SuperName];
+            @class.Super = _classes[@class.SuperName];
         }
 
-        foreach (var @class in Classes.Values)
+        foreach (var @class in _classes.Values)
         {
             @class.GenerateVirtualTable(this);
             @class.RecalculateSize();
@@ -125,11 +126,11 @@ public partial class JvmState
 
         using (new JvmContext(this))
         {
-            var classes = Classes.Values.ToList();
+            var classes = _classes.Values.ToList();
             for (var i = 0; i < classes.Count; i++)
             {
                 var cls = classes[i];
-                Toolkit.LoadLogger?.ReportLinkProgress(i, Classes.Count, cls.Name);
+                Toolkit.LoadLogger?.ReportLinkProgress(i, _classes.Count, cls.Name);
                 BytecodeLinker.Link(cls);
             }
         }
@@ -146,7 +147,7 @@ public partial class JvmState
         if (_running)
             throw new InvalidOperationException("Can't unlock running JVM.");
 
-        foreach (var cls in Classes.Values)
+        foreach (var cls in _classes.Values)
         {
             foreach (var m in cls.Methods.Values)
             {
@@ -169,7 +170,7 @@ public partial class JvmState
     }
 
     /// <summary>
-    ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
+    ///     Gets class object from <see cref="_classes" />. Automatically handles array types. Throws if no class found.
     /// </summary>
     /// <param name="name">Class name to search.</param>
     /// <returns>Found or created class object.</returns>
@@ -178,14 +179,23 @@ public partial class JvmState
         return GetClassOrNull(name) ?? throw new JavaRuntimeError($"Class {name} is not loaded!");
     }
 
+    public bool IsClassLoaded(string name) => _classes.ContainsKey(name);
+
+    public Dictionary<string, JavaClass>.ValueCollection LoadedClasses => _classes.Values;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TryGetLoadedClass(string name, [MaybeNullWhen(false)] out JavaClass cls) => _classes.TryGetValue(name, out cls);
+
+    public JavaClass? GetLoadedClassOrNull(string name) => _classes.GetValueOrDefault(name);
+
     /// <summary>
-    ///     Gets class object from <see cref="Classes" />. Automatically handles array types.
+    ///     Gets class object from <see cref="_classes" />. Automatically handles array types.
     /// </summary>
     /// <param name="name">Class name to search.</param>
     /// <returns>Class object if found or created, null otherwise.</returns>
     public JavaClass? GetClassOrNull(string name)
     {
-        if (Classes.TryGetValue(name, out var o))
+        if (_classes.TryGetValue(name, out var o))
             return o;
 
         if (name.StartsWith('['))
@@ -208,7 +218,7 @@ public partial class JvmState
                     if (itemDescr[0] == 'L' && itemDescr[^1] == ';')
                     {
                         var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
-                        if (!Classes.ContainsKey(itemClass))
+                        if (!_classes.ContainsKey(itemClass))
                         {
                             if (name.Contains('.') && !name.Contains('/'))
                                 throw new JavaRuntimeError(
@@ -233,7 +243,7 @@ public partial class JvmState
                 Super = GetClass("java/lang/Object"),
             };
             ac.GenerateVirtualTable(this);
-            Classes.Add(name, ac);
+            _classes.Add(name, ac);
             return ac;
         }
 

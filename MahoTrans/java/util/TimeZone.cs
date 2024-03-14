@@ -23,7 +23,7 @@ public class TimeZone : Object
     private static void initializeAvailable()
     {
         //TODO THIS MUST NOT BE A THING
-        var cls = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+        var cls = Jvm.GetClass(typeof(TimeZone).ToJavaName());
         if (cls.PendingInitializer)
         {
             ClInit();

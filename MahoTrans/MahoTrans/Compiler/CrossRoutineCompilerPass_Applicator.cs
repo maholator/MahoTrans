@@ -46,7 +46,7 @@ public partial class CrossRoutineCompilerPass
         var module = builder.DefineDynamicModule($"{JvmState.CROSS_ROUTINES_DLL_PREFIX}{_hostAsmCounter}");
         _hostAsmCounter++;
 
-        var classes = jvm.Classes.Values;
+        var classes = jvm.LoadedClasses;
         int i = 0;
         foreach (var cls in classes)
         {

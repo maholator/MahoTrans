@@ -41,7 +41,7 @@ public class Class : Object
     public static Reference forName([String] Reference r)
     {
         var name = Jvm.ResolveString(r);
-        if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
+        if (!Jvm.TryGetLoadedClass(name.Replace('.', '/'), out var jc))
             Jvm.Throw<ClassNotFoundException>(name);
         var cls = Jvm.Allocate<Class>();
         cls.InternalClass = jc;

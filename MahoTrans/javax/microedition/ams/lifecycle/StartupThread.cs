@@ -48,7 +48,7 @@ public class StartupThread : Thread
     /// <returns>MIDlet object. Call its init method and start it.</returns>
     public Reference AllocMidlet()
     {
-        var midlet = Jvm.AllocateObject(Jvm.Classes[MidletClassName]);
+        var midlet = Jvm.AllocateObject(Jvm.GetClass(MidletClassName));
         Jvm.Resolve<MIDlet>(midlet).Properties = Manifest;
         Jvm.MidletObject = midlet;
         return midlet;
