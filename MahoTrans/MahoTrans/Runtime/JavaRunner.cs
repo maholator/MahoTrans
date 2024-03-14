@@ -978,11 +978,11 @@ public class JavaRunner
                 break;
 
             case MTOpcode.invoke_static:
-                CallMethod((Method)instr.Data, true, frame, thread);
+                CallStaticMethod((Method)instr.Data, frame, thread);
                 break;
 
             case MTOpcode.invoke_instance:
-                CallMethod((Method)instr.Data, false, frame, thread);
+                CallInstanceMethod((Method)instr.Data, frame, thread);
                 break;
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
@@ -1528,7 +1528,7 @@ public class JavaRunner
         if (m == null)
             ThrowUnresolvedVirtual(pointer, state, obj);
 
-        CallMethod(m, false, frame, thread);
+        CallInstanceMethod(m, frame, thread);
     }
 
     [DoesNotReturn]
@@ -1538,7 +1538,9 @@ public class JavaRunner
             $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
     }
 
-    private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread)
+    //TODO split bridges out
+
+    private static void CallStaticMethod(Method m, Frame frame, JavaThread thread)
     {
         if (m.Class.PendingInitializer)
         {
@@ -1556,44 +1558,60 @@ public class JavaRunner
             return;
         }
 
-        var argsLength = m.ArgsCount;
-
-        if (@static)
+        if (m.IsCritical)
         {
-            if (m.IsCritical)
-            {
-                var host = m.Class.GetOrInitModel();
-                if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
-                    return;
-            }
-        }
-        else
-        {
-            argsLength += 1;
-
-            if (m.IsCritical)
-            {
-                frame.SetFrom(argsLength);
-                var r = frame.PopReferenceFrom();
-                if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
-                    return;
-            }
+            var host = m.Class.GetOrInitModel();
+            if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
+                return;
         }
 
+        CallJavaMethod(m, frame, thread);
+    }
+
+    private static void CallInstanceMethod(Method m, Frame frame, JavaThread thread)
+    {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread);
+            // we want to do this instruction again so no pointer increase here
+            return;
+        }
+
+        if (m.Bridge != null)
+        {
+            m.Bridge(frame);
+
+            // we are done with the call, so going to next instruction
+            frame.Pointer++;
+            return;
+        }
+
+        if (m.IsCritical)
+        {
+            frame.SetFrom(m.ArgsCount + 1);
+            var r = frame.PopReferenceFrom();
+            if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
+                return;
+        }
+
+        CallJavaMethod(m, frame, thread);
+    }
+
+    private static unsafe void CallJavaMethod(Method m, Frame frame, JavaThread thread)
+    {
+        int argsLength = m.ArgsCount + (m.IsStatic ? 0 : 1);
         var java = m.JavaBody;
 
         var f = thread.Push(java!);
         frame.SetFrom(argsLength);
-        unsafe
+
+        var sizes = java!.ArgsSizes;
+        var argIndex = 0;
+        var localIndex = 0;
+        for (; argIndex < argsLength; argIndex++)
         {
-            var sizes = java!.ArgsSizes;
-            var argIndex = 0;
-            var localIndex = 0;
-            for (; argIndex < argsLength; argIndex++)
-            {
-                f.LocalVariables[localIndex] = frame.PopUnknownFrom();
-                localIndex += sizes[argIndex];
-            }
+            f.LocalVariables[localIndex] = frame.PopUnknownFrom();
+            localIndex += sizes[argIndex];
         }
 
         frame.Discard(argsLength);
