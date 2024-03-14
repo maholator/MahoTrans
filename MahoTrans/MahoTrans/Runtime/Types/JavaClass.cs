@@ -217,7 +217,7 @@ public class JavaClass : IJavaEntity
     ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
-    /// <returns>Field object. Null if field was not found.</returns>
+    /// <returns>Field object and class where the field lives. Null if field was not found.</returns>
     public (JavaClass, Field)? GetFieldRecursiveOrNull(NameDescriptor descriptor)
     {
         var cls = this;
@@ -262,7 +262,9 @@ public class JavaClass : IJavaEntity
     {
         PendingInitializer = false;
 
-        if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
+        var m = ClassInitMethod;
+
+        if (m != null)
         {
             Object.Jvm.Toolkit.Logger?.LogEvent(EventCategory.ClassInitializer,
                 $"Class {Name} initialized via <clinit> method");
@@ -281,6 +283,8 @@ public class JavaClass : IJavaEntity
                 $"Class {Name} has no initialization method");
         }
     }
+
+    public Method? ClassInitMethod => Methods.GetValueOrDefault(NameDescriptor.ClassInit);
 
     public Reference GetOrInitModel()
     {
