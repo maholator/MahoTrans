@@ -296,6 +296,39 @@ public partial class CrossRoutineCompilerPass
                 _il.EndScope();
                 break;
             }
+            case MTOpcode.dup2:
+            {
+                _il.BeginScope();
+                var left = _il.DeclareLocal(StackTypes[LocalInstrIndex][^2].ToType());
+                var right = _il.DeclareLocal(StackTypes[LocalInstrIndex][^1].ToType());
+
+                // left > right
+                _il.Emit(OpCodes.Stloc, right);
+                _il.Emit(OpCodes.Stloc, left);
+
+                using (BeginMarshalSection(^4))
+                {
+                    _il.Emit(OpCodes.Ldloc, left);
+                }
+
+                using (BeginMarshalSection(^3))
+                {
+                    _il.Emit(OpCodes.Ldloc, right);
+                }
+
+                using (BeginMarshalSection(^2))
+                {
+                    _il.Emit(OpCodes.Ldloc, left);
+                }
+
+                using (BeginMarshalSection(^1))
+                {
+                    _il.Emit(OpCodes.Ldloc, right);
+                }
+
+                _il.EndScope();
+                break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }
