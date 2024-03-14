@@ -1803,12 +1803,10 @@ public static class BytecodeLinker
                         case JavaOpcode.invokevirtual:
                         case JavaOpcode.invokeinterface:
                         {
-                            if (LinkVirtualCall(cls, args, ref opcode, ref data, out var pointer, out var argsCount,
+                            if (LinkVirtualCall(cls, args, ref opcode, ref data, ref intData, ref shortData,
                                     out var nd))
                             {
-                                // opcode is set internally
-                                intData = pointer;
-                                shortData = argsCount;
+                                // everything is set internally
                             }
 
                             if (nd == default)
@@ -2211,15 +2209,15 @@ public static class BytecodeLinker
         stackBeforeInstruction = new PredictedStackState[output.Length];
     }
 
-    private static bool LinkVirtualCall(JavaClass cls, byte[] args, ref MTOpcode opcode, ref object data,
-        out int pointer, out ushort argsCount, out NameDescriptor nd)
+    private static bool LinkVirtualCall(JavaClass caller, byte[] args, ref MTOpcode opcode, ref object data,
+        ref int pointer, ref ushort argsCount, out NameDescriptor nd)
     {
         var logger = JvmContext.Toolkit?.LoadLogger;
         var jvm = JvmContext.Jvm!;
         var index = Combine(args[0], args[1]);
 
         {
-            if (getConstantSilently(cls, index, out NameDescriptor nonBoundNd))
+            if (getConstantSilently(caller, index, out NameDescriptor nonBoundNd))
             {
                 // this is a non-bound call
                 argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(nonBoundNd.Descriptor);
@@ -2230,33 +2228,52 @@ public static class BytecodeLinker
             }
         }
 
-        if (!getConstantSafely(cls, index, ref opcode, ref data, out NameDescriptorClass ndc))
+        if (!getConstantSafely(caller, index, ref opcode, ref data, out NameDescriptorClass ndc))
         {
-            pointer = 0;
-            argsCount = 0;
             nd = default;
             return false;
         }
 
         nd = ndc.Descriptor;
 
-        if (!jvm.TryGetLoadedClass(ndc.ClassName, out var c))
+        if (!jvm.TryGetLoadedClass(ndc.ClassName, out var virtHost))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
-            logger?.Log(LoadIssueType.MissingClassAccess, cls.Name, msg);
+            logger?.Log(LoadIssueType.MissingClassAccess, caller.Name, msg);
             opcode = MTOpcode.error_no_class;
             data = ndc.ClassName;
-            pointer = 0;
-            argsCount = 0;
             return false;
         }
 
-        var m = c.GetMethodRecursiveOrNull(ndc.Descriptor);
+        var m = virtHost.GetMethodRecursiveOrNull(ndc.Descriptor);
 
         if (m == null || m.IsStatic)
         {
             var msg = $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"";
-            logger?.Log(LoadIssueType.MissingVirtualAccess, cls.Name, msg);
+            logger?.Log(LoadIssueType.MissingVirtualAccess, caller.Name, msg);
+        }
+        else if (jvm.IsClassFinal(virtHost))
+        {
+            // if call target is final, we can devirt the method.
+            // checking if we calling the same class.
+            bool simple = canCallSimply(m, virtHost);
+            if (m.Bridge == null)
+            {
+                opcode = MTOpcode.invoke_instance;
+                data = m;
+            }
+            else if (simple)
+            {
+                opcode = MTOpcode.bridge;
+                data = m.Bridge;
+            }
+            else
+            {
+                opcode = MTOpcode.bridge_init;
+                data = new ClassBoundBridge(m.Bridge, m.Class);
+            }
+
+            return true;
         }
 
         argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor);
