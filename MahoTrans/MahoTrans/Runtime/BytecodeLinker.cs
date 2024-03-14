@@ -1852,19 +1852,22 @@ public static class BytecodeLinker
                                             data = m.Bridge;
                                         }
                                     }
-                                    else if (m.Bridge == null)
-                                    {
-                                        opcode = MTOpcode.invoke_static;
-                                        data = m;
-                                    }
-                                    else if (m.IsCritical)
-                                    {
-                                        throw new JavaLinkageException("Critical bridges are not supported.");
-                                    }
                                     else
                                     {
-                                        opcode = MTOpcode.bridge_init;
-                                        data = new ClassBoundBridge(m.Bridge, m.Class);
+                                        if (m.Bridge == null)
+                                        {
+                                            opcode = MTOpcode.invoke_static;
+                                            data = m;
+                                        }
+                                        else if (m.IsCritical)
+                                        {
+                                            throw new JavaLinkageException("Critical bridges are not supported.");
+                                        }
+                                        else
+                                        {
+                                            opcode = MTOpcode.bridge_init;
+                                            data = new ClassBoundBridge(m.Bridge, m.Class);
+                                        }
                                     }
                                 }
                                 else
