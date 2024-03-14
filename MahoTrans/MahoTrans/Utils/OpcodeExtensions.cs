@@ -170,6 +170,7 @@ public static class OpcodeExtensions
             MTOpcode.athrow => OpcodeType.Throw,
             MTOpcode.invoke_virtual => OpcodeType.VirtCall,
             MTOpcode.invoke_static => OpcodeType.Call,
+            MTOpcode.invoke_static_simple => OpcodeType.Call,
             MTOpcode.invoke_instance => OpcodeType.Call,
             MTOpcode.invoke_virtual_void_no_args_bysig => OpcodeType.VirtCall,
             MTOpcode.get_static => OpcodeType.Static,
