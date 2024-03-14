@@ -214,15 +214,26 @@ public enum MTOpcode : byte
     invoke_virtual,
 
     /// <summary>
-    /// Invokes static java method. If your method is native, <see cref="bridge"/> must be used.
+    ///     Invokes static java method. If your method is native, <see cref="bridge" /> must be used.
     /// </summary>
     invoke_static,
 
     /// <summary>
-    /// Invokes static java method. Initialization and synchronization is skipped. If your method is native, <see cref="bridge"/> must be used.
+    ///     Invokes static java method. Initialization and synchronization is skipped. If your method is native,
+    ///     <see cref="bridge" /> must be used.
     /// </summary>
     invoke_static_simple,
+
+    /// <summary>
+    ///     Invokes instance java method. If your method is native, <see cref="bridge" /> must be used.
+    /// </summary>
     invoke_instance,
+
+    /// <summary>
+    ///     Invokes instance java method. Initialization and synchronization is skipped. If your method is native,
+    ///     <see cref="bridge" /> must be used.
+    /// </summary>
+    invoke_instance_simple,
     invoke_virtual_void_no_args_bysig,
 
     #endregion

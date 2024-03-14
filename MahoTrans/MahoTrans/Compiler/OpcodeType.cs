@@ -92,7 +92,7 @@ public enum OpcodeType
     Bridge,
 
     /// <summary>
-    ///     This opcode has attached class initializer.
+    ///     This opcode has attached class initializer and can't be inlined.
     /// </summary>
     Initializer,
 

@@ -989,8 +989,15 @@ public class JavaRunner
             }
 
             case MTOpcode.invoke_instance:
-                CallInstanceMethod((Method)instr.Data, frame, thread);
+                CallComplexJavaInstanceMethod((Method)instr.Data, frame, thread);
                 break;
+
+            case MTOpcode.invoke_instance_simple:
+            {
+                Method m = (Method)instr.Data;
+                CallJavaMethod(m.JavaBody!, m.ArgsCount + 1, frame, thread);
+                break;
+            }
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
                 CallVirtBySig(thread, jvm, frame);
@@ -1535,37 +1542,6 @@ public class JavaRunner
         if (m == null)
             ThrowUnresolvedVirtual(pointer, state, obj);
 
-        CallInstanceMethod(m, frame, thread);
-    }
-
-    [DoesNotReturn]
-    private static void ThrowUnresolvedVirtual(int pointer, JvmState state, Object obj)
-    {
-        throw new JavaRuntimeError(
-            $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
-    }
-
-    private static void CallComplexJavaStaticMethod(Method m, Frame frame, JavaThread thread)
-    {
-        if (m.Class.PendingInitializer)
-        {
-            m.Class.Initialize(thread);
-            // we want to do this instruction again so no pointer increase here
-            return;
-        }
-
-        if (m.IsCritical)
-        {
-            var host = m.Class.GetOrInitModel();
-            if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
-                return;
-        }
-
-        CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
-    }
-
-    private static void CallInstanceMethod(Method m, Frame frame, JavaThread thread)
-    {
         if (m.Class.PendingInitializer)
         {
             m.Class.Initialize(thread);
@@ -1580,6 +1556,51 @@ public class JavaRunner
             // we are done with the call, so going to next instruction
             frame.Pointer++;
             return;
+        }
+
+        if (m.IsCritical)
+        {
+            frame.SetFrom(m.ArgsCount + 1);
+            var r = frame.PopReferenceFrom();
+            if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
+                return;
+        }
+
+        int argsLength = m.ArgsCount + 1;
+        CallJavaMethod(m.JavaBody!, argsLength, frame, thread);
+    }
+
+    [DoesNotReturn]
+    private static void ThrowUnresolvedVirtual(int pointer, JvmState state, Object obj)
+    {
+        throw new JavaRuntimeError(
+            $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
+    }
+
+    private static void CallComplexJavaStaticMethod(Method m, Frame frame, JavaThread thread)
+    {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread);
+            return; // we want to do this instruction again so no pointer increase here
+        }
+
+        if (m.IsCritical)
+        {
+            var host = m.Class.GetOrInitModel();
+            if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
+                return;
+        }
+
+        CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
+    }
+
+    private static void CallComplexJavaInstanceMethod(Method m, Frame frame, JavaThread thread)
+    {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread);
+            return; // we want to do this instruction again so no pointer increase here
         }
 
         if (m.IsCritical)

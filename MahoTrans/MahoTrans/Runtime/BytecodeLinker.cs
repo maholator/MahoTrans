@@ -1833,43 +1833,32 @@ public static class BytecodeLinker
                             if (m != null)
                             {
                                 auxData[instrIndex] = m;
-                                if (isStatic)
+                                MTOpcode op;
+                                if (canCallSimply(m, cls))
+                                    op = isStatic ? MTOpcode.invoke_static_simple : MTOpcode.invoke_instance_simple;
+                                else
+                                    op = isStatic ? MTOpcode.invoke_static : MTOpcode.invoke_instance;
+
+                                if (m.Bridge == null)
                                 {
-                                    if (canCallSimply(m, cls))
-                                    {
-                                        if (m.Bridge == null)
-                                        {
-                                            opcode = MTOpcode.invoke_static_simple;
-                                            data = m;
-                                        }
-                                        else
-                                        {
-                                            opcode = MTOpcode.bridge;
-                                            data = m.Bridge;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (m.Bridge == null)
-                                        {
-                                            opcode = MTOpcode.invoke_static;
-                                            data = m;
-                                        }
-                                        else if (m.IsCritical)
-                                        {
-                                            throw new JavaLinkageException("Critical bridges are not supported.");
-                                        }
-                                        else
-                                        {
-                                            opcode = MTOpcode.bridge_init;
-                                            data = new ClassBoundBridge(m.Bridge, m.Class);
-                                        }
-                                    }
+                                    opcode = op;
+                                    data = m;
                                 }
                                 else
                                 {
-                                    opcode = MTOpcode.invoke_instance;
-                                    data = m;
+                                    if (canCallSimply(m, cls))
+                                    {
+                                        opcode = MTOpcode.bridge;
+                                        data = m.Bridge;
+                                    }
+                                    else
+                                    {
+                                        if (m.IsCritical)
+                                            throw new JavaLinkageException("Critical bridges are not supported.");
+
+                                        opcode = MTOpcode.bridge_init;
+                                        data = new ClassBoundBridge(m.Bridge, m.Class);
+                                    }
                                 }
                             }
 
