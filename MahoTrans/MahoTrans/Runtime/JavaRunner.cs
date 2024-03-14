@@ -978,12 +978,15 @@ public class JavaRunner
                 break;
 
             case MTOpcode.invoke_static:
-                CallStaticMethod((Method)instr.Data, frame, thread);
+                CallComplexJavaStaticMethod((Method)instr.Data, frame, thread);
                 break;
 
             case MTOpcode.invoke_static_simple:
-                CallStaticMethod((Method)instr.Data, frame, thread);
+            {
+                Method m = (Method)instr.Data;
+                CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
                 break;
+            }
 
             case MTOpcode.invoke_instance:
                 CallInstanceMethod((Method)instr.Data, frame, thread);
@@ -1542,23 +1545,12 @@ public class JavaRunner
             $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
     }
 
-    //TODO split bridges out
-
-    private static void CallStaticMethod(Method m, Frame frame, JavaThread thread)
+    private static void CallComplexJavaStaticMethod(Method m, Frame frame, JavaThread thread)
     {
         if (m.Class.PendingInitializer)
         {
             m.Class.Initialize(thread);
             // we want to do this instruction again so no pointer increase here
-            return;
-        }
-
-        if (m.Bridge != null)
-        {
-            m.Bridge(frame);
-
-            // we are done with the call, so going to next instruction
-            frame.Pointer++;
             return;
         }
 
@@ -1569,7 +1561,7 @@ public class JavaRunner
                 return;
         }
 
-        CallJavaMethod(m, frame, thread);
+        CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
     }
 
     private static void CallInstanceMethod(Method m, Frame frame, JavaThread thread)
@@ -1598,18 +1590,16 @@ public class JavaRunner
                 return;
         }
 
-        CallJavaMethod(m, frame, thread);
+        int argsLength = m.ArgsCount + 1;
+        CallJavaMethod(m.JavaBody!, argsLength, frame, thread);
     }
 
-    private static unsafe void CallJavaMethod(Method m, Frame frame, JavaThread thread)
+    private static unsafe void CallJavaMethod(JavaMethodBody jmb, int argsLength, Frame frame, JavaThread thread)
     {
-        int argsLength = m.ArgsCount + (m.IsStatic ? 0 : 1);
-        var java = m.JavaBody;
-
-        var f = thread.Push(java!);
+        var f = thread.Push(jmb);
         frame.SetFrom(argsLength);
 
-        var sizes = java!.ArgsSizes;
+        var sizes = jmb.ArgsSizes;
         var argIndex = 0;
         var localIndex = 0;
         for (; argIndex < argsLength; argIndex++)
