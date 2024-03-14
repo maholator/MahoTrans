@@ -484,6 +484,25 @@ public partial class CrossRoutineCompilerPass
                 EmitMathRepush();
                 break;
 
+            case MTOpcode.i2b:
+                _il.Emit(OpCodes.Ldc_I4, 255);
+                _il.Emit(OpCodes.And);
+                _il.Emit(OpCodes.Conv_U1);
+                _il.Emit(OpCodes.Conv_I1);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.i2c:
+                _il.Emit(OpCodes.Conv_U2);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.i2s:
+                _il.Emit(OpCodes.Conv_U2);
+                _il.Emit(OpCodes.Conv_I2);
+                EmitMathRepush();
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException();
         }

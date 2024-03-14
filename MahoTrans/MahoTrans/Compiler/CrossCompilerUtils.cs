@@ -53,7 +53,7 @@ public static class CrossCompilerUtils
             case OpcodeType.Math:
                 return true;
             case OpcodeType.Conversion:
-                return opcode <= MTOpcode.d2f;
+                return true;
             case OpcodeType.Compare:
                 return false;
             case OpcodeType.Branch:
