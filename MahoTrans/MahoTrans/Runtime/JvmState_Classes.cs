@@ -27,6 +27,8 @@ public partial class JvmState
     /// </summary>
     private readonly Dictionary<Type, JavaClass> _classesByType = new();
 
+    private HashSet<JavaClass> _finalClasses = new();
+
     private readonly Dictionary<string, byte[]> _resources = new();
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
     private int _virtualPointerRoller = 1;
@@ -134,6 +136,8 @@ public partial class JvmState
 
         using (new JvmContext(this))
         {
+            _finalClasses = getFinalClasses();
+
             var classes = _classes.Values.ToList();
             for (var i = 0; i < classes.Count; i++)
             {
@@ -176,6 +180,30 @@ public partial class JvmState
             CrossRoutineCompilerPass.CrossCompileAll(this);
         }
     }
+
+    private HashSet<JavaClass> getFinalClasses()
+    {
+        var hs = new HashSet<JavaClass>();
+        foreach (var clsToCheck in LoadedClasses)
+        {
+            foreach (var clsChild in LoadedClasses)
+            {
+                if (clsChild == clsToCheck)
+                    continue;
+
+                if (clsChild.Is(clsToCheck))
+                    goto skip;
+            }
+
+            hs.Add(clsToCheck);
+
+            skip: ;
+        }
+
+        return hs;
+    }
+
+    public bool IsClassFinal(JavaClass cls) => _finalClasses.Contains(cls);
 
     /// <summary>
     ///     Gets class object from <see cref="_classes" />. Automatically handles array types. Throws if no class found.
