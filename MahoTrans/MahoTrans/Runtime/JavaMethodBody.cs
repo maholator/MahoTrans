@@ -104,6 +104,19 @@ public class JavaMethodBody
     // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
     public override string ToString() => Method?.ToString() ?? "Detached";
 
+    /// <summary>
+    ///     Clears everything that was calculated by linker.
+    /// </summary>
+    public void Clear()
+    {
+        LinkedCode = null!;
+        LinkedCatches = null!;
+        LocalTypes = null!;
+        StackTypes = null!;
+        ArgsSizes = null!;
+        UsedEntities = null!;
+    }
+
     public struct Catch
     {
         public ushort TryStart;

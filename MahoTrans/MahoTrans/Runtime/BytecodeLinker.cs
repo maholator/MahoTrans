@@ -25,8 +25,6 @@ public static class BytecodeLinker
 
             Link(method.JavaBody);
         }
-
-        cls.Linked = true;
     }
 
     private static void Link(JavaMethodBody method)

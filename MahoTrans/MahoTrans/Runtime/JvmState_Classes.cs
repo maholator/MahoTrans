@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
 using MahoTrans.Compiler;
 using MahoTrans.Loader;
@@ -40,6 +41,9 @@ public partial class JvmState
 
     public void AddJvmClasses(JavaClass[] classes, string moduleName)
     {
+        if (_locked)
+            throw new InvalidOperationException("Can't load classes in locked state.");
+
         using (new JvmContext(this))
         {
             ClassCompiler.CompileTypes(Classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
@@ -49,12 +53,15 @@ public partial class JvmState
                 Classes.Add(cls.Name, cls);
             }
 
-            RefreshState(classes);
+            refreshState(classes);
         }
     }
 
     public void AddClrClasses(IEnumerable<Type> types)
     {
+        if (_locked)
+            throw new InvalidOperationException("Can't load classes in locked state.");
+
         using (new JvmContext(this))
         {
             var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
@@ -64,7 +71,7 @@ public partial class JvmState
                 Classes.Add(cls.Name, cls);
             }
 
-            RefreshState(classes);
+            refreshState(classes);
         }
     }
 
@@ -72,7 +79,7 @@ public partial class JvmState
     ///     Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
     /// </summary>
     /// <param name="new">Newly added classes.</param>
-    private void RefreshState(IEnumerable<JavaClass> @new)
+    private void refreshState(IEnumerable<JavaClass> @new)
     {
         foreach (var @class in @new)
         {
@@ -108,13 +115,17 @@ public partial class JvmState
     public void AddMahoTransLibrary() => AddClrClasses(typeof(JvmState).Assembly);
 
     /// <summary>
-    /// Links classes which were not linked yet.
+    ///     Links classes and locks this JVM.
     /// </summary>
-    public void LinkNonLinked()
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void LinkAndLock()
     {
+        if (_locked)
+            throw new InvalidOperationException("JVM is already locked.");
+
         using (new JvmContext(this))
         {
-            var classes = Classes.Values.Where(x => !x.Linked).ToList();
+            var classes = Classes.Values.ToList();
             for (var i = 0; i < classes.Count; i++)
             {
                 var cls = classes[i];
@@ -122,10 +133,35 @@ public partial class JvmState
                 BytecodeLinker.Link(cls);
             }
         }
+
+        _locked = true;
     }
 
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void Unlock()
+    {
+        if (!_locked)
+            throw new InvalidOperationException("JVM was not locked.");
+
+        if (_running)
+            throw new InvalidOperationException("Can't unlock running JVM.");
+
+        foreach (var cls in Classes.Values)
+        {
+            foreach (var m in cls.Methods.Values)
+            {
+                m.JavaBody?.Clear();
+            }
+        }
+
+        _locked = false;
+    }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void CrossCompileLoaded()
     {
+        if (!_locked)
+            throw new InvalidOperationException("JVM was not locked.");
         using (new JvmContext(this))
         {
             CrossRoutineCompilerPass.CrossCompileAll(this);

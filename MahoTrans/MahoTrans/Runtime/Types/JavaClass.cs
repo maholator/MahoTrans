@@ -40,11 +40,6 @@ public class JavaClass : IJavaEntity
 
     public int Size;
 
-    /// <summary>
-    ///     True, if <see cref="BytecodeLinker" /> processed this class.
-    /// </summary>
-    public bool Linked;
-
     public string? DisplayableName { get; set; }
 
     public override string ToString() => Name;
