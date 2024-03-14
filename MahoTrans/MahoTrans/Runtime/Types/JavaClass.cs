@@ -102,22 +102,6 @@ public class JavaClass : IJavaEntity
         }
     }
 
-    public bool Is(string type)
-    {
-        if (Name == type)
-            return true;
-        JavaClass jc = this;
-
-        while (true)
-        {
-            if (jc.SuperName == type)
-                return true;
-            if (jc.Super.IsObject)
-                return false;
-            jc = jc.Super;
-        }
-    }
-
     public bool Is(JavaClass type)
     {
         if (this == type)
