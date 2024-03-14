@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Compiler;
+using MahoTrans.Runtime;
 
 namespace MahoTrans.Utils;
 
@@ -191,5 +192,32 @@ public static class OpcodeExtensions
             MTOpcode.error_bytecode => OpcodeType.Error,
             _ => throw new ArgumentOutOfRangeException(nameof(opcode), opcode, null)
         };
+    }
+
+    /// <summary>
+    /// Checks total count of opcodes, used in all methods in all classes loaded in the jvm.
+    /// </summary>
+    /// <param name="jvm">Jvm to check.</param>
+    /// <param name="opcode">Opcode to count.</param>
+    /// <returns>Total count of opcode usages.</returns>
+    public static int CountOpcodes(this JvmState jvm, MTOpcode opcode)
+    {
+        int count = 0;
+        foreach (var cls in jvm.Classes.Values)
+        {
+            foreach (var m in cls.Methods.Values)
+            {
+                if (m.JavaBody != null)
+                {
+                    foreach (var instr in m.JavaBody.LinkedCode)
+                    {
+                        if (instr.Opcode == opcode)
+                            count++;
+                    }
+                }
+            }
+        }
+
+        return count;
     }
 }
