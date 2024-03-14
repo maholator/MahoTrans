@@ -22,6 +22,11 @@ public partial class JvmState
     /// </summary>
     private readonly Dictionary<string, JavaClass> _classes = new();
 
+    /// <summary>
+    ///     Auxiliary dictionary for fast conversion from CLR type to JVM model.
+    /// </summary>
+    private readonly Dictionary<Type, JavaClass> _classesByType = new();
+
     private readonly Dictionary<string, byte[]> _resources = new();
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
     private int _virtualPointerRoller = 1;
@@ -40,21 +45,21 @@ public partial class JvmState
         AddJvmClasses(jar.Classes, moduleName);
     }
 
-    public void AddJvmClasses(JavaClass[] classes, string moduleName)
+    public void AddJvmClasses(JavaClass[] classesToLoad, string moduleName)
     {
         if (_locked)
             throw new InvalidOperationException("Can't load classes in locked state.");
 
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(_classes, classes, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
+            ClassCompiler.CompileTypes(_classes, classesToLoad, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
                 Toolkit.LoadLogger);
-            foreach (var cls in classes)
+            foreach (var cls in classesToLoad)
             {
                 _classes.Add(cls.Name, cls);
             }
 
-            refreshState(classes);
+            refreshState(classesToLoad);
         }
     }
 
@@ -82,11 +87,14 @@ public partial class JvmState
     /// <param name="new">Newly added classes.</param>
     private void refreshState(IEnumerable<JavaClass> @new)
     {
-        foreach (var @class in @new)
+        foreach (var cls in @new)
         {
-            if (@class.IsObject)
-                continue;
-            @class.Super = _classes[@class.SuperName];
+            // clr -> jvm map
+            _classesByType[cls.ClrType!] = cls;
+
+            // supers
+            if (!cls.IsObject)
+                cls.Super = _classes[cls.SuperName];
         }
 
         foreach (var @class in _classes.Values)
@@ -184,7 +192,8 @@ public partial class JvmState
     public Dictionary<string, JavaClass>.ValueCollection LoadedClasses => _classes.Values;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool TryGetLoadedClass(string name, [MaybeNullWhen(false)] out JavaClass cls) => _classes.TryGetValue(name, out cls);
+    public bool TryGetLoadedClass(string name, [MaybeNullWhen(false)] out JavaClass cls) =>
+        _classes.TryGetValue(name, out cls);
 
     public JavaClass? GetLoadedClassOrNull(string name) => _classes.GetValueOrDefault(name);
 

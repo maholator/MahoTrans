@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
@@ -10,7 +11,6 @@ using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
 using String = java.lang.String;
@@ -76,7 +76,8 @@ public partial class JvmState
     public T Allocate<T>() where T : Object, new()
     {
         var o = new T();
-        o.JavaClass = _classes[typeof(T).ToJavaName()];
+        o.JavaClass = _classesByType[typeof(T)];
+        Debug.Assert(o.JavaClass.ClrType == o.GetType());
         PutToHeap(o);
         return o;
     }
