@@ -709,12 +709,12 @@ public class JavaRunner
                 break;
 
             case MTOpcode.d2i:
-                DoubleToInt(frame);
+                frame.PushInt(D2I(frame.PopDouble()));
                 pointer++;
                 break;
 
             case MTOpcode.d2l:
-                DoubleToLong(frame);
+                frame.PushLong(D2L(frame.PopDouble()));
                 pointer++;
                 break;
 
@@ -1322,34 +1322,32 @@ public class JavaRunner
         throw new JavaRuntimeError($"Can't round float number {f}");
     }
 
-    private static void DoubleToInt(Frame frame)
+    public static int D2I(double d)
     {
-        double val = frame.PopDouble();
-        if (double.IsNaN(val))
-            frame.PushInt(0);
-        else if (double.IsFinite(val))
-            frame.PushInt((int)val);
-        else if (double.IsPositiveInfinity(val))
-            frame.PushInt(int.MaxValue);
-        else if (double.IsNegativeInfinity(val))
-            frame.PushInt(int.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round double number {val}");
+        if (double.IsNaN(d))
+            return 0;
+        if (double.IsPositiveInfinity(d))
+            return int.MaxValue;
+        if (double.IsNegativeInfinity(d))
+            return int.MinValue;
+        if (double.IsFinite(d))
+            return (int)d;
+
+        throw new JavaRuntimeError($"Can't round double number {d}");
     }
 
-    private static void DoubleToLong(Frame frame)
+    public static long D2L(double d)
     {
-        double val = frame.PopDouble();
-        if (double.IsNaN(val))
-            frame.PushLong(0);
-        else if (double.IsFinite(val))
-            frame.PushLong((long)val);
-        else if (double.IsPositiveInfinity(val))
-            frame.PushLong(long.MaxValue);
-        else if (double.IsNegativeInfinity(val))
-            frame.PushLong(long.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round double number {val}");
+        if (double.IsNaN(d))
+            return 0L;
+        if (double.IsPositiveInfinity(d))
+            return long.MaxValue;
+        if (double.IsNegativeInfinity(d))
+            return long.MinValue;
+        if (double.IsFinite(d))
+            return (long)d;
+
+        throw new JavaRuntimeError($"Can't round double number {d}");
     }
 
     #endregion

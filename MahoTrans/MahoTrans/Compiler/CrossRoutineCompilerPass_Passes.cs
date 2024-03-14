@@ -469,6 +469,21 @@ public partial class CrossRoutineCompilerPass
                 EmitMathRepush();
                 break;
 
+            case MTOpcode.d2i:
+                _il.Emit(OpCodes.Call, typeof(JavaRunner).GetMethod(nameof(JavaRunner.D2I))!);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.d2l:
+                _il.Emit(OpCodes.Call, typeof(JavaRunner).GetMethod(nameof(JavaRunner.D2L))!);
+                EmitMathRepush();
+                break;
+
+            case MTOpcode.d2f:
+                _il.Emit(OpCodes.Conv_R4);
+                EmitMathRepush();
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
