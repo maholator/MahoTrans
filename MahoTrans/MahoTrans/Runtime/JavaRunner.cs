@@ -981,6 +981,10 @@ public class JavaRunner
                 CallStaticMethod((Method)instr.Data, frame, thread);
                 break;
 
+            case MTOpcode.invoke_static_simple:
+                CallStaticMethod((Method)instr.Data, frame, thread);
+                break;
+
             case MTOpcode.invoke_instance:
                 CallInstanceMethod((Method)instr.Data, frame, thread);
                 break;
