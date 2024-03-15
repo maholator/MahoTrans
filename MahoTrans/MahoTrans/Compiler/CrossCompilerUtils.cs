@@ -42,7 +42,14 @@ public static class CrossCompilerUtils
             case OpcodeType.Array:
                 return true;
             case OpcodeType.Stack:
-                return opcode <= MTOpcode.dup2;
+                return opcode switch
+                {
+                    MTOpcode.pop => true,
+                    MTOpcode.pop2 => true,
+                    MTOpcode.swap => true,
+                    MTOpcode.dup => true,
+                    _ => false
+                };
             case OpcodeType.Math:
                 return true;
             case OpcodeType.Conversion:
