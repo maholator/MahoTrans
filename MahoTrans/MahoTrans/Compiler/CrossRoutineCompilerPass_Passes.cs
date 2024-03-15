@@ -470,10 +470,7 @@ public partial class CrossRoutineCompilerPass
                 break;
 
             case MTOpcode.l2i:
-                _il.Emit(OpCodes.Ldc_I4_M1);
-                _il.Emit(OpCodes.Conv_U8);
-                _il.Emit(OpCodes.And);
-                _il.Emit(OpCodes.Conv_U4);
+                _il.Emit(OpCodes.Conv_I4);
                 EmitMathRepush();
                 break;
 
@@ -518,9 +515,6 @@ public partial class CrossRoutineCompilerPass
                 break;
 
             case MTOpcode.i2b:
-                _il.Emit(OpCodes.Ldc_I4, 255);
-                _il.Emit(OpCodes.And);
-                _il.Emit(OpCodes.Conv_U1);
                 _il.Emit(OpCodes.Conv_I1);
                 EmitMathRepush();
                 break;
@@ -531,7 +525,6 @@ public partial class CrossRoutineCompilerPass
                 break;
 
             case MTOpcode.i2s:
-                _il.Emit(OpCodes.Conv_U2);
                 _il.Emit(OpCodes.Conv_I2);
                 EmitMathRepush();
                 break;

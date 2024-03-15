@@ -677,8 +677,7 @@ public class JavaRunner
 
             case MTOpcode.l2i:
             {
-                ulong ul = ((ulong)frame.PopLong()) & 0xFF_FF_FF_FF;
-                frame.PushInt((int)(uint)ul);
+                frame.PushInt((int)frame.PopLong());
                 pointer++;
                 break;
             }
@@ -725,8 +724,7 @@ public class JavaRunner
 
             case MTOpcode.i2b:
             {
-                var val = frame.PopInt() & 0xFF;
-                frame.PushInt((sbyte)(byte)val);
+                frame.PushInt((sbyte)frame.PopInt());
                 pointer++;
                 break;
             }
@@ -738,8 +736,7 @@ public class JavaRunner
 
             case MTOpcode.i2s:
             {
-                var b = (int)(short)(ushort)(uint)frame.PopInt();
-                frame.PushInt(b);
+                frame.PushInt((short)frame.PopInt());
                 pointer++;
                 break;
             }
