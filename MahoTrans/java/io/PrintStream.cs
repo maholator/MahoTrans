@@ -8,6 +8,7 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 using String = java.lang.String;
 
 namespace java.io;
@@ -178,7 +179,7 @@ public class PrintStream : OutputStream
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("toString", "()Ljava/lang/String;");
+        b.AppendStaticCall<String>("valueOf", typeof(String), typeof(Object));
         b.AppendVirtcall("print", "(Ljava/lang/String;)V");
         b.AppendReturn();
         return b.Build(2, 2);
@@ -312,7 +313,7 @@ public class PrintStream : OutputStream
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("toString", "()Ljava/lang/String;");
+        b.AppendStaticCall<String>("valueOf", typeof(String), typeof(Object));
         b.AppendVirtcall("print", "(Ljava/lang/String;)V");
         b.AppendThis();
         b.AppendVirtcall("println", typeof(void));
