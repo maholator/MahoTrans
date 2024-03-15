@@ -165,4 +165,11 @@ public static class JavaConversions
 
     public static bool IsJavaType(this Type t) =>
         t.IsAssignableTo(typeof(Object)) || t.GetCustomAttribute<JavaInterfaceAttribute>() != null;
+
+    public static int Combine(this byte[] args, int offset = 0)
+    {
+        var u = (ushort)((args[offset] << 8) | args[offset + 1]);
+        var s = (short)u;
+        return s;
+    }
 }

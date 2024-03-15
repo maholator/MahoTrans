@@ -221,13 +221,13 @@ public static class DebuggerUtils
             case MTOpcode.athrow:
                 return 1;
 
-            case MTOpcode.invoke_virtual:
-                return instruction.ShortData + 1; // this+args
-
             case MTOpcode.invoke_static:
+            case MTOpcode.invoke_static_simple:
                 return ((Method)instruction.Data).ArgsCount;
 
+            case MTOpcode.invoke_virtual:
             case MTOpcode.invoke_instance:
+            case MTOpcode.invoke_instance_simple:
                 return ((Method)instruction.Data).ArgsCount + 1;
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
@@ -262,7 +262,7 @@ public static class DebuggerUtils
                 return instruction.IntData;
 
             default:
-                return 0;
+                throw new ArgumentException($"Opcode {instruction.Opcode} is not supported.");
         }
     }
 
@@ -303,27 +303,28 @@ public static class DebuggerUtils
     /// <summary>
     ///     Pretty-prints instruction to show it in debugger.
     /// </summary>
-    /// <param name="linked">Linked version of instruction.</param>
-    /// <param name="raw">Raw version of instruction.</param>
     /// <param name="method">Method that contains the instruction.</param>
+    /// <param name="index">Number of the instruction.</param>
     /// <param name="jvm">JVM.</param>
     /// <returns>Opcode and additional info for it.</returns>
-    public static string PrettyPrintInstruction(LinkedInstruction linked, Instruction raw, Method method,
+    public static string PrettyPrintInstruction(JavaMethodBody method, int index,
         JvmState jvm)
     {
-        var rawOpcode = raw.Opcode;
+        var consts = method.Method.Class.Constants;
+        var rawOpcode = method.Code[index].Opcode;
+        var args = method.Code[index].Args;
+        var linked = method.LinkedCode[index];
 
         switch (rawOpcode)
         {
             case JavaOpcode.bipush:
+                return $"{rawOpcode} ({(sbyte)args[0]})";
             case JavaOpcode.sipush:
+                return $"{rawOpcode} ({args.Combine()})";
             case JavaOpcode.ldc:
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
-                if (linked.Opcode == MTOpcode.iconst)
-                    return $"{rawOpcode} ({linked.IntData})";
-
-                return $"{rawOpcode} ({linked.Data})";
+                return $"{rawOpcode} ({consts[args.Combine()]})";
 
             case JavaOpcode.iload:
             case JavaOpcode.lload:
@@ -335,7 +336,7 @@ public static class DebuggerUtils
             case JavaOpcode.fstore:
             case JavaOpcode.dstore:
             case JavaOpcode.astore:
-                return $"{rawOpcode} ({linked.IntData})";
+                return $"{rawOpcode}_{args[0]}";
 
             case JavaOpcode.ifeq:
             case JavaOpcode.ifne:
@@ -360,35 +361,24 @@ public static class DebuggerUtils
             case JavaOpcode.getfield:
             case JavaOpcode.putstatic:
             case JavaOpcode.getstatic:
-                var i = BytecodeLinker.Combine(raw.Args[0], raw.Args[1]);
-                var ndc = (NameDescriptorClass)method.Class.Constants[i];
-                return $"{rawOpcode} {ndc}";
-
             case JavaOpcode.invokeinterface:
             case JavaOpcode.invokevirtual:
-                var nd = jvm.DecodeVirtualPointer(linked.IntData);
-                return $"{rawOpcode} {nd.Name} {nd.Descriptor}";
-
             case JavaOpcode.invokespecial:
             case JavaOpcode.invokestatic:
-                return $"{rawOpcode} {linked.Data}";
-
             case JavaOpcode.newobject:
             case JavaOpcode.anewarray:
-                return $"{rawOpcode} {linked.Data}";
-
-            case JavaOpcode.newarray:
-                return $"{rawOpcode} {(ArrayType)linked.IntData}";
-
             case JavaOpcode.checkcast:
             case JavaOpcode.instanceof:
-                return $"{rawOpcode} {linked.Data}";
+                return $"{rawOpcode} {method.UsedEntities[index]}";
+
+            case JavaOpcode.newarray:
+                return $"{rawOpcode} {(ArrayType)args[0]}";
 
             case JavaOpcode.wide:
-                return $"{rawOpcode} {(JavaOpcode)raw.Args[0]}";
+                return $"{rawOpcode} {(JavaOpcode)args[0]}";
 
             case JavaOpcode.multianewarray:
-                return $"{rawOpcode} {linked.IntData} {linked.Data}";
+                return $"{rawOpcode} {args[2]} {method.UsedEntities[index]}";
 
             default:
                 return $"{rawOpcode}";

@@ -29,7 +29,7 @@ public static class BytecodeLinker
 
     private static void Link(JavaMethodBody method)
     {
-        var isClinit = method.Method.Descriptor.Name == "<clinit>";
+        var isClinit = method.Method.Descriptor == NameDescriptor.ClassInit;
         try
         {
             LinkInternal(method, isClinit);
@@ -1803,11 +1803,10 @@ public static class BytecodeLinker
                         case JavaOpcode.invokevirtual:
                         case JavaOpcode.invokeinterface:
                         {
-                            if (LinkVirtualCall(cls, args, ref opcode, ref data, ref intData, ref shortData,
-                                    out var nd))
-                            {
-                                // everything is set internally
-                            }
+                            var nd = LinkVirtualCall(cls, args, ref opcode, ref data, ref intData, ref shortData,
+                                out var m);
+
+                            auxData[instrIndex] = m;
 
                             if (nd == default)
                             {
@@ -1849,6 +1848,7 @@ public static class BytecodeLinker
                                     if (canCallSimply(m, cls))
                                     {
                                         opcode = MTOpcode.bridge;
+                                        intData = m.ArgsCount + (isStatic ? 0 : 1);
                                         data = m.Bridge;
                                     }
                                     else
@@ -1857,6 +1857,7 @@ public static class BytecodeLinker
                                             throw new JavaLinkageException("Critical bridges are not supported.");
 
                                         opcode = MTOpcode.bridge_init;
+                                        intData = m.ArgsCount + (isStatic ? 0 : 1);
                                         data = new ClassBoundBridge(m.Bridge, m.Class);
                                     }
                                 }
@@ -2079,7 +2080,7 @@ public static class BytecodeLinker
                             var dims = args[2];
                             var type = (string)consts[Combine(args[0], args[1])];
                             intData = dims;
-                            data = jvm.GetClass(type);
+                            data = auxData[instrIndex] = jvm.GetClass(type);
                             for (int i = 0; i < dims; i++)
                             {
                                 if (type[i] != '[')
@@ -2198,8 +2199,9 @@ public static class BytecodeLinker
         stackBeforeInstruction = new PredictedStackState[output.Length];
     }
 
-    private static bool LinkVirtualCall(JavaClass caller, byte[] args, ref MTOpcode opcode, ref object data,
-        ref int pointer, ref ushort argsCount, out NameDescriptor nd)
+    private static NameDescriptor LinkVirtualCall(JavaClass caller, byte[] args, ref MTOpcode opcode,
+        ref object instrData,
+        ref int instrIntData, ref ushort argsCount, out Method? method)
     {
         var logger = JvmContext.Toolkit?.LoadLogger;
         var jvm = JvmContext.Jvm!;
@@ -2210,33 +2212,33 @@ public static class BytecodeLinker
             {
                 // this is a non-bound call
                 argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(nonBoundNd.Descriptor);
-                pointer = jvm.GetVirtualPointer(nonBoundNd);
-                nd = nonBoundNd;
+                instrIntData = jvm.GetVirtualPointer(nonBoundNd);
                 opcode = MTOpcode.invoke_virtual;
-                return true;
+                method = null;
+                return nonBoundNd;
             }
         }
 
-        if (!getConstantSafely(caller, index, ref opcode, ref data, out NameDescriptorClass ndc))
+        if (!getConstantSafely(caller, index, ref opcode, ref instrData, out NameDescriptorClass ndc))
         {
-            nd = default;
-            return false;
+            method = null;
+            return default;
         }
 
-        nd = ndc.Descriptor;
 
         if (!jvm.TryGetLoadedClass(ndc.ClassName, out var virtHost))
         {
             var msg = $"\"{ndc.ClassName}\" can't be found but its method \"{ndc.Descriptor}\" is going to be used";
             logger?.Log(LoadIssueType.MissingClassAccess, caller.Name, msg);
             opcode = MTOpcode.error_no_class;
-            data = ndc.ClassName;
-            return false;
+            instrData = ndc.ClassName;
+            method = null;
+            return ndc.Descriptor;
         }
 
-        var m = virtHost.GetMethodRecursiveOrNull(ndc.Descriptor);
+        method = virtHost.GetMethodRecursiveOrNull(ndc.Descriptor);
 
-        if (m == null || m.IsStatic)
+        if (method == null || method.IsStatic)
         {
             var msg = $"\"{ndc.ClassName}\" has no method \"{ndc.Descriptor}\"";
             logger?.Log(LoadIssueType.MissingVirtualAccess, caller.Name, msg);
@@ -2245,30 +2247,34 @@ public static class BytecodeLinker
         {
             // if call target is final, we can devirt the method.
             // checking if we calling the same class.
-            bool simple = canCallSimply(m, virtHost);
-            if (m.Bridge == null)
+            bool simple = canCallSimply(method, virtHost);
+            if (method.Bridge == null)
             {
                 opcode = MTOpcode.invoke_instance;
-                data = m;
+                instrData = method;
             }
             else if (simple)
             {
                 opcode = MTOpcode.bridge;
-                data = m.Bridge;
+                instrIntData = method.ArgsCount + 1;
+                instrData = method.Bridge;
             }
             else
             {
                 opcode = MTOpcode.bridge_init;
-                data = new ClassBoundBridge(m.Bridge, m.Class);
+                instrIntData = method.ArgsCount + 1;
+                instrData = new ClassBoundBridge(method.Bridge, method.Class);
             }
 
-            return true;
+            return ndc.Descriptor;
         }
 
+        // if class is not final, doing regular virtcall.
         argsCount = (ushort)DescriptorUtils.ParseMethodArgsCount(ndc.Descriptor.Descriptor);
-        pointer = jvm.GetVirtualPointer(ndc.Descriptor);
+        instrIntData = jvm.GetVirtualPointer(ndc.Descriptor);
         opcode = MTOpcode.invoke_virtual;
-        return true;
+
+        return ndc.Descriptor;
     }
 
     /// <summary>
@@ -2498,12 +2504,7 @@ public static class BytecodeLinker
         return m.Class == callSource || m.Class.ClassInitMethod == null;
     }
 
-    public static int Combine(byte indexByte1, byte indexByte2)
-    {
-        var u = (ushort)((indexByte1 << 8) | indexByte2);
-        var s = (short)u;
-        return s;
-    }
+    private static int Combine(byte indexByte1, byte indexByte2) => (short)(ushort)((indexByte1 << 8) | indexByte2);
 
     private enum LocalVariableType : ushort
     {
