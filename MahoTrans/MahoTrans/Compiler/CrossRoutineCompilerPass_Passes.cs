@@ -516,16 +516,19 @@ public partial class CrossRoutineCompilerPass
 
             case MTOpcode.i2b:
                 _il.Emit(OpCodes.Conv_I1);
+                _il.Emit(OpCodes.Conv_I4);
                 EmitMathRepush();
                 break;
 
             case MTOpcode.i2c:
                 _il.Emit(OpCodes.Conv_U2);
+                _il.Emit(OpCodes.Conv_I4);
                 EmitMathRepush();
                 break;
 
             case MTOpcode.i2s:
                 _il.Emit(OpCodes.Conv_I2);
+                _il.Emit(OpCodes.Conv_I4);
                 EmitMathRepush();
                 break;
 
