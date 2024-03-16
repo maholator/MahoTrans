@@ -247,7 +247,7 @@ public partial class JvmState
 #endif
     }
 
-    public T Resolve<T>(Reference r) where T : Object
+    public T Resolve<T>(Reference r) where T : class, IJavaObject
     {
         if (r.IsNull)
             Throw<NullPointerException>();
@@ -267,7 +267,7 @@ public partial class JvmState
 #endif
     }
 
-    public T? ResolveOrNull<T>(Reference r) where T : Object
+    public T? ResolveOrNull<T>(Reference r) where T : class, IJavaObject
     {
         if (r.IsNull)
             return null;

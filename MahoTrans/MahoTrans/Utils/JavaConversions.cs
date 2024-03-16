@@ -1,12 +1,9 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Reflection;
 using System.Text;
 using java.io;
-using MahoTrans.Native;
 using MahoTrans.Runtime;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Utils;
 
@@ -163,8 +160,7 @@ public static class JavaConversions
         return jvm.WrapReferenceArray(r, "[Ljava/lang/String;");
     }
 
-    public static bool IsJavaType(this Type t) =>
-        t.IsAssignableTo(typeof(Object)) || t.GetCustomAttribute<JavaInterfaceAttribute>() != null;
+    public static bool IsJavaType(this Type t) => t.IsAssignableTo(typeof(IJavaObject));
 
     public static int Combine(this byte[] args, int offset = 0)
     {

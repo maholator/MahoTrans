@@ -1,12 +1,11 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Native;
+using MahoTrans;
 
 namespace com.nokia.mid.ui;
 
-[JavaInterface]
-public interface DirectGraphics
+public interface DirectGraphics : IJavaObject
 {
     public const int FLIP_HORIZONTAL = 8192;
     public const int FLIP_VERTICAL = 16384;

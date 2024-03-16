@@ -1,12 +1,11 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Native;
+using MahoTrans;
 
 namespace javax.microedition.media;
 
-[JavaInterface]
-public interface PlayerListener
+public interface PlayerListener : IJavaObject
 {
     public const string CLOSED = "closed";
     public const string DEVICE_AVAILABLE = "deviceAvailable";

@@ -7,7 +7,6 @@ using String = java.lang.String;
 
 namespace javax.microedition.media;
 
-[JavaInterface]
 public interface Player : Controllable
 {
     public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference listener) => throw new AbstractCall();

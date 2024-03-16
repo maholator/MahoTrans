@@ -115,7 +115,7 @@ public static class NativeLinker
             var ii = i.FullName!.Replace('.', '/');
             if (javaInterfaces.Contains(ii))
                 continue;
-            if (i.GetCustomAttribute<JavaInterfaceAttribute>() != null)
+            if (i.IsJavaType())
                 javaInterfaces.Add(ii);
         }
 

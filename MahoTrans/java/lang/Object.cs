@@ -18,7 +18,7 @@ namespace java.lang;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers | ImplicitUseTargetFlags.WithInheritors)]
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-public class Object
+public class Object : IJavaObject
 {
     #region Object properties
 

@@ -261,6 +261,14 @@ public static class DebuggerUtils
             case MTOpcode.bridge_init:
                 return instruction.IntData;
 
+            case MTOpcode.set_static:
+            case MTOpcode.set_static_init:
+                return 1;
+
+            case MTOpcode.get_static:
+            case MTOpcode.get_static_init:
+                return 0;
+
             default:
                 throw new ArgumentException($"Opcode {instruction.Opcode} is not supported.");
         }
@@ -308,7 +316,7 @@ public static class DebuggerUtils
     /// <param name="jvm">JVM.</param>
     /// <returns>Opcode and additional info for it.</returns>
     public static string PrettyPrintInstruction(JavaMethodBody method, int index,
-        JvmState jvm)
+                                                JvmState jvm)
     {
         var consts = method.Method.Class.Constants;
         var rawOpcode = method.Code[index].Opcode;

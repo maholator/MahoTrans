@@ -25,7 +25,7 @@ public static class ReferenceExtensions
     ///     Calls <see cref="JvmState.Resolve{T}" />.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static T As<T>(this Reference r) where T : Object
+    public static T As<T>(this Reference r) where T : class, IJavaObject
     {
         return JvmContext.Jvm!.Resolve<T>(r);
     }
@@ -34,7 +34,7 @@ public static class ReferenceExtensions
     ///     Calls <see cref="JvmState.ResolveOrNull{T}" />.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static T? AsOrNull<T>(this Reference r) where T : Object
+    public static T? AsOrNull<T>(this Reference r) where T : class, IJavaObject
     {
         return JvmContext.Jvm!.ResolveOrNull<T>(r);
     }
