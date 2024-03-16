@@ -7,20 +7,22 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class List : Screen, Choice
+public class List : Screen, Choice, INativeChoice
 {
-    [JavaIgnore]
-    public List<ChoiceItem> Items = new();
+    public List<ChoiceItem> Items { get; } = new();
 
-    public ChoiceType Type;
+    public ChoiceType Type { get; set; }
+
+    public int FitPolicy { get; set; }
+
+    public int SelectedIndex { get; set; }
+
+    public List<bool> SelectedIndexes { get; } = new();
+
+    void INativeChoice.Invalidate() => Toolkit.Display.ContentUpdated(Handle);
 
     [JavaIgnore]
     public Reference ImplicitSelectCommand;
-
-    public int SelectedItem;
-
-    [JavaIgnore]
-    public List<bool> SelectedMap = new();
 
     [ClassInit]
     public static void ClInit()
@@ -44,78 +46,56 @@ public class List : Screen, Choice
     }
 
     [InitMethod]
-    public void Init([String] Reference title, int listType, [JavaType("[Ljava/lang/String;")] Reference stringElements,
-        [JavaType("[Ljavax/microedition/lcdui/Image;")]
-        Reference imageElements)
+    public void Init([String] Reference title, int listType, [String] Reference[] stringElements,
+        [JavaType(typeof(Image))] Reference[]? imageElements)
     {
         Init(title, listType);
-
-        var strings = Jvm.ResolveArray<Reference>(stringElements);
-        if (imageElements.IsNull)
-        {
-            foreach (var str in strings)
-            {
-                if (str.IsNull)
-                    Jvm.Throw<NullPointerException>();
-                Items.Add(new ChoiceItem(str, Reference.Null));
-                SelectedMap.Add(false);
-            }
-
-            return;
-        }
-
-        var images = Jvm.ResolveArray<Reference>(imageElements);
-        if (images.Length != strings.Length)
-            Jvm.Throw<IllegalArgumentException>();
-
-        for (var i = 0; i < strings.Length; i++)
-        {
-            var str = strings[i];
-            if (str.IsNull)
-                Jvm.Throw<NullPointerException>();
-            Items.Add(new ChoiceItem(str, images[i]));
-            SelectedMap.Add(false);
-        }
+        this.Initialize(stringElements, imageElements);
     }
 
-    public int append([String] Reference stringPart, [JavaType(typeof(Image))] Reference imagePart)
-    {
-        if (stringPart.IsNull)
-            Jvm.Throw<NullPointerException>();
-        var index = Items.Count;
-        Items.Add(new ChoiceItem(stringPart, imagePart));
-        SelectedMap.Add(false);
-        Toolkit.Display.ContentUpdated(Handle);
-        return index;
-    }
+    public int getSelectedIndex() => this.GetSelected();
 
-    public void delete(int elementNum)
-    {
-        if (elementNum < 0 || elementNum >= Items.Count)
-            Jvm.Throw<IndexOutOfBoundsException>();
-        Items.RemoveAt(elementNum);
-        SelectedMap.RemoveAt(elementNum);
-        Toolkit.Display.ContentUpdated(Handle);
-    }
+    public void setSelectedIndex(int index, bool state) => this.SetSelected(index, state);
 
-    public void deleteAll()
-    {
-        Items.Clear();
-        SelectedMap.Clear();
-        Toolkit.Display.ContentUpdated(Handle);
-    }
+    public int getSelectedFlags(bool[] flags) => this.GetSelectedFlags(flags);
 
-    public void set(int elementNum, [String] Reference stringPart, [JavaType(typeof(Image))] Reference imagePart)
-    {
-        if (elementNum < 0 || elementNum >= Items.Count)
-            Jvm.Throw<IndexOutOfBoundsException>();
-        if (stringPart.IsNull)
-            Jvm.Throw<NullPointerException>();
-        Items[elementNum] = new ChoiceItem(stringPart, imagePart);
-        Toolkit.Display.ContentUpdated(Handle);
-    }
+    public void setSelectedFlags(bool[] flags) => this.SetSelectedFlags(flags);
 
     public int size() => Items.Count;
+
+    [return: JavaType(typeof(Image))]
+    public Reference getImage(int index) => Items[index].Image;
+
+    [return: String]
+    public Reference getString(int index) => Items[index].Text;
+
+    [return: JavaType(typeof(Font))]
+    public Reference getFont(int index) => Items[index].Font;
+
+    public void set(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.SetItem(index, text, image);
+
+    public void setFont(int index, [JavaType(typeof(Font))] Reference font)
+    {
+        Items[index].Font = font;
+        Toolkit.Display.ContentUpdated(Handle);
+    }
+
+    public bool isSelected(int index) => this.GetItemState(index);
+
+    public int getFitPolicy() => FitPolicy;
+
+    public void setFitPolicy(int policy) => this.SetFitPolicy(policy);
+
+    public void deleteAll() => this.Clear();
+
+    public void delete(int index) => this.RemoveAt(index);
+
+    public void insert(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Insert(index, text, image);
+
+    public int append([String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Add(text, image);
 
     public new void addCommand([JavaType(typeof(Command))] Reference cmd)
     {
@@ -150,91 +130,6 @@ public class List : Screen, Choice
         Commands.Remove(cmd);
 
         Toolkit.Display.CommandsUpdated(Handle, Commands, ImplicitSelectCommand);
-    }
-
-    public int getSelectedIndex()
-    {
-        if (Type == ChoiceType.Multiple)
-            return -1;
-
-        return SelectedItem;
-    }
-
-    public void setSelectedIndex(int index, bool state)
-    {
-        if (Type == ChoiceType.Multiple)
-        {
-            SelectedMap[index] = state;
-            Toolkit.Display.ContentUpdated(Handle);
-            return;
-        }
-
-        if (state)
-        {
-            SelectedItem = index;
-            Toolkit.Display.ContentUpdated(Handle);
-        }
-    }
-
-    [JavaIgnore]
-    public void SetSelectedFlags(bool[] selectedArray)
-    {
-        var count = SelectedMap.Count;
-        if (selectedArray.Length < count)
-            Jvm.Throw<IllegalArgumentException>();
-
-        if (Type == ChoiceType.Multiple)
-        {
-            SelectedMap.Clear();
-            SelectedMap.AddRange(selectedArray.Take(count));
-        }
-        else
-        {
-            SelectedItem = 0;
-            for (int i = 0; i < Items.Count; i++)
-            {
-                if (selectedArray[i])
-                {
-                    SelectedItem = i;
-                    break;
-                }
-            }
-        }
-
-        Toolkit.Display.ContentUpdated(Handle);
-    }
-
-    public void setSelectedFlags([JavaType("[Z")] Reference flags)
-    {
-        SetSelectedFlags(Jvm.ResolveArray<bool>(flags));
-    }
-
-    public int getSelectedFlags([JavaType("[Z")] Reference flags)
-    {
-        var arr = Jvm.ResolveArray<bool>(flags);
-        if (arr.Length < Items.Count)
-            Jvm.Throw<IllegalArgumentException>();
-        if (Type == ChoiceType.Multiple)
-        {
-            var count = 0;
-            for (var i = 0; i < Items.Count; i++)
-            {
-                arr[i] = SelectedMap[i];
-                if (SelectedMap[i])
-                    count++;
-            }
-
-            return count;
-        }
-
-        for (var i = 0; i < arr.Length; i++)
-        {
-            arr[i] = false;
-        }
-
-        arr[SelectedItem] = true;
-
-        return 1;
     }
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
