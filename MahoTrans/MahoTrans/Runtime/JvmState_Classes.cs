@@ -60,8 +60,6 @@ public partial class JvmState
             {
                 _classes.Add(cls.Name, cls);
             }
-
-            refreshState(classesToLoad);
         }
     }
 
@@ -78,41 +76,8 @@ public partial class JvmState
                 cls.Flags |= ClassFlags.Public;
                 _classes.Add(cls.Name, cls);
             }
-
-            refreshState(classes);
         }
     }
-
-    /// <summary>
-    ///     Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
-    /// </summary>
-    /// <param name="new">Newly added classes.</param>
-    private void refreshState(IEnumerable<JavaClass> @new)
-    {
-        foreach (var cls in @new)
-        {
-            // clr -> jvm map
-            _classesByType[cls.ClrType!] = cls;
-
-            // supers
-            if (!cls.IsObject)
-                cls.Super = _classes[cls.SuperName];
-        }
-
-        foreach (var @class in _classes.Values)
-        {
-            @class.GenerateVirtualTable(this);
-            @class.RecalculateSize();
-        }
-
-        if (StaticFields.Length < StaticFieldsOwners.Count)
-        {
-            var newStack = new long[StaticFieldsOwners.Count];
-            Array.Copy(StaticFields, newStack, StaticFields.Length);
-            StaticFields = newStack;
-        }
-    }
-
     public void AddClrClasses(Assembly assembly)
     {
         var all = assembly.GetTypes();
@@ -134,11 +99,38 @@ public partial class JvmState
         if (_locked)
             throw new InvalidOperationException("JVM is already locked.");
 
+        foreach (var cls in LoadedClasses)
+        {
+            // supers
+            if (!cls.IsObject)
+                cls.Super = _classes[cls.SuperName];
+
+            // clr -> jvm map
+            _classesByType[cls.ClrType!] = cls;
+        }
+
+
+        foreach (var cls in LoadedClasses)
+        {
+            // virts
+            cls.GenerateVirtualTable(this);
+
+            // sizes
+            cls.RecalculateSize();
+        }
+
+        if (StaticFields.Length < StaticFieldsOwners.Count)
+        {
+            var newStack = new long[StaticFieldsOwners.Count];
+            Array.Copy(StaticFields, newStack, StaticFields.Length);
+            StaticFields = newStack;
+        }
+
         using (new JvmContext(this))
         {
             _finalClasses = getFinalClasses();
 
-            var classes = _classes.Values.ToList();
+            var classes = LoadedClasses.ToList();
             for (var i = 0; i < classes.Count; i++)
             {
                 var cls = classes[i];
@@ -161,6 +153,8 @@ public partial class JvmState
 
         foreach (var cls in _classes.Values)
         {
+            cls.VirtualTable = null;
+            cls.VirtualTableMap = null;
             foreach (var m in cls.Methods.Values)
             {
                 m.JavaBody?.Clear();
