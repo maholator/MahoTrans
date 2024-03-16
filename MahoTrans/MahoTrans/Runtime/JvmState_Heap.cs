@@ -249,9 +249,9 @@ public partial class JvmState
 
     public T Resolve<T>(Reference r) where T : class, IJavaObject
     {
-        if (r.IsNull)
-            Throw<NullPointerException>();
 #if DEBUG
+        if (r.IsNull)
+            Throw<NullPointerException>($"Attempt to resolve null reference to {typeof(T)}");
         if (r.Index >= _heap.Length)
             throw new JavaRuntimeError($"Reference {r.Index} is out of bounds ({_heap.Length})");
         var obj = _heap[r.Index];
@@ -263,6 +263,8 @@ public partial class JvmState
 
         throw new JavaRuntimeError($"Reference {r.Index} pointers to {obj.GetType()} object, {typeof(T)} expected.");
 #else
+        if (r.IsNull)
+            Throw<NullPointerException>();
         return Unsafe.As<T>(_heap[r.Index]!);
 #endif
     }
