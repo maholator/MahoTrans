@@ -56,6 +56,11 @@ public class Item : Object
         NotifyToolkit();
     }
 
+    public void notifyStateChanged()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Call this if you change anything on the item.
     /// </summary>
