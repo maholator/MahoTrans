@@ -203,6 +203,11 @@ public static class CompilerUtils
     /// </summary>
     public static readonly MethodInfo GetAddressSafely = RefExt.GetMethod(nameof(ReferenceExtensions.GetAddrSafely))!;
 
+    /// <summary>
+    ///     <see cref="ReferenceExtensions.Wrap{T}" />
+    /// </summary>
+    public static readonly MethodInfo WrapArray = RefExt.GetMethod(nameof(ReferenceExtensions.Wrap))!;
+
     public static bool IsNullable(ParameterInfo param)
     {
         return _nullability.Create(param).WriteState == NullabilityState.Nullable;

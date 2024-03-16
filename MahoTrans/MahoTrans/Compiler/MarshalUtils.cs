@@ -50,12 +50,12 @@ public static class MarshalUtils
             return GetMarshallerFromRef(to, toNullable);
 
         if (to == typeof(Reference))
-            return GetMarshallerToRef(from, fromNullable);
+            return GetMarshallerToRef(from);
 
         throw new NotSupportedException($"{from} can't be marshaled to {to}.");
     }
 
-    public static MethodInfo GetMarshallerFromRef(Type to, bool toNullable)
+    private static MethodInfo GetMarshallerFromRef(Type to, bool toNullable)
     {
         if (to.IsJavaType())
         {
@@ -75,10 +75,16 @@ public static class MarshalUtils
         throw new NotSupportedException($"Can't marshal Reference to {to}.");
     }
 
-    private static MethodInfo GetMarshallerToRef(Type from, bool fromNullable)
+    private static MethodInfo GetMarshallerToRef(Type from)
     {
         if (from.IsJavaType())
             return GetAddressSafely;
+
+        if (from == typeof(Reference[]))
+            throw new NotSupportedException($"Can't implicitly marshal Reference[] to Reference.");
+
+        if (from.IsArray && StackReversePopMethods.ContainsKey(from.GetElementType()!))
+            return WrapArray;
 
         throw new NotSupportedException($"Can't marshal {from} to Reference.");
     }

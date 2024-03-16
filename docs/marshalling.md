@@ -33,7 +33,19 @@ Type checks are done from first line to last line.
 | Ref[]?       | Ref is popped from stack. Ref safely resolved as array.                  |
 | Object       | Ref is popped from stack. Ref resolved. NPE may be thrown.               |
 | Object?      | Ref is popped from stack. Ref safely resolved.                           |
+| Interface    | Ref is popped from stack. Ref resolved. NPE may be thrown.               |
+| Interface?   | Ref is popped from stack. Ref safely resolved.                           |
 | `enum`       | Enum underlying type is popped from stack as primitive.                  |
+
+## Method return
+
+| Type        | Action                               |
+|-------------|--------------------------------------|
+| Primitive   | Primitive converted by stack.        |
+| Ref         | No action.                           |
+| Object      | Address is taken as `Ref`.           |
+| Interface   | Address is taken as `Ref`.           |
+| Primitive[] | Array is wrapped and taken as `Ref`. |
 
 ## `JavaType` attributes
 

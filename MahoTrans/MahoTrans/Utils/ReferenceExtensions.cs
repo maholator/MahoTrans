@@ -59,5 +59,8 @@ public static class ReferenceExtensions
         return obj.This;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static Reference Wrap<T>(T[] array) where T : struct => JvmContext.Jvm!.WrapPrimitiveArray(array);
+
     public static void Throw(this Reference exception) => JvmContext.Jvm!.Throw(exception);
 }
