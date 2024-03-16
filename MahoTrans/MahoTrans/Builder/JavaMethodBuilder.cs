@@ -172,6 +172,12 @@ public class JavaMethodBuilder
         Append(new Instruction(JavaOpcode.newobject, c));
     }
 
+    public void AppendNewObject(string className)
+    {
+        var c = _class.PushConstant(className).Split();
+        Append(new Instruction(JavaOpcode.newobject, c));
+    }
+
     public void AppendInt(int i)
     {
         var c = _class.PushConstant(i).Split();
