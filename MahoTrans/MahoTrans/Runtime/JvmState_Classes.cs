@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
+using MahoTrans.ClassLibs;
 using MahoTrans.Compiler;
 using MahoTrans.Loader;
 using MahoTrans.Native;
@@ -78,6 +79,7 @@ public partial class JvmState
             }
         }
     }
+
     public void AddClrClasses(Assembly assembly)
     {
         var all = assembly.GetTypes();
@@ -88,7 +90,17 @@ public partial class JvmState
     /// <summary>
     ///     Imports MT assembly to this JVM.
     /// </summary>
-    public void AddMahoTransLibrary() => AddClrClasses(typeof(JvmState).Assembly);
+    public void AddMahoTransLibrary()
+    {
+        AddClrClasses(typeof(JvmState).Assembly);
+        var aux = ClassLibsLoader.GetClasses();
+        var loader = new ClassLoader(Toolkit.LoadLogger);
+        AddJvmClasses(aux.Select(x => loader.ReadClassFile(x)).ToArray(), "MTAuxClasses");
+        foreach (var stream in aux)
+        {
+            stream.Dispose();
+        }
+    }
 
     /// <summary>
     ///     Links classes and locks this JVM.

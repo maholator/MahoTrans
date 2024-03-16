@@ -4,6 +4,7 @@
 using java.lang;
 using java.util;
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -121,9 +122,33 @@ public class RecordStore : Object
             Jvm.Throw<RecordStoreNotFoundException>();
     }
 
-    public void enumerateRecords()
+    [JavaDescriptor(
+        "(Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)Ljavax/microedition/rms/RecordEnumeration;")]
+    public JavaMethodBody enumerateRecords(JavaClass cls)
     {
-        throw new NotImplementedException();
+        //TODO issues with enum:
+        // 1: this *does not* sync with record store calls. Because they are native and there is no "critical bridges" yet.
+        // 2: this internally attaches to listeners but never removed from them.
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject("javax/microedition/rms/RecordEnumerationImpl");
+        b.AppendDup();
+        b.AppendThis();
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.aload_2);
+        b.Append(JavaOpcode.iload_3);
+        b.AppendVirtcall("<init>",
+            "(Ljavax/microedition/rms/RecordStore;Ljava/lang/Object;Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)V");
+        b.AppendReturnReference();
+        return b.Build(7, 4);
+    }
+
+    [return: JavaType("[I")]
+    public Reference getRecordIds()
+    {
+        CheckNotClosed();
+        var arr = Toolkit.RecordStore.GetAllRecordIds(Jvm.ResolveString(StoreName));
+        return Jvm.WrapPrimitiveArray(arr);
     }
 
     public long getLastModified()
@@ -256,17 +281,8 @@ public class RecordStore : Object
     {
         if (Listeners.IsNull)
             return;
-        var vector = Jvm.Resolve<Vector>(listener);
+        var vector = Jvm.Resolve<Vector>(Listeners);
         vector.removeElement(listener);
-    }
-
-    [JavaDescriptor(
-        "(Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)Ljavax/microedition/rms/RecordEnumeration;")]
-    public Reference enumerateRecords(Reference filter, Reference comp, bool z)
-    {
-        //TODO
-        Jvm.Throw<RecordStoreNotOpenException>();
-        return Reference.Null;
     }
 
     public void setMode(int authmode, bool writeable)
