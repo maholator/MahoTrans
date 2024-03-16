@@ -73,6 +73,10 @@ public class ChoiceGroup : Item, Choice, INativeChoice
 
     public void setFitPolicy(int policy) => this.SetFitPolicy(policy);
 
+    public void deleteAll() => this.Clear();
+
+    public void delete(int index) => this.RemoveAt(index);
+
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         foreach (var item in Items)

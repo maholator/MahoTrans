@@ -155,5 +155,22 @@ public static class ChoiceImpl
         choice.Invalidate();
     }
 
+    public static void Clear(this INativeChoice choice)
+    {
+        choice.SelectedIndex = 0;
+        choice.SelectedIndexes.Clear();
+        choice.Items.Clear();
+        choice.Invalidate();
+    }
+
+    public static void RemoveAt(this INativeChoice choice, int index)
+    {
+        choice.Items.RemoveAt(index);
+        choice.SelectedIndexes.RemoveAt(index);
+        if (choice.SelectedIndex >= index)
+            choice.SelectedIndex--;
+        choice.Invalidate();
+    }
+
     private static JvmState Jvm => JvmContext.Jvm!;
 }
