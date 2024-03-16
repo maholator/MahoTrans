@@ -129,5 +129,15 @@ public static class ChoiceImpl
         choice.Invalidate();
     }
 
+    public static void SetItem(this INativeChoice choice, int index, Reference text, Reference image)
+    {
+        if (text.IsNull)
+            Jvm.Throw<NullPointerException>();
+
+        choice.Items[index].Text = text;
+        choice.Items[index].Image = image;
+        choice.Invalidate();
+    }
+
     private static JvmState Jvm => JvmContext.Jvm!;
 }

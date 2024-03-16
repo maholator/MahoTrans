@@ -53,6 +53,18 @@ public class ChoiceGroup : Item, Choice, INativeChoice
     [return: String]
     public Reference getString(int index) => Items[index].Text;
 
+    [return: JavaType(typeof(Font))]
+    public Reference getFont(int index) => Items[index].Font;
+
+    public void set(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.SetItem(index, text, image);
+
+    public void setFont(int index, [JavaType(typeof(Font))] Reference font)
+    {
+        Items[index].Font = font;
+        NotifyToolkit();
+    }
+
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         foreach (var item in Items)
