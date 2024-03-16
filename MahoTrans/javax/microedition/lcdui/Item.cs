@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -16,6 +17,11 @@ public class Item : Object
     [String]
     public Reference Label;
 
+    [JavaIgnore]
+    public int Layout;
+
+    public int PrefW, PrefH;
+
     [return: String]
     public Reference getLabel() => Label;
 
@@ -25,12 +31,42 @@ public class Item : Object
         NotifyToolkit();
     }
 
+    public int getLayout() => Layout;
+
+    public void setLayout(int layout)
+    {
+        Layout = layout;
+        NotifyToolkit();
+    }
+
+    public int getPreferredWidth() => PrefW;
+
+    public int getPreferredHeight() => PrefH;
+
+    public void setPreferredSize(int width, int height)
+    {
+        if (width < -1)
+            Jvm.Throw<IllegalArgumentException>();
+
+        if (height < -1)
+            Jvm.Throw<IllegalArgumentException>();
+
+        PrefW = width;
+        PrefH = height;
+        NotifyToolkit();
+    }
+
+    /// <summary>
+    /// Call this if you change anything on the item.
+    /// </summary>
     [JavaIgnore]
     protected void NotifyToolkit()
     {
-        if (Owner != default) Toolkit.Display.ItemUpdated(Owner, This);
+        if (Owner != default)
+            Toolkit.Display.ItemUpdated(Owner, This);
     }
 
+    public const int PLAIN = 0;
     public const int BUTTON = 2;
     public const int HYPERLINK = 1;
     public const int LAYOUT_2 = 16384;
@@ -47,5 +83,4 @@ public class Item : Object
     public const int LAYOUT_VCENTER = 48;
     public const int LAYOUT_VEXPAND = 8192;
     public const int LAYOUT_VSHRINK = 4096;
-    public const int PLAIN = 0;
 }
