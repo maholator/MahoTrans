@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MahoTrans.Abstractions", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MahoTrans.Benchmarks", "MahoTrans.Benchmarks\MahoTrans.Benchmarks.csproj", "{6980379B-4F1B-44F0-8A31-8EE0C5B67477}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcodesTest", "OpcodesTest\OpcodesTest.csproj", "{9E28777A-0457-416E-8EC1-BF833F8C0D99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{6980379B-4F1B-44F0-8A31-8EE0C5B67477}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6980379B-4F1B-44F0-8A31-8EE0C5B67477}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6980379B-4F1B-44F0-8A31-8EE0C5B67477}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E28777A-0457-416E-8EC1-BF833F8C0D99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E28777A-0457-416E-8EC1-BF833F8C0D99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E28777A-0457-416E-8EC1-BF833F8C0D99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E28777A-0457-416E-8EC1-BF833F8C0D99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
