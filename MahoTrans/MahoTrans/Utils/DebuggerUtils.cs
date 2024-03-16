@@ -318,13 +318,17 @@ public static class DebuggerUtils
         switch (rawOpcode)
         {
             case JavaOpcode.bipush:
-                return $"{rawOpcode} ({(sbyte)args[0]})";
+                return $"{rawOpcode} {(sbyte)args[0]}";
+
             case JavaOpcode.sipush:
-                return $"{rawOpcode} ({args.Combine()})";
+                return $"{rawOpcode} {args.Combine()}";
+
             case JavaOpcode.ldc:
+                return $"{rawOpcode} {consts[args[0]]}";
+
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
-                return $"{rawOpcode} ({consts[args.Combine()]})";
+                return $"{rawOpcode} {consts[args.Combine()]}";
 
             case JavaOpcode.iload:
             case JavaOpcode.lload:
@@ -355,7 +359,7 @@ public static class DebuggerUtils
             case JavaOpcode.@goto:
             case JavaOpcode.ifnull:
             case JavaOpcode.ifnonnull:
-                return $"{rawOpcode} ({linked.IntData})";
+                return $"{rawOpcode} (to {linked.IntData})";
 
             case JavaOpcode.putfield:
             case JavaOpcode.getfield:
