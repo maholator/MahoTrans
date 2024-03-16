@@ -2,14 +2,13 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
-using MahoTrans.Runtime;
 using String = java.lang.String;
 
 namespace javax.microedition.media;
 
 public interface Player : Controllable
 {
-    public void addPlayerListener([JavaType(typeof(PlayerListener))] Reference listener) => throw new AbstractCall();
+    public void addPlayerListener(PlayerListener listener) => throw new AbstractCall();
 
     public void close() => throw new AbstractCall();
 
@@ -27,7 +26,7 @@ public interface Player : Controllable
 
     public void realize() => throw new AbstractCall();
 
-    public void removePlayerListener([JavaType(typeof(PlayerListener))] Reference listener) => throw new AbstractCall();
+    public void removePlayerListener(PlayerListener listener) => throw new AbstractCall();
 
     public void setLoopCount(int count) => throw new AbstractCall();
 
