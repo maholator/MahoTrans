@@ -11,6 +11,8 @@ namespace javax.microedition.lcdui;
 
 public class Item : Object
 {
+    #region State
+
     [JavaIgnore]
     public DisplayableHandle Owner;
 
@@ -21,6 +23,11 @@ public class Item : Object
     public int Layout;
 
     public int PrefW, PrefH;
+
+    [JavaType(typeof(ItemCommandListener))]
+    public Reference Listener;
+
+    #endregion
 
     [return: String]
     public Reference getLabel() => Label;
@@ -61,8 +68,13 @@ public class Item : Object
         throw new NotImplementedException();
     }
 
+    public void setItemCommandListener([JavaType(typeof(ItemCommandListener))] Reference l)
+    {
+        Listener = l;
+    }
+
     /// <summary>
-    /// Call this if you change anything on the item.
+    ///     Call this if you change anything on the item.
     /// </summary>
     [JavaIgnore]
     protected void NotifyToolkit()
