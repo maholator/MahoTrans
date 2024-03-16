@@ -46,6 +46,10 @@ public class Item : Object
         NotifyToolkit();
     }
 
+    public int getMinimumWidth() => throw new NotImplementedException();
+
+    public int getMinimumHeight() => throw new NotImplementedException();
+
     public int getPreferredWidth() => PrefW;
 
     public int getPreferredHeight() => PrefH;
