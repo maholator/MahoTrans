@@ -13,6 +13,8 @@ public interface INativeChoice
     /// </summary>
     ChoiceType Type { get; }
 
+    int FitPolicy { get; set; }
+
     /// <summary>
     ///     Selected indexes. Used if list is not <see cref="ChoiceType.Multiple"/>.
     /// </summary>

@@ -13,6 +13,8 @@ public class ChoiceGroup : Item, Choice, INativeChoice
 
     public ChoiceType Type { get; set; }
 
+    public int FitPolicy { get; set; }
+
     public int SelectedIndex { get; set; }
 
     public List<bool> SelectedIndexes { get; } = new();
@@ -64,6 +66,12 @@ public class ChoiceGroup : Item, Choice, INativeChoice
         Items[index].Font = font;
         NotifyToolkit();
     }
+
+    public bool isSelected(int index) => this.GetItemState(index);
+
+    public int getFitPolicy() => FitPolicy;
+
+    public void setFitPolicy(int policy) => this.SetFitPolicy(policy);
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {

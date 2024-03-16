@@ -139,5 +139,21 @@ public static class ChoiceImpl
         choice.Invalidate();
     }
 
+    public static bool GetItemState(this INativeChoice choice, int index)
+    {
+        if (choice.Type == ChoiceType.Multiple)
+            return choice.SelectedIndexes[index];
+
+        return choice.SelectedIndex == index;
+    }
+
+    public static void SetFitPolicy(this INativeChoice choice, int policy)
+    {
+        if (policy < 0 || policy > 2)
+            Jvm.Throw<IllegalArgumentException>();
+        choice.FitPolicy = policy;
+        choice.Invalidate();
+    }
+
     private static JvmState Jvm => JvmContext.Jvm!;
 }
