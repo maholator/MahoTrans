@@ -22,6 +22,7 @@ public class StringItem : Item
     {
         Label = label;
         Text = text;
+        Appearance = PLAIN;
     }
 
     [InitMethod]
@@ -30,7 +31,7 @@ public class StringItem : Item
         base.Init();
         Label = label;
         Text = text;
-        if (appearanceMode < 0 || appearanceMode > 2)
+        if (appearanceMode < PLAIN || appearanceMode > BUTTON)
             Jvm.Throw<IllegalArgumentException>();
         Appearance = appearanceMode;
     }
