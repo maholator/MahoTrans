@@ -245,21 +245,24 @@ public class List : Screen, Choice
         base.AnnounceHiddenReferences(queue);
     }
 
-    public struct ListItem
+    public class ListItem
     {
         public Reference Text;
         public Reference Image;
+        public Reference Font;
 
         public ListItem(Reference text, Reference image)
         {
             Text = text;
             Image = image;
+            Font = Reference.Null;
         }
 
         public void AnnounceHiddenReferences(Queue<Reference> queue)
         {
             queue.Enqueue(Text);
             queue.Enqueue(Image);
+            queue.Enqueue(Font);
         }
     }
 }
