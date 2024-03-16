@@ -19,20 +19,6 @@ public class List : Screen, Choice
 
     public int SelectedItem;
 
-    int Choice.SelectedIndex
-    {
-        get => SelectedItem;
-        set => SelectedItem = value;
-    }
-
-    bool[] Choice.SelectedIndixes
-    {
-        get => SelectedMap.ToArray();
-        set => SelectedMap = value.ToList();
-    }
-
-    int Choice.ItemsCount => Items.Count;
-
     [JavaIgnore]
     public List<bool> SelectedMap = new();
 

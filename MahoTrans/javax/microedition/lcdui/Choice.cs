@@ -7,7 +7,4 @@ namespace javax.microedition.lcdui;
 
 public interface Choice : IJavaObject
 {
-    int SelectedIndex { get; set; }
-    bool[] SelectedIndixes { get; set; }
-    int ItemsCount { get; }
 }
