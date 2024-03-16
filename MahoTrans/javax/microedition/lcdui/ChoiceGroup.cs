@@ -19,6 +19,8 @@ public class ChoiceGroup : Item, Choice
     [JavaIgnore]
     public List<bool> SelectedMap = new();
 
+    #region Impls for frontend
+
     int Choice.SelectedIndex
     {
         get => SelectedItem;
@@ -33,6 +35,8 @@ public class ChoiceGroup : Item, Choice
 
     int Choice.ItemsCount => Items.Count;
 
+    #endregion
+
     [InitMethod]
     public void Init([String] Reference label, int listType)
     {
@@ -44,16 +48,14 @@ public class ChoiceGroup : Item, Choice
     }
 
     [InitMethod]
-    public void Init([String] Reference title, int listType, [JavaType("[Ljava/lang/String;")] Reference stringElements,
-        [JavaType("[Ljavax/microedition/lcdui/Image;")]
-        Reference imageElements)
+    public void Init([String] Reference label, int listType, [String] Reference[] stringElements,
+        [JavaType(typeof(Image))] Reference[]? imageElements)
     {
-        Init(title, listType);
+        Init(label, listType);
 
-        var strings = Jvm.ResolveArray<Reference>(stringElements);
-        if (imageElements.IsNull)
+        if (imageElements == null)
         {
-            foreach (var str in strings)
+            foreach (var str in stringElements)
             {
                 if (str.IsNull)
                     Jvm.Throw<NullPointerException>();
@@ -64,16 +66,15 @@ public class ChoiceGroup : Item, Choice
             return;
         }
 
-        var images = Jvm.ResolveArray<Reference>(imageElements);
-        if (images.Length != strings.Length)
+        if (imageElements.Length != stringElements.Length)
             Jvm.Throw<IllegalArgumentException>();
 
-        for (var i = 0; i < strings.Length; i++)
+        for (var i = 0; i < stringElements.Length; i++)
         {
-            var str = strings[i];
+            var str = stringElements[i];
             if (str.IsNull)
                 Jvm.Throw<NullPointerException>();
-            Items.Add(new List.ListItem(str, images[i]));
+            Items.Add(new List.ListItem(str, imageElements[i]));
             SelectedMap.Add(false);
         }
     }
