@@ -134,6 +134,18 @@ public sealed class VirtualRms : ISnapshotableRecordStore
         return _storage[name].Count(x => x != null);
     }
 
+    public int[] GetAllRecordIds(string name)
+    {
+        List<int> ids = new();
+        for (int i = 0; i < _storage[name].Count; i++)
+        {
+            if (_storage[name][i] != null)
+                ids.Add(i + 1);
+        }
+
+        return ids.ToArray();
+    }
+
     public VirtualRms TakeSnapshot()
     {
         var dict = new SortedDictionary<string, List<byte[]?>>();

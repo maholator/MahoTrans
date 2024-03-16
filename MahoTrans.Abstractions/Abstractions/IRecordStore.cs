@@ -89,4 +89,6 @@ public interface IRecordStore : IToolkit
     int GetNextId(string name);
 
     int GetCount(string name);
+
+    int[] GetAllRecordIds(string name);
 }
