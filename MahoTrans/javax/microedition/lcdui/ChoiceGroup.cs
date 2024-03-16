@@ -87,6 +87,51 @@ public class ChoiceGroup : Item, Choice
         return SelectedItem;
     }
 
+    public void setSelectedIndex(int index, bool state)
+    {
+        if (Type == ChoiceType.Multiple)
+        {
+            SelectedMap[index] = state;
+            NotifyToolkit();
+            return;
+        }
+
+        if (state)
+        {
+            SelectedItem = index;
+            NotifyToolkit();
+        }
+    }
+
+    public void setSelectedFlags(bool[] flags)
+    {
+        var count = SelectedMap.Count;
+        if (flags.Length < count)
+            Jvm.Throw<IllegalArgumentException>();
+
+        if (Type == ChoiceType.Multiple)
+        {
+            SelectedMap.Clear();
+            SelectedMap.AddRange(flags.Take(count));
+        }
+        else
+        {
+            SelectedItem = 0;
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if (flags[i])
+                {
+                    SelectedItem = i;
+                    break;
+                }
+            }
+        }
+
+        NotifyToolkit();
+    }
+
+    public int size() => Items.Count;
+
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         foreach (var item in Items)
