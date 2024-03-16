@@ -21,7 +21,7 @@ public interface INativeChoice
     /// <summary>
     ///     Selected indexes. Used only in <see cref="ChoiceType.Multiple"/>.
     /// </summary>
-    List<bool> SelectedIndixes { get; }
+    List<bool> SelectedIndexes { get; }
 
     List<List.ListItem> Items { get; }
 
@@ -29,4 +29,6 @@ public interface INativeChoice
     ///     Count of elements in the choice.
     /// </summary>
     int ItemsCount => Items.Count;
+
+    void Invalidate();
 }

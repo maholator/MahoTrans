@@ -7,22 +7,17 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class ChoiceGroup : Item, Choice
+public class ChoiceGroup : Item, Choice, INativeChoice
 {
-    [JavaIgnore]
-    public List<List.ListItem> Items = new();
+    public List<List.ListItem> Items { get; } = new();
 
-    public ChoiceType Type;
+    public ChoiceType Type { get; set; }
 
-    public int SelectedItem;
+    public int SelectedIndex { get; set; }
 
-    [JavaIgnore]
-    public List<bool> SelectedMap = new();
+    public List<bool> SelectedIndexes { get; } = new();
 
-    #region Impls for frontend
-
-
-    #endregion
+    void INativeChoice.Invalidate() => NotifyToolkit();
 
     [InitMethod]
     public void Init([String] Reference label, int listType)
@@ -39,85 +34,24 @@ public class ChoiceGroup : Item, Choice
         [JavaType(typeof(Image))] Reference[]? imageElements)
     {
         Init(label, listType);
-
-        if (imageElements == null)
-        {
-            foreach (var str in stringElements)
-            {
-                if (str.IsNull)
-                    Jvm.Throw<NullPointerException>();
-                Items.Add(new List.ListItem(str, Reference.Null));
-                SelectedMap.Add(false);
-            }
-
-            return;
-        }
-
-        if (imageElements.Length != stringElements.Length)
-            Jvm.Throw<IllegalArgumentException>();
-
-        for (var i = 0; i < stringElements.Length; i++)
-        {
-            var str = stringElements[i];
-            if (str.IsNull)
-                Jvm.Throw<NullPointerException>();
-            Items.Add(new List.ListItem(str, imageElements[i]));
-            SelectedMap.Add(false);
-        }
+        this.Initialize(stringElements, imageElements);
     }
 
-    public int getSelectedIndex()
-    {
-        if (Type == ChoiceType.Multiple)
-            return -1;
+    public int getSelectedIndex() => this.GetSelected();
 
-        return SelectedItem;
-    }
+    public void setSelectedIndex(int index, bool state) => this.SetSelected(index, state);
 
-    public void setSelectedIndex(int index, bool state)
-    {
-        if (Type == ChoiceType.Multiple)
-        {
-            SelectedMap[index] = state;
-            NotifyToolkit();
-            return;
-        }
+    public int getSelectedFlags(bool[] flags) => this.GetSelectedFlags(flags);
 
-        if (state)
-        {
-            SelectedItem = index;
-            NotifyToolkit();
-        }
-    }
-
-    public void setSelectedFlags(bool[] flags)
-    {
-        var count = SelectedMap.Count;
-        if (flags.Length < count)
-            Jvm.Throw<IllegalArgumentException>();
-
-        if (Type == ChoiceType.Multiple)
-        {
-            SelectedMap.Clear();
-            SelectedMap.AddRange(flags.Take(count));
-        }
-        else
-        {
-            SelectedItem = 0;
-            for (int i = 0; i < Items.Count; i++)
-            {
-                if (flags[i])
-                {
-                    SelectedItem = i;
-                    break;
-                }
-            }
-        }
-
-        NotifyToolkit();
-    }
+    public void setSelectedFlags(bool[] flags) => this.SetSelectedFlags(flags);
 
     public int size() => Items.Count;
+
+    [return: JavaType(typeof(Image))]
+    public Reference getImage(int index) => Items[index].Image;
+
+    [return: String]
+    public Reference getString(int index) => Items[index].Text;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
