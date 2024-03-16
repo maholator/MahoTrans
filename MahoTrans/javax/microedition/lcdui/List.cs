@@ -254,10 +254,7 @@ public class List : Screen, Choice
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         foreach (var item in Items)
-        {
-            queue.Enqueue(item.Text);
-            queue.Enqueue(item.Image);
-        }
+            item.AnnounceHiddenReferences(queue);
 
         base.AnnounceHiddenReferences(queue);
     }
@@ -271,6 +268,12 @@ public class List : Screen, Choice
         {
             Text = text;
             Image = image;
+        }
+
+        public void AnnounceHiddenReferences(Queue<Reference> queue)
+        {
+            queue.Enqueue(Text);
+            queue.Enqueue(Image);
         }
     }
 }

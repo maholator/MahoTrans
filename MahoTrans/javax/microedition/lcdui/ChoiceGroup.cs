@@ -85,4 +85,12 @@ public class ChoiceGroup : Item, Choice
 
         return SelectedItem;
     }
+
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
+    {
+        foreach (var item in Items)
+            item.AnnounceHiddenReferences(queue);
+
+        base.AnnounceHiddenReferences(queue);
+    }
 }
