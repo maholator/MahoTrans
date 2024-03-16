@@ -10,7 +10,7 @@ namespace javax.microedition.lcdui;
 public class List : Screen, Choice
 {
     [JavaIgnore]
-    public List<ListItem> Items = new();
+    public List<ChoiceItem> Items = new();
 
     public ChoiceType Type;
 
@@ -57,7 +57,7 @@ public class List : Screen, Choice
             {
                 if (str.IsNull)
                     Jvm.Throw<NullPointerException>();
-                Items.Add(new ListItem(str, Reference.Null));
+                Items.Add(new ChoiceItem(str, Reference.Null));
                 SelectedMap.Add(false);
             }
 
@@ -73,7 +73,7 @@ public class List : Screen, Choice
             var str = strings[i];
             if (str.IsNull)
                 Jvm.Throw<NullPointerException>();
-            Items.Add(new ListItem(str, images[i]));
+            Items.Add(new ChoiceItem(str, images[i]));
             SelectedMap.Add(false);
         }
     }
@@ -83,7 +83,7 @@ public class List : Screen, Choice
         if (stringPart.IsNull)
             Jvm.Throw<NullPointerException>();
         var index = Items.Count;
-        Items.Add(new ListItem(stringPart, imagePart));
+        Items.Add(new ChoiceItem(stringPart, imagePart));
         SelectedMap.Add(false);
         Toolkit.Display.ContentUpdated(Handle);
         return index;
@@ -111,7 +111,7 @@ public class List : Screen, Choice
             Jvm.Throw<IndexOutOfBoundsException>();
         if (stringPart.IsNull)
             Jvm.Throw<NullPointerException>();
-        Items[elementNum] = new ListItem(stringPart, imagePart);
+        Items[elementNum] = new ChoiceItem(stringPart, imagePart);
         Toolkit.Display.ContentUpdated(Handle);
     }
 
@@ -243,26 +243,5 @@ public class List : Screen, Choice
             item.AnnounceHiddenReferences(queue);
 
         base.AnnounceHiddenReferences(queue);
-    }
-
-    public class ListItem
-    {
-        public Reference Text;
-        public Reference Image;
-        public Reference Font;
-
-        public ListItem(Reference text, Reference image)
-        {
-            Text = text;
-            Image = image;
-            Font = Reference.Null;
-        }
-
-        public void AnnounceHiddenReferences(Queue<Reference> queue)
-        {
-            queue.Enqueue(Text);
-            queue.Enqueue(Image);
-            queue.Enqueue(Font);
-        }
     }
 }

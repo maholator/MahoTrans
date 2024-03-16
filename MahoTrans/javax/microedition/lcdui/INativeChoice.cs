@@ -25,7 +25,7 @@ public interface INativeChoice
     /// </summary>
     List<bool> SelectedIndexes { get; }
 
-    List<List.ListItem> Items { get; }
+    List<ChoiceItem> Items { get; }
 
     /// <summary>
     ///     Count of elements in the choice.

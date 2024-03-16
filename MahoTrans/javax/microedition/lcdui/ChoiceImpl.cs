@@ -25,7 +25,7 @@ public static class ChoiceImpl
             {
                 if (str.IsNull)
                     Jvm.Throw<NullPointerException>();
-                items.Add(new List.ListItem(str, Reference.Null));
+                items.Add(new ChoiceItem(str, Reference.Null));
                 sel.Add(false);
             }
 
@@ -40,7 +40,7 @@ public static class ChoiceImpl
             var str = stringElements[i];
             if (str.IsNull)
                 Jvm.Throw<NullPointerException>();
-            items.Add(new List.ListItem(str, imageElements[i]));
+            items.Add(new ChoiceItem(str, imageElements[i]));
             sel.Add(false);
         }
     }

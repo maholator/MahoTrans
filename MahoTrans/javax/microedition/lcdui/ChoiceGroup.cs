@@ -9,7 +9,7 @@ namespace javax.microedition.lcdui;
 
 public class ChoiceGroup : Item, Choice, INativeChoice
 {
-    public List<List.ListItem> Items { get; } = new();
+    public List<ChoiceItem> Items { get; } = new();
 
     public ChoiceType Type { get; set; }
 
