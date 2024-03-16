@@ -77,6 +77,12 @@ public class ChoiceGroup : Item, Choice, INativeChoice
 
     public void delete(int index) => this.RemoveAt(index);
 
+    public void insert(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Insert(index, text, image);
+
+    public int append([String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Add(text, image);
+
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         foreach (var item in Items)

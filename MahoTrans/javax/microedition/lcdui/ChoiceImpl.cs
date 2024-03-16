@@ -172,5 +172,26 @@ public static class ChoiceImpl
         choice.Invalidate();
     }
 
+    public static int Add(this INativeChoice choice, Reference text, Reference image)
+    {
+        if (text.IsNull)
+            Jvm.Throw<NullPointerException>();
+        choice.Items.Add(new ChoiceItem(text, image));
+        choice.SelectedIndexes.Add(false);
+        choice.Invalidate();
+        return choice.ItemsCount - 1;
+    }
+
+    public static void Insert(this INativeChoice choice, int index, Reference text, Reference image)
+    {
+        if (text.IsNull)
+            Jvm.Throw<NullPointerException>();
+        choice.Items.Insert(index, new ChoiceItem(text, image));
+        choice.SelectedIndexes.Insert(index, false);
+        if (choice.SelectedIndex >= index)
+            choice.SelectedIndex++;
+        choice.Invalidate();
+    }
+
     private static JvmState Jvm => JvmContext.Jvm!;
 }
