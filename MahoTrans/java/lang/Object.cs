@@ -55,7 +55,7 @@ public class Object : IJavaObject
     /// </summary>
     [JsonProperty]
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public string ClassName
+    private string ClassName
     {
         get => JavaClass.Name;
         set => JavaClass = Jvm.GetClass(value);

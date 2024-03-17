@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.IO.Compression;
+using System.Reflection;
 using System.Text;
 using javax.microedition.ams;
 using JetBrains.Annotations;
@@ -16,13 +17,14 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private JsonSerializerSettings HeapJsonSettings => new()
+    public JsonSerializerSettings HeapJsonSettings => new()
     {
         TypeNameHandling = TypeNameHandling.All,
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
         SerializationBinder = new Binder(this),
+        ContractResolver = new Resolver(),
     };
 
     private const string cycle_number_txt = "cycle_number.txt";
@@ -351,6 +353,14 @@ public partial class JvmState
         public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
             _binder.BindToName(serializedType, out assemblyName, out typeName);
+        }
+    }
+
+    private class Resolver : DefaultContractResolver
+    {
+        public Resolver()
+        {
+            DefaultMembersSearchFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         }
     }
 
