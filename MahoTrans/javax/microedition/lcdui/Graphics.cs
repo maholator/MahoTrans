@@ -274,6 +274,13 @@ public class Graphics : Object, DirectGraphics
             (ImageManipulation)manipulation);
     }
 
+    void drawPixels(int[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width, int height,
+        ImageManipulation manipulation, int format)
+    {
+        transparency = transparency && format != DirectGraphics.TYPE_INT_888_RGB;
+        Implementation.DrawARGB32(pixels, transparency, offset, scanlength, x, y, width, height, manipulation);
+    }
+
     private static UShortPixelType throwUShortFormat()
     {
         Jvm.Throw<IllegalArgumentException>();
