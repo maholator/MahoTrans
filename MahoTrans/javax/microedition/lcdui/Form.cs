@@ -13,6 +13,8 @@ public class Form : Screen
     [JavaIgnore]
     public List<Reference> Items = new();
 
+    public Reference StateListener;
+
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
         queue.Enqueue(Items);
@@ -38,9 +40,9 @@ public class Form : Screen
     public int append([JavaType(typeof(Item))] Reference item)
     {
         var i = Jvm.Resolve<Item>(item);
-        if (i.Owner != default)
+        if (i.IsAttached)
             Jvm.Throw<IllegalStateException>();
-        i.Owner = Handle;
+        i.AttachTo(this);
         Items.Add(item);
         Toolkit.Display.ContentUpdated(Handle);
         return Items.Count - 1;
@@ -64,7 +66,7 @@ public class Form : Screen
     {
         if (n < 0 || n >= Items.Count)
             Jvm.Throw<IndexOutOfBoundsException>();
-        Jvm.Resolve<Item>(Items[n]).Owner = default;
+        Jvm.Resolve<Item>(Items[n]).AttachTo(null);
         Items.RemoveAt(n);
         Toolkit.Display.ContentUpdated(Handle);
     }
@@ -72,10 +74,12 @@ public class Form : Screen
     public void deleteAll()
     {
         foreach (var item in Items)
-            Jvm.Resolve<Item>(item).Owner = default;
+            Jvm.Resolve<Item>(item).AttachTo(null);
         Items.Clear();
         Toolkit.Display.ContentUpdated(Handle);
     }
 
     public int size() => Items.Count;
+
+    public void setItemStateListener([JavaType(typeof(ItemStateListener))] Reference l) => StateListener = l;
 }

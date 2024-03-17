@@ -70,10 +70,10 @@ public class Display : Object
     public void setCurrentItem([JavaType(typeof(Item))] Reference item)
     {
         var i = Jvm.Resolve<Item>(item);
-        if (i.Owner == default)
+        if (!i.IsAttached)
             Jvm.Throw<IllegalStateException>();
 
-        Toolkit.Display.FocusItem(i.Owner, item);
+        Toolkit.Display.FocusItem(i.AttachedTo, item);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)

@@ -5,6 +5,8 @@ using java.lang;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using MahoTrans.Utils;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;
@@ -14,7 +16,10 @@ public class Item : Object
     #region State
 
     [JavaIgnore]
-    public DisplayableHandle Owner;
+    private DisplayableHandle _ownerHandle;
+
+    [JavaIgnore]
+    private Reference _ownerReference;
 
     [String]
     public Reference Label;
@@ -83,9 +88,29 @@ public class Item : Object
     [JavaIgnore]
     protected void NotifyToolkit()
     {
-        if (Owner != default)
-            Toolkit.Display.ItemUpdated(Owner, This);
+        if (_ownerHandle != default)
+            Toolkit.Display.ItemUpdated(_ownerHandle, This);
     }
+
+    [JavaIgnore]
+    public void AttachTo(Form? f)
+    {
+        if (f == null)
+        {
+            _ownerReference = default;
+            _ownerHandle = default;
+            return;
+        }
+
+        _ownerReference = f.This;
+        _ownerHandle = f.Handle;
+    }
+
+    [JsonIgnore]
+    public bool IsAttached => _ownerHandle != default;
+
+    [JsonIgnore]
+    public DisplayableHandle AttachedTo => _ownerHandle;
 
     public const int PLAIN = 0;
     public const int BUTTON = 2;
