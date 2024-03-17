@@ -225,10 +225,12 @@ public static class DebuggerUtils
             case MTOpcode.invoke_static_simple:
                 return ((Method)instruction.Data).ArgsCount;
 
-            case MTOpcode.invoke_virtual:
             case MTOpcode.invoke_instance:
             case MTOpcode.invoke_instance_simple:
                 return ((Method)instruction.Data).ArgsCount + 1;
+
+            case MTOpcode.invoke_virtual:
+                return instruction.ShortData + 1;
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
                 return 3; // this, name, descriptor
