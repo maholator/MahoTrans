@@ -21,11 +21,7 @@ public class ImageItem : Item
     public void Init([String] Reference label, [JavaType(typeof(Image))] Reference image, int layout,
         [String] Reference altText)
     {
-        base.Init();
-        Label = label;
-        Image = image;
-        //todo layout
-        AltText = altText;
+        Init(label, image, layout, altText, PLAIN);
     }
 
     [InitMethod]
@@ -35,11 +31,25 @@ public class ImageItem : Item
         base.Init();
         Label = label;
         Image = image;
-        //todo layout
+        Layout = layout;
         AltText = altText;
         if (appearanceMode < 0 || appearanceMode > 2)
             Jvm.Throw<IllegalArgumentException>();
         Appearance = appearanceMode;
+    }
+
+    [return: String]
+    public Reference getAltText() => AltText;
+
+    public int getAppearanceMode() => Appearance;
+
+    [return: JavaType(typeof(Image))]
+    public Reference getImage() => Image;
+
+    public void setAltText([String] Reference altText)
+    {
+        AltText = altText;
+        NotifyToolkit();
     }
 
     public void setImage([JavaType(typeof(Image))] Reference image)
@@ -47,7 +57,4 @@ public class ImageItem : Item
         Image = image;
         NotifyToolkit();
     }
-
-    [return: JavaType(typeof(Image))]
-    public Reference getImage() => Image;
 }
