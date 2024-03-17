@@ -15,7 +15,7 @@ public class Gauge : Item
     public bool Editable;
 
     [InitMethod]
-    public void Init([String] Reference label, bool interactive, int value, int maxValue)
+    public void Init([String] Reference label, bool interactive, int maxValue, int value)
     {
         base.Init();
         Label = label;
