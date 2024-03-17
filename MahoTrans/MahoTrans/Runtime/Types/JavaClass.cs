@@ -120,6 +120,9 @@ public class JavaClass : IJavaEntity
         }
     }
 
+    /// <summary>
+    ///     True if this class is <see cref="Object" />.
+    /// </summary>
     public bool IsObject => Name == "java/lang/Object";
 
     public bool IsInterface => (Flags & ClassFlags.Interface) != 0;
@@ -240,6 +243,15 @@ public class JavaClass : IJavaEntity
             {
                 Debug.Assert(m.Class == cls);
                 return m;
+            }
+
+            if (cls.IsInterface)
+            {
+                foreach (var interf in cls.Interfaces)
+                {
+                    var m2 = JvmContext.Jvm!.GetLoadedClassOrNull(interf)?.GetMethodRecursiveOrNull(descriptor);
+                    if (m2 != null) return m2;
+                }
             }
 
             if (cls.IsObject)
