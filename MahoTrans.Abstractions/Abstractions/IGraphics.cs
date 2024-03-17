@@ -49,8 +49,6 @@ public interface IGraphics
     void DrawString(ReadOnlySpan<char> text, int x, int y, GraphicsAnchor an, uint color, FontFace face,
         FontStyle style, int size);
 
-    void DrawARGB32(int[] rgbData, bool transparent, int offset, int scanlength, int x, int y, int width, int height);
-
     void DrawARGB32(int[] rgbData, bool transparent, int offset, int scanlength, int x, int y, int width, int height,
         ImageManipulation manipulation);
 
