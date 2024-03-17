@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
 using MahoTrans.Compiler;
 using MahoTrans.Native;
@@ -270,6 +271,10 @@ public static class NativeLinker
     {
         // ignored fields are ignored.
         if (field.GetCustomAttribute<JavaIgnoreAttribute>() != null)
+            return false;
+
+        // service fields are ignored.
+        if (field.GetCustomAttribute<CompilerGeneratedAttribute>() != null)
             return false;
 
         var t = field.FieldType;
