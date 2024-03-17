@@ -4,7 +4,7 @@
 namespace javax.microedition.lcdui;
 
 /// <summary>
-/// Used to access choice state directly.
+///     Used to access choice state directly.
 /// </summary>
 public interface INativeChoice
 {
@@ -16,15 +16,18 @@ public interface INativeChoice
     int FitPolicy { get; set; }
 
     /// <summary>
-    ///     Selected indexes. Used if list is not <see cref="ChoiceType.Multiple"/>.
+    ///     Selected indexes. Used if list is not <see cref="ChoiceType.Multiple" />.
     /// </summary>
     int SelectedIndex { get; set; }
 
     /// <summary>
-    ///     Selected indexes. Used only in <see cref="ChoiceType.Multiple"/>.
+    ///     Selected indexes. Used only in <see cref="ChoiceType.Multiple" />.
     /// </summary>
     List<bool> SelectedIndexes { get; }
 
+    /// <summary>
+    ///     Items in this choice.
+    /// </summary>
     List<ChoiceItem> Items { get; }
 
     /// <summary>
@@ -32,5 +35,13 @@ public interface INativeChoice
     /// </summary>
     int ItemsCount => Items.Count;
 
+    /// <summary>
+    ///     Notifies toolkit about change.
+    /// </summary>
     void Invalidate();
+
+    /// <summary>
+    ///     Notifies application about change.
+    /// </summary>
+    void ReportChange();
 }

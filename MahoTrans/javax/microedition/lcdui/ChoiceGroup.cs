@@ -21,6 +21,8 @@ public class ChoiceGroup : Item, Choice, INativeChoice
 
     void INativeChoice.Invalidate() => NotifyToolkit();
 
+    void INativeChoice.ReportChange() => notifyStateChanged();
+
     [InitMethod]
     public void Init([String] Reference label, int listType)
     {

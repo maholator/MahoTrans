@@ -21,6 +21,10 @@ public class List : Screen, Choice, INativeChoice
 
     void INativeChoice.Invalidate() => Toolkit.Display.ContentUpdated(Handle);
 
+    void INativeChoice.ReportChange()
+    {
+    }
+
     [JavaIgnore]
     public Reference ImplicitSelectCommand;
 
