@@ -49,7 +49,7 @@ public class DataOutputStream : OutputStream
     [JavaDescriptor("([B)V")]
     public JavaMethodBody write___buf(JavaClass cls)
     {
-        byte[] streamWrite = cls.PushConstant(_write).Split();
+        byte[] streamWrite = cls.PushConstant(new NameDescriptor("write", "(I)V")).Split();
         return new JavaMethodBody(3, 3)
         {
             // Locals: this > arr > index
