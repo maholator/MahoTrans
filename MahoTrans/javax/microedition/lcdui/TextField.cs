@@ -25,6 +25,22 @@ public class TextField : Item, HasText
         MaxSize = maxSize;
     }
 
+    public int size() => Content.Length;
+
+    [return: String]
+    public Reference getString() => Jvm.InternalizeString(Content);
+
+    public void setString([String] Reference text)
+    {
+        var t = Jvm.ResolveStringOrNull(text) ?? "";
+        if (t.Length > MaxSize)
+            Jvm.Throw<IllegalArgumentException>();
+        Content = t;
+        NotifyToolkit();
+    }
+
+    public int getMaxSize() => MaxSize;
+
     string HasText.Text
     {
         get => Content;
