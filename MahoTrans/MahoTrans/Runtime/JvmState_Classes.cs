@@ -293,10 +293,6 @@ public partial class JvmState
         return null;
     }
 
-    [Obsolete("Faulty method, see TODO", true)]
-    //TODO: for java/lang/abc it returns... "[java/lang/abc"? No "L;"?
-    public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
-
     #endregion
 
     #region Calls
