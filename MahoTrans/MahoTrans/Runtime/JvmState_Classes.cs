@@ -1,6 +1,7 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -280,10 +281,36 @@ public partial class JvmState
                 }
             }
 
+            string superName;
+
+            if (name[1] == '[')
+            {
+                // nested array, i.e. [[[[[[[object
+                var nestingCount = -1;
+                foreach (var c in name)
+                {
+                    if (c != '[')
+                        break;
+
+                    nestingCount++;
+                }
+
+                Debug.Assert(nestingCount >= 1);
+
+                superName = $"{new string('[', nestingCount)}Ljava/lang/Object;";
+            }
+            else
+            {
+                // simple array, i.e. [object
+                superName = "java/lang/Object";
+            }
+
+
             JavaClass ac = new JavaClass
             {
                 Name = name,
-                Super = GetClass("java/lang/Object"),
+                SuperName = superName,
+                Super = GetClass(superName),
             };
             ac.GenerateVirtualTable(this);
             _classes.Add(name, ac);
