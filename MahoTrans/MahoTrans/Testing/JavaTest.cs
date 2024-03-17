@@ -32,10 +32,13 @@ public class JavaTest
             LoadLogger = new ConsoleLogger()
         };
         _jvm = new JvmState(tk, ExecutionManner.Unlocked);
-        _jvm.AddClrClasses(typeof(JavaRunner).Assembly);
+        _jvm.AddMahoTransLibrary();
         var cl = new ClassLoader(new ConsoleLogger());
         var cls = cl.ReadJarFile(jarFile, true);
         _jvm.AddJvmClasses(cls, "jar");
+
+        _jvm.LinkAndLock();
+
         var obj = _jvm.AllocateObject(_jvm.GetClass(className));
 
         var thread = JavaThread.CreateSynthetic(new NameDescriptor(methodName, "()V"), obj, _jvm);
