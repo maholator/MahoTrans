@@ -17,6 +17,7 @@ public class Graphics : Object, DirectGraphics
     [JavaIgnore]
     public GraphicsHandle Handle;
 
+    [JsonIgnore]
     private IGraphics Implementation => Toolkit.Images.ResolveGraphics(Handle);
 
     [JavaIgnore]
