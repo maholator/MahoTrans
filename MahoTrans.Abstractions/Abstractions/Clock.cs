@@ -9,6 +9,11 @@ namespace MahoTrans.Abstractions;
 public abstract class Clock : IToolkit
 {
     /// <summary>
+    ///     Initializes the clock, for example, captures current time for future use.
+    /// </summary>
+    public abstract void Init();
+
+    /// <summary>
     ///     Gets current time of the system. This is used for System.currentTimeMillis() calls.
     /// </summary>
     /// <param name="currentCycle">Current jvm's cycle.</param>

@@ -29,6 +29,10 @@ public class StrictClock : Clock
         StartTicks = startTicks;
     }
 
+    public override void Init()
+    {
+    }
+
     public override long GetCurrentMs(long currentTick)
     {
         // this is passed time in CLR ticks since JVM start

@@ -17,10 +17,13 @@ public class RealTimeClock : Clock
         TicksPerCycleStep = 0;
     }
 
+    public override void Init()
+    {
+        _startTick = DateTime.Now.Ticks;
+    }
+
     public override long GetCurrentMs(long currentTick)
     {
-        if (_startTick == 0)
-            _startTick = DateTime.Now.Ticks;
         return DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 
