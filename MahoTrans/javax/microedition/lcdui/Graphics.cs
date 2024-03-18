@@ -240,7 +240,7 @@ public class Graphics : Object, DirectGraphics
     public void drawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
-        Implementation.DrawARGB32(rgbData, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height);
+        Implementation.DrawARGB32(rgbData, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height, default);
     }
 
     public void fillPolygon(int[] x, int xFrom, int[] y, int yFrom, int count, int argb)
@@ -274,7 +274,7 @@ public class Graphics : Object, DirectGraphics
             (ImageManipulation)manipulation);
     }
 
-    void drawPixels(int[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width, int height,
+    public void drawPixels(int[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width, int height,
         ImageManipulation manipulation, int format)
     {
         transparency = transparency && format != DirectGraphics.TYPE_INT_888_RGB;
