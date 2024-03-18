@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using javax.microedition.ams;
-using JetBrains.Annotations;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
@@ -41,13 +40,10 @@ public partial class JvmState
     /// <summary>
     ///     Gets snapshot of this JVM.
     /// </summary>
-    /// <returns>Stream with written snapshot. Position will be zero. Make sure do dispose it.</returns>
-    [MustUseReturnValue]
-    public MemoryStream Snapshot()
+    /// <param name="writeTo">Stream to write to.</param>
+    public void Snapshot(Stream writeTo)
     {
-        var snapshotStream = new MemoryStream();
-
-        using (var zip = new ZipArchive(snapshotStream, ZipArchiveMode.Create, true, Encoding.UTF8))
+        using (var zip = new ZipArchive(writeTo, ZipArchiveMode.Create, true, Encoding.UTF8))
         {
             zip.AddTextEntry(cycle_number_txt, s => s.Write(CycleNumber));
             zip.AddTextEntry(classes_txt, s =>
@@ -106,9 +102,6 @@ public partial class JvmState
                 s.Write(t);
             });
         }
-
-        snapshotStream.Position = 0;
-        return snapshotStream;
     }
 
     private struct SerializedClass
@@ -360,7 +353,9 @@ public partial class JvmState
     {
         public Resolver()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             DefaultMembersSearchFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 
