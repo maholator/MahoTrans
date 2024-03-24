@@ -9,4 +9,8 @@ namespace javax.microedition.rms;
 public interface RecordEnumeration : IJavaObject
 {
     public int nextRecordId() => throw new AbstractCall();
+
+    public bool hasNextElement() => throw new AbstractCall();
+
+    public void destroy() => throw new AbstractCall();
 }

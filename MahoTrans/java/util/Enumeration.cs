@@ -3,10 +3,13 @@
 
 using MahoTrans;
 using MahoTrans.Native;
+using MahoTrans.Runtime;
 
 namespace java.util;
 
 public interface Enumeration : IJavaObject
 {
     public bool hasMoreElements() => throw new AbstractCall();
+
+    public Reference nextElement() => throw new AbstractCall();
 }
