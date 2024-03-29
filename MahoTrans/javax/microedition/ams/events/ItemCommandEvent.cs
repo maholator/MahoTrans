@@ -10,9 +10,9 @@ using MahoTrans.Runtime.Types;
 
 namespace javax.microedition.ams.events;
 
-public class CommandEvent : Event
+public class ItemCommandEvent : Event
 {
-    [JavaType(typeof(Displayable))]
+    [JavaType(typeof(Item))]
     public Reference Target;
 
     [JavaType(typeof(Command))]
@@ -23,7 +23,7 @@ public class CommandEvent : Event
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
-        b.AppendGetLocalField(nameof(Target), typeof(Displayable));
+        b.AppendGetLocalField(nameof(Target), typeof(Item));
         b.Append(JavaOpcode.dup);
         b.Append(JavaOpcode.astore_1);
         using (b.AppendGoto(JavaOpcode.ifnonnull))
@@ -32,7 +32,7 @@ public class CommandEvent : Event
         }
 
         b.Append(JavaOpcode.aload_1);
-        b.AppendGetField(nameof(Displayable.Listener), typeof(CommandListener), typeof(Displayable));
+        b.AppendGetField(nameof(Item.Listener), typeof(ItemCommandListener), typeof(Item));
         b.Append(JavaOpcode.dup);
         using (b.AppendGoto(JavaOpcode.ifnonnull))
         {
@@ -42,7 +42,7 @@ public class CommandEvent : Event
         b.AppendThis();
         b.AppendGetLocalField(nameof(Command), typeof(Command));
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("commandAction", typeof(void), typeof(Command), typeof(Displayable));
+        b.AppendVirtcall(nameof(ItemCommandListener.commandAction), typeof(void), typeof(Command), typeof(Item));
         b.AppendReturn();
         return b.Build(3, 2);
     }

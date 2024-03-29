@@ -32,6 +32,11 @@ public class Item : Object
     [JavaType(typeof(ItemCommandListener))]
     public Reference Listener;
 
+    public Reference ImplicitCommand;
+
+    [JavaIgnore]
+    public List<Reference> Commands = new();
+
     #endregion
 
     [return: String]
@@ -88,17 +93,40 @@ public class Item : Object
 
     public void addCommand([JavaType(typeof(Command))] Reference cmd)
     {
-        //TODO
+        if (cmd.IsNull)
+            Jvm.Throw<NullPointerException>();
+        if (Commands.Contains(cmd))
+            return;
+        Commands.Add(cmd);
+        NotifyToolkit();
     }
 
     public void removeCommand([JavaType(typeof(Command))] Reference cmd)
     {
-        //TODO
+        if (cmd.IsNull)
+            return;
+        Commands.Remove(cmd);
+        if (ImplicitCommand == cmd)
+            ImplicitCommand = Reference.Null;
+        NotifyToolkit();
     }
 
+    /// <summary>
+    ///     See MIDP docs.
+    /// </summary>
+    /// <remarks>
+    ///     Behaviour of this is different from <see cref="List" />. List maintains implicit command and others separately,
+    ///     while this uses "implicit" only as hint.
+    /// </remarks>
     public void setDefaultCommand([JavaType(typeof(Command))] Reference cmd)
     {
-        //TODO
+        if (cmd.IsNull)
+            ImplicitCommand = Reference.Null;
+
+        if (!Commands.Contains(cmd))
+            addCommand(cmd);
+
+        ImplicitCommand = cmd;
     }
 
     /// <summary>
