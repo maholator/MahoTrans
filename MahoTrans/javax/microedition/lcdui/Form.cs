@@ -13,6 +13,7 @@ public class Form : Screen
     [JavaIgnore]
     public List<Reference> Items = new();
 
+    [JavaType(typeof(ItemStateListener))]
     public Reference StateListener;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)

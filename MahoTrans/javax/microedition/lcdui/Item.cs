@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
+using javax.microedition.ams.events;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
@@ -73,7 +74,11 @@ public class Item : Object
 
     public void notifyStateChanged()
     {
-        throw new NotImplementedException();
+        Jvm.EventQueue.Enqueue<ChangeNotifyEvent>(x =>
+        {
+            x.Target = _ownerReference;
+            x.Item = This;
+        });
     }
 
     public void setItemCommandListener([JavaType(typeof(ItemCommandListener))] Reference l)
