@@ -24,9 +24,7 @@ public class Spacer : Item
 
     public void setMinimumSize(int minWidth, int minHeight)
     {
-        if (minWidth < 0)
-            Jvm.Throw<IllegalArgumentException>();
-        if (minHeight < 0)
+        if (minWidth < 0 || minHeight < 0)
             Jvm.Throw<IllegalArgumentException>();
         MinW = minWidth;
         MinH = minHeight;
