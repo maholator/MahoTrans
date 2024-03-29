@@ -5,7 +5,6 @@ using java.lang;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
-using MahoTrans.Utils;
 using Newtonsoft.Json;
 using Object = java.lang.Object;
 
@@ -80,6 +79,21 @@ public class Item : Object
     public void setItemCommandListener([JavaType(typeof(ItemCommandListener))] Reference l)
     {
         Listener = l;
+    }
+
+    public void addCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        //TODO
+    }
+
+    public void removeCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        //TODO
+    }
+
+    public void setDefaultCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        //TODO
     }
 
     /// <summary>
