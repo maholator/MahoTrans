@@ -1295,56 +1295,47 @@ public class JavaRunner
     {
         if (float.IsNaN(f))
             return 0;
-        if (float.IsPositiveInfinity(f))
-            return int.MaxValue;
-        if (float.IsNegativeInfinity(f))
-            return int.MinValue;
-        if (float.IsFinite(f))
-            return (int)f;
+        var r = (int)f;
+        if (r == int.MinValue)
+            return f < 0 ? int.MinValue : int.MaxValue;
 
-        throw new JavaRuntimeError($"Can't round float number {f}");
+        return r;
     }
 
     public static long F2L(float f)
     {
         if (float.IsNaN(f))
             return 0L;
-        if (float.IsPositiveInfinity(f))
-            return long.MaxValue;
-        if (float.IsNegativeInfinity(f))
-            return long.MinValue;
-        if (float.IsFinite(f))
-            return (long)f;
 
-        throw new JavaRuntimeError($"Can't round float number {f}");
+        var r = (long)f;
+        if (r == long.MinValue)
+            return f < 0 ? long.MinValue : long.MaxValue;
+
+        return r;
     }
 
     public static int D2I(double d)
     {
         if (double.IsNaN(d))
             return 0;
-        if (double.IsPositiveInfinity(d))
-            return int.MaxValue;
-        if (double.IsNegativeInfinity(d))
-            return int.MinValue;
-        if (double.IsFinite(d))
-            return (int)d;
 
-        throw new JavaRuntimeError($"Can't round double number {d}");
+        var r = (int)d;
+        if (r == int.MinValue)
+            return d < 0 ? int.MinValue : int.MaxValue;
+
+        return r;
     }
 
     public static long D2L(double d)
     {
         if (double.IsNaN(d))
             return 0L;
-        if (double.IsPositiveInfinity(d))
-            return long.MaxValue;
-        if (double.IsNegativeInfinity(d))
-            return long.MinValue;
-        if (double.IsFinite(d))
-            return (long)d;
 
-        throw new JavaRuntimeError($"Can't round double number {d}");
+        var r = (long)d;
+        if (r == long.MinValue)
+            return d < 0 ? long.MinValue : long.MaxValue;
+
+        return r;
     }
 
     #endregion
