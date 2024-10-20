@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
-using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
@@ -27,6 +26,8 @@ public class ByteArrayOutputStream : OutputStream
     public new void close()
     {
     }
+
+    public void reset() => buf.Clear();
 
     [JavaDescriptor("()[B")]
     public Reference toByteArray()
