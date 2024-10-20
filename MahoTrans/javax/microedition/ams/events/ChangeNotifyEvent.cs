@@ -32,6 +32,7 @@ public class ChangeNotifyEvent : Event
 
         b.AppendGetField(nameof(Form.StateListener), typeof(ItemStateListener), typeof(Form));
         b.Append(JavaOpcode.dup);
+        b.Append(JavaOpcode.dup);
         using (b.AppendGoto(JavaOpcode.ifnonnull))
         {
             b.AppendReturn();
@@ -40,6 +41,6 @@ public class ChangeNotifyEvent : Event
         b.AppendGetLocalField(nameof(Item), typeof(Item));
         b.AppendVirtcall(nameof(ItemStateListener.itemStateChanged), typeof(void), typeof(Item));
         b.AppendReturn();
-        return b.Build(2, 1);
+        return b.Build(3, 1);
     }
 }
