@@ -19,6 +19,7 @@ public enum MTOpcode : byte
 
     #region Constants
 
+    aconst_0,
     iconst_m1,
     iconst_0,
     iconst_1,
@@ -42,6 +43,11 @@ public enum MTOpcode : byte
     iconst,
 
     /// <summary>
+    ///     Pushes float from <see cref="LinkedInstruction.IntData" />.
+    /// </summary>
+    fconst,
+
+    /// <summary>
     ///     Pushes <see cref="LinkedInstruction.Data" /> as a string.
     /// </summary>
     strconst,
@@ -61,15 +67,7 @@ public enum MTOpcode : byte
     #region Locals
 
     load,
-    load_0,
-    load_1,
-    load_2,
-    load_3,
     store,
-    store_0,
-    store_1,
-    store_2,
-    store_3,
     iinc,
 
     #endregion
@@ -214,41 +212,55 @@ public enum MTOpcode : byte
     #region Calls
 
     invoke_virtual,
+
+    /// <summary>
+    ///     Invokes static java method. If your method is native, <see cref="bridge" /> must be used.
+    /// </summary>
     invoke_static,
+
+    /// <summary>
+    ///     Invokes static java method. Initialization and synchronization is skipped. If your method is native,
+    ///     <see cref="bridge" /> must be used.
+    /// </summary>
+    invoke_static_simple,
+
+    /// <summary>
+    ///     Invokes instance java method. If your method is native, <see cref="bridge" /> must be used.
+    /// </summary>
     invoke_instance,
+
+    /// <summary>
+    ///     Invokes instance java method. Initialization and synchronization is skipped. If your method is native,
+    ///     <see cref="bridge" /> must be used.
+    /// </summary>
+    invoke_instance_simple,
     invoke_virtual_void_no_args_bysig,
-
-    #endregion
-
-    #region Fields (reflection)
-
-    /// <summary>
-    ///     Gets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
-    /// </summary>
-    get_field,
-
-    /// <summary>
-    ///     Sets field value via reflection. <see cref="LinkedInstruction.Data" /> is a <see cref="ReflectionFieldPointer" />.
-    /// </summary>
-    set_field,
 
     #endregion
 
     #region Fileds (static)
 
     /// <summary>
+    ///     Gets value from <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    get_static,
+
+    /// <summary>
+    ///     Sets value in <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.IntData" /> is field index.
+    /// </summary>
+    set_static,
+
+    /// <summary>
     ///     Gets value from <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
     ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
     /// </summary>
-    get_static,
+    get_static_init,
 
     /// <summary>
     ///     Sets value in <see cref="JvmState.StaticFields" />. <see cref="LinkedInstruction.Data" /> is a
     ///     <see cref="JavaClass" /> to initialize. <see cref="LinkedInstruction.IntData" /> is field index.
     /// </summary>
-    set_static,
-
-    get_native_static,
+    set_static_init,
 
     #endregion
 
@@ -291,7 +303,7 @@ public enum MTOpcode : byte
     ///     <see cref="LinkedInstruction.IntData" /> must contain count of taken values.
     ///     For example, if bridge pops 2 values and pushes 3, <see cref="LinkedInstruction.IntData" /> will be equal to 2.
     /// </summary>
-    bridge_init_class,
+    bridge_init,
 
     #endregion
 

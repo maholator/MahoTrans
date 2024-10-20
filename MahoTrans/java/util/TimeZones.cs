@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -146,7 +146,7 @@ public sealed class TimeZones : Object
 
         foreach (var zone in zones)
         {
-            zone.JavaClass = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+            zone.JavaClass = Jvm.GetClass(typeof(TimeZone).ToJavaName());
             Jvm.PutToHeap(zone);
         }
 

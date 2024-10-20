@@ -11,12 +11,14 @@ public readonly struct JvmContext : IDisposable
     /// <summary>
     ///     <see cref="JvmState" /> object associated with current thread.
     /// </summary>
-    [ThreadStatic] public static JvmState? Jvm;
+    [ThreadStatic]
+    public static JvmState? Jvm;
 
     /// <summary>
     ///     Cache of <see cref="Jvm" />.<see cref="JvmState.Toolkit" />.
     /// </summary>
-    [ThreadStatic] public static ToolkitCollection? Toolkit;
+    [ThreadStatic]
+    public static ToolkitCollection? Toolkit;
 
     private readonly JvmState? _prev;
 
@@ -30,7 +32,6 @@ public readonly struct JvmContext : IDisposable
         Jvm = jvm;
         Toolkit = jvm.Toolkit;
     }
-
 
     public void Dispose()
     {

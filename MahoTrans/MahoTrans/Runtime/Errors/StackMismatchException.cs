@@ -8,7 +8,8 @@ namespace MahoTrans.Runtime.Errors;
 /// </summary>
 public class StackMismatchException : Exception
 {
-    public StackMismatchException(string? message) : base(message)
+    public StackMismatchException(string? message)
+        : base(message)
     {
     }
 }

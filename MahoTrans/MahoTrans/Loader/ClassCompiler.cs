@@ -1,9 +1,10 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
 using System.Reflection.Emit;
 using MahoTrans.Abstractions;
+using MahoTrans.Compiler;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
@@ -142,7 +143,7 @@ public static class ClassCompiler
                 // field define
                 object fieldType = DescriptorUtils.ParseDescriptor(field.Descriptor.Descriptor);
                 var t = fieldType as Type ?? typeof(Reference);
-                var f = c.Builder!.DefineField(BridgeCompiler.GetFieldName(field.Descriptor, cls.Name), t,
+                var f = c.Builder!.DefineField(FieldBridgeCompiler.GetFieldName(field.Descriptor, cls.Name), t,
                     ConvertFlags(field.Flags));
                 // attribute attachment
                 {
@@ -150,7 +151,7 @@ public static class ClassCompiler
                     f.SetCustomAttribute(jab);
                 }
                 // bridges
-                BridgeCompiler.BuildBridges(c.Builder!, f, field.Descriptor, cls);
+                FieldBridgeCompiler.BuildBridges(c.Builder!, f, field.Descriptor, cls);
                 // verify
                 {
                     if (fieldType is not Type)
@@ -187,13 +188,13 @@ public static class ClassCompiler
                 // static fields are not managed by CLR
                 if (field.IsStatic)
                     continue;
-                field.NativeField = type.GetField(BridgeCompiler.GetFieldName(field.Descriptor, item.Key.Name),
+                field.NativeField = type.GetField(FieldBridgeCompiler.GetFieldName(field.Descriptor, item.Key.Name),
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance |
                     BindingFlags.DeclaredOnly)!;
-                field.GetValue = type.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, item.Key.Name),
+                field.GetValue = type.GetMethod(FieldBridgeCompiler.GetGetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
-                field.SetValue = type.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, item.Key.Name),
+                field.SetValue = type.GetMethod(FieldBridgeCompiler.GetSetterName(field.Descriptor, item.Key.Name),
                         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!
                     .CreateDelegate<Action<Frame>>();
             }

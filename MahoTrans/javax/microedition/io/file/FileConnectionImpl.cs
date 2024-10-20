@@ -200,7 +200,7 @@ public class FileConnectionImpl : Object, FileConnection
             Reference[] r = new Reference[list.Count];
             for (int i = 0; i < r.Length; i++)
                 r[i] = Jvm.AllocateString(list[i]);
-            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
+            var enumerator = Jvm.Allocate<ArrayEnumerator>();
             enumerator.Value = r;
             enumerator.Init();
             return enumerator.This;
@@ -238,7 +238,7 @@ public class FileConnectionImpl : Object, FileConnection
             Jvm.Throw<IOException>();
         if (!InputStream.IsNull || !OutputStream.IsNull)
             Jvm.Throw<IOException>("Invalid state");
-        FileInputStream i = Jvm.AllocateObject<FileInputStream>();
+        FileInputStream i = Jvm.Allocate<FileInputStream>();
         i.Stream = File.OpenRead(SystemUrl);
         i.Connection = this;
         return InputStream = i.This;
@@ -252,7 +252,7 @@ public class FileConnectionImpl : Object, FileConnection
             Jvm.Throw<IOException>();
         if (!InputStream.IsNull || !OutputStream.IsNull)
             Jvm.Throw<IOException>("Invalid state");
-        FileOutputStream o = Jvm.AllocateObject<FileOutputStream>();
+        FileOutputStream o = Jvm.Allocate<FileOutputStream>();
         o.Stream = File.OpenWrite(SystemUrl);
         o.Connection = this;
         return OutputStream = o.This;

@@ -1,5 +1,8 @@
-﻿using MahoTrans.Builder;
+﻿// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -15,7 +18,7 @@ public class InputStreamUtils : Object
         var b = new JavaMethodBuilder(cls);
 
         // buf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_1);
 
@@ -24,7 +27,7 @@ public class InputStreamUtils : Object
         b.Append(JavaOpcode.istore_2);
 
         // readBuf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_3);
 
@@ -60,7 +63,8 @@ public class InputStreamUtils : Object
                 b.Append(JavaOpcode.aload, 5);
                 b.Append(JavaOpcode.iconst_0);
                 b.Append(JavaOpcode.iload_2);
-                b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", typeof(java.lang.System)));
+                b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                    typeof(lang.System)));
 
                 // buf = tmp
                 b.Append(JavaOpcode.aload, 5);
@@ -73,7 +77,8 @@ public class InputStreamUtils : Object
             b.Append(JavaOpcode.aload_1);
             b.Append(JavaOpcode.iload_2);
             b.Append(JavaOpcode.iload, 4);
-            b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", typeof(java.lang.System)));
+            b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+                typeof(lang.System)));
 
             // count += read
             b.Append(JavaOpcode.iload_2);
@@ -97,7 +102,8 @@ public class InputStreamUtils : Object
         b.Append(JavaOpcode.aload, 5);
         b.Append(JavaOpcode.iconst_0);
         b.Append(JavaOpcode.iload_2);
-        b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", typeof(java.lang.System)));
+        b.AppendStaticCall(new NameDescriptorClass("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V",
+            typeof(lang.System)));
 
         // return res;
         b.Append(JavaOpcode.aload, 5);
@@ -105,7 +111,4 @@ public class InputStreamUtils : Object
 
         return b.Build(5, 6);
     }
-
-
 }
-

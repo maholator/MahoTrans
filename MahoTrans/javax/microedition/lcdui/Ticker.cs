@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -9,7 +9,8 @@ namespace javax.microedition.lcdui;
 
 public class Ticker : Object
 {
-    [String] public Reference Text;
+    [String]
+    public Reference Text;
 
     [InitMethod]
     public void Init([String] Reference str)

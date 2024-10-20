@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.midlet;
@@ -18,14 +18,16 @@ namespace javax.microedition.ams.lifecycle;
 public class StartupThread : Thread
 {
     /// <summary>
-    /// Name of MIDlet class. This will be instantiated.
+    ///     Name of MIDlet class. This will be instantiated.
     /// </summary>
-    [JavaIgnore] public string MidletClassName = null!;
+    [JavaIgnore]
+    public string MidletClassName = null!;
 
     /// <summary>
-    /// MIDlet's manifest. Will be passed to <see cref="MIDlet.Properties" />.
+    ///     MIDlet's manifest. Will be passed to <see cref="MIDlet.Properties" />.
     /// </summary>
-    [JavaIgnore] public Dictionary<string, string> Manifest = null!;
+    [JavaIgnore]
+    public Dictionary<string, string> Manifest = null!;
 
     [JavaDescriptor("()V")]
     public new JavaMethodBody run(JavaClass cls)
@@ -41,12 +43,12 @@ public class StartupThread : Thread
     }
 
     /// <summary>
-    /// Allocates MIDlet object.
+    ///     Allocates MIDlet object.
     /// </summary>
     /// <returns>MIDlet object. Call its init method and start it.</returns>
     public Reference AllocMidlet()
     {
-        var midlet = Jvm.AllocateObject(Jvm.Classes[MidletClassName]);
+        var midlet = Jvm.AllocateObject(Jvm.GetClass(MidletClassName));
         Jvm.Resolve<MIDlet>(midlet).Properties = Manifest;
         Jvm.MidletObject = midlet;
         return midlet;

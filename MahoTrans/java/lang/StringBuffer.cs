@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
@@ -7,14 +7,15 @@ using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Utils;
 using Newtonsoft.Json;
 
 namespace java.lang;
 
 public class StringBuffer : Object
 {
-    [JavaIgnore] [JsonProperty] private List<char> _buffer = null!;
+    [JavaIgnore]
+    [JsonProperty]
+    private List<char> _buffer = null!;
 
     [InitMethod]
     public new void Init() => _buffer = new List<char>();
@@ -90,27 +91,19 @@ public class StringBuffer : Object
     public JavaMethodBody append(JavaClass cls)
     {
         // this, arg
-        return new JavaMethodBody(3, 2)
-        {
-            RawCode = new Instruction[]
-            {
-                new(JavaOpcode.aload_0),
-                new(JavaOpcode.dup),
-                new(JavaOpcode.aload_1),
-                new(JavaOpcode.invokevirtual,
-                    cls.PushConstant(new NameDescriptor("toString", "()Ljava/lang/String;")).Split()),
-                new(JavaOpcode.invokevirtual,
-                    cls.PushConstant(new NameDescriptor("append", "(Ljava/lang/String;)Ljava/lang/StringBuffer;"))
-                        .Split()),
-                new(JavaOpcode.areturn),
-            }
-        };
+        var b = new JavaMethodBuilder(cls);
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.AppendStaticCall<String>("valueOf", typeof(String), typeof(Object));
+        b.AppendVirtcall(nameof(append), typeof(StringBuffer), typeof(String));
+        b.AppendReturnReference();
+        return b.Build(2, 2);
     }
 
     [return: JavaType(typeof(StringBuffer))]
     public Reference append([String] Reference s)
     {
-        _buffer.AddRange(Jvm.ResolveStringOrDefault(s) ?? "null");
+        _buffer.AddRange(Jvm.ResolveStringOrNull(s) ?? "null");
         return This;
     }
 

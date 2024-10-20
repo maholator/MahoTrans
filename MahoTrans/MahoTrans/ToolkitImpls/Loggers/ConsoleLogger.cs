@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
@@ -17,6 +17,14 @@ public class ConsoleLogger : ILogger, ILoadLogger
         Console.Write(": ");
         Console.Write(message);
         Console.WriteLine();
+    }
+
+    public void ReportLinkProgress(int num, int total, string name)
+    {
+    }
+
+    public void ReportCompileProgress(int num, int total, string name)
+    {
     }
 
     public void LogRuntime(MTLogLevel level, string message)

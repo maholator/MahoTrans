@@ -1,16 +1,18 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Array = System.Array;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui.game;
 
 public class LayerManager : Object
 {
-    [JavaIgnore] public Reference[] Layers = null!;
+    [JavaIgnore]
+    public Reference[] Layers = null!;
 
     public int Size;
     public int X;
@@ -36,16 +38,17 @@ public class LayerManager : Object
         if (index < 0 || index > Size)
             Jvm.Throw<IndexOutOfBoundsException>();
         remove(layer);
-        if(index == Size)
+        if (index == Size)
         {
             Reference[] tmp = new Reference[Size + 4];
-            System.Array.Copy(Layers, tmp, Size);
-            System.Array.Copy(Layers, index, tmp, index + 1, Size - index);
+            Array.Copy(Layers, tmp, Size);
+            Array.Copy(Layers, index, tmp, index + 1, Size - index);
         }
         else
         {
-            System.Array.Copy(Layers, index, Layers, index + 1, Size - index);
+            Array.Copy(Layers, index, Layers, index + 1, Size - index);
         }
+
         Layers[index] = layer;
         ++Size;
     }
@@ -67,7 +70,7 @@ public class LayerManager : Object
         {
             if (Layers[i] == layer)
             {
-                System.Array.Copy(Layers, i + 1, Layers, i, Size - i - 1);
+                Array.Copy(Layers, i + 1, Layers, i, Size - i - 1);
                 Layers[--Size] = Reference.Null;
                 break;
             }

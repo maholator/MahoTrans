@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -21,8 +21,11 @@ class GregorianCalendar : Calendar
 
     private int dst_offset;
 
-    [JavaIgnore] public static sbyte[] DaysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    [JavaIgnore] private static int[] DaysInYear = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+    [JavaIgnore]
+    public static sbyte[] DaysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    [JavaIgnore]
+    private static int[] DaysInYear = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     private const int CACHED_YEAR = 0;
     private const int CACHED_MONTH = 1;
@@ -30,10 +33,12 @@ class GregorianCalendar : Calendar
     private const int CACHED_DAY_OF_WEEK = 3;
     private const int CACHED_ZONE_OFFSET = 4;
     private bool isCached;
-    [JavaIgnore] private int[]? cachedFields;
+
+    [JavaIgnore]
+    private int[]? cachedFields;
+
     private long nextMidnightMillis;
     private long lastMidnightMillis;
-
 
     [InitMethod]
     public new void Init()
@@ -148,7 +153,6 @@ class GregorianCalendar : Calendar
         fields[DATE] = cachedFields[CACHED_DATE];
         fields[DAY_OF_WEEK] = cachedFields[CACHED_DAY_OF_WEEK];
     }
-
 
     public override void computeFields()
     {

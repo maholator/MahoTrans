@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 namespace MahoTrans.Builder;
@@ -39,10 +39,14 @@ public class JavaTryCatch : IDisposable
     /// </summary>
     public void CatchSection()
     {
-        Builder.AppendGoto(JavaOpcode.@goto, CatchEnd);
+        if (!Builder.LastOpcodePerformsJump)
+            Builder.AppendGoto(JavaOpcode.@goto, CatchEnd);
         Builder.BringLabel(CatchBegin);
     }
 
+    /// <summary>
+    ///     Ends catch section.
+    /// </summary>
     public void Dispose()
     {
         Builder.BringLabel(CatchEnd);

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -28,7 +28,6 @@ public class GameCanvas : Canvas
     }
 
     public int getKeyStates() => 0;
-
 
     public const int DOWN_PRESSED = 64;
     public const int FIRE_PRESSED = 256;

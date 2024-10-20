@@ -1,18 +1,21 @@
-﻿// Copyright (c) Arman Jussupgaliyev. Licensed under the MIT Licence.
+﻿// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Security.Cryptography;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Utils;
-using System.Security.Cryptography;
 using Object = java.lang.Object;
 
 namespace java.security;
 
 public class MessageDigest : Object
 {
-    [JavaIgnore] private string Algorithm = null!;
-    [JavaIgnore] private HashAlgorithm Hash = null!;
+    [JavaIgnore]
+    private string Algorithm = null!;
+
+    [JavaIgnore]
+    private HashAlgorithm Hash = null!;
 
     [return: JavaType(typeof(MessageDigest))]
     public static Reference getInstance([String] Reference algorithm)
@@ -20,7 +23,7 @@ public class MessageDigest : Object
         string s = Jvm.ResolveString(algorithm).ToUpper().Trim();
         if (s.Length < 3)
             Jvm.Throw<NoSuchAlgorithmException>(s);
-        MessageDigest md = Jvm.AllocateObject<MessageDigest>();
+        MessageDigest md = Jvm.Allocate<MessageDigest>();
         md.Algorithm = s;
         md.InitHash();
         return md.This;
@@ -55,6 +58,7 @@ public class MessageDigest : Object
                 Jvm.Throw<NoSuchAlgorithmException>(Algorithm);
                 return;
         }
+
         ha.Initialize();
         Hash = ha;
     }
@@ -76,7 +80,7 @@ public class MessageDigest : Object
         sbyte[] b = Jvm.ResolveArray<sbyte>(buf);
         try
         {
-            Hash.TransformFinalBlock(System.Array.Empty<byte>(), 0, 0);
+            Hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
             byte[]? hash = Hash.Hash;
             if (hash == null)
                 Jvm.Throw<DigestException>();
@@ -89,6 +93,7 @@ public class MessageDigest : Object
         {
             Jvm.Throw<DigestException>();
         }
+
         return 0;
     }
 

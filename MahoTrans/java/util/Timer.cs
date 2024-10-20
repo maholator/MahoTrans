@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -14,13 +14,14 @@ namespace java.util;
 
 public class Timer : Object
 {
-    [JavaType(typeof(TimerThread))] public Reference Thread;
+    [JavaType(typeof(TimerThread))]
+    public Reference Thread;
 
     [InitMethod]
     public new void Init()
     {
         base.Init();
-        var th = Jvm.AllocateObject<TimerThread>();
+        var th = Jvm.Allocate<TimerThread>();
         th.Init();
         Thread = th.This;
     }

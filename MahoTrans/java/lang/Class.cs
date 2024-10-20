@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
@@ -16,7 +16,9 @@ public class Class : Object
     /// <summary>
     ///     JVM-side version of this object.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JavaClass InternalClass = null!;
+    [JavaIgnore]
+    [JsonIgnore]
+    public JavaClass InternalClass = null!;
 
     /// <summary>
     ///     Json helper to serialize/deserialize attached class. NEVER touch it. Use <see cref="JavaClass" /> to take object's
@@ -39,9 +41,9 @@ public class Class : Object
     public static Reference forName([String] Reference r)
     {
         var name = Jvm.ResolveString(r);
-        if (!Jvm.Classes.TryGetValue(name.Replace('.', '/'), out var jc))
+        if (!Jvm.TryGetLoadedClass(name.Replace('.', '/'), out var jc))
             Jvm.Throw<ClassNotFoundException>(name);
-        var cls = Jvm.AllocateObject<Class>();
+        var cls = Jvm.Allocate<Class>();
         cls.InternalClass = jc;
         return cls.This;
     }
@@ -70,7 +72,6 @@ public class Class : Object
         };
     }
 
-
     public Reference allocate()
     {
         if (!InternalClass.Methods.ContainsKey(new NameDescriptor("<init>", "()V")))
@@ -85,8 +86,8 @@ public class Class : Object
         if (data == null)
             return Reference.Null;
 
-        var stream = Jvm.AllocateObject<ByteArrayInputStream>();
-        var buf = Jvm.AllocateArray(data, "[B");
+        var stream = Jvm.Allocate<ByteArrayInputStream>();
+        var buf = Jvm.WrapPrimitiveArray(data);
         stream.Init(buf);
         return stream.This;
     }

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Runtime.CompilerServices;
@@ -7,7 +7,7 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private void ExecuteInternalStrict()
+    private void executeInternalStrict()
     {
         var clrTicks = DateTime.UtcNow.Ticks;
         do
@@ -21,7 +21,7 @@ public partial class JvmState
 
                 if (_cycleNumber % CYCLES_PER_BUNCH == 0)
                     break;
-            } while (_running);
+            } while (_shouldRun);
 
             if (_cycleNumber % CYCLES_PER_BUNCH == 0)
             {
@@ -45,10 +45,10 @@ public partial class JvmState
 
                 clrTicks += target;
             }
-        } while (_running);
+        } while (_shouldRun);
     }
 
-    private void ExecuteInternalWeak()
+    private void executeInternalWeak()
     {
         var clrTicks = DateTime.UtcNow.Ticks;
         do
@@ -62,7 +62,7 @@ public partial class JvmState
 
                 if (_cycleNumber % CYCLES_PER_BUNCH == 0)
                     break;
-            } while (_running);
+            } while (_shouldRun);
 
             if (_cycleNumber % CYCLES_PER_BUNCH == 0)
             {
@@ -86,11 +86,11 @@ public partial class JvmState
 
                 clrTicks += target;
             }
-        } while (_running);
+        } while (_shouldRun);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private void ExecuteInternalUnlocked()
+    private void executeInternalUnlocked()
     {
         do
         {
@@ -112,7 +112,7 @@ public partial class JvmState
 
                     if (_cycleNumber % CYCLES_PER_BUNCH == 0)
                         break;
-                } while (_running);
+                } while (_shouldRun);
             }
 
             if (_cycleNumber % CYCLES_PER_BUNCH == 0)
@@ -128,6 +128,6 @@ public partial class JvmState
                     RunGarbageCollector();
                 }
             }
-        } while (_running);
+        } while (_shouldRun);
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -10,14 +10,16 @@ namespace javax.microedition.midlet;
 
 public class MIDlet : Object
 {
-    [JavaIgnore] public Dictionary<string, string> Properties = null!;
+    [JavaIgnore]
+    public Dictionary<string, string> Properties = null!;
 
     public Reference Display;
 
     /// <summary>
-    /// This is true if MIDlet is in paused state.
+    ///     This is true if MIDlet is in paused state.
     /// </summary>
-    [JavaIgnore] public bool IsPaused;
+    [JavaIgnore]
+    public bool IsPaused;
 
     [InitMethod]
     public new void Init()
@@ -35,6 +37,7 @@ public class MIDlet : Object
         if (Properties.TryGetValue(Jvm.ResolveString(r), out var val))
             return Jvm.InternalizeString(val);
 
+        // never try to return empty string here. NEVER. If you need a local hack, do a LOCAL hack to some manifest field.
         return Reference.Null;
     }
 

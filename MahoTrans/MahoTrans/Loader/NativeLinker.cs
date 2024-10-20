@@ -1,9 +1,11 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
+using MahoTrans.Compiler;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Errors;
@@ -17,13 +19,13 @@ namespace MahoTrans.Loader;
 ///     This class exposes tools to build JVM types from CLR types.
 /// </summary>
 /// <seealso cref="ClassCompiler" />
-/// <seealso cref="BridgeCompiler" />
+/// <seealso cref="FieldBridgeCompiler" />
 public static class NativeLinker
 {
     private static int _bridgeAsmCounter = 1;
 
     /// <summary>
-    /// Converts list of CLR types to list of JVM types.
+    ///     Converts list of CLR types to list of JVM types.
     /// </summary>
     /// <param name="types">Types to convert.</param>
     /// <param name="logger">Logger to log issues to.</param>
@@ -31,12 +33,13 @@ public static class NativeLinker
     public static List<JavaClass> Make(Type[] types, ILoadLogger? logger)
     {
         // bridges asm init
-        var name = new AssemblyName($"Bridge-{_bridgeAsmCounter}");
-        _bridgeAsmCounter++;
+        var name = new AssemblyName($"{JvmState.NATIVE_BRIDGE_DLL_PREFIX}{_bridgeAsmCounter}");
+
         var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.RunAndCollect);
-        var module = builder.DefineDynamicModule($"Bridge-{_bridgeAsmCounter}");
-        var bridge = module.DefineType(BridgeCompiler.METHODS_BRIDGE_CLASS_NAME,
+        var module = builder.DefineDynamicModule($"{JvmState.NATIVE_BRIDGE_DLL_PREFIX}{_bridgeAsmCounter}");
+        var bridge = module.DefineType(CompilerUtils.BRIDGE_CLASS_NAME,
             TypeAttributes.Public | TypeAttributes.Sealed);
+        _bridgeAsmCounter++;
 
         // building java classes
         List<JavaClass> java = new List<JavaClass>();
@@ -57,10 +60,8 @@ public static class NativeLinker
 
             foreach (var field in @class.Fields.Values)
             {
-                field.GetValue = loaded.GetMethod(BridgeCompiler.GetFieldGetterName(field.Descriptor, @class.Name))?
-                    .CreateDelegate<Action<Frame>>();
-                field.SetValue = loaded.GetMethod(BridgeCompiler.GetFieldSetterName(field.Descriptor, @class.Name))?
-                    .CreateDelegate<Action<Frame>>();
+                field.GetValue = FieldBridgeCompiler.CaptureGetter(loaded, @class, field);
+                field.SetValue = FieldBridgeCompiler.CaptureSetter(loaded, @class, field);
             }
         }
 
@@ -105,7 +106,7 @@ public static class NativeLinker
             if (nm.Name == nameof(Object.OnObjectDelete))
                 continue;
 
-            var built = BuildMethod(nm, jc, type, bridge);
+            var built = BuildMethod(nm, jc, type, bridge, logger);
             javaMethods.Add(built);
         }
 
@@ -115,7 +116,7 @@ public static class NativeLinker
             var ii = i.FullName!.Replace('.', '/');
             if (javaInterfaces.Contains(ii))
                 continue;
-            if (i.GetCustomAttribute<JavaInterfaceAttribute>() != null)
+            if (i.IsJavaType())
                 javaInterfaces.Add(ii);
         }
 
@@ -134,7 +135,7 @@ public static class NativeLinker
         {
             if (x.DeclaringType == typeof(StaticMemory))
             {
-                var d = BridgeCompiler.BuildNativeStaticBridge(bridge, x);
+                var d = FieldBridgeCompiler.BuildNativeStaticBridge(bridge, x);
                 var field = new Field(d, FieldFlags.Public | FieldFlags.Static, name);
                 return field;
             }
@@ -149,7 +150,7 @@ public static class NativeLinker
                 {
                     NativeField = x,
                 };
-                BridgeCompiler.BuildBridges(bridge, x, d, jc);
+                FieldBridgeCompiler.BuildBridges(bridge, x, d, jc);
                 return field;
             }
         }).ToDictionary(x => x.Descriptor, x => x);
@@ -157,7 +158,7 @@ public static class NativeLinker
     }
 
     private static Method BuildMethod(MethodInfo nativeMethod, JavaClass javaType, Type clrType,
-        TypeBuilder bridgeBuilder)
+        TypeBuilder bridgeBuilder, ILoadLogger? logger)
     {
         // collecting info
 
@@ -167,9 +168,11 @@ public static class NativeLinker
         if (descriptor != null)
         {
             if (!descriptor.StartsWith('('))
-                throw new JavaLinkageException($"Descriptor {descriptor} has no opening bracket!");
+                throw new JavaLinkageException(
+                    $"Descriptor {descriptor} has no opening bracket! Check {clrType.FullName}.");
             if (descriptor.Count(x => x == ')') != 1)
-                throw new JavaLinkageException($"Descriptor {descriptor} has invalid closing brackets!");
+                throw new JavaLinkageException(
+                    $"Descriptor {descriptor} has invalid closing brackets! Check {clrType.FullName}.");
         }
 
         var flags = MethodFlags.Public;
@@ -182,18 +185,38 @@ public static class NativeLinker
         if (nativeMethod.ReturnParameter.ParameterType == typeof(JavaMethodBody))
         {
             if (isCtor || isClinit)
-                throw new JavaLinkageException("Java method builder can't build initialization method.");
+                throw new JavaLinkageException(
+                    $"Java method builder can't build initialization method. There was an attempt in {clrType.FullName}.");
 
             if (args.Length != 1 || args[0].ParameterType != typeof(JavaClass))
-                throw new JavaLinkageException("Java method builder must take 1 argument - containing JVM type.");
+                throw new JavaLinkageException(
+                    $"Java method builder must take 1 argument - containing JVM type. Method {nativeName} in {clrType.FullName} doesn't.");
 
             if (descriptor == null)
                 throw new JavaLinkageException(
                     $"Java method builder must have a descriptor attribute - method {nativeName} in {clrType.FullName} doesn't.");
 
+            if (args[0].Name != "cls")
+                logger?.Log(LoadIssueType.QuestionableNativeCode, clrType.ToJavaName(),
+                    $"Method builder \"{nativeMethod.Name}\" argument should be named \"cls\", but it is named \"{args[0].Name}\".");
+
             var d = new NameDescriptor(name, descriptor);
             var target = nativeMethod.IsStatic ? null : Activator.CreateInstance(clrType);
-            var body = (JavaMethodBody)nativeMethod.Invoke(target, new object[] { javaType })!;
+
+            JavaMethodBody? body;
+            try
+            {
+                body = nativeMethod.Invoke(target, new object[] { javaType })! as JavaMethodBody;
+            }
+            catch (Exception e)
+            {
+                throw new JavaLinkageException(
+                    $"Method builder {nativeName} in {clrType.FullName} crashed.", e);
+            }
+
+            if (body == null)
+                throw new JavaLinkageException(
+                    $"Method builder {nativeName} in {clrType.FullName} returned invalid or null body.");
 
             return new Method(d, flags, javaType)
             {
@@ -206,7 +229,7 @@ public static class NativeLinker
         if (isCtor && isClinit)
             throw new JavaLinkageException(
                 $"{ms} must be either instance or static.");
-        if (isCtor && ret.Native != typeof(void))
+        if (isCtor && !ret.IsVoid)
             throw new JavaLinkageException(
                 $"{ms} must return void.");
         if (isCtor && nativeMethod.IsStatic)
@@ -215,7 +238,7 @@ public static class NativeLinker
         if (isClinit && !nativeMethod.IsStatic)
             throw new JavaLinkageException(
                 $"{ms} must be static.");
-        if (isClinit && ret.Native != typeof(void))
+        if (isClinit && !ret.IsVoid)
             throw new JavaLinkageException(
                 $"{ms} must return void.");
 
@@ -228,7 +251,7 @@ public static class NativeLinker
         java.NativeBody = nativeMethod;
         try
         {
-            java.BridgeNumber = BridgeCompiler.BuildBridgeMethod(nativeMethod, bridgeBuilder);
+            java.BridgeNumber = CallBridgeCompiler.BuildCallBridge(nativeMethod, bridgeBuilder);
         }
         catch (Exception e)
         {
@@ -239,7 +262,6 @@ public static class NativeLinker
         return java;
     }
 
-
     /// <summary>
     ///     Checks, should the field be shown to JVM.
     /// </summary>
@@ -249,6 +271,10 @@ public static class NativeLinker
     {
         // ignored fields are ignored.
         if (field.GetCustomAttribute<JavaIgnoreAttribute>() != null)
+            return false;
+
+        // service fields are ignored.
+        if (field.GetCustomAttribute<CompilerGeneratedAttribute>() != null)
             return false;
 
         var t = field.FieldType;
@@ -279,25 +305,55 @@ public static class NativeLinker
 
     private readonly struct Parameter
     {
-        public readonly Type Native;
-        public readonly string? Java;
+        /// <summary>
+        ///     Captures real type of parameter or field.
+        /// </summary>
+        private readonly Type _native;
 
-        public Parameter(Type native, string? java)
+        /// <summary>
+        ///     Captures value of <see cref="JavaTypeAttribute" />.
+        /// </summary>
+        private readonly string? _java;
+
+        private Parameter(Type native, string? java)
         {
-            Native = native;
-            Java = java;
+            _native = native;
+            _java = java;
         }
+
+        public bool IsVoid => _native == typeof(void);
 
         public override string ToString()
         {
-            if (Java == null)
-                return Native.ToJavaDescriptorNative();
-            if (Java.StartsWith('['))
-                return Java;
-            if (Java.StartsWith('L') && Java.EndsWith(';'))
-                return Java;
+            if (!_native.IsArray)
+                return toDescriptor(_native);
 
-            return $"L{Java};";
+            // for arrays, we should add [[[[[ things ourselves.
+
+            if (_native.GetArrayRank() != 1)
+                throw new NotSupportedException("Multidimensional arrays are not supported");
+            if (!_native.HasElementType) // no idea when it may happen but why not to check
+                throw new NotSupportedException("Array must have element type");
+            var udrType = _native.GetElementType()!;
+
+            if (udrType.IsArray)
+                throw new NotSupportedException("Nested arrays are not supported");
+
+            // one more dimension
+            return "[" + toDescriptor(udrType);
+        }
+
+        private string toDescriptor(Type t)
+        {
+            if (_java == null)
+                return t.ToJavaDescriptor();
+
+            if (_java.StartsWith('['))
+                return _java;
+            if (_java.StartsWith('L') && _java.EndsWith(';'))
+                return _java;
+
+            return $"L{_java};";
         }
 
         public static Parameter FromParam(ParameterInfo info)

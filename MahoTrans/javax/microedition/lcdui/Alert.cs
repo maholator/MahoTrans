@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 // ReSharper disable InconsistentNaming
@@ -13,12 +13,13 @@ public class Alert : Screen
 {
     public const int FOREVER = -2;
 
-    [JavaType(typeof(Displayable))] public Reference Next;
+    [JavaType(typeof(Displayable))]
+    public Reference Next;
 
     [ClassInit]
     public static void ClInit()
     {
-        var dismiss = Jvm.AllocateObject<Command>();
+        var dismiss = Jvm.Allocate<Command>();
         dismiss.Init(Jvm.AllocateString(""), Command.OK, 0);
         NativeStatics.AlertDismissCommand = dismiss.This;
     }
@@ -40,16 +41,19 @@ public class Alert : Screen
         Type = alertType;
         Timeout = getDefaultTimeout();
         Commands.Add(NativeStatics.AlertDismissCommand);
-        setCommandListener(Jvm.AllocateObject<DefaultAlertHandler>().This);
+        setCommandListener(Jvm.Allocate<DefaultAlertHandler>().This);
         // invalidate is necessary to notify toolkit about non-null implicit command
         Toolkit.Display.CommandsUpdated(Handle, Commands, Reference.Null);
     }
 
-    [String] public Reference Text;
+    [String]
+    public Reference Text;
 
-    [JavaType(typeof(Image))] public Reference Image;
+    [JavaType(typeof(Image))]
+    public Reference Image;
 
-    [JavaType(typeof(AlertType))] public Reference Type;
+    [JavaType(typeof(AlertType))]
+    public Reference Type;
 
     public int Timeout;
 

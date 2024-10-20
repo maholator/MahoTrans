@@ -1,7 +1,9 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using java.lang;
 using JetBrains.Annotations;
 using MahoTrans.Abstractions;
@@ -9,7 +11,6 @@ using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
-using MahoTrans.Utils;
 using Array = System.Array;
 using Object = java.lang.Object;
 using String = java.lang.String;
@@ -24,23 +25,38 @@ public partial class JvmState
     public long[] StaticFields = Array.Empty<long>();
     public List<Field> StaticFieldsOwners = new();
     private int _nextObjectId = 1;
-    [PublicAPI] public int ObjectsOnFly;
+
+    [PublicAPI]
+    public int ObjectsOnFly;
+
     private Dictionary<string, int> _internalizedStrings = new();
 
     private int _bytesAllocated;
 
-    [PublicAPI] public int BytesAllocated => _bytesAllocated;
+    [PublicAPI]
+    public int BytesAllocated => _bytesAllocated;
 
     //TODO
     public int TotalMemory { get; } = 1024 * 1024 * 4;
     public int FreeMemory => TotalMemory - BytesAllocated;
 
-    [PublicAPI] public int GcCount;
+    [PublicAPI]
+    public int GcCount;
 
     private bool _gcPending;
 
-    #region Object allocation
+    #region Object/string allocation
 
+    /// <summary>
+    ///     Creates new CLR object for given JVM class. This used by interpreter. This can be used by native code if caller
+    ///     doesn't know what it is doing.
+    /// </summary>
+    /// <param name="class">Class object.</param>
+    /// <returns>Reference to newly created object.</returns>
+    /// <remarks>
+    ///     As per benchmark, this appears to be x2 faster than generic <see cref="Allocate{T}" />:
+    ///     https://t.me/sym_ansel_dev/39 . This is because generic call does dictionary lookup to obtain java class object.
+    /// </remarks>
     public Reference AllocateObject(JavaClass @class)
     {
         Object o = (Activator.CreateInstance(@class.ClrType!) as Object)!;
@@ -48,23 +64,43 @@ public partial class JvmState
         return PutToHeap(o);
     }
 
-    public T AllocateObject<T>() where T : Object
+    /// <summary>
+    ///     Creates new CLR object of CLR class that represents given JVM type.
+    /// </summary>
+    /// <typeparam name="T">Class to instantiate.</typeparam>
+    /// <returns>Newly created object.</returns>
+    /// <remarks>
+    ///     This calls default constructor, assigns java class object and adds the object to heap. This is easier to use in
+    ///     native code, but <see cref="AllocateObject" /> is faster.
+    /// </remarks>
+    public T Allocate<T>() where T : Object, new()
     {
-        var o = Activator.CreateInstance<T>();
-        o.JavaClass = Classes[typeof(T).ToJavaName()];
+        var o = new T();
+        o.JavaClass = _classesByType[typeof(T)];
+        Debug.Assert(o.JavaClass.ClrType == o.GetType());
         PutToHeap(o);
         return o;
     }
 
+    /// <summary>
+    ///     Wraps CLR string into JVM object.
+    /// </summary>
+    /// <param name="str">String to wrap.</param>
+    /// <returns>Created string object.</returns>
     public Reference AllocateString(string str)
     {
         return PutToHeap(new String
         {
             Value = str,
-            JavaClass = Classes["java/lang/String"]
+            JavaClass = _classes["java/lang/String"]
         });
     }
 
+    /// <summary>
+    ///     Wraps CLR string into JVM object. Attempts to use cached "internalized" string.
+    /// </summary>
+    /// <param name="str">String to wrap.</param>
+    /// <returns>Reference to internalized string wrapper.</returns>
     public Reference InternalizeString(string str)
     {
         if (_internalizedStrings.TryGetValue(str, out var i))
@@ -79,53 +115,35 @@ public partial class JvmState
     #region Array allocation (for native)
 
     /// <summary>
-    ///     Creates an array. This is for native code.
+    ///     Creates JVM array wrapper over CLR array. This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
+    /// <param name="className">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
     /// <returns>Reference to newly created array.</returns>
-    public Reference AllocateArray<T>(T[] data, string cls) where T : struct =>
-        AllocateArray(data, GetClass(cls));
-
-    /// <summary>
-    ///     Creates an array. This is for native code.
-    /// </summary>
-    /// <param name="data">CLR array to put it. It won't be copied.</param>
-    /// <param name="cls">Array class. If you store strings, this must be "[Ljava/lang/String;".</param>
-    /// <returns>Reference to newly created array.</returns>
-    public Reference AllocateArray<T>(T[] data, JavaClass cls) where T : struct
+    public Reference WrapReferenceArray(Reference[] data, string className)
     {
         if (data == null!)
-            throw new JavaRuntimeError("Attempt to convert null array");
+            throw new JavaRuntimeError("Attempt to wrap null array");
 
-        if (typeof(T) == typeof(byte))
-            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
+        JavaClass cls = GetClass(className);
 
-        return PutToHeap(new Array<T>
-        {
-            Value = data,
-            JavaClass = cls
-        });
+        return PutToHeap(Array<Reference>.Create(data, cls));
     }
 
     /// <summary>
-    ///     Creates an array of primitives (ints, chars, etc.). This is for native code.
+    ///     Creates JVM array wrapper over CLR array of primitives (ints, chars, etc.). This is for native code.
     /// </summary>
     /// <param name="data">CLR array to put it. It won't be copied.</param>
     /// <returns>Reference to newly created array.</returns>
-    public Reference AllocatePrimitiveArray<T>(T[] data) where T : struct
+    public Reference WrapPrimitiveArray<T>(T[] data) where T : struct
     {
         if (data == null!)
-            throw new JavaRuntimeError("Attempt to convert null array");
-        if (typeof(T) == typeof(byte))
-            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes!");
-        if (typeof(T) == typeof(Reference))
-            throw new JavaRuntimeError("Reference array must have assigned class!");
-        return PutToHeap(new Array<T>
-        {
-            Value = data,
-            JavaClass = PrimitiveToArrayType<T>(),
-        });
+            throw new JavaRuntimeError("Attempt to wrap null array");
+
+        // this does all the checks (i.e. sbyte/ubyte)
+        var arrayClass = PrimitiveToArrayType<T>();
+
+        return PutToHeap(Array<T>.Create(data, arrayClass));
     }
 
     #endregion
@@ -144,14 +162,14 @@ public partial class JvmState
             Throw<NegativeArraySizeException>();
         return arrayType switch
         {
-            ArrayType.T_BOOLEAN => AllocateArray<bool>(length),
-            ArrayType.T_CHAR => AllocateArray<char>(length),
-            ArrayType.T_FLOAT => AllocateArray<float>(length),
-            ArrayType.T_DOUBLE => AllocateArray<double>(length),
-            ArrayType.T_BYTE => AllocateArray<sbyte>(length),
-            ArrayType.T_SHORT => AllocateArray<short>(length),
-            ArrayType.T_INT => AllocateArray<int>(length),
-            ArrayType.T_LONG => AllocateArray<long>(length),
+            ArrayType.T_BOOLEAN => AllocateArrayInternal<bool>(length),
+            ArrayType.T_CHAR => AllocateArrayInternal<char>(length),
+            ArrayType.T_FLOAT => AllocateArrayInternal<float>(length),
+            ArrayType.T_DOUBLE => AllocateArrayInternal<double>(length),
+            ArrayType.T_BYTE => AllocateArrayInternal<sbyte>(length),
+            ArrayType.T_SHORT => AllocateArrayInternal<short>(length),
+            ArrayType.T_INT => AllocateArrayInternal<int>(length),
+            ArrayType.T_LONG => AllocateArrayInternal<long>(length),
             _ => Reference.Null
         };
     }
@@ -166,28 +184,26 @@ public partial class JvmState
     {
         if (length < 0)
             Throw<NegativeArraySizeException>();
-        return PutToHeap(new Array<Reference>
-        {
-            Value = new Reference[length],
-            JavaClass = cls
-        });
+        return PutToHeap(Array<Reference>.CreateEmpty(length, cls));
     }
 
     #endregion
 
     #region Array allocation (utils)
 
-    private Reference AllocateArray<T>(int length) where T : struct
+    private Reference AllocateArrayInternal<T>(int length) where T : struct
     {
         if (typeof(T) == typeof(Reference))
             throw new JavaRuntimeError("Reference array must have assigned class!");
-        return PutToHeap(new Array<T>
-        {
-            Value = new T[length],
-            JavaClass = PrimitiveToArrayType<T>(),
-        });
+        return PutToHeap(Array<T>.CreateEmpty(length, PrimitiveToArrayType<T>()));
     }
 
+    /// <summary>
+    ///     Gets JVM class for "[primitive" object. Must not be used with references.
+    /// </summary>
+    /// <typeparam name="T">CLR type to get type for.</typeparam>
+    /// <returns>JVM class.</returns>
+    /// <exception cref="JavaRuntimeError">Something wrong is passed.</exception>
     private JavaClass PrimitiveToArrayType<T>()
     {
         string name;
@@ -207,6 +223,10 @@ public partial class JvmState
             name = "[Z";
         else if (typeof(T) == typeof(sbyte))
             name = "[B";
+        else if (typeof(T) == typeof(byte))
+            throw new JavaRuntimeError("Attempt to allocate array of unsigned bytes");
+        else if (typeof(T) == typeof(Reference))
+            throw new JavaRuntimeError("Attempt to allocate reference array as primitive array");
         else
             throw new JavaRuntimeError($"Attempt to allocate an array of non-supported primitive type {typeof(T)}");
         return GetClass(name);
@@ -216,16 +236,22 @@ public partial class JvmState
 
     #region Resolution
 
-#if DEBUG
     public Object ResolveObject(Reference r)
     {
+#if DEBUG
         return Resolve<Object>(r);
-    }
-
-    public T Resolve<T>(Reference r) where T : Object
-    {
+#else
         if (r.IsNull)
             Throw<NullPointerException>();
+        return _heap[r.Index]!;
+#endif
+    }
+
+    public T Resolve<T>(Reference r) where T : class, IJavaObject
+    {
+#if DEBUG
+        if (r.IsNull)
+            Throw<NullPointerException>($"Attempt to resolve null reference to {typeof(T)}");
         if (r.Index >= _heap.Length)
             throw new JavaRuntimeError($"Reference {r.Index} is out of bounds ({_heap.Length})");
         var obj = _heap[r.Index];
@@ -236,24 +262,14 @@ public partial class JvmState
             return t;
 
         throw new JavaRuntimeError($"Reference {r.Index} pointers to {obj.GetType()} object, {typeof(T)} expected.");
-    }
 #else
-    public Object ResolveObject(Reference r)
-    {
         if (r.IsNull)
             Throw<NullPointerException>();
-        return _heap[r.Index]!;
-    }
-
-    public T Resolve<T>(Reference r) where T : Object
-    {
-        if (r.IsNull)
-            Throw<NullPointerException>();
-        return (T)_heap[r.Index]!;
-    }
+        return Unsafe.As<T>(_heap[r.Index]!);
 #endif
+    }
 
-    public T? ResolveNullable<T>(Reference r) where T : Object
+    public T? ResolveOrNull<T>(Reference r) where T : class, IJavaObject
     {
         if (r.IsNull)
             return null;
@@ -269,7 +285,7 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (String)_heap[r.Index]!;
+        var obj = Unsafe.As<String>(_heap[r.Index]!);
         return obj.Value;
     }
 
@@ -279,7 +295,7 @@ public partial class JvmState
     /// </summary>
     /// <param name="r">Reference to resolve.</param>
     /// <returns>String value.</returns>
-    public string? ResolveStringOrDefault(Reference r)
+    public string? ResolveStringOrNull(Reference r)
     {
         if (r.IsNull)
             return null;
@@ -291,23 +307,28 @@ public partial class JvmState
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (Array<T>)_heap[r.Index]!;
-        return obj.Value;
+        var obj = Unsafe.As<java.lang.Array>(_heap[r.Index]!);
+        return Unsafe.As<T[]>(obj.BaseArray);
     }
 
-    public T[]? ResolveArrayOrDefault<T>(Reference r) where T : struct
+    public T[]? ResolveArrayOrNull<T>(Reference r) where T : struct
     {
         if (r.IsNull)
             return null;
-        var obj = _heap[r.Index] as Array<T>;
-        return obj?.Value;
+        var obj = _heap[r.Index] as java.lang.Array;
+        if (obj == null)
+            return null;
+        return Unsafe.As<T[]>(obj.BaseArray);
     }
 
+    /// <summary>
+    ///     Helper for interpreter and bridges.
+    /// </summary>
     public void SetArrayElement<T>(Reference r, int index, T value) where T : struct
     {
         if (r.IsNull)
             Throw<NullPointerException>();
-        var obj = (Array<T>)_heap[r.Index]!;
+        var obj = Unsafe.As<Array<T>>(_heap[r.Index]!);
         obj[index] = value;
     }
 
@@ -321,9 +342,9 @@ public partial class JvmState
     /// <typeparam name="T">Type of exception.</typeparam>
     /// <exception cref="JavaThrowable">Always thrown CLR exception. Contains java exception to be processed by handler.</exception>
     [DoesNotReturn]
-    public void Throw<T>() where T : Throwable
+    public void Throw<T>() where T : Throwable, new()
     {
-        var ex = AllocateObject<T>();
+        var ex = Allocate<T>();
         ex.Init();
         ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);
@@ -331,12 +352,21 @@ public partial class JvmState
     }
 
     [DoesNotReturn]
-    public void Throw<T>(string message) where T : Throwable
+    public void Throw<T>(string message) where T : Throwable, new()
     {
-        var ex = AllocateObject<T>();
+        var ex = Allocate<T>();
         ex.Init(AllocateString(message));
         ex.Source = ThrowSource.Native;
         Toolkit.Logger?.LogExceptionThrow(ex.This);
+        throw new JavaThrowable(ex);
+    }
+
+    [DoesNotReturn]
+    public void Throw(Reference r)
+    {
+        var ex = Resolve<Throwable>(r);
+        ex.Source = ThrowSource.Java;
+        Toolkit.Logger?.LogExceptionThrow(r);
         throw new JavaThrowable(ex);
     }
 
@@ -565,7 +595,7 @@ public partial class JvmState
         // building roots list
         {
             // classes
-            foreach (var cls in Classes.Values)
+            foreach (var cls in _classes.Values)
             {
                 if (!cls.ModelObject.IsNull)
                 {
@@ -617,6 +647,31 @@ public partial class JvmState
 
         return roots;
     }
+
+    /// <summary>
+    ///     Sets object in heap to null. No checks are done. No events are invoked. This is for internal usage.
+    /// </summary>
+    /// <param name="r">Reference to clear.</param>
+    /// <remarks>This is for internal usage only.</remarks>
+    [Obsolete("Objects must not be deleted from heap directly. Never call this outside from tests/benchmarks.")]
+    public void ForceDeleteObject(Reference r)
+    {
+        _heap[r] = null;
+    }
+
+    #endregion
+
+    #region Statics
+
+    public long GetStaticLong(int index) => StaticFields[index];
+
+    public int GetStaticInt(int index) => (int)StaticFields[index];
+
+    public float GetStaticFloat(int index) => BitConverter.Int32BitsToSingle((int)StaticFields[index]);
+
+    public double GetStaticDouble(int index) => BitConverter.Int64BitsToDouble(StaticFields[index]);
+
+    public Reference GetStaticReference(int index) => StaticFields[index];
 
     #endregion
 }

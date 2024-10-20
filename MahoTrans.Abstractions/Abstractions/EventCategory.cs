@@ -11,10 +11,22 @@ namespace MahoTrans.Abstractions;
 public enum EventCategory
 {
     Common = 1,
-    [Description("Class initializers")] ClassInitializer,
-    [Description("JIT")] Jit,
 
-    [Description("Resources")] Resources,
-    [Description("GC")] Gc,
+    [Description("Class initializers")]
+    ClassInitializer,
+
+    [Description("Resources")]
+    Resources,
+
+    [Description("GC")]
+    Gc,
+
+    [Description("Threading")]
     Threading,
+
+    [Description("System properties")]
+    SystemPropertyAccess,
+
+    [Description("App properties")]
+    AppPropertyAccess,
 }

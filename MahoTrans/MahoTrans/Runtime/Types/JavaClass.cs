@@ -1,6 +1,7 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using java.lang;
@@ -11,13 +12,13 @@ using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime.Types;
 
-public class JavaClass
+public class JavaClass : IJavaEntity
 {
     public short MinorVersion;
     public short MajorVersion;
     public object[] Constants = Array.Empty<object>();
     public ClassFlags Flags;
-    public string Name = "java/lang/Object";
+    public string Name { get; set; } = "java/lang/Object";
     public string SuperName = "java/lang/Object";
     public JavaClass Super = null!;
     public string[] Interfaces = Array.Empty<string>();
@@ -38,6 +39,8 @@ public class JavaClass
     public bool PendingInitializer = true;
 
     public int Size;
+
+    public string? DisplayableName { get; set; }
 
     public override string ToString() => Name;
 
@@ -94,22 +97,6 @@ public class JavaClass
         }
     }
 
-    public bool Is(string type)
-    {
-        if (Name == type)
-            return true;
-        JavaClass jc = this;
-
-        while (true)
-        {
-            if (jc.SuperName == type)
-                return true;
-            if (jc.Super.IsObject)
-                return false;
-            jc = jc.Super;
-        }
-    }
-
     public bool Is(JavaClass type)
     {
         if (this == type)
@@ -133,6 +120,9 @@ public class JavaClass
         }
     }
 
+    /// <summary>
+    ///     True if this class is <see cref="Object" />.
+    /// </summary>
     public bool IsObject => Name == "java/lang/Object";
 
     public bool IsInterface => (Flags & ClassFlags.Interface) != 0;
@@ -225,14 +215,14 @@ public class JavaClass
     ///     Gets field defined on this class or one of its supers. This assumes that class tree already built.
     /// </summary>
     /// <param name="descriptor">Descriptor of the field.</param>
-    /// <returns>Field object. Null if field was not found.</returns>
-    public Field? GetFieldRecursiveOrNull(NameDescriptor descriptor)
+    /// <returns>Field object and class where the field lives. Null if field was not found.</returns>
+    public (JavaClass, Field)? GetFieldRecursiveOrNull(NameDescriptor descriptor)
     {
         var cls = this;
         while (true)
         {
             if (cls.Fields.TryGetValue(descriptor, out var f))
-                return f;
+                return (cls, f);
             if (cls.IsObject)
                 return null;
             cls = cls.Super;
@@ -250,7 +240,20 @@ public class JavaClass
         while (true)
         {
             if (cls.Methods.TryGetValue(descriptor, out var m))
+            {
+                Debug.Assert(m.Class == cls);
                 return m;
+            }
+
+            if (cls.IsInterface)
+            {
+                foreach (var interf in cls.Interfaces)
+                {
+                    var m2 = JvmContext.Jvm!.GetLoadedClassOrNull(interf)?.GetMethodRecursiveOrNull(descriptor);
+                    if (m2 != null) return m2;
+                }
+            }
+
             if (cls.IsObject)
                 return null;
             cls = cls.Super;
@@ -266,7 +269,9 @@ public class JavaClass
     {
         PendingInitializer = false;
 
-        if (Methods.TryGetValue(new NameDescriptor("<clinit>", "()V"), out var m))
+        var m = ClassInitMethod;
+
+        if (m != null)
         {
             Object.Jvm.Toolkit.Logger?.LogEvent(EventCategory.ClassInitializer,
                 $"Class {Name} initialized via <clinit> method");
@@ -276,7 +281,7 @@ public class JavaClass
             }
             else
             {
-                thread.Push(m.JavaBody);
+                thread.Push(m.JavaBody!);
             }
         }
         else
@@ -286,11 +291,13 @@ public class JavaClass
         }
     }
 
+    public Method? ClassInitMethod => Methods.GetValueOrDefault(NameDescriptor.ClassInit);
+
     public Reference GetOrInitModel()
     {
         if (ModelObject.IsNull)
         {
-            var cls = JvmContext.Jvm!.AllocateObject<Class>();
+            var cls = JvmContext.Jvm!.Allocate<Class>();
             cls.InternalClass = this;
             ModelObject = cls.This;
         }

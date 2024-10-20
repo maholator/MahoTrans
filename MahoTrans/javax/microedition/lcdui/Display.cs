@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -12,7 +12,8 @@ namespace javax.microedition.lcdui;
 
 public class Display : Object
 {
-    [JavaType(typeof(Displayable))] public Reference Current;
+    [JavaType(typeof(Displayable))]
+    public Reference Current;
 
     [return: JavaType(typeof(Display))]
     public static Reference getDisplay([JavaType(typeof(MIDlet))] Reference midletRef)
@@ -20,7 +21,7 @@ public class Display : Object
         var midlet = Jvm.Resolve<MIDlet>(midletRef);
         if (midlet.Display.IsNull)
         {
-            var disp = Jvm.AllocateObject<Display>();
+            var disp = Jvm.Allocate<Display>();
             midlet.Display = disp.This;
         }
 
@@ -69,10 +70,10 @@ public class Display : Object
     public void setCurrentItem([JavaType(typeof(Item))] Reference item)
     {
         var i = Jvm.Resolve<Item>(item);
-        if (i.Owner == default)
+        if (!i.IsAttached)
             Jvm.Throw<IllegalStateException>();
 
-        Toolkit.Display.FocusItem(i.Owner, item);
+        Toolkit.Display.FocusItem(i.AttachedTo, item);
     }
 
     public void callSerially([JavaType(typeof(Runnable))] Reference r)
@@ -113,7 +114,6 @@ public class Display : Object
                 return 0;
         }
     }
-
 
     public const int ALERT = 3;
     public const int CHOICE_GROUP_ELEMENT = 2;

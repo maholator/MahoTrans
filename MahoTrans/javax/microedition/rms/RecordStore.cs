@@ -1,9 +1,10 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
 using java.util;
 using MahoTrans;
+using MahoTrans.Builder;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
@@ -15,13 +16,20 @@ namespace javax.microedition.rms;
 
 public class RecordStore : Object
 {
-    [String] public Reference StoreName;
-    [JsonProperty] private int _openCount;
+    [String]
+    public Reference StoreName;
 
-    [JavaType(typeof(Vector))] public Reference Listeners;
+    [JsonProperty]
+    private int _openCount;
 
-    [JsonProperty] private int _version;
-    [JsonProperty] private long _modifiedAt;
+    [JavaType(typeof(Vector))]
+    public Reference Listeners;
+
+    [JsonProperty]
+    private int _version;
+
+    [JsonProperty]
+    private long _modifiedAt;
 
     [ClassInit]
     public static void ClInit()
@@ -114,9 +122,33 @@ public class RecordStore : Object
             Jvm.Throw<RecordStoreNotFoundException>();
     }
 
-    public void enumerateRecords()
+    [JavaDescriptor(
+        "(Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)Ljavax/microedition/rms/RecordEnumeration;")]
+    public JavaMethodBody enumerateRecords(JavaClass cls)
     {
-        throw new NotImplementedException();
+        //TODO issues with enum:
+        // 1: this *does not* sync with record store calls. Because they are native and there is no "critical bridges" yet.
+        // 2: this internally attaches to listeners but never removed from them.
+        var b = new JavaMethodBuilder(cls);
+        b.AppendNewObject("javax/microedition/rms/RecordEnumerationImpl");
+        b.AppendDup();
+        b.AppendThis();
+        b.AppendThis();
+        b.Append(JavaOpcode.aload_1);
+        b.Append(JavaOpcode.aload_2);
+        b.Append(JavaOpcode.iload_3);
+        b.AppendVirtcall("<init>",
+            "(Ljavax/microedition/rms/RecordStore;Ljava/lang/Object;Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)V");
+        b.AppendReturnReference();
+        return b.Build(7, 4);
+    }
+
+    [return: JavaType("[I")]
+    public Reference getRecordIds()
+    {
+        CheckNotClosed();
+        var arr = Toolkit.RecordStore.GetAllRecordIds(Jvm.ResolveString(StoreName));
+        return Jvm.WrapPrimitiveArray(arr);
     }
 
     public long getLastModified()
@@ -151,7 +183,7 @@ public class RecordStore : Object
         var buf = Toolkit.RecordStore.GetRecord(Jvm.ResolveString(StoreName), recordId);
         if (buf == null)
             Jvm.Throw<InvalidRecordIDException>();
-        return Jvm.AllocateArray(buf.ConvertToSigned(), "[B");
+        return Jvm.WrapPrimitiveArray(buf.ConvertToSigned());
     }
 
     public int getRecord(int recordId, [JavaType("[B")] Reference buf, int offset)
@@ -226,10 +258,10 @@ public class RecordStore : Object
             return opened;
         }
 
-        var store = Jvm.AllocateObject<RecordStore>();
+        var store = Jvm.Allocate<RecordStore>();
         store._openCount = 1;
         store.StoreName = name;
-        var vec = Jvm.AllocateObject<Vector>();
+        var vec = Jvm.Allocate<Vector>();
         vec.Init();
         store.Listeners = vec.This;
         NativeStatics.OpenedRecordStores.Add(nameStr, store.This);
@@ -249,17 +281,8 @@ public class RecordStore : Object
     {
         if (Listeners.IsNull)
             return;
-        var vector = Jvm.Resolve<Vector>(listener);
+        var vector = Jvm.Resolve<Vector>(Listeners);
         vector.removeElement(listener);
-    }
-
-    [JavaDescriptor(
-        "(Ljavax/microedition/rms/RecordFilter;Ljavax/microedition/rms/RecordComparator;Z)Ljavax/microedition/rms/RecordEnumeration;")]
-    public Reference enumerateRecords(Reference filter, Reference comp, bool z)
-    {
-        //TODO
-        Jvm.Throw<RecordStoreNotOpenException>();
-        return Reference.Null;
     }
 
     public void setMode(int authmode, bool writeable)

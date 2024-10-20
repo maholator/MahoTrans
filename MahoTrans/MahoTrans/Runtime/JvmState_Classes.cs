@@ -1,14 +1,18 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using MahoTrans.Abstractions;
+using MahoTrans.ClassLibs;
+using MahoTrans.Compiler;
 using MahoTrans.Loader;
 using MahoTrans.Native;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
-using Object = java.lang.Object;
 
 namespace MahoTrans.Runtime;
 
@@ -18,72 +22,114 @@ public partial class JvmState
     ///     List of all loaded classes. Array classes are created only when needed, use <see cref="GetClass" /> to construct
     ///     them.
     /// </summary>
-    public readonly Dictionary<string, JavaClass> Classes = new();
+    private readonly Dictionary<string, JavaClass> _classes = new();
+
+    /// <summary>
+    ///     Auxiliary dictionary for fast conversion from CLR type to JVM model.
+    /// </summary>
+    private readonly Dictionary<Type, JavaClass> _classesByType = new();
+
+    private HashSet<JavaClass> _finalClasses = new();
 
     private readonly Dictionary<string, byte[]> _resources = new();
     private readonly Dictionary<NameDescriptor, int> _virtualPointers = new();
     private int _virtualPointerRoller = 1;
 
+    public const string TYPE_HOST_DLL_PREFIX = "MTJvmTypesHost_";
+    public const string NATIVE_BRIDGE_DLL_PREFIX = "MTBridgesHost_";
+    public const string CROSS_ROUTINES_DLL_PREFIX = "MTCrossHost_";
+
     #region Class loading
 
-    public void AddJvmClasses(JarPackage jar, string assemblyName, string moduleName)
+    public void AddJvmClasses(JarPackage jar, string moduleName)
     {
         foreach (var kvp in jar.Resources)
             _resources.Add(kvp.Key, kvp.Value);
 
-        AddJvmClasses(jar.Classes, assemblyName, moduleName);
+        AddJvmClasses(jar.Classes, moduleName);
     }
 
-    public void AddJvmClasses(JavaClass[] classes, string assemblyName, string moduleName)
+    public void AddJvmClasses(JavaClass[] classesToLoad, string moduleName)
     {
+        if (_locked)
+            throw new InvalidOperationException("Can't load classes in locked state.");
+
         using (new JvmContext(this))
         {
-            ClassCompiler.CompileTypes(Classes, classes, assemblyName, moduleName, this, Toolkit.LoadLogger);
-            foreach (var cls in classes)
+            ClassCompiler.CompileTypes(_classes, classesToLoad, $"{TYPE_HOST_DLL_PREFIX}{moduleName}", moduleName, this,
+                Toolkit.LoadLogger);
+            foreach (var cls in classesToLoad)
             {
-                Classes.Add(cls.Name, cls);
+                _classes.Add(cls.Name, cls);
             }
-
-            RefreshState(classes);
-            foreach (var cls in classes)
-                BytecodeLinker.Link(cls);
         }
     }
 
     public void AddClrClasses(IEnumerable<Type> types)
     {
+        if (_locked)
+            throw new InvalidOperationException("Can't load classes in locked state.");
+
         using (new JvmContext(this))
         {
             var classes = NativeLinker.Make(types.ToArray(), Toolkit.LoadLogger);
             foreach (var cls in classes)
             {
                 cls.Flags |= ClassFlags.Public;
-                Classes.Add(cls.Name, cls);
+                _classes.Add(cls.Name, cls);
             }
+        }
+    }
 
-            RefreshState(classes);
-            foreach (var cls in classes)
-                BytecodeLinker.Link(cls);
+    public void AddClrClasses(Assembly assembly)
+    {
+        var all = assembly.GetTypes();
+        var pending = all.Where(x => x.IsJavaType() && x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
+        AddClrClasses(pending);
+    }
+
+    /// <summary>
+    ///     Imports MT assembly to this JVM.
+    /// </summary>
+    public void AddMahoTransLibrary()
+    {
+        AddClrClasses(typeof(JvmState).Assembly);
+        var aux = ClassLibsLoader.GetClasses();
+        var loader = new ClassLoader(Toolkit.LoadLogger);
+        AddJvmClasses(aux.Select(x => loader.ReadClassFile(x)).ToArray(), "MTAuxClasses");
+        foreach (var stream in aux)
+        {
+            stream.Dispose();
         }
     }
 
     /// <summary>
-    ///     Call this when new classes are loaded into JVM. Otherwise, they will be left in semi-broken state.
+    ///     Links classes and locks this JVM.
     /// </summary>
-    /// <param name="new">Newly added classes.</param>
-    private void RefreshState(IEnumerable<JavaClass> @new)
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void LinkAndLock()
     {
-        foreach (var @class in @new)
+        if (_locked)
+            throw new InvalidOperationException("JVM is already locked.");
+
+        foreach (var cls in LoadedClasses)
         {
-            if (@class.IsObject)
-                continue;
-            @class.Super = Classes[@class.SuperName];
+            // supers
+            if (!cls.IsObject)
+                cls.Super = _classes[cls.SuperName];
+
+            // clr -> jvm map
+            _classesByType[cls.ClrType!] = cls;
         }
 
-        foreach (var @class in Classes.Values)
+
+        foreach (var cls in LoadedClasses)
         {
-            @class.GenerateVirtualTable(this);
-            @class.RecalculateSize();
+            // virts
+            cls.GenerateVirtualTable(this);
+
+            // sizes
+            cls.RecalculateSize();
         }
 
         if (StaticFields.Length < StaticFieldsOwners.Count)
@@ -92,22 +138,82 @@ public partial class JvmState
             Array.Copy(StaticFields, newStack, StaticFields.Length);
             StaticFields = newStack;
         }
+
+        using (new JvmContext(this))
+        {
+            _finalClasses = getFinalClasses();
+
+            var classes = LoadedClasses.ToList();
+            for (var i = 0; i < classes.Count; i++)
+            {
+                var cls = classes[i];
+                Toolkit.LoadLogger?.ReportLinkProgress(i, _classes.Count, cls.Name);
+                BytecodeLinker.Link(cls);
+            }
+        }
+
+        _locked = true;
     }
 
-    public void AddClrClasses(Assembly assembly)
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void Unlock()
     {
-        var all = assembly.GetTypes();
-        var compatible = all.Where(x =>
+        if (!_locked)
+            throw new InvalidOperationException("JVM was not locked.");
+
+        if (_running)
+            throw new InvalidOperationException("Can't unlock running JVM.");
+
+        foreach (var cls in _classes.Values)
         {
-            return x.EnumerateBaseTypes().Contains(typeof(Object)) ||
-                   x.GetCustomAttribute<JavaInterfaceAttribute>() != null;
-        });
-        var nonIgnored = compatible.Where(x => x.GetCustomAttribute<JavaIgnoreAttribute>() == null);
-        AddClrClasses(nonIgnored);
+            cls.VirtualTable = null;
+            cls.VirtualTableMap = null;
+            foreach (var m in cls.Methods.Values)
+            {
+                m.JavaBody?.Clear();
+            }
+        }
+
+        _locked = false;
     }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void CrossCompileLoaded()
+    {
+        if (!_locked)
+            throw new InvalidOperationException("JVM was not locked.");
+        using (new JvmContext(this))
+        {
+            CrossRoutineCompilerPass.CrossCompileAll(this);
+        }
+    }
+
+    private HashSet<JavaClass> getFinalClasses()
+    {
+        var hs = new HashSet<JavaClass>();
+        foreach (var clsToCheck in LoadedClasses)
+        {
+            foreach (var clsChild in LoadedClasses)
+            {
+                if (clsChild == clsToCheck)
+                    continue;
+
+                if (clsChild.Is(clsToCheck))
+                    goto skip;
+            }
+
+            hs.Add(clsToCheck);
+
+            skip: ;
+        }
+
+        return hs;
+    }
+
+    public bool IsClassFinal(JavaClass cls) => _finalClasses.Contains(cls);
 
     /// <summary>
-    ///     Gets class object from <see cref="Classes" />. Automatically handles array types. Throws if no class found.
+    ///     Gets class object from <see cref="_classes" />. Automatically handles array types. Throws if no class found.
     /// </summary>
     /// <param name="name">Class name to search.</param>
     /// <returns>Found or created class object.</returns>
@@ -116,14 +222,24 @@ public partial class JvmState
         return GetClassOrNull(name) ?? throw new JavaRuntimeError($"Class {name} is not loaded!");
     }
 
+    public bool IsClassLoaded(string name) => _classes.ContainsKey(name);
+
+    public Dictionary<string, JavaClass>.ValueCollection LoadedClasses => _classes.Values;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TryGetLoadedClass(string name, [MaybeNullWhen(false)] out JavaClass cls) =>
+        _classes.TryGetValue(name, out cls);
+
+    public JavaClass? GetLoadedClassOrNull(string name) => _classes.GetValueOrDefault(name);
+
     /// <summary>
-    ///     Gets class object from <see cref="Classes" />. Automatically handles array types.
+    ///     Gets class object from <see cref="_classes" />. Automatically handles array types.
     /// </summary>
     /// <param name="name">Class name to search.</param>
     /// <returns>Class object if found or created, null otherwise.</returns>
     public JavaClass? GetClassOrNull(string name)
     {
-        if (Classes.TryGetValue(name, out var o))
+        if (_classes.TryGetValue(name, out var o))
             return o;
 
         if (name.StartsWith('['))
@@ -146,7 +262,7 @@ public partial class JvmState
                     if (itemDescr[0] == 'L' && itemDescr[^1] == ';')
                     {
                         var itemClass = itemDescr.Substring(1, itemDescr.Length - 2);
-                        if (!Classes.ContainsKey(itemClass))
+                        if (!_classes.ContainsKey(itemClass))
                         {
                             if (name.Contains('.') && !name.Contains('/'))
                                 throw new JavaRuntimeError(
@@ -165,22 +281,44 @@ public partial class JvmState
                 }
             }
 
+            string superName;
+
+            if (name[1] == '[')
+            {
+                // nested array, i.e. [[[[[[[object
+                var nestingCount = -1;
+                foreach (var c in name)
+                {
+                    if (c != '[')
+                        break;
+
+                    nestingCount++;
+                }
+
+                Debug.Assert(nestingCount >= 1);
+
+                superName = $"{new string('[', nestingCount)}Ljava/lang/Object;";
+            }
+            else
+            {
+                // simple array, i.e. [object
+                superName = "java/lang/Object";
+            }
+
+
             JavaClass ac = new JavaClass
             {
                 Name = name,
-                Super = GetClass("java/lang/Object"),
+                SuperName = superName,
+                Super = GetClass(superName),
             };
             ac.GenerateVirtualTable(this);
-            Classes.Add(name, ac);
+            _classes.Add(name, ac);
             return ac;
         }
 
         return null;
     }
-
-    [Obsolete("Faulty method, see TODO",true)]
-    //TODO: for java/lang/abc it returns... "[java/lang/abc"? No "L;"?
-    public JavaClass WrapArray(JavaClass cls) => GetClass($"[{cls.Name}");
 
     #endregion
 

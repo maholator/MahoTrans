@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -10,7 +10,8 @@ namespace java.util;
 
 public class TimerTree : Object
 {
-    [JavaType(typeof(TimerNode))] public Reference Root;
+    [JavaType(typeof(TimerNode))]
+    public Reference Root;
 
     public bool isEmpty()
     {
@@ -21,14 +22,14 @@ public class TimerTree : Object
     public void insert(TimerNode z)
     {
         TimerNode? y = null;
-        var x = Root.AsNullable<TimerNode>();
+        var x = Root.AsOrNull<TimerNode>();
         while (x != null)
         {
             y = x;
             if (z.Task.As<TimerTask>().when < x.Task.As<TimerTask>().when)
-                x = x.Left.AsNullable<TimerNode>();
+                x = x.Left.AsOrNull<TimerNode>();
             else
-                x = x.Right.AsNullable<TimerNode>();
+                x = x.Right.AsOrNull<TimerNode>();
         }
 
         z.Parent = y?.This ?? Reference.Null;
@@ -57,14 +58,14 @@ public class TimerTree : Object
 
         // TODO check that y is not null?
         if (!y!.Left.IsNull)
-            x = y.Left.AsNullable<TimerNode>();
+            x = y.Left.AsOrNull<TimerNode>();
         else
-            x = y.Right.AsNullable<TimerNode>();
+            x = y.Right.AsOrNull<TimerNode>();
         if (x != null)
             x.Parent = y.Parent;
         if (y.Parent.IsNull)
             Root = x?.This ?? Reference.Null;
-        else if (y == y.Parent.AsNullable<TimerNode>()?.Left.AsNullable<TimerNode>())
+        else if (y == y.Parent.AsOrNull<TimerNode>()?.Left.AsOrNull<TimerNode>())
             y.Parent.As<TimerNode>().Left = x?.This ?? Reference.Null;
         else
             y.Parent.As<TimerNode>().Right = x?.This ?? Reference.Null;
@@ -76,11 +77,11 @@ public class TimerTree : Object
     {
         if (!x.Right.IsNull)
             return minimum(x.Right).As<TimerNode>();
-        TimerNode? y = x.Parent.AsNullable<TimerNode>();
-        while (y != null && x == y.Right.AsNullable<TimerNode>())
+        TimerNode? y = x.Parent.AsOrNull<TimerNode>();
+        while (y != null && x == y.Right.AsOrNull<TimerNode>())
         {
             x = y;
-            y = y.Parent.AsNullable<TimerNode>();
+            y = y.Parent.AsOrNull<TimerNode>();
         }
 
         return y;

@@ -3,9 +3,9 @@
 
 using MahoTrans.Abstractions;
 
-namespace MahoTrans.ToolkitImpls.Dummy;
+namespace MahoTrans.ToolkitImpls.Stub;
 
-public class DummyFonts : IFontManager
+public class StubFonts : IFontManager
 {
     public int GetFontHeight(FontSize size) => 20;
 

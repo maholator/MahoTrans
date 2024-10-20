@@ -1,10 +1,14 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime;
 
+/// <summary>
+///     Two combined strings: name of the member and member's descriptor. Used to identify class members, i.e. fields and
+///     methods.
+/// </summary>
 public readonly struct NameDescriptor : IEquatable<NameDescriptor>
 {
     public readonly string Name;
@@ -54,4 +58,18 @@ public readonly struct NameDescriptor : IEquatable<NameDescriptor>
     {
         return !left.Equals(right);
     }
+
+    #region Constants
+
+    /// <summary>
+    ///     Descriptor of "clinit" method.
+    /// </summary>
+    public static NameDescriptor ClassInit => new("<clinit>", "()V");
+
+    /// <summary>
+    ///     Descriptor of default constructor.
+    /// </summary>
+    public static NameDescriptor ObjectInit => new("<init>", "()V");
+
+    #endregion
 }

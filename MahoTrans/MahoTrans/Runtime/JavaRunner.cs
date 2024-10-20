@@ -5,11 +5,10 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using java.lang;
-using MahoTrans.Loader;
 using MahoTrans.Runtime.Config;
 using MahoTrans.Runtime.Errors;
-using MahoTrans.Runtime.Exceptions;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 using Array = java.lang.Array;
 using Object = java.lang.Object;
 using Thread = java.lang.Thread;
@@ -52,7 +51,7 @@ public class JavaRunner
             if (thread.ActiveFrame == null)
             {
                 // no more frames: aborting interpreter
-                var exRealMsg = state.ResolveStringOrDefault(t.Message);
+                var exRealMsg = state.ResolveStringOrNull(t.Message);
                 var exMsg = string.IsNullOrEmpty(exRealMsg)
                     ? "Exception has no attached message."
                     : $"Message: {exRealMsg}";
@@ -117,6 +116,7 @@ public class JavaRunner
                 pointer++;
                 break;
 
+            case MTOpcode.aconst_0:
             case MTOpcode.iconst_0:
                 frame.PushInt(0);
                 pointer++;
@@ -193,6 +193,7 @@ public class JavaRunner
                 break;
 
             case MTOpcode.iconst:
+            case MTOpcode.fconst:
                 frame.PushInt(instr.IntData);
                 pointer++;
                 break;
@@ -217,62 +218,15 @@ public class JavaRunner
                 pointer++;
                 break;
 
-            case MTOpcode.load_0:
-                frame.PushFromLocal(0);
-                pointer++;
-                break;
-
-            case MTOpcode.load_1:
-                frame.PushFromLocal(1);
-                pointer++;
-                break;
-
-            case MTOpcode.load_2:
-                frame.PushFromLocal(2);
-                pointer++;
-                break;
-
-            case MTOpcode.load_3:
-                frame.PushFromLocal(3);
-                pointer++;
-                break;
-
             case MTOpcode.store:
                 frame.PopToLocal(instr.IntData);
                 pointer++;
                 break;
 
-            case MTOpcode.store_0:
-                frame.PopToLocal(0);
-                pointer++;
-                break;
-
-            case MTOpcode.store_1:
-                frame.PopToLocal(1);
-                pointer++;
-                break;
-
-            case MTOpcode.store_2:
-                frame.PopToLocal(2);
-                pointer++;
-                break;
-
-            case MTOpcode.store_3:
-                frame.PopToLocal(3);
-                pointer++;
-                break;
-
             case MTOpcode.iinc:
-                unsafe
-                {
-                    long val = frame.LocalVariables[instr.ShortData];
-                    // cast to int because stack is long
-                    var i = (int)val;
-                    // no casts - linker did all that he could.
-                    frame.LocalVariables[instr.ShortData] = instr.IntData + i;
-                    pointer++;
-                    break;
-                }
+                frame.IncrementLocal(instr.ShortData, instr.IntData);
+                pointer++;
+                break;
 
             case MTOpcode.iaload:
                 PushFromIntArray(frame, jvm);
@@ -356,8 +310,7 @@ public class JavaRunner
 
             case MTOpcode.array_length:
             {
-                var arr = jvm.Resolve<Array>(frame.PopReference());
-                frame.PushInt(arr.BaseValue.Length);
+                frame.PushInt(frame.PopReference().As<Array>().Length);
                 pointer++;
                 break;
             }
@@ -724,8 +677,7 @@ public class JavaRunner
 
             case MTOpcode.l2i:
             {
-                ulong ul = ((ulong)frame.PopLong()) & 0xFF_FF_FF_FF;
-                frame.PushInt((int)(uint)ul);
+                frame.PushInt((int)frame.PopLong());
                 pointer++;
                 break;
             }
@@ -741,12 +693,12 @@ public class JavaRunner
                 break;
 
             case MTOpcode.f2i:
-                FloatToInt(frame);
+                frame.PushInt(F2I(frame.PopFloat()));
                 pointer++;
                 break;
 
             case MTOpcode.f2l:
-                FloatToLong(frame);
+                frame.PushLong(F2L(frame.PopFloat()));
                 pointer++;
                 break;
 
@@ -756,12 +708,12 @@ public class JavaRunner
                 break;
 
             case MTOpcode.d2i:
-                DoubleToInt(frame);
+                frame.PushInt(D2I(frame.PopDouble()));
                 pointer++;
                 break;
 
             case MTOpcode.d2l:
-                DoubleToLong(frame);
+                frame.PushLong(D2L(frame.PopDouble()));
                 pointer++;
                 break;
 
@@ -772,8 +724,7 @@ public class JavaRunner
 
             case MTOpcode.i2b:
             {
-                var val = frame.PopInt() & 0xFF;
-                frame.PushInt((sbyte)(byte)val);
+                frame.PushInt((sbyte)frame.PopInt());
                 pointer++;
                 break;
             }
@@ -785,8 +736,7 @@ public class JavaRunner
 
             case MTOpcode.i2s:
             {
-                var b = (int)(short)(ushort)(uint)frame.PopInt();
-                frame.PushInt(b);
+                frame.PushInt((short)frame.PopInt());
                 pointer++;
                 break;
             }
@@ -1017,32 +967,34 @@ public class JavaRunner
             }
 
             case MTOpcode.athrow:
-            {
-                var exr = frame.PopReference();
-                if (exr.IsNull)
-                    jvm.Throw<NullPointerException>();
-                else
-                {
-                    var ex = jvm.Resolve<Throwable>(exr);
-                    ex.Source = ThrowSource.Java;
-                    jvm.Toolkit.Logger?.LogExceptionThrow(exr);
-                    throw new JavaThrowable(ex);
-                }
-
+                jvm.Throw(frame.PopReference());
                 break;
-            }
 
             case MTOpcode.invoke_virtual:
                 CallVirtual(instr.IntData, instr.ShortData, frame, thread, jvm);
                 break;
 
             case MTOpcode.invoke_static:
-                CallMethod((Method)instr.Data, true, frame, thread);
+                CallComplexJavaStaticMethod((Method)instr.Data, frame, thread);
                 break;
 
-            case MTOpcode.invoke_instance:
-                CallMethod((Method)instr.Data, false, frame, thread);
+            case MTOpcode.invoke_static_simple:
+            {
+                Method m = (Method)instr.Data;
+                CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
                 break;
+            }
+
+            case MTOpcode.invoke_instance:
+                CallComplexJavaInstanceMethod((Method)instr.Data, frame, thread);
+                break;
+
+            case MTOpcode.invoke_instance_simple:
+            {
+                Method m = (Method)instr.Data;
+                CallJavaMethod(m.JavaBody!, m.ArgsCount + 1, frame, thread);
+                break;
+            }
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
                 CallVirtBySig(thread, jvm, frame);
@@ -1114,17 +1066,7 @@ public class JavaRunner
                     jvm.Throw<NullPointerException>();
 
                 var obj = jvm.ResolveObject(r);
-                if (obj.MonitorOwner != thread.ThreadId)
-                {
-                    jvm.Throw<IllegalMonitorStateException>();
-                }
-                else
-                {
-                    obj.MonitorReEnterCount--;
-                    if (obj.MonitorReEnterCount == 0)
-                        obj.MonitorOwner = 0;
-                }
-
+                obj.ExitMonitor(thread);
                 pointer++;
 
                 break;
@@ -1172,7 +1114,7 @@ public class JavaRunner
                 pointer++;
                 break;
             }
-            case MTOpcode.bridge_init_class:
+            case MTOpcode.bridge_init:
             {
                 var p = (ClassBoundBridge)instr.Data;
                 if (p.Class.PendingInitializer)
@@ -1185,60 +1127,8 @@ public class JavaRunner
                 pointer++;
                 break;
             }
-            case MTOpcode.get_field:
-            {
-                var d = (ReflectionFieldPointer)instr.Data;
-                // attempt to init class
-                if (d.Class.PendingInitializer)
-                {
-                    d.Class.Initialize(thread);
-                    return;
-                }
 
-                if (d.Field.IsStatic)
-                {
-                    frame.Push(d.Field.GetValue(null));
-                }
-                else
-                {
-                    var r = frame.PopReference();
-                    var obj = jvm.ResolveObject(r);
-                    var val = d.Field.GetValue(obj);
-                    frame.Push(val);
-                }
-
-                pointer++;
-                break;
-            }
-            case MTOpcode.set_field:
-            {
-                var d = (ReflectionFieldPointer)instr.Data;
-                // attempt to init class
-                if (d.Class.PendingInitializer)
-                {
-                    d.Class.Initialize(thread);
-                    return;
-                }
-
-                var popper = BridgeCompiler.STACK_POPPERS[d.Field.FieldType];
-                var value = popper.Invoke(frame, System.Array.Empty<object>());
-
-                if (d.Field.IsStatic)
-                {
-                    d.Field.SetValue(null, value);
-                }
-                else
-                {
-                    var r = frame.PopReference();
-                    var obj = jvm.ResolveObject(r);
-                    d.Field.SetValue(obj, value);
-                }
-
-                pointer++;
-                break;
-            }
-
-            case MTOpcode.get_static:
+            case MTOpcode.get_static_init:
             {
                 var p = (JavaClass)instr.Data;
                 if (p.PendingInitializer)
@@ -1252,7 +1142,7 @@ public class JavaRunner
                 break;
             }
 
-            case MTOpcode.set_static:
+            case MTOpcode.set_static_init:
             {
                 var p = (JavaClass)instr.Data;
                 if (p.PendingInitializer)
@@ -1265,6 +1155,16 @@ public class JavaRunner
                 pointer++;
                 break;
             }
+
+            case MTOpcode.get_static:
+                frame.PushUnchecked(jvm.StaticFields[instr.IntData]);
+                pointer++;
+                break;
+
+            case MTOpcode.set_static:
+                jvm.StaticFields[instr.IntData] = frame.Pop();
+                pointer++;
+                break;
 
             case MTOpcode.error_no_class:
             {
@@ -1319,16 +1219,7 @@ public class JavaRunner
             monitorHost = caller.Stack[caller.StackTop];
 
         var obj = state.ResolveObject(monitorHost);
-        if (obj.MonitorOwner != thread.ThreadId)
-        {
-            state.Throw<IllegalMonitorStateException>();
-        }
-        else
-        {
-            obj.MonitorReEnterCount--;
-            if (obj.MonitorReEnterCount == 0)
-                obj.MonitorOwner = 0;
-        }
+        obj.ExitMonitor(thread);
     }
 
     private static Reference CreateMultiSubArray(int dimensionsLeft, int[] count, JvmState state, ArrayType? typeP,
@@ -1368,21 +1259,14 @@ public class JavaRunner
         if (r.IsNull)
             state.Throw<NullPointerException>();
 
-        var obj = state.ResolveObject(r);
-        if (obj.MonitorReEnterCount == 0)
+        if (TryEnterInstanceMonitor(r, thread, state))
         {
-            obj.MonitorOwner = thread.ThreadId;
-            obj.MonitorReEnterCount = 1;
-            frame.Pointer++;
-        }
-        else if (obj.MonitorOwner == thread.ThreadId)
-        {
-            obj.MonitorReEnterCount++;
+            // if monitor entered, go to next opcode
             frame.Pointer++;
         }
         else
         {
-            // wait
+            // else wait
             frame.PushReference(r);
             // not going to next instruction!
         }
@@ -1402,82 +1286,56 @@ public class JavaRunner
     private static bool TryEnterInstanceMonitor(Reference r, JavaThread thread, JvmState state)
     {
         var obj = state.ResolveObject(r);
-        if (obj.MonitorReEnterCount == 0)
-        {
-            obj.MonitorOwner = thread.ThreadId;
-            obj.MonitorReEnterCount = 1;
-            return true;
-        }
-
-        if (obj.MonitorOwner == thread.ThreadId)
-        {
-            obj.MonitorReEnterCount++;
-            return true;
-        }
-
-        return false;
+        return obj.TryEnterMonitor(thread);
     }
 
     #region Numbers manipulation
 
-    private static void FloatToInt(Frame frame)
+    public static int F2I(float f)
     {
-        float val = frame.PopFloat();
-        if (float.IsNaN(val))
-            frame.PushInt(0);
-        else if (float.IsFinite(val))
-            frame.PushInt((int)val);
-        else if (float.IsPositiveInfinity(val))
-            frame.PushInt(int.MaxValue);
-        else if (float.IsNegativeInfinity(val))
-            frame.PushInt(int.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round float number {val}");
+        if (float.IsNaN(f))
+            return 0;
+        var r = (int)f;
+        if (r == int.MinValue)
+            return f < 0 ? int.MinValue : int.MaxValue;
+
+        return r;
     }
 
-    private static void FloatToLong(Frame frame)
+    public static long F2L(float f)
     {
-        float val = frame.PopFloat();
-        if (float.IsNaN(val))
-            frame.PushLong(0);
-        else if (float.IsFinite(val))
-            frame.PushLong((long)val);
-        else if (float.IsPositiveInfinity(val))
-            frame.PushLong(long.MaxValue);
-        else if (float.IsNegativeInfinity(val))
-            frame.PushLong(long.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round float number {val}");
+        if (float.IsNaN(f))
+            return 0L;
+
+        var r = (long)f;
+        if (r == long.MinValue)
+            return f < 0 ? long.MinValue : long.MaxValue;
+
+        return r;
     }
 
-    private static void DoubleToInt(Frame frame)
+    public static int D2I(double d)
     {
-        double val = frame.PopDouble();
-        if (double.IsNaN(val))
-            frame.PushInt(0);
-        else if (double.IsFinite(val))
-            frame.PushInt((int)val);
-        else if (double.IsPositiveInfinity(val))
-            frame.PushInt(int.MaxValue);
-        else if (double.IsNegativeInfinity(val))
-            frame.PushInt(int.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round double number {val}");
+        if (double.IsNaN(d))
+            return 0;
+
+        var r = (int)d;
+        if (r == int.MinValue)
+            return d < 0 ? int.MinValue : int.MaxValue;
+
+        return r;
     }
 
-    private static void DoubleToLong(Frame frame)
+    public static long D2L(double d)
     {
-        double val = frame.PopDouble();
-        if (double.IsNaN(val))
-            frame.PushLong(0);
-        else if (double.IsFinite(val))
-            frame.PushLong((long)val);
-        else if (double.IsPositiveInfinity(val))
-            frame.PushLong(long.MaxValue);
-        else if (double.IsNegativeInfinity(val))
-            frame.PushLong(long.MinValue);
-        else
-            throw new JavaRuntimeError($"Can't round double number {val}");
+        if (double.IsNaN(d))
+            return 0L;
+
+        var r = (long)d;
+        if (r == long.MinValue)
+            return d < 0 ? long.MinValue : long.MaxValue;
+
+        return r;
     }
 
     #endregion
@@ -1615,7 +1473,7 @@ public class JavaRunner
         var index = frame.PopInt();
         var reference = frame.PopReference();
         var array = state.Resolve<Array>(reference);
-        if (index < 0 || index >= array.BaseValue.Length)
+        if (index < 0 || index >= array.BaseArray.Length)
             state.Throw<ArrayIndexOutOfBoundsException>();
         if (array is Array<bool> b)
             frame.PushBool(b[index]);
@@ -1670,18 +1528,6 @@ public class JavaRunner
         if (m == null)
             ThrowUnresolvedVirtual(pointer, state, obj);
 
-        CallMethod(m, false, frame, thread);
-    }
-
-    [DoesNotReturn]
-    private static void ThrowUnresolvedVirtual(int pointer, JvmState state, Object obj)
-    {
-        throw new JavaRuntimeError(
-            $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
-    }
-
-    private static void CallMethod(Method m, bool @static, Frame frame, JavaThread thread)
-    {
         if (m.Class.PendingInitializer)
         {
             m.Class.Initialize(thread);
@@ -1698,44 +1544,75 @@ public class JavaRunner
             return;
         }
 
-        var argsLength = m.ArgsCount;
-
-        if (@static)
+        if (m.IsCritical)
         {
-            if (m.IsCritical)
-            {
-                var host = m.Class.GetOrInitModel();
-                if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
-                    return;
-            }
-        }
-        else
-        {
-            argsLength += 1;
-
-            if (m.IsCritical)
-            {
-                frame.SetFrom(argsLength);
-                var r = frame.PopReferenceFrom();
-                if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
-                    return;
-            }
+            frame.SetFrom(m.ArgsCount + 1);
+            var r = frame.PopReferenceFrom();
+            if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
+                return;
         }
 
-        var java = m.JavaBody;
+        int argsLength = m.ArgsCount + 1;
+        CallJavaMethod(m.JavaBody!, argsLength, frame, thread);
+    }
 
-        var f = thread.Push(java);
+    [DoesNotReturn]
+    private static void ThrowUnresolvedVirtual(int pointer, JvmState state, Object obj)
+    {
+        throw new JavaRuntimeError(
+            $"No virtual method {state.DecodeVirtualPointer(pointer)} found on object {obj.JavaClass.Name}");
+    }
+
+    private static void CallComplexJavaStaticMethod(Method m, Frame frame, JavaThread thread)
+    {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread);
+            return; // we want to do this instruction again so no pointer increase here
+        }
+
+        if (m.IsCritical)
+        {
+            var host = m.Class.GetOrInitModel();
+            if (!TryEnterInstanceMonitor(host, thread, Object.Jvm))
+                return;
+        }
+
+        CallJavaMethod(m.JavaBody!, m.ArgsCount, frame, thread);
+    }
+
+    private static void CallComplexJavaInstanceMethod(Method m, Frame frame, JavaThread thread)
+    {
+        if (m.Class.PendingInitializer)
+        {
+            m.Class.Initialize(thread);
+            return; // we want to do this instruction again so no pointer increase here
+        }
+
+        if (m.IsCritical)
+        {
+            frame.SetFrom(m.ArgsCount + 1);
+            var r = frame.PopReferenceFrom();
+            if (!TryEnterInstanceMonitor(r, thread, Object.Jvm))
+                return;
+        }
+
+        int argsLength = m.ArgsCount + 1;
+        CallJavaMethod(m.JavaBody!, argsLength, frame, thread);
+    }
+
+    private static unsafe void CallJavaMethod(JavaMethodBody jmb, int argsLength, Frame frame, JavaThread thread)
+    {
+        var f = thread.Push(jmb);
         frame.SetFrom(argsLength);
-        unsafe
+
+        var sizes = jmb.ArgsSizes;
+        var argIndex = 0;
+        var localIndex = 0;
+        for (; argIndex < argsLength; argIndex++)
         {
-            var sizes = java.ArgsSizes;
-            var argIndex = 0;
-            var localIndex = 0;
-            for (; argIndex < argsLength; argIndex++)
-            {
-                f.LocalVariables[localIndex] = frame.PopUnknownFrom();
-                localIndex += sizes[argIndex];
-            }
+            f.LocalVariables[localIndex] = frame.PopUnknownFrom();
+            localIndex += sizes[argIndex];
         }
 
         frame.Discard(argsLength);

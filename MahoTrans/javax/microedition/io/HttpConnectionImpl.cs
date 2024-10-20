@@ -67,9 +67,9 @@ public class HttpConnectionImpl : Object, HttpConnection
             if (OutputState != 0)
             {
                 ByteArrayOutputStream baos = Jvm.Resolve<ByteArrayOutputStream>(ByteOutputStream);
-                Request.Content = new ByteArrayContent(baos._buf.ToUnsigned(), 0, baos.count);
+                Request.Content = new ByteArrayContent(baos.buf.ToArray().ToUnsigned(), 0, baos.buf.Count);
                 if (GetRequestHeader("Content-Length") is null)
-                    SetRequestHeader("Content-Length", "" + baos.count);
+                    SetRequestHeader("Content-Length", "" + baos.buf.Count);
                 if (GetRequestHeader("Content-Type") is null)
                     SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             }
@@ -101,7 +101,7 @@ public class HttpConnectionImpl : Object, HttpConnection
         }
         catch (System.Exception e)
         {
-            IOException ioe = Jvm.AllocateObject<IOException>();
+            IOException ioe = Jvm.Allocate<IOException>();
             ioe.Init(Jvm.AllocateString(e.ToString()));
             RequestException = ioe.This;
         }
@@ -139,7 +139,7 @@ public class HttpConnectionImpl : Object, HttpConnection
     public Reference OpenInputStreamInternal()
     {
         InputState = 1;
-        HttpInputStream i = Jvm.AllocateObject<HttpInputStream>();
+        HttpInputStream i = Jvm.Allocate<HttpInputStream>();
         i.Stream = Response.Content.ReadAsStream();
         i.Connection = this;
         return InputStream = i.This;
@@ -152,8 +152,8 @@ public class HttpConnectionImpl : Object, HttpConnection
 
         OutputState = 1;
 
-        HttpOutputStream o = Jvm.AllocateObject<HttpOutputStream>();
-        ByteArrayOutputStream baos = Jvm.AllocateObject<ByteArrayOutputStream>();
+        HttpOutputStream o = Jvm.Allocate<HttpOutputStream>();
+        ByteArrayOutputStream baos = Jvm.Allocate<ByteArrayOutputStream>();
         baos.Init();
         o.ByteStream = ByteOutputStream = baos.This;
         o.Connection = this;

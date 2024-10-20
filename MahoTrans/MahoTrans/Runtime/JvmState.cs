@@ -1,7 +1,8 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using javax.microedition.ams;
 using javax.microedition.midlet;
@@ -15,8 +16,21 @@ namespace MahoTrans.Runtime;
 ///     Object which holds all information about JVM - threads, objects, classes, etc and manages JVM execution.
 /// </summary>
 [PublicAPI]
-public partial class JvmState
+public sealed partial class JvmState
 {
+    /// <summary>
+    ///     Classes can't be loaded while this is true.
+    /// </summary>
+    private bool _locked;
+
+    /// <summary>
+    ///     Setting this to false will stop execution loop after current cycle.
+    /// </summary>
+    private bool _shouldRun;
+
+    /// <summary>
+    ///     This is true if execution loop is running.
+    /// </summary>
     private bool _running;
 
     private EventQueue? _eventQueue;
@@ -54,7 +68,7 @@ public partial class JvmState
         if (_eventQueue != null)
             throw new InvalidOperationException("Attempt to create a second queue");
 
-        _eventQueue = AllocateObject<EventQueue>();
+        _eventQueue = Allocate<EventQueue>();
         _eventQueue.OwningJvm = this;
         _eventQueue.start();
     }
@@ -64,22 +78,34 @@ public partial class JvmState
     ///     <see cref="ExecuteLoop" /> to be sure that cycle will run until call to <see cref="Stop" />, or call
     ///     <see cref="Stop" /> right before call to this method to be sure that only one cycle will be executed.
     /// </summary>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Execute()
     {
-        using (new JvmContext(this))
+        if (!_locked)
+            throw new InvalidOperationException("Can't run unlocked JVM.");
+        try
         {
-            switch (ExecutionManner)
+            _running = true;
+
+            using (new JvmContext(this))
             {
-                case ExecutionManner.Unlocked:
-                    ExecuteInternalUnlocked();
-                    break;
-                case ExecutionManner.Strict:
-                    ExecuteInternalStrict();
-                    break;
-                case ExecutionManner.Weak:
-                    ExecuteInternalWeak();
-                    break;
+                switch (ExecutionManner)
+                {
+                    case ExecutionManner.Unlocked:
+                        executeInternalUnlocked();
+                        break;
+                    case ExecutionManner.Strict:
+                        executeInternalStrict();
+                        break;
+                    case ExecutionManner.Weak:
+                        executeInternalWeak();
+                        break;
+                }
             }
+        }
+        finally
+        {
+            _running = false;
         }
     }
 
@@ -89,7 +115,7 @@ public partial class JvmState
     /// </summary>
     public void ExecuteLoop()
     {
-        _running = true;
+        _shouldRun = true;
         Execute();
     }
 
@@ -99,8 +125,14 @@ public partial class JvmState
     /// </summary>
     public void Stop()
     {
-        _running = false;
+        _shouldRun = false;
     }
+
+    /// <summary>
+    ///     True if JVM execution loop is running. Note that <see cref="Stop" /> call only schedules execution termination. You
+    ///     can check this value to know if JVM is actually running or it finally stopped.
+    /// </summary>
+    public bool IsRunning => _running;
 
     /// <summary>
     ///     Event queue, associated with this JVM. Use it to dispatch events to midlet.
@@ -119,7 +151,7 @@ public partial class JvmState
     /// </summary>
     public void Dispose()
     {
-        foreach (var cls in Classes.Values)
+        foreach (var cls in _classes.Values)
         {
             cls.VirtualTableMap?.Clear();
             cls.VirtualTableMap = null;
@@ -146,7 +178,7 @@ public partial class JvmState
             cls.Interfaces = null!;
         }
 
-        Classes.Clear();
+        _classes.Clear();
         Toolkit = null!;
         _eventQueue = null;
         _internalizedStrings.Clear();

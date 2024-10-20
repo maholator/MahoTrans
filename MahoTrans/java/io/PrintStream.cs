@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
@@ -8,13 +8,15 @@ using MahoTrans.Native;
 using MahoTrans.Runtime;
 using MahoTrans.Runtime.Types;
 using MahoTrans.Utils;
+using Object = java.lang.Object;
 using String = java.lang.String;
 
 namespace java.io;
 
 public class PrintStream : OutputStream
 {
-    [JavaType(typeof(OutputStream))] public Reference Output;
+    [JavaType(typeof(OutputStream))]
+    public Reference Output;
 
     [InitMethod]
     public void Init([JavaType(typeof(OutputStream))] Reference r) => Output = r;
@@ -24,7 +26,7 @@ public class PrintStream : OutputStream
     {
         char[] chars = { c };
         var bytes = Encoding.UTF8.GetBytes(chars).ConvertToSigned();
-        return Jvm.AllocateArray(bytes, "[B");
+        return Jvm.WrapPrimitiveArray(bytes);
     }
 
     public bool checkError() => false;
@@ -177,7 +179,7 @@ public class PrintStream : OutputStream
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("toString", "()Ljava/lang/String;");
+        b.AppendStaticCall<String>("valueOf", typeof(String), typeof(Object));
         b.AppendVirtcall("print", "(Ljava/lang/String;)V");
         b.AppendReturn();
         return b.Build(2, 2);
@@ -208,7 +210,7 @@ public class PrintStream : OutputStream
     {
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
-        b.AppendConstant('\n');
+        b.AppendChar('\n');
         b.AppendVirtcall("print", "(C)V");
         b.AppendReturn();
         return b.Build(2, 1);
@@ -311,7 +313,7 @@ public class PrintStream : OutputStream
         var b = new JavaMethodBuilder(cls);
         b.AppendThis();
         b.Append(JavaOpcode.aload_1);
-        b.AppendVirtcall("toString", "()Ljava/lang/String;");
+        b.AppendStaticCall<String>("valueOf", typeof(String), typeof(Object));
         b.AppendVirtcall("print", "(Ljava/lang/String;)V");
         b.AppendThis();
         b.AppendVirtcall("println", typeof(void));

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -11,16 +11,20 @@ public class Calendar : Object
 {
     public bool areFieldsSet;
 
-    [JavaIgnore] protected int[] fields = null!;
+    [JavaIgnore]
+    protected int[] fields = null!;
 
-    [JavaIgnore] protected bool[] isSet = null!;
+    [JavaIgnore]
+    protected bool[] isSet = null!;
 
     bool isTimeSet;
 
     protected long time;
 
     protected int lastTimeFieldSet;
-    [JavaType(typeof(TimeZone))] public Reference Zone;
+
+    [JavaType(typeof(TimeZone))]
+    public Reference Zone;
 
     public const int
         JANUARY = 0,
@@ -109,9 +113,9 @@ public class Calendar : Object
         }
     }
 
-    public virtual void computeFields() => throw new AbstractJavaMethodCallError();
+    public virtual void computeFields() => throw new AbstractCall();
 
-    public virtual void computeTime() => throw new AbstractJavaMethodCallError();
+    public virtual void computeTime() => throw new AbstractCall();
 
     public new bool equals(Reference obj)
     {
@@ -136,16 +140,15 @@ public class Calendar : Object
     [return: JavaType(typeof(Calendar))]
     public static Reference getInstance()
     {
-        var c = Jvm.AllocateObject<GregorianCalendar>();
+        var c = Jvm.Allocate<GregorianCalendar>();
         c.Init();
         return c.This;
     }
 
-
     [return: JavaType(typeof(Calendar))]
     public static Reference getInstance([JavaType(typeof(TimeZone))] Reference timezone)
     {
-        var c = Jvm.AllocateObject<GregorianCalendar>();
+        var c = Jvm.Allocate<GregorianCalendar>();
         c.Init(timezone);
         return c.This;
     }
@@ -153,7 +156,7 @@ public class Calendar : Object
     [return: JavaType(typeof(Date))]
     public Reference getTime()
     {
-        var d = Jvm.AllocateObject<Date>();
+        var d = Jvm.Allocate<Date>();
         d.Init(getTimeInMillis());
         return d.This;
     }
@@ -169,13 +172,11 @@ public class Calendar : Object
         return time;
     }
 
-
     [return: JavaType(typeof(TimeZone))]
     public Reference getTimeZone()
     {
         return Zone;
     }
-
 
     public new int hashCode()
     {

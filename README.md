@@ -69,26 +69,28 @@ JVM interpreter&recompiler written on C# as core for mobile apps emulators
 
 ## Toolkits
 
-| Class                                                                | Description                                                                          |
-|----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| [ISystem](MahoTrans.Abstractions/Abstractions/ISystem.cs)            | Receives data from stdout/stderr. Provides properties and timezone.                  |
-| [Clock](MahoTrans.Abstractions/Abstractions/Clock.cs)               | Provides time and controls execution speed.                                          |
+| Class                                                                 | Description                                                                          |
+|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [ISystem](MahoTrans.Abstractions/Abstractions/ISystem.cs)             | Receives data from stdout/stderr. Provides properties and timezone.                  |
+| [Clock](MahoTrans.Abstractions/Abstractions/Clock.cs)                 | Provides time and controls execution speed.                                          |
 | [IImageManager](MahoTrans.Abstractions/Abstractions/IImageManager.cs) | Backend for LCDUI `Image`/`Graphics` classes.                                        |
-| [IFontManager](MahoTrans.Abstractions/Abstractions/IFontManager.cs)  | Backend for LCDUI `Font` class.                                                      |
-| [IDisplay](MahoTrans.Abstractions/Abstractions/IDisplay.cs)          | Backend for LCDUI `Display`/`Displayable` classes.                                   |
+| [IFontManager](MahoTrans.Abstractions/Abstractions/IFontManager.cs)   | Backend for LCDUI `Font` class.                                                      |
+| [IDisplay](MahoTrans.Abstractions/Abstractions/IDisplay.cs)           | Backend for LCDUI `Display`/`Displayable` classes.                                   |
 | [IAmsCallbacks](MahoTrans.Abstractions/Abstractions/IAmsCallbacks.cs) | Receives pause/resume/exit signals from MIDlet. Allows to perform platform requests. |
-| [IRecordStore](MahoTrans.Abstractions/Abstractions/IRecordStore.cs)  | Backend for `RecordStore` class.                                                     |
-| [IMedia](MahoTrans.Abstractions/Abstractions/IMedia.cs)              | Backend for MMAPI.                                                                   |
-| [ILoadLogger](MahoTrans.Abstractions/Abstractions/ILoadLogger.cs)    | Receives messages from loader, linker and compiler.                                  |
-| [ILogger](MahoTrans.Abstractions/Abstractions/ILogger.cs)            | Receives exception and runtime events.                                               |
+| [IRecordStore](MahoTrans.Abstractions/Abstractions/IRecordStore.cs)   | Backend for `RecordStore` class.                                                     |
+| [IMedia](MahoTrans.Abstractions/Abstractions/IMedia.cs)               | Backend for MMAPI.                                                                   |
+| [ILoadLogger](MahoTrans.Abstractions/Abstractions/ILoadLogger.cs)     | Receives messages from loader, linker and compiler.                                  |
+| [ILogger](MahoTrans.Abstractions/Abstractions/ILogger.cs)             | Receives exception and runtime events.                                               |
 
 Some stub implementations are provided out of the box. Others must be implemented by frontend.
 
 MT manages only its own lifetime. Toolkits must be initialized/disposed/snapshoted/restored themselves.
 
-Some toolkits do not need access to MT to work (for example, graphics, clock, record store). They should reference [package](https://www.nuget.org/packages/ru.nnproject.MahoTrans.Abstractions/) directly and not depend on MT itself.
+Some toolkits do not need access to MT to work (for example, graphics, clock, record store). They should
+reference [package](https://www.nuget.org/packages/ru.nnproject.MahoTrans.Abstractions/) directly and not depend on MT
+itself.
 
-## Example code
+## Example startup code
 
 ```csharp
 private ToolkitCollection CreateToolkit() {
@@ -101,8 +103,9 @@ private JvmState Setup() {
     var jarPackage = loader.ReadJarFile(s, false);
     
     var j = new JvmState(CreateToolkit(), ExecutionManner.Unlocked);
-    j.AddClrClasses(typeof(JavaRunner).Assembly); // MT libs
-    j.AddJvmClasses(jarPackage, "jar", "jar"); // your JAR
+    j.AddMahoTransLibrary(); // MT libs
+    // load here your CLR libs, JAR libs and polyfills.
+    j.AddJvmClasses(jarPackage, "name-of-your-app"); // your JAR
     return j;
 }
 
@@ -121,3 +124,9 @@ static void Main(string midletClass) {
     }
 }
 ```
+
+## Docs
+
+- [`Reference`, heap and serializer](docs/heap.md)
+- [Marshalling and `JavaType` attribute: creating CLR library methods](docs/marshalling.md)
+- [Builders and descriptors: creating JVM library methods](docs/javaemit.md)

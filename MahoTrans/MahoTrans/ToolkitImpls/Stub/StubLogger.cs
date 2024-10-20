@@ -1,10 +1,10 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 
-namespace MahoTrans.ToolkitImpls.Loggers;
+namespace MahoTrans.ToolkitImpls.Stub;
 
 /// <summary>
 ///     Logger that does nothing with incoming messages.
@@ -20,6 +20,14 @@ public class StubLogger : ILogger, ILoadLogger, IHeapDebugger
     }
 
     public void Log(LoadIssueType level, string className, string message)
+    {
+    }
+
+    public void ReportLinkProgress(int num, int total, string name)
+    {
+    }
+
+    public void ReportCompileProgress(int num, int total, string name)
     {
     }
 

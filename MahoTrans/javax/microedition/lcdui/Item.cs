@@ -1,18 +1,43 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using java.lang;
+using javax.microedition.ams.events;
 using MahoTrans.Handles;
 using MahoTrans.Native;
 using MahoTrans.Runtime;
+using Newtonsoft.Json;
 using Object = java.lang.Object;
 
 namespace javax.microedition.lcdui;
 
 public class Item : Object
 {
-    [JavaIgnore] public DisplayableHandle Owner;
+    #region State
 
-    [String] public Reference Label;
+    [JavaIgnore]
+    private DisplayableHandle _ownerHandle;
+
+    [JavaIgnore]
+    private Reference _ownerReference;
+
+    [String]
+    public Reference Label;
+
+    [JavaIgnore]
+    public int Layout;
+
+    public int PrefW, PrefH;
+
+    [JavaType(typeof(ItemCommandListener))]
+    public Reference Listener;
+
+    public Reference ImplicitCommand;
+
+    [JavaIgnore]
+    public List<Reference> Commands = new();
+
+    #endregion
 
     [return: String]
     public Reference getLabel() => Label;
@@ -23,13 +48,118 @@ public class Item : Object
         NotifyToolkit();
     }
 
+    public int getLayout() => Layout;
+
+    public void setLayout(int layout)
+    {
+        Layout = layout;
+        NotifyToolkit();
+    }
+
+    public int getMinimumWidth() => throw new NotImplementedException();
+
+    public int getMinimumHeight() => throw new NotImplementedException();
+
+    public int getPreferredWidth() => PrefW;
+
+    public int getPreferredHeight() => PrefH;
+
+    public void setPreferredSize(int width, int height)
+    {
+        if (width < -1)
+            Jvm.Throw<IllegalArgumentException>();
+
+        if (height < -1)
+            Jvm.Throw<IllegalArgumentException>();
+
+        PrefW = width;
+        PrefH = height;
+        NotifyToolkit();
+    }
+
+    public void notifyStateChanged()
+    {
+        Jvm.EventQueue.Enqueue<ChangeNotifyEvent>(x =>
+        {
+            x.Target = _ownerReference;
+            x.Item = This;
+        });
+    }
+
+    public void setItemCommandListener([JavaType(typeof(ItemCommandListener))] Reference l)
+    {
+        Listener = l;
+    }
+
+    public void addCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd.IsNull)
+            Jvm.Throw<NullPointerException>();
+        if (Commands.Contains(cmd))
+            return;
+        Commands.Add(cmd);
+        NotifyToolkit();
+    }
+
+    public void removeCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd.IsNull)
+            return;
+        Commands.Remove(cmd);
+        if (ImplicitCommand == cmd)
+            ImplicitCommand = Reference.Null;
+        NotifyToolkit();
+    }
+
+    /// <summary>
+    ///     See MIDP docs.
+    /// </summary>
+    /// <remarks>
+    ///     Behaviour of this is different from <see cref="List" />. List maintains implicit command and others separately,
+    ///     while this uses "implicit" only as hint.
+    /// </remarks>
+    public void setDefaultCommand([JavaType(typeof(Command))] Reference cmd)
+    {
+        if (cmd.IsNull)
+            ImplicitCommand = Reference.Null;
+
+        if (!Commands.Contains(cmd))
+            addCommand(cmd);
+
+        ImplicitCommand = cmd;
+    }
+
+    /// <summary>
+    ///     Call this if you change anything on the item.
+    /// </summary>
     [JavaIgnore]
     protected void NotifyToolkit()
     {
-        if (Owner != default) Toolkit.Display.ItemUpdated(Owner, This);
+        if (_ownerHandle != default)
+            Toolkit.Display.ItemUpdated(_ownerHandle, This);
     }
 
+    [JavaIgnore]
+    public void AttachTo(Form? f)
+    {
+        if (f == null)
+        {
+            _ownerReference = default;
+            _ownerHandle = default;
+            return;
+        }
 
+        _ownerReference = f.This;
+        _ownerHandle = f.Handle;
+    }
+
+    [JsonIgnore]
+    public bool IsAttached => _ownerHandle != default;
+
+    [JsonIgnore]
+    public DisplayableHandle AttachedTo => _ownerHandle;
+
+    public const int PLAIN = 0;
     public const int BUTTON = 2;
     public const int HYPERLINK = 1;
     public const int LAYOUT_2 = 16384;
@@ -46,5 +176,4 @@ public class Item : Object
     public const int LAYOUT_VCENTER = 48;
     public const int LAYOUT_VEXPAND = 8192;
     public const int LAYOUT_VSHRINK = 4096;
-    public const int PLAIN = 0;
 }

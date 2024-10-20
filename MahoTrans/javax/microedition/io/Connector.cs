@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
@@ -45,12 +45,12 @@ public class Connector : Object
         {
             case "http":
             case "https":
-                HttpConnectionImpl http = Jvm.AllocateObject<HttpConnectionImpl>();
+                HttpConnectionImpl http = Jvm.Allocate<HttpConnectionImpl>();
                 http.Init();
                 http.Open(s);
                 return http.This;
             case "file":
-                FileConnectionImpl file = Jvm.AllocateObject<FileConnectionImpl>();
+                FileConnectionImpl file = Jvm.Allocate<FileConnectionImpl>();
                 file.Init();
                 file.Open(s);
                 return file.This;

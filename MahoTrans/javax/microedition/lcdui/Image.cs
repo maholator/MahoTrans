@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -17,61 +17,56 @@ namespace javax.microedition.lcdui;
 
 public class Image : Object
 {
-    [JavaIgnore] public ImageHandle Handle;
+    [JavaIgnore]
+    public ImageHandle Handle;
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createImage([String] Reference name)
+    public static Image createImage([String] Reference name)
     {
         var blob = Jvm.GetResource(Jvm.ResolveString(name), null);
         if (blob == null)
             Jvm.Throw<IOException>();
 
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(blob.ToUnsigned());
-        return image.This;
+        return image;
     }
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createImage([JavaType("[B")] Reference buf, int from, int len)
+    public static Image createImage([JavaType("[B")] Reference buf, int from, int len)
     {
         var blob = Jvm.ResolveArray<sbyte>(buf).ToUnsigned();
 
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateFromFile(new ReadOnlySpan<byte>(blob, from, len));
-        return image.This;
+        return image;
     }
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createImage(int w, int h)
+    public static Image createImage(int w, int h)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateBuffer(w, h);
-        return image.This;
+        return image;
     }
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createRGBImage([JavaType("[I")] Reference rgb, int width, int height, bool alpha)
+    public static Image createRGBImage(int[] rgb, int width, int height, bool alpha)
     {
-        var image = Jvm.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateFromRgb(Jvm.ResolveArray<int>(rgb), width, height, alpha);
-        return image.This;
+        var image = Jvm.Allocate<Image>();
+        image.Handle = Toolkit.Images.CreateFromRgb(rgb, width, height, alpha);
+        return image;
     }
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createImage___copy([JavaType(typeof(Image))] Reference source)
+    public static Image createImage___copy(Image source)
     {
-        var image = Jvm.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle);
-        return image.This;
+        var image = Jvm.Allocate<Image>();
+        image.Handle = Toolkit.Images.CreateCopy(source.Handle);
+        return image;
     }
 
-    [return: JavaType(typeof(Image))]
-    public static Reference createImage___copy([JavaType(typeof(Image))] Reference source, int x, int y, int w, int h,
-        int tr)
+    public static Image createImage___copy(Image source, int x, int y, int w, int h,
+        SpriteTransform tr)
     {
-        var image = Jvm.AllocateObject<Image>();
-        image.Handle = Toolkit.Images.CreateCopy(Jvm.Resolve<Image>(source).Handle, x, y, w, h, (SpriteTransform)tr);
-        return image.This;
+        var image = Jvm.Allocate<Image>();
+        image.Handle = Toolkit.Images.CreateCopy(source.Handle, x, y, w, h, tr);
+        return image;
     }
 
     [JavaDescriptor("(Ljava/io/InputStream;)Ljavax/microedition/lcdui/Image;")]
@@ -80,7 +75,7 @@ public class Image : Object
         var b = new JavaMethodBuilder(cls);
 
         // buf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_1);
 
@@ -89,7 +84,7 @@ public class Image : Object
         b.Append(JavaOpcode.istore_2);
 
         // readBuf = new byte[4096];
-        b.AppendConstant(4096);
+        b.AppendShort(4096);
         b.Append(JavaOpcode.newarray, (byte)ArrayType.T_BYTE);
         b.Append(JavaOpcode.astore_3);
 
@@ -162,10 +157,10 @@ public class Image : Object
         return b.Build(5, 6);
     }
 
-
     public bool isMutable() => Toolkit.Images.IsMutable(Handle);
 
     public int getWidth() => Toolkit.Images.GetWidth(Handle);
+
     public int getHeight() => Toolkit.Images.GetHeight(Handle);
 
     public void getRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
@@ -179,7 +174,7 @@ public class Image : Object
     {
         if (!isMutable())
             Jvm.Throw<IllegalStateException>();
-        var g = Jvm.AllocateObject<Graphics>();
+        var g = Jvm.Allocate<Graphics>();
         g.Init();
         g.Handle = Toolkit.Images.GetGraphics(Handle);
         return g.This;

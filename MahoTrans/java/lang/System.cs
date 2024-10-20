@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
@@ -13,12 +13,12 @@ public class System : Object
     [ClassInit]
     public static void Clinit()
     {
-        var outPrinter = Jvm.AllocateObject<PrintStream>();
-        outPrinter.Init(Jvm.AllocateObject<StdOut>().This);
+        var outPrinter = Jvm.Allocate<PrintStream>();
+        outPrinter.Init(Jvm.Allocate<StdOut>().This);
         NativeStatics.OutStream = outPrinter.This;
 
-        var errPrinter = Jvm.AllocateObject<PrintStream>();
-        errPrinter.Init(Jvm.AllocateObject<StdErr>().This);
+        var errPrinter = Jvm.Allocate<PrintStream>();
+        errPrinter.Init(Jvm.Allocate<StdErr>().This);
         NativeStatics.ErrStream = errPrinter.This;
     }
 
@@ -47,8 +47,8 @@ public class System : Object
 
     public static void arraycopy(Reference src, int src_position, Reference dst, int dst_position, int length)
     {
-        var arr1 = Jvm.Resolve<Array>(src).BaseValue;
-        var arr2 = Jvm.Resolve<Array>(dst).BaseValue;
+        var arr1 = Jvm.Resolve<Array>(src).BaseArray;
+        var arr2 = Jvm.Resolve<Array>(dst).BaseArray;
         global::System.Array.Copy(arr1, src_position, arr2, dst_position, length);
     }
 

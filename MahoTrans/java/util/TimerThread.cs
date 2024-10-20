@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -16,13 +16,14 @@ public class TimerThread : Thread
 {
     public bool Cancelled;
 
-    [JavaType(typeof(TimerTree))] public Reference Tasks;
+    [JavaType(typeof(TimerTree))]
+    public Reference Tasks;
 
     [InitMethod]
     public new void Init()
     {
         base.Init();
-        var tree = Jvm.AllocateObject<TimerTree>();
+        var tree = Jvm.Allocate<TimerTree>();
         tree.Init();
         Tasks = tree.This;
         start();
@@ -197,7 +198,7 @@ public class TimerThread : Thread
 
     public void insertTask([JavaType(typeof(TimerTask))] Reference newTask)
     {
-        var node = Jvm.AllocateObject<TimerNode>();
+        var node = Jvm.Allocate<TimerNode>();
         node.Init(newTask);
         Tasks.As<TimerTree>().insert(node);
         notify();
@@ -206,7 +207,7 @@ public class TimerThread : Thread
     public void cancel()
     {
         Cancelled = true;
-        Tasks = Jvm.AllocateObject<TimerTree>().This;
+        Tasks = Jvm.Allocate<TimerTree>().This;
         notify();
     }
 }

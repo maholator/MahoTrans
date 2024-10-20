@@ -1,8 +1,9 @@
-﻿using MahoTrans.Native;
+﻿// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 
 namespace javax.microedition.io;
 
-[JavaInterface]
 public interface HttpConnection : ContentConnection
 {
     public const String GET = "GET";

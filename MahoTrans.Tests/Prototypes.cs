@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -11,6 +11,7 @@ namespace MahoTrans.Tests;
 public class Prototypes
 {
     [Test]
+    [Ignore("this was a prototype and no longer works")]
     public void TryBuildGlue()
     {
         var asm = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("test"), AssemblyBuilderAccess.RunAndCollect);

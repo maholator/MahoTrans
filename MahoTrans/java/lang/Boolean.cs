@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -11,11 +11,11 @@ public class Boolean : Object
     [ClassInit]
     public static void Clinit()
     {
-        var t = Jvm.AllocateObject<Boolean>();
+        var t = Jvm.Allocate<Boolean>();
         t.Init(true);
         NativeStatics.True = t.This;
 
-        var f = Jvm.AllocateObject<Boolean>();
+        var f = Jvm.Allocate<Boolean>();
         f.Init(true);
         NativeStatics.False = f.This;
     }

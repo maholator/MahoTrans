@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
@@ -10,25 +10,29 @@ namespace javax.microedition.lcdui;
 
 public class Font : Object
 {
-    [JavaIgnore] public FontFace Face;
+    [JavaIgnore]
+    public FontFace Face;
 
-    [JavaIgnore] public FontStyle Style;
-
-    /// <summary>
-    /// Font size as LCDUI constant. For custom fonts, this is 0.
-    /// </summary>
-    [JavaIgnore] public FontSize Size;
+    [JavaIgnore]
+    public FontStyle Style;
 
     /// <summary>
-    /// Height of the font in pixels.
+    ///     Font size as LCDUI constant. For custom fonts, this is 0.
     /// </summary>
-    [JavaIgnore] public int Height;
+    [JavaIgnore]
+    public FontSize Size;
+
+    /// <summary>
+    ///     Height of the font in pixels.
+    /// </summary>
+    [JavaIgnore]
+    public int Height;
 
     [return: JavaType(typeof(Font))]
     public static Reference getFont(int face, int style, int size)
     {
         //TODO checks
-        var font = Jvm.AllocateObject<Font>();
+        var font = Jvm.Allocate<Font>();
         font.Face = (FontFace)face;
         font.Style = (FontStyle)style;
         font.Size = (FontSize)size;
@@ -39,7 +43,7 @@ public class Font : Object
     [return: JavaType(typeof(Font))]
     public static Reference getDefaultFont()
     {
-        var font = Jvm.AllocateObject<Font>();
+        var font = Jvm.Allocate<Font>();
         font.Face = 0;
         font.Style = 0;
         font.Size = FontSize.Medium;
@@ -86,7 +90,6 @@ public class Font : Object
         return Toolkit.Fonts.GetCharsWidth(Face, Style, Height,
             Jvm.ResolveArray<char>(str).AsSpan(from, len));
     }
-
 
     public const int FACE_MONOSPACE = 32;
     public const int FACE_PROPORTIONAL = 64;

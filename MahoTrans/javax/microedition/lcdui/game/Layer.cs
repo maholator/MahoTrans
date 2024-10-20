@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -44,14 +44,17 @@ public class Layer : Object
     }
 
     public int getX() => X;
+
     public int getY() => Y;
+
     public int getWidth() => Width;
+
     public int getHeight() => Height;
+
     public bool isVisible() => Visible;
 
     public void paint(Reference g)
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
-
 }

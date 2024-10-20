@@ -121,7 +121,6 @@ public unsafe class Frame
         CurrentStackSize = stack;
     }
 
-
     /// <summary>
     ///     Deallocates locals buffer. This will be automatically done on object destruction.
     /// </summary>
@@ -429,7 +428,41 @@ public unsafe class Frame
     /// <param name="index">Index of local variable.</param>
     public void PushFromLocal(int index) => PushUnchecked(LocalVariables[index]);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public void IncrementLocal(int index, int value)
+    {
+        long i = LocalVariables[index];
+        // casting to int here to handle overflows
+        //TODO possibly this is redundant? int popper trims upper bytes anyway.
+        // https://sharplab.io/#v2:EYLgxg9gTgpgtADwGwBYA0AXEBDAzgWwB8ABAZgAIBXAO12wDMZziAmcgYXIG8BYAKHKDy/IcwoAbCNQDmAKnIAZCGGziAatigBLbMHExcAbhFCTgssxTkAktTCx8MahiUrxACi3PyXgCYwENB9vADdVShgASjNuGNFJGR9yAF5FZVUNbV19XABtPwCAXWMBUSEvDHJYXBTyMPEI8gBqck9nSK0SsqFXDM0dPQN86n8EQtrqrqEAXxiYi2IrW3sYR2de8QAxPAw2yoLA4Mr6iOjSwV5zsoTpJNSNzIGc4dHiuJ709X7soYPx1JOTBanRisz40yAA
+        int res = value + (int)i;
+        LocalVariables[index] = res;
+    }
+
+    public int GetLocalInt(int index) => (int)LocalVariables[index];
+
+    public long GetLocalLong(int index) => LocalVariables[index];
+
+    public float GetLocalFloat(int index) => BitConverter.Int32BitsToSingle((int)LocalVariables[index]);
+
+    public double GetLocalDouble(int index) => BitConverter.Int64BitsToDouble(LocalVariables[index]);
+
+    public Reference GetLocalReference(int index) => LocalVariables[index];
+
+    public void SetLocalInt(int value, int index) => LocalVariables[index] = value;
+
+    public void SetLocalLong(long value, int index) => LocalVariables[index] = value;
+
+    public void SetLocalFloat(float value, int index) => LocalVariables[index] = BitConverter.SingleToInt32Bits(value);
+
+    public void SetLocalDouble(double value, int index) =>
+        LocalVariables[index] = BitConverter.DoubleToInt64Bits(value);
+
+    public void SetLocalReference(Reference value, int index) => LocalVariables[index] = value;
+
     #endregion
+
+    public void IncreasePointer(int value) => Pointer += value;
 
     public override string ToString()
     {

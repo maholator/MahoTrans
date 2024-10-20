@@ -1,12 +1,12 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
 using MahoTrans.Runtime;
 
-namespace MahoTrans.ToolkitImpls.Systems;
+namespace MahoTrans.ToolkitImpls.Stub;
 
-public class DummySystem : ISystem
+public class StubSystem : ISystem
 {
     public void PrintException(Reference t)
     {

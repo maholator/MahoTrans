@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -28,6 +28,7 @@ public static class DebuggerUtils
             case MTOpcode.nop:
                 return 0;
 
+            case MTOpcode.aconst_0:
             case MTOpcode.iconst_m1:
             case MTOpcode.iconst_0:
             case MTOpcode.iconst_1:
@@ -45,6 +46,7 @@ public static class DebuggerUtils
             case MTOpcode.dconst_1:
             case MTOpcode.dconst_2:
             case MTOpcode.iconst:
+            case MTOpcode.fconst:
             case MTOpcode.strconst:
             case MTOpcode.lconst:
             case MTOpcode.dconst:
@@ -52,18 +54,10 @@ public static class DebuggerUtils
                 return 0;
 
             case MTOpcode.load:
-            case MTOpcode.load_0:
-            case MTOpcode.load_1:
-            case MTOpcode.load_2:
-            case MTOpcode.load_3:
                 // loads load 1 value and take nothing.
                 return 0;
 
             case MTOpcode.store:
-            case MTOpcode.store_0:
-            case MTOpcode.store_1:
-            case MTOpcode.store_2:
-            case MTOpcode.store_3:
                 // stores take 1 value.
                 return 1;
 
@@ -227,14 +221,16 @@ public static class DebuggerUtils
             case MTOpcode.athrow:
                 return 1;
 
-            case MTOpcode.invoke_virtual:
-                return instruction.ShortData + 1; // this+args
-
             case MTOpcode.invoke_static:
+            case MTOpcode.invoke_static_simple:
                 return ((Method)instruction.Data).ArgsCount;
 
             case MTOpcode.invoke_instance:
+            case MTOpcode.invoke_instance_simple:
                 return ((Method)instruction.Data).ArgsCount + 1;
+
+            case MTOpcode.invoke_virtual:
+                return instruction.ShortData + 1;
 
             case MTOpcode.invoke_virtual_void_no_args_bysig:
                 return 3; // this, name, descriptor
@@ -264,11 +260,19 @@ public static class DebuggerUtils
                 return 1;
 
             case MTOpcode.bridge:
-            case MTOpcode.bridge_init_class:
+            case MTOpcode.bridge_init:
                 return instruction.IntData;
 
-            default:
+            case MTOpcode.set_static:
+            case MTOpcode.set_static_init:
+                return 1;
+
+            case MTOpcode.get_static:
+            case MTOpcode.get_static_init:
                 return 0;
+
+            default:
+                throw new ArgumentException($"Opcode {instruction.Opcode} is not supported.");
         }
     }
 
@@ -291,8 +295,8 @@ public static class DebuggerUtils
                     return $"string \"{s.Value}\"";
                 case Array a:
                 {
-                    var nativeArrayElementType = a.BaseValue.GetType().GetElementType()!.Name;
-                    return $"{nativeArrayElementType}[{a.BaseValue.Length}] array, {obj.JavaClass}";
+                    var nativeArrayElementType = a.BaseArray.GetType().GetElementType()!.Name;
+                    return $"{nativeArrayElementType}[{a.BaseArray.Length}] array, {obj.JavaClass}";
                 }
                 case Class cls:
                     return $"class \"{cls.InternalClass.Name}\"";
@@ -309,27 +313,32 @@ public static class DebuggerUtils
     /// <summary>
     ///     Pretty-prints instruction to show it in debugger.
     /// </summary>
-    /// <param name="linked">Linked version of instruction.</param>
-    /// <param name="raw">Raw version of instruction.</param>
     /// <param name="method">Method that contains the instruction.</param>
+    /// <param name="index">Number of the instruction.</param>
     /// <param name="jvm">JVM.</param>
     /// <returns>Opcode and additional info for it.</returns>
-    public static string PrettyPrintInstruction(LinkedInstruction linked, Instruction raw, Method method,
-        JvmState jvm)
+    public static string PrettyPrintInstruction(JavaMethodBody method, int index,
+                                                JvmState jvm)
     {
-        var rawOpcode = raw.Opcode;
+        var consts = method.Method.Class.Constants;
+        var rawOpcode = method.Code[index].Opcode;
+        var args = method.Code[index].Args;
+        var linked = method.LinkedCode[index];
 
         switch (rawOpcode)
         {
             case JavaOpcode.bipush:
+                return $"{rawOpcode} {(sbyte)args[0]}";
+
             case JavaOpcode.sipush:
+                return $"{rawOpcode} {args.Combine()}";
+
             case JavaOpcode.ldc:
+                return $"{rawOpcode} {consts[args[0]]}";
+
             case JavaOpcode.ldc_w:
             case JavaOpcode.ldc2_w:
-                if (linked.Opcode == MTOpcode.iconst)
-                    return $"{rawOpcode} ({linked.IntData})";
-
-                return $"{rawOpcode} ({linked.Data})";
+                return $"{rawOpcode} {consts[args.Combine()]}";
 
             case JavaOpcode.iload:
             case JavaOpcode.lload:
@@ -341,7 +350,7 @@ public static class DebuggerUtils
             case JavaOpcode.fstore:
             case JavaOpcode.dstore:
             case JavaOpcode.astore:
-                return $"{rawOpcode} ({linked.IntData})";
+                return $"{rawOpcode}_{args[0]}";
 
             case JavaOpcode.ifeq:
             case JavaOpcode.ifne:
@@ -360,41 +369,30 @@ public static class DebuggerUtils
             case JavaOpcode.@goto:
             case JavaOpcode.ifnull:
             case JavaOpcode.ifnonnull:
-                return $"{rawOpcode} ({linked.IntData})";
+                return $"{rawOpcode} (to {linked.IntData})";
 
             case JavaOpcode.putfield:
             case JavaOpcode.getfield:
             case JavaOpcode.putstatic:
             case JavaOpcode.getstatic:
-                var i = BytecodeLinker.Combine(raw.Args[0], raw.Args[1]);
-                var ndc = (NameDescriptorClass)method.Class.Constants[i];
-                return $"{rawOpcode} {ndc}";
-
             case JavaOpcode.invokeinterface:
             case JavaOpcode.invokevirtual:
-                var nd = jvm.DecodeVirtualPointer(linked.IntData);
-                return $"{rawOpcode} {nd.Name} {nd.Descriptor}";
-
             case JavaOpcode.invokespecial:
             case JavaOpcode.invokestatic:
-                return $"{rawOpcode} {linked.Data}";
-
             case JavaOpcode.newobject:
             case JavaOpcode.anewarray:
-                return $"{rawOpcode} {linked.Data}";
-
-            case JavaOpcode.newarray:
-                return $"{rawOpcode} {(ArrayType)linked.IntData}";
-
             case JavaOpcode.checkcast:
             case JavaOpcode.instanceof:
-                return $"{rawOpcode} {linked.Data}";
+                return $"{rawOpcode} {method.UsedEntities[index]}";
+
+            case JavaOpcode.newarray:
+                return $"{rawOpcode} {(ArrayType)args[0]}";
 
             case JavaOpcode.wide:
-                return $"{rawOpcode} {(JavaOpcode)raw.Args[0]}";
+                return $"{rawOpcode} {(JavaOpcode)args[0]}";
 
             case JavaOpcode.multianewarray:
-                return $"{rawOpcode} {linked.IntData} {linked.Data}";
+                return $"{rawOpcode} {args[2]} {method.UsedEntities[index]}";
 
             default:
                 return $"{rawOpcode}";

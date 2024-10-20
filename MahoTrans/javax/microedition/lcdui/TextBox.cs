@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -9,7 +9,8 @@ namespace javax.microedition.lcdui;
 
 public class TextBox : Screen, HasText
 {
-    [JavaIgnore] public string Content = string.Empty;
+    [JavaIgnore]
+    public string Content = string.Empty;
 
     public int MaxSize { get; set; }
 
@@ -20,7 +21,7 @@ public class TextBox : Screen, HasText
             Jvm.Throw<IllegalArgumentException>();
         base.Init();
         setTitle(title);
-        Content = Jvm.ResolveStringOrDefault(text) ?? "";
+        Content = Jvm.ResolveStringOrNull(text) ?? "";
         MaxSize = maxSize;
     }
 
@@ -31,7 +32,7 @@ public class TextBox : Screen, HasText
 
     public void setString([String] Reference text)
     {
-        var t = Jvm.ResolveStringOrDefault(text) ?? "";
+        var t = Jvm.ResolveStringOrNull(text) ?? "";
         if (t.Length > MaxSize)
             Jvm.Throw<IllegalArgumentException>();
         Content = t;

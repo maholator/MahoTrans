@@ -1,14 +1,50 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.lcdui;
+using MahoTrans;
 using MahoTrans.Native;
 
 namespace com.nokia.mid.ui;
 
-[JavaInterface(typeof(Graphics))]
-public interface DirectGraphics
+public interface DirectGraphics : IJavaObject
 {
+    public void drawImage(Image img, int x, int y, int anchor, int m) => throw new AbstractCall();
+
+    public void drawPixels(sbyte[] pixels, sbyte[] transparencyMask, int offset, int scanlength, int x, int y, int width,
+        int height, int manipulation, int format) => throw new AbstractCall();
+
+    public void drawPixels(int[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width,
+        int height, int manipulation, int format) => throw new AbstractCall();
+
+    public void drawPixels(short[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width,
+        int height, int manipulation, int format) => throw new AbstractCall();
+
+    public void drawPolygon(int[] xPoints, int xOffset, int[] yPoints, int yOffset, int nPoints, int argbColor) =>
+        throw new AbstractCall();
+
+    public void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) => throw new AbstractCall();
+
+    public void fillPolygon(int[] xPoints, int xOffset, int[] yPoints, int yOffset, int nPoints, int argbColor) =>
+        throw new AbstractCall();
+
+    public void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argbColor) => throw new AbstractCall();
+
+    public int getAlphaComponent() => throw new AbstractCall();
+
+    public int getNativePixelFormat() => throw new AbstractCall();
+
+    public void getPixels(sbyte[] pixels, sbyte[] transparencyMask, int offset, int scanlength, int x, int y, int width,
+        int height, int format) => throw new AbstractCall();
+
+    public void getPixels(int[] pixels, int offset, int scanlength, int x, int y, int width, int height, int format) =>
+        throw new AbstractCall();
+
+    public void getPixels(short[] pixels, int offset, int scanlength, int x, int y, int width, int height,
+        int format) => throw new AbstractCall();
+
+    public void setARGBColor(int argbColor) => throw new AbstractCall();
+
     public const int FLIP_HORIZONTAL = 8192;
     public const int FLIP_VERTICAL = 16384;
     public const int ROTATE_180 = 180;

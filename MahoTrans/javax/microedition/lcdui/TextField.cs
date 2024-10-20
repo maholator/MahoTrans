@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -9,7 +9,8 @@ namespace javax.microedition.lcdui;
 
 public class TextField : Item, HasText
 {
-    [JavaIgnore] public string Content = string.Empty;
+    [JavaIgnore]
+    public string Content = string.Empty;
 
     public int MaxSize { get; set; }
 
@@ -20,9 +21,25 @@ public class TextField : Item, HasText
             Jvm.Throw<IllegalArgumentException>();
         base.Init();
         Label = label;
-        Content = Jvm.ResolveStringOrDefault(text) ?? string.Empty;
+        Content = Jvm.ResolveStringOrNull(text) ?? string.Empty;
         MaxSize = maxSize;
     }
+
+    public int size() => Content.Length;
+
+    [return: String]
+    public Reference getString() => Jvm.InternalizeString(Content);
+
+    public void setString([String] Reference text)
+    {
+        var t = Jvm.ResolveStringOrNull(text) ?? "";
+        if (t.Length > MaxSize)
+            Jvm.Throw<IllegalArgumentException>();
+        Content = t;
+        NotifyToolkit();
+    }
+
+    public int getMaxSize() => MaxSize;
 
     string HasText.Text
     {

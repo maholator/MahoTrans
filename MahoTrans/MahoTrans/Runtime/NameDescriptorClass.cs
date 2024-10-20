@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Utils;
@@ -42,7 +42,7 @@ public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
     /// <param name="className">Containing class name.</param>
     public NameDescriptorClass(string name, Type type, string className)
     {
-        Descriptor = new NameDescriptor(name, type.ToJavaDescriptorNative());
+        Descriptor = new NameDescriptor(name, type.ToJavaDescriptor());
         ClassName = className;
     }
 
@@ -54,7 +54,7 @@ public readonly struct NameDescriptorClass : IEquatable<NameDescriptorClass>
     /// <param name="class">Containing class.</param>
     public NameDescriptorClass(string name, Type type, Type @class)
     {
-        Descriptor = new NameDescriptor(name, type.ToJavaDescriptorNative());
+        Descriptor = new NameDescriptor(name, type.ToJavaDescriptor());
         ClassName = @class.ToJavaName();
     }
 

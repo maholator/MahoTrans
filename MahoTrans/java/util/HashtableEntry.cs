@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -11,7 +11,9 @@ public class HashtableEntry : Object
 {
     public Reference Key;
     public Reference Value;
-    [JavaType(typeof(HashtableEntry))] public Reference Next;
+
+    [JavaType(typeof(HashtableEntry))]
+    public Reference Next;
 
     [InitMethod]
     public void Init(Reference key, Reference value)

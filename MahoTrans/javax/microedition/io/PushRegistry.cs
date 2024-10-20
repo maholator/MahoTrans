@@ -1,4 +1,4 @@
-﻿// Copyright (c) Arman Jussupgaliyev. Licensed under the MIT Licence.
+﻿// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -12,7 +12,7 @@ public class PushRegistry : Object
     [JavaDescriptor("(Z)[Ljava/lang/String;")]
     public static Reference listConnections(bool b)
     {
-        return Jvm.AllocateArray(Array.Empty<Reference>(), "[Ljava/lang/String;");
+        return Jvm.WrapReferenceArray(Array.Empty<Reference>(), "[Ljava/lang/String;");
     }
 
     public static bool unregisterConnection([String] Reference connection)

@@ -122,7 +122,7 @@ public class Hashtable : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference elements()
     {
-        var e = Jvm.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.Allocate<ArrayEnumerator>();
         e.Value = _storage.Values.SelectMany(x =>
         {
             List<Reference> els = new();
@@ -187,7 +187,7 @@ public class Hashtable : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference keys()
     {
-        var e = Jvm.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.Allocate<ArrayEnumerator>();
         e.Value = _storage.Values.SelectMany(x =>
         {
             List<Reference> els = new();
@@ -419,7 +419,7 @@ public class Hashtable : Object
 
     public void AddNewList(int hash, Reference key, Reference value)
     {
-        var e = Jvm.AllocateObject<HashtableEntry>();
+        var e = Jvm.Allocate<HashtableEntry>();
         e.Init(key, value);
         _storage.Add(hash, e.This);
     }

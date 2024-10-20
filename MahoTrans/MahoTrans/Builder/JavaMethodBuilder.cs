@@ -48,25 +48,9 @@ public class JavaMethodBuilder
         Append(new Instruction(opcode, arg));
     }
 
-    public void Append(params JavaOpcode[] opcodes)
-    {
-        foreach (var opcode in opcodes)
-        {
-            Append(opcode);
-        }
-    }
-
     public void Append(Instruction instruction)
     {
         _code.Add(new InstructionEntry(instruction));
-    }
-
-    public void Append(params Instruction[] code)
-    {
-        foreach (var instruction in code)
-        {
-            Append(instruction);
-        }
     }
 
     public void AppendGoto(JavaOpcode opcode, JavaLabel label)
@@ -94,7 +78,7 @@ public class JavaMethodBuilder
 
     public void AppendVirtcall(string name, Type returns)
     {
-        AppendVirtcall(name, $"(){returns.ToJavaDescriptorNative()}");
+        AppendVirtcall(name, $"(){returns.ToJavaDescriptor()}");
     }
 
     public void AppendVirtcall(string name, Type returns, params Type[] args)
@@ -138,7 +122,7 @@ public class JavaMethodBuilder
     /// </summary>
     /// <param name="name">Name of the field.</param>
     /// <param name="type">Type of the field.</param>
-    public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptorNative());
+    public void AppendGetLocalField(string name, Type type) => AppendGetLocalField(name, type.ToJavaDescriptor());
 
     /// <summary>
     ///     Gets field from arbitrary type.
@@ -159,7 +143,7 @@ public class JavaMethodBuilder
     /// <param name="type">Type of the field.</param>
     /// <param name="cls">Type that contains the field.</param>
     public void AppendGetField(string name, Type type, Type cls) =>
-        AppendGetField(name, type.ToJavaDescriptorNative(), cls);
+        AppendGetField(name, type.ToJavaDescriptor(), cls);
 
     /// <summary>
     ///     Puts field to arbitrary type.
@@ -180,12 +164,24 @@ public class JavaMethodBuilder
     /// <param name="type">Type of the field.</param>
     /// <param name="cls">Type that contains the field.</param>
     public void AppendPutField(string name, Type type, Type cls) =>
-        AppendPutField(name, type.ToJavaDescriptorNative(), cls);
+        AppendPutField(name, type.ToJavaDescriptor(), cls);
 
     public void AppendNewObject<T>() where T : Object
     {
         var c = _class.PushConstant(typeof(T).ToJavaName()).Split();
         Append(new Instruction(JavaOpcode.newobject, c));
+    }
+
+    public void AppendNewObject(string className)
+    {
+        var c = _class.PushConstant(className).Split();
+        Append(new Instruction(JavaOpcode.newobject, c));
+    }
+
+    public void AppendInt(int i)
+    {
+        var c = _class.PushConstant(i).Split();
+        Append(new Instruction(JavaOpcode.ldc_w, c));
     }
 
     public void AppendConstant(string str)
@@ -194,13 +190,33 @@ public class JavaMethodBuilder
         Append(new Instruction(JavaOpcode.ldc_w, c));
     }
 
+    public void AppendConstant(long l)
+    {
+        var c = _class.PushConstant(l).Split();
+        Append(new Instruction(JavaOpcode.ldc2_w, c));
+    }
+
+    public void AppendConstant(double d)
+    {
+        var c = _class.PushConstant(d).Split();
+        Append(new Instruction(JavaOpcode.ldc2_w, c));
+    }
+
     #region Labels and jumps
 
+    /// <summary>
+    ///     Creates a label in this method. Places it at the current end of the method.
+    /// </summary>
+    /// <returns>Label handle. You can move it to better place.</returns>
     public JavaLabel PlaceLabel()
     {
         return new JavaLabel(this, _labels.Push(_code.Count));
     }
 
+    /// <summary>
+    ///     Moves already defined label to the current end of the method.
+    /// </summary>
+    /// <param name="label">Label to move.</param>
     public void BringLabel(JavaLabel label)
     {
         _labels[label] = _code.Count;
@@ -220,9 +236,12 @@ public class JavaMethodBuilder
     ///     push to stack i then length.
     /// </param>
     /// <returns>
-    ///     Loop handle. Call <see cref="EndLoop" /> to end the loop. Call <see cref="BeginLoopCondition" /> to mark
-    ///     condition start.
+    ///     Loop handle. Call <see cref="BeginLoopCondition" /> to mark condition start. Call <see cref="EndLoop" /> to end the
+    ///     loop.
     /// </returns>
+    /// <remarks>
+    ///     Wrap this in using block to make it look like real code block. Loop end will be managed automatically.
+    /// </remarks>
     public JavaLoop BeginLoop(JavaOpcode condition)
     {
         var id = _loopStates.Push(1);
@@ -231,11 +250,23 @@ public class JavaMethodBuilder
         return new JavaLoop(this, id, lb, lc, condition);
     }
 
+    /// <summary>
+    ///     Begins try block. Append your try block body, then call <see cref="JavaTryCatch.CatchSection" />, then append catch
+    ///     block body. This must be used in using block. Catch end will be managed automatically.
+    /// </summary>
+    /// <typeparam name="T">Exception type to catch.</typeparam>
+    /// <returns>Try-catch handle to pass to using statement.</returns>
     public JavaTryCatch BeginTry<T>() where T : Throwable
     {
         return BeginTry(typeof(T).ToJavaName());
     }
 
+    /// <summary>
+    ///     Begins try block. Append your try block body, then call <see cref="JavaTryCatch.CatchSection" />, then append catch
+    ///     block body. This must be used in using block. Catch end will be managed automatically.
+    /// </summary>
+    /// <param name="exceptionName">Class name of the exception to catch.</param>
+    /// <returns>Try-catch handle to pass to using statement.</returns>
     public JavaTryCatch BeginTry(string exceptionName)
     {
         var ex = _class.PushConstant(exceptionName);
@@ -268,7 +299,26 @@ public class JavaMethodBuilder
 
     #endregion
 
-    public Instruction[] Build()
+    public bool LastOpcodePerformsJump
+    {
+        get
+        {
+            if (_code.Count == 0)
+                return false;
+
+            switch (_code[^1])
+            {
+                case GotoEntry gotoEntry:
+                    return gotoEntry.Opcode.IsJumpOpcode();
+                case InstructionEntry instructionEntry:
+                    return instructionEntry.Instruction.Opcode.IsJumpOpcode();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    public Instruction[] BuildCode()
     {
         var offsets = CalculateOffsets();
 
@@ -320,7 +370,7 @@ public class JavaMethodBuilder
     {
         return new JavaMethodBody(maxStack, maxLocals)
         {
-            Code = Build(),
+            Code = BuildCode(),
             Catches = BuildTryCatches(),
         };
     }

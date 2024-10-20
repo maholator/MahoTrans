@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Abstractions;
@@ -17,10 +17,13 @@ public class RealTimeClock : Clock
         TicksPerCycleStep = 0;
     }
 
+    public override void Init()
+    {
+        _startTick = DateTime.Now.Ticks;
+    }
+
     public override long GetCurrentMs(long currentTick)
     {
-        if (_startTick == 0)
-            _startTick = DateTime.Now.Ticks;
         return DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 

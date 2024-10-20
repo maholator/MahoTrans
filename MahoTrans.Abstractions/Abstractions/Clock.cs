@@ -8,7 +8,10 @@ namespace MahoTrans.Abstractions;
 /// </summary>
 public abstract class Clock : IToolkit
 {
-    #region JVM-side APIs
+    /// <summary>
+    ///     Initializes the clock, for example, captures current time for future use.
+    /// </summary>
+    public abstract void Init();
 
     /// <summary>
     ///     Gets current time of the system. This is used for System.currentTimeMillis() calls.
@@ -29,20 +32,18 @@ public abstract class Clock : IToolkit
     /// </summary>
     /// <param name="currentCycle">Сurrent jvm's cycle.</param>
     /// <returns>Time in CLR format.</returns>
-   public abstract  long GetCurrentClrTicks(long currentCycle);
+    public abstract long GetCurrentClrTicks(long currentCycle);
 
     /// <summary>
     ///     Gets time, passed since JVM start in CLR format.
     /// </summary>
     /// <param name="currentCycle">Current jvm's cycle.</param>
     /// <returns>Time in CLR format.</returns>
-   public abstract  long GetPassedClrTicks(long currentCycle);
+    public abstract long GetPassedClrTicks(long currentCycle);
 
     /// <summary>
-    ///     CLR time in which cycles step must be done. Ticks count is set by JvmState.CYCLES_PER_BUNCH. This must be managed by the clock.
+    ///     CLR time in which cycles step must be done. Ticks count is set by JvmState.CYCLES_PER_BUNCH. This must be managed
+    ///     by the clock.
     /// </summary>
     public long TicksPerCycleStep;
-
-
-    #endregion
 }

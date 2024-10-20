@@ -1,10 +1,10 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.IO.Compression;
+using System.Reflection;
 using System.Text;
 using javax.microedition.ams;
-using JetBrains.Annotations;
 using MahoTrans.Runtime.Errors;
 using MahoTrans.Utils;
 using Newtonsoft.Json;
@@ -16,15 +16,14 @@ namespace MahoTrans.Runtime;
 
 public partial class JvmState
 {
-    private JsonSerializerSettings HeapSerializeSettings => new JsonSerializerSettings
+    public JsonSerializerSettings HeapJsonSettings => new()
     {
         TypeNameHandling = TypeNameHandling.All,
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         NullValueHandling = NullValueHandling.Include,
         ReferenceLoopHandling = ReferenceLoopHandling.Error,
-        Converters = { new CustomConvertorAssembly() },
-        EqualityComparer = CustomJsonEqualityComparer.Instance,
         SerializationBinder = new Binder(this),
+        ContractResolver = new Resolver(),
     };
 
     private const string cycle_number_txt = "cycle_number.txt";
@@ -41,18 +40,15 @@ public partial class JvmState
     /// <summary>
     ///     Gets snapshot of this JVM.
     /// </summary>
-    /// <returns>Stream with written snapshot. Position will be zero. Make sure do dispose it.</returns>
-    [MustUseReturnValue]
-    public MemoryStream Snapshot()
+    /// <param name="writeTo">Stream to write to.</param>
+    public void Snapshot(Stream writeTo)
     {
-        var snapshotStream = new MemoryStream();
-
-        using (var zip = new ZipArchive(snapshotStream, ZipArchiveMode.Create, true, Encoding.UTF8))
+        using (var zip = new ZipArchive(writeTo, ZipArchiveMode.Create, true, Encoding.UTF8))
         {
             zip.AddTextEntry(cycle_number_txt, s => s.Write(CycleNumber));
             zip.AddTextEntry(classes_txt, s =>
             {
-                foreach (var cls in Classes.Values)
+                foreach (var cls in _classes.Values)
                 {
                     if (cls.IsArray)
                         continue;
@@ -94,7 +90,7 @@ public partial class JvmState
             zip.AddTextEntry(heap_next_txt, s => s.Write(_nextObjectId));
             zip.AddTextEntry(heap_heap_json, s =>
             {
-                var t = JsonConvert.SerializeObject(_heap, HeapSerializeSettings);
+                var t = JsonConvert.SerializeObject(_heap, HeapJsonSettings);
                 s.Write(t);
             });
             zip.AddTextEntry(heap_statics_json, s =>
@@ -102,13 +98,10 @@ public partial class JvmState
                 SerializedStatics ss = default;
                 ss.Java = StaticFields;
                 ss.Native = StaticMemory;
-                var t = JsonConvert.SerializeObject(ss, HeapSerializeSettings);
+                var t = JsonConvert.SerializeObject(ss, HeapJsonSettings);
                 s.Write(t);
             });
         }
-
-        snapshotStream.Position = 0;
-        return snapshotStream;
     }
 
     private struct SerializedClass
@@ -143,7 +136,7 @@ public partial class JvmState
                     .Select(x => x.Split(' '))
                     .ToDictionary(x => x[3], x => new SerializedClass(x));
 
-                foreach (var cls in Classes.Values)
+                foreach (var cls in _classes.Values)
                 {
                     if (cls.IsArray)
                         continue;
@@ -195,23 +188,20 @@ public partial class JvmState
             }
 
             // heap
+            using (new JvmContext(this))
             {
                 _nextObjectId = int.Parse(zip.ReadTextEntry(heap_next_txt));
                 _internalizedStrings =
                     JsonConvert.DeserializeObject<Dictionary<string, int>>(zip.ReadTextEntry(heap_strings_json))!;
-                JvmContext.Jvm = this;
-                _heap = JsonConvert.DeserializeObject<Object[]>(zip.ReadTextEntry(heap_heap_json),
-                    HeapSerializeSettings)!;
 
-                var ss = JsonConvert.DeserializeObject<SerializedStatics>(zip.ReadTextEntry(heap_statics_json),
-                    HeapSerializeSettings);
+
+                _heap = DeserializeBound<Object[]>(zip.ReadTextEntry(heap_heap_json));
+                var ss = DeserializeBound<SerializedStatics>(zip.ReadTextEntry(heap_statics_json));
                 if (ss.Java.Length != StaticFieldsOwners.Count)
                     throw new SnapshotLoadError(
                         $"Statics count do not match. Expected {StaticFieldsOwners.Count}, {ss.Java.Length} was in snapshot.");
                 StaticFields = ss.Java;
                 StaticMemory = ss.Native;
-
-                JvmContext.Jvm = null;
             }
         }
 
@@ -256,7 +246,7 @@ public partial class JvmState
 
         foreach (var sh in x.Frames)
         {
-            var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody;
+            var method = GetClass(sh.ClassName).Methods[sh.MethodDescriptor].JavaBody!;
             var f = new Frame(method) { Pointer = sh.Pointer, StackTop = sh.StackTop };
             unsafe
             {
@@ -339,9 +329,14 @@ public partial class JvmState
 
         public Type BindToType(string? assemblyName, string typeName)
         {
-            if (assemblyName == "jar")
+            if (assemblyName == null)
             {
-                return _jvm.Classes[typeName].ClrType ??
+                throw new JavaRuntimeError();
+            }
+
+            if (assemblyName.StartsWith(TYPE_HOST_DLL_PREFIX))
+            {
+                return _jvm._classes[typeName].ClrType ??
                        throw new JavaRuntimeError($"Can't bind to {typeName} because it has no CLR type");
             }
 
@@ -353,4 +348,16 @@ public partial class JvmState
             _binder.BindToName(serializedType, out assemblyName, out typeName);
         }
     }
+
+    private class Resolver : DefaultContractResolver
+    {
+        public Resolver()
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            DefaultMembersSearchFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+    }
+
+    private T DeserializeBound<T>(string json) => JsonConvert.DeserializeObject<T>(json, HeapJsonSettings)!;
 }

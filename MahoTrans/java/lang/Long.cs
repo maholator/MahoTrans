@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -43,7 +43,7 @@ public class Long : Object
     public static long parseLong([String] Reference s)
     {
         if (!long.TryParse(Jvm.ResolveString(s), out var i))
-           Jvm.Throw<NumberFormatException>();
+            Jvm.Throw<NumberFormatException>();
         return i;
     }
 
@@ -70,12 +70,14 @@ public class Long : Object
                 Jvm.Throw<NumberFormatException>();
             result = next;
         }
+
         if (!negative)
         {
             result = -result;
             if (result < 0)
                 Jvm.Throw<NumberFormatException>();
         }
+
         return result;
     }
 
@@ -106,6 +108,7 @@ public class Long : Object
             count = 1;
             j = -l;
         }
+
         while ((l /= radix) != 0)
             ++count;
         char[] buffer = new char[count];
@@ -118,6 +121,7 @@ public class Long : Object
                 ch += 48;
             buffer[--count] = (char)ch;
         } while ((j /= radix) != 0);
+
         if (negative)
             buffer[0] = '-';
         return Jvm.AllocateString(new string(buffer, 0, buffer.Length));

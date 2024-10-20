@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.io;
@@ -19,10 +19,10 @@ public class Manager : Object
 
         if (str is ByteArrayInputStream bais)
         {
-            var buf = bais.buf.As<Array<sbyte>>().Value;
+            var buf = bais.buf.As<Array<sbyte>>().TypedArray;
             var mem = new ReadOnlySpan<sbyte>(buf, bais.pos, bais.count - bais.pos);
-            var player = Jvm.AllocateObject<PlayerImpl>();
-            player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrDefault(type), player.This);
+            var player = Jvm.Allocate<PlayerImpl>();
+            player.Handle = Toolkit.Media.Create(mem, Jvm.ResolveStringOrNull(type), player.This);
             return player.This;
         }
 

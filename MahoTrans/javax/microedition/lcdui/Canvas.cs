@@ -15,7 +15,8 @@ namespace javax.microedition.lcdui;
 
 public class Canvas : Displayable
 {
-    [JavaType(typeof(Graphics))] public Reference CachedGraphics;
+    [JavaType(typeof(Graphics))]
+    public Reference CachedGraphics;
 
     [InitMethod]
     public override void Init()
@@ -34,7 +35,7 @@ public class Canvas : Displayable
         {
             if (CachedGraphics.IsNull)
             {
-                var cg = Jvm.AllocateObject<Graphics>();
+                var cg = Jvm.Allocate<Graphics>();
                 cg.Init();
                 cg.Handle = Toolkit.Display.GetGraphics(Handle);
                 CachedGraphics = cg.This;
@@ -47,7 +48,7 @@ public class Canvas : Displayable
             return CachedGraphics;
         }
 
-        var g = Jvm.AllocateObject<Graphics>();
+        var g = Jvm.Allocate<Graphics>();
         g.Init();
         g.Handle = Toolkit.Display.GetGraphics(Handle);
         return g.This;
@@ -162,8 +163,11 @@ public class Canvas : Displayable
     }
 
     public bool hasPointerEvents() => true;
+
     public bool isDoubleBuffered() => true;
+
     public bool hasPointerMotionEvents() => true;
+
     public bool hasRepeatEvents() => false;
 
     public void setFullScreenMode(bool mode)

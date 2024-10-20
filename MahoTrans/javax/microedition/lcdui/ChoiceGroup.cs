@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -7,29 +7,21 @@ using MahoTrans.Runtime;
 
 namespace javax.microedition.lcdui;
 
-public class ChoiceGroup : Item, Choice
+public class ChoiceGroup : Item, Choice, INativeChoice
 {
-    [JavaIgnore] public List<List.ListItem> Items = new();
+    public List<ChoiceItem> Items { get; } = new();
 
-    public ChoiceType Type;
+    public ChoiceType Type { get; set; }
 
-    public int SelectedItem;
+    public int FitPolicy { get; set; }
 
-    [JavaIgnore] public List<bool> SelectedMap = new();
+    public int SelectedIndex { get; set; }
 
-    int Choice.SelectedIndex
-    {
-        get => SelectedItem;
-        set => SelectedItem = value;
-    }
+    public List<bool> SelectedIndexes { get; } = new();
 
-    bool[] Choice.SelectedIndixes
-    {
-        get => SelectedMap.ToArray();
-        set => SelectedMap = value.ToList();
-    }
+    void INativeChoice.Invalidate() => NotifyToolkit();
 
-    int Choice.ItemsCount => Items.Count;
+    void INativeChoice.ReportChange() => notifyStateChanged();
 
     [InitMethod]
     public void Init([String] Reference label, int listType)
@@ -42,45 +34,62 @@ public class ChoiceGroup : Item, Choice
     }
 
     [InitMethod]
-    public void Init([String] Reference title, int listType, [JavaType("[Ljava/lang/String;")] Reference stringElements,
-        [JavaType("[Ljavax/microedition/lcdui/Image;")]
-        Reference imageElements)
+    public void Init([String] Reference label, int listType, [String] Reference[] stringElements,
+        [JavaType(typeof(Image))] Reference[]? imageElements)
     {
-        Init(title, listType);
-
-        var strings = Jvm.ResolveArray<Reference>(stringElements);
-        if (imageElements.IsNull)
-        {
-            foreach (var str in strings)
-            {
-                if (str.IsNull)
-                    Jvm.Throw<NullPointerException>();
-                Items.Add(new List.ListItem(str, Reference.Null));
-                SelectedMap.Add(false);
-            }
-
-            return;
-        }
-
-        var images = Jvm.ResolveArray<Reference>(imageElements);
-        if (images.Length != strings.Length)
-            Jvm.Throw<IllegalArgumentException>();
-
-        for (var i = 0; i < strings.Length; i++)
-        {
-            var str = strings[i];
-            if (str.IsNull)
-                Jvm.Throw<NullPointerException>();
-            Items.Add(new List.ListItem(str, images[i]));
-            SelectedMap.Add(false);
-        }
+        Init(label, listType);
+        this.Initialize(stringElements, imageElements);
     }
 
-    public int getSelectedIndex()
-    {
-        if (Type == ChoiceType.Multiple)
-            return -1;
+    public int getSelectedIndex() => this.GetSelected();
 
-        return SelectedItem;
+    public void setSelectedIndex(int index, bool state) => this.SetSelected(index, state);
+
+    public int getSelectedFlags(bool[] flags) => this.GetSelectedFlags(flags);
+
+    public void setSelectedFlags(bool[] flags) => this.SetSelectedFlags(flags);
+
+    public int size() => Items.Count;
+
+    [return: JavaType(typeof(Image))]
+    public Reference getImage(int index) => Items[index].Image;
+
+    [return: String]
+    public Reference getString(int index) => Items[index].Text;
+
+    [return: JavaType(typeof(Font))]
+    public Reference getFont(int index) => Items[index].Font;
+
+    public void set(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.SetItem(index, text, image);
+
+    public void setFont(int index, [JavaType(typeof(Font))] Reference font)
+    {
+        Items[index].Font = font;
+        NotifyToolkit();
+    }
+
+    public bool isSelected(int index) => this.GetItemState(index);
+
+    public int getFitPolicy() => FitPolicy;
+
+    public void setFitPolicy(int policy) => this.SetFitPolicy(policy);
+
+    public void deleteAll() => this.Clear();
+
+    public void delete(int index) => this.RemoveAt(index);
+
+    public void insert(int index, [String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Insert(index, text, image);
+
+    public int append([String] Reference text, [JavaType(typeof(Image))] Reference image) =>
+        this.Add(text, image);
+
+    public override void AnnounceHiddenReferences(Queue<Reference> queue)
+    {
+        foreach (var item in Items)
+            item.AnnounceHiddenReferences(queue);
+
+        base.AnnounceHiddenReferences(queue);
     }
 }

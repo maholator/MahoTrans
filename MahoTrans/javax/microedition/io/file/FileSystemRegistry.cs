@@ -20,7 +20,7 @@ public class FileSystemRegistry : Object
             Reference[] r = new Reference[drives.Length];
             for (int i = 0; i < r.Length; i++)
                 r[i] = Jvm.AllocateString("file:///" + drives[i].Replace('\\', '/'));
-            var enumerator = Jvm.AllocateObject<ArrayEnumerator>();
+            var enumerator = Jvm.Allocate<ArrayEnumerator>();
             enumerator.Value = r;
             enumerator.Init();
             return enumerator.This;

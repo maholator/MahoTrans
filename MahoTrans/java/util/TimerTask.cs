@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -26,7 +26,7 @@ public class TimerTask : Object, Runnable
 
     public void run()
     {
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
     }
 
     public long scheduledExecutionTime()

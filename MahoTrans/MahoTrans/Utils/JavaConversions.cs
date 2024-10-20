@@ -157,6 +157,15 @@ public static class JavaConversions
             r[i] = jvm.AllocateString(list[i]);
         }
 
-        return jvm.AllocateArray(r, "[Ljava/lang/String;");
+        return jvm.WrapReferenceArray(r, "[Ljava/lang/String;");
+    }
+
+    public static bool IsJavaType(this Type t) => t.IsAssignableTo(typeof(IJavaObject));
+
+    public static int Combine(this byte[] args, int offset = 0)
+    {
+        var u = (ushort)((args[offset] << 8) | args[offset + 1]);
+        var s = (short)u;
+        return s;
     }
 }

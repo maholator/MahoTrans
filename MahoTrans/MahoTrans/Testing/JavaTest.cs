@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Loader;
@@ -7,7 +7,7 @@ using MahoTrans.Runtime.Config;
 using MahoTrans.ToolkitImpls.Clocks;
 using MahoTrans.ToolkitImpls.Loggers;
 using MahoTrans.ToolkitImpls.Rms;
-using MahoTrans.ToolkitImpls.Systems;
+using MahoTrans.ToolkitImpls.Stub;
 
 namespace MahoTrans.Testing;
 
@@ -21,7 +21,7 @@ public class JavaTest
             throw new FileNotFoundException();
 
         ToolkitCollection tk = new ToolkitCollection(
-            new DummySystem(),
+            new StubSystem(),
             new RealTimeClock(),
             null!,
             null!,
@@ -32,12 +32,14 @@ public class JavaTest
             LoadLogger = new ConsoleLogger()
         };
         _jvm = new JvmState(tk, ExecutionManner.Unlocked);
-        _jvm.AddClrClasses(typeof(JavaRunner).Assembly);
+        _jvm.AddMahoTransLibrary();
         var cl = new ClassLoader(new ConsoleLogger());
         var cls = cl.ReadJarFile(jarFile, true);
-        _jvm.AddJvmClasses(cls, "jar", "jar");
-        var obj = _jvm.AllocateObject(_jvm.GetClass(className));
+        _jvm.AddJvmClasses(cls, "jar");
 
+        _jvm.LinkAndLock();
+
+        var obj = _jvm.AllocateObject(_jvm.GetClass(className));
 
         var thread = JavaThread.CreateSynthetic(new NameDescriptor(methodName, "()V"), obj, _jvm);
         using (new JvmContext(_jvm))

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -9,7 +9,9 @@ namespace java.util;
 
 public class SimpleTimeZone : TimeZone
 {
-    [String] public Reference ID;
+    [String]
+    public Reference ID;
+
     private int rawOffset;
     private int startYear, startMonth, startDay, startDayOfWeek, startTime;
     private int endMonth, endDay, endDayOfWeek, endTime;
@@ -99,7 +101,6 @@ public class SimpleTimeZone : TimeZone
     {
         return dstSavings;
     }
-
 
     public override int getOffset(int era, int year, int month, int day, int dayOfWeek, int time)
     {

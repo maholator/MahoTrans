@@ -40,7 +40,7 @@ public static class VirtualRmsUtils
         writer.Write(dict.Count);
 
         // stores data
-        foreach (var (name, slots) in dict.OrderBy(x => x.Key))
+        foreach (var (name, slots) in dict)
         {
             // store name
             var enc = Encoding.UTF8.GetBytes(name);
@@ -66,7 +66,7 @@ public static class VirtualRmsUtils
 
     public static VirtualRms Read(Stream stream)
     {
-        var dict = new Dictionary<string, List<byte[]?>>();
+        var dict = new SortedDictionary<string, List<byte[]?>>();
         using var reader = new BeBinaryReader(stream, Encoding.UTF8, true);
 
         // count of stores

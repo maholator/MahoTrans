@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -6,12 +6,13 @@ using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime.Types;
 
-public class Method : IDisposable
+public class Method : IDisposable, IJavaEntity
 {
     public readonly MethodFlags Flags;
     public readonly NameDescriptor Descriptor;
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
-    private object _methodBody = null!;
+    public MethodInfo? NativeBody;
+    private JavaMethodBody? _javaBody;
     public int BridgeNumber;
     public Action<Frame>? Bridge;
     public readonly JavaClass Class;
@@ -20,6 +21,8 @@ public class Method : IDisposable
     ///     Number of method's self args. If method is non-static, this does not include "this" arg.
     /// </summary>
     public readonly int ArgsCount;
+
+    public string? DisplayableName { get; set; }
 
     public Method(NameDescriptor descriptor, MethodFlags flags, JavaClass @class)
     {
@@ -35,19 +38,14 @@ public class Method : IDisposable
 
     public bool IsCritical => (Flags & MethodFlags.Synchronized) != 0;
 
-    public MethodInfo NativeBody
+    public JavaMethodBody? JavaBody
     {
-        get => (MethodInfo)_methodBody;
-        set => _methodBody = value;
-    }
-
-    public JavaMethodBody JavaBody
-    {
-        get => (JavaMethodBody)_methodBody;
+        get => _javaBody;
         set
         {
-            value.Method = this;
-            _methodBody = value;
+            if (value != null)
+                value.Method = this;
+            _javaBody = value;
         }
     }
 
@@ -62,13 +60,16 @@ public class Method : IDisposable
 
     public uint GetSnapshotHash()
     {
-        return Descriptor.GetSnapshotHash() ^ ((_methodBody as JavaMethodBody)?.GetSnapshotHash() ?? 0U) ^ (uint)Flags;
+        return Descriptor.GetSnapshotHash() ^ (JavaBody?.GetSnapshotHash() ?? 0U) ^ (uint)Flags;
     }
 
     public void Dispose()
     {
         Attributes = null!;
-        _methodBody = null!;
+        JavaBody = null!;
+        NativeBody = null!;
         Bridge = null!;
     }
+
+    public string Name => Descriptor.Name;
 }

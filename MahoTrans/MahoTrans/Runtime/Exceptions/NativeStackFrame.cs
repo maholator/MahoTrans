@@ -3,8 +3,9 @@
 
 using System.Reflection;
 using System.Text;
-using MahoTrans.Loader;
+using MahoTrans.Compiler;
 using MahoTrans.Runtime.Types;
+using MahoTrans.Utils;
 
 namespace MahoTrans.Runtime.Exceptions;
 
@@ -21,36 +22,9 @@ public class NativeStackFrame : IMTStackFrame
         _lineNumber = lineNumber;
     }
 
-
     public string MethodName => _method.Name;
 
-    public string MethodSignature
-    {
-        get
-        {
-            StringBuilder s = new StringBuilder();
-            var p = _method.GetParameters();
-            s.Append('(');
-            for (int k = 0; k < p.Length; k++)
-            {
-                s.Append(p[k].ParameterType.Name);
-                s.Append(' ');
-                s.Append(p[k].Name);
-                if (k + 1 != p.Length)
-                    s.Append(", ");
-            }
-
-            s.Append(')');
-
-            //if (_method is MethodInfo mi)
-            //{
-            //    s.Append(' ');
-            //    s.Append(mi.ReturnType.Name);
-            //}
-
-            return s.ToString();
-        }
-    }
+    public string MethodSignature => _method.PrettyPrintNativeArgs();
 
     public string? MethodClass => _method.DeclaringType?.FullName;
 
@@ -64,7 +38,7 @@ public class NativeStackFrame : IMTStackFrame
 
     public int? LineNumber => _lineNumber == 0 ? null : _lineNumber;
 
-    public bool IsBridge => _method.DeclaringType?.Name == BridgeCompiler.METHODS_BRIDGE_CLASS_NAME;
+    public bool IsBridge => _method.DeclaringType?.Name == CompilerUtils.BRIDGE_CLASS_NAME;
 
     public bool IsInterpreter => _method.DeclaringType == typeof(JavaRunner);
 

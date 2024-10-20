@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using javax.microedition.ams.events;
@@ -18,17 +18,25 @@ namespace javax.microedition.ams;
 /// </summary>
 public class EventQueue : Thread
 {
-    [JavaIgnore] [JsonIgnore] private Queue<Reference> _events = new();
-    [JavaIgnore] private object _lock = new();
+    [JavaIgnore]
+    [JsonIgnore]
+    private Queue<Reference> _events = new();
 
-    [JsonIgnore] public int Length => _events.Count;
+    [JavaIgnore]
+    private object _lock = new();
+
+    [JsonIgnore]
+    public int Length => _events.Count;
 
     /// <summary>
     ///     JVM this event queue working in. This is used to allow calling event queueing from anywhere.
     /// </summary>
-    [JavaIgnore] [JsonIgnore] public JvmState OwningJvm = null!;
+    [JavaIgnore]
+    [JsonIgnore]
+    public JvmState OwningJvm = null!;
 
-    [JavaIgnore] public Dictionary<int, bool> QueuedRepaints = new();
+    [JavaIgnore]
+    public Dictionary<int, bool> QueuedRepaints = new();
 
     /// <summary>
     ///     For snapshots.
@@ -63,11 +71,11 @@ public class EventQueue : Thread
     }
 
     [JavaIgnore]
-    public void Enqueue<T>(Action<T> setup) where T : Event
+    public void Enqueue<T>(Action<T> setup) where T : Event, new()
     {
         lock (_lock)
         {
-            var e = OwningJvm.AllocateObject<T>();
+            var e = OwningJvm.Allocate<T>();
             setup.Invoke(e);
             if (e is RepaintEvent re)
             {

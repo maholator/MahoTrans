@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
@@ -8,7 +8,7 @@ namespace MahoTrans.Runtime.Types;
 /// <summary>
 ///     Represents a field inside JVM type.
 /// </summary>
-public class Field
+public class Field : IJavaEntity
 {
     public readonly FieldFlags Flags;
     public readonly string ClassName;
@@ -33,6 +33,8 @@ public class Field
 
     public JavaAttribute[] Attributes = Array.Empty<JavaAttribute>();
 
+    public string? DisplayableName { get; set; }
+
     public Field(NameDescriptor descriptor, FieldFlags flags, string className)
     {
         Flags = flags;
@@ -47,4 +49,6 @@ public class Field
     public override int GetHashCode() => Descriptor.GetHashCode();
 
     public uint GetSnapshotHash() => Descriptor.GetSnapshotHash();
+
+    public string Name => Descriptor.Name;
 }

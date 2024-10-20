@@ -1,6 +1,7 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Reflection;
 using System.Text;
 using MahoTrans.Runtime;
 
@@ -79,7 +80,7 @@ public static class DescriptorUtils
     }
 
     /// <summary>
-    /// Calculate primitive type from first descriptor character.
+    ///     Calculate primitive type from first descriptor character.
     /// </summary>
     /// <param name="c">First character of descriptor.</param>
     /// <returns>Primitive type.</returns>
@@ -137,7 +138,7 @@ public static class DescriptorUtils
     public static (PrimitiveType? returnType, PrimitiveType[] args) ParseMethodDescriptorAsPrimitives(string descriptor)
     {
         if (descriptor[0] != '(')
-            throw new ArgumentException();
+            throw new ArgumentException($"Descriptor {descriptor} must start from '('");
         int argsEnd = descriptor.IndexOf(')');
         string argsD = descriptor.Substring(1, argsEnd - 1);
         var retD = descriptor[argsEnd + 1];
@@ -249,21 +250,22 @@ public static class DescriptorUtils
 
     /// <summary>
     ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
-    ///     If you want to convert native primitives like bool->Z, use <see cref="ToJavaDescriptorNative" /> instead.
-    /// </summary>
-    /// <param name="t">Type to get name from.</param>
-    /// <returns>Name with dots replaced by slashes int L; form.</returns>
-    public static string ToJavaDescriptor(this Type t) => $"L{t.ToJavaName()};";
-
-    /// <summary>
-    ///     Gets full type name as descriptor, i.e. Lpkg/obj;.
-    ///     If the type if a native primitive, handles it correctly, i.e. bool->Z, void->V and so on.
-    ///     If the type is guaranteed to be a java class, use <see cref="ToJavaDescriptor" /> directly.
+    ///     If the type if a native primitive, handles it, i.e. bool->Z, void->V and so on.
     /// </summary>
     /// <param name="t">Type to get name from.</param>
     /// <returns>Type descriptor.</returns>
-    public static string ToJavaDescriptorNative(this Type t)
+    public static string ToJavaDescriptor(this Type t)
     {
+        if (t.IsArray)
+        {
+            if (t.GetArrayRank() != 1)
+                throw new NotSupportedException("Multidimensional arrays are not supported");
+            if (!t.HasElementType)
+                throw new NotSupportedException("Arrays must have element type");
+
+            return "[" + t.GetElementType()!.ToJavaDescriptor();
+        }
+
         if (t == typeof(Reference))
             return "Ljava/lang/Object;";
         if (t == typeof(int))
@@ -286,7 +288,10 @@ public static class DescriptorUtils
             return "Ljava/lang/String;";
         if (t == typeof(void))
             return "V";
-        return t.ToJavaDescriptor();
+        if (t.IsEnum)
+            return Enum.GetUnderlyingType(t).ToJavaDescriptor();
+
+        return $"L{t.ToJavaName()};";
     }
 
     public static string BuildMethodDescriptor(Type returnType, params Type[] args)
@@ -294,11 +299,29 @@ public static class DescriptorUtils
         var sb = new StringBuilder("(");
         foreach (var type in args)
         {
-            sb.Append(type.ToJavaDescriptorNative());
+            sb.Append(type.ToJavaDescriptor());
         }
 
         sb.Append(')');
-        sb.Append(returnType.ToJavaDescriptorNative());
+        sb.Append(returnType.ToJavaDescriptor());
         return sb.ToString();
+    }
+
+    public static string PrettyPrintNativeArgs(this MethodBase method)
+    {
+        StringBuilder s = new StringBuilder();
+        var p = method.GetParameters();
+        s.Append('(');
+        for (int k = 0; k < p.Length; k++)
+        {
+            s.Append(p[k].ParameterType.Name);
+            s.Append(' ');
+            s.Append(p[k].Name);
+            if (k + 1 != p.Length)
+                s.Append(", ");
+        }
+
+        s.Append(')');
+        return s.ToString();
     }
 }

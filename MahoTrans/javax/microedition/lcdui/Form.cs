@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -10,7 +10,11 @@ namespace javax.microedition.lcdui;
 
 public class Form : Screen
 {
-    [JavaIgnore] public List<Reference> Items = new();
+    [JavaIgnore]
+    public List<Reference> Items = new();
+
+    [JavaType(typeof(ItemStateListener))]
+    public Reference StateListener;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -37,9 +41,9 @@ public class Form : Screen
     public int append([JavaType(typeof(Item))] Reference item)
     {
         var i = Jvm.Resolve<Item>(item);
-        if (i.Owner != default)
+        if (i.IsAttached)
             Jvm.Throw<IllegalStateException>();
-        i.Owner = Handle;
+        i.AttachTo(this);
         Items.Add(item);
         Toolkit.Display.ContentUpdated(Handle);
         return Items.Count - 1;
@@ -47,24 +51,23 @@ public class Form : Screen
 
     public int append___text([String] Reference str)
     {
-        var i = Jvm.AllocateObject<StringItem>();
+        var i = Jvm.Allocate<StringItem>();
         i.Init(Reference.Null, str);
         return append(i.This);
     }
 
     public int append___image([JavaType(typeof(Image))] Reference image)
     {
-        var i = Jvm.AllocateObject<ImageItem>();
+        var i = Jvm.Allocate<ImageItem>();
         i.Init(Reference.Null, image, 0, Reference.Null);
         return append(i.This);
     }
-
 
     public void delete(int n)
     {
         if (n < 0 || n >= Items.Count)
             Jvm.Throw<IndexOutOfBoundsException>();
-        Jvm.Resolve<Item>(Items[n]).Owner = default;
+        Jvm.Resolve<Item>(Items[n]).AttachTo(null);
         Items.RemoveAt(n);
         Toolkit.Display.ContentUpdated(Handle);
     }
@@ -72,10 +75,12 @@ public class Form : Screen
     public void deleteAll()
     {
         foreach (var item in Items)
-            Jvm.Resolve<Item>(item).Owner = default;
+            Jvm.Resolve<Item>(item).AttachTo(null);
         Items.Clear();
         Toolkit.Display.ContentUpdated(Handle);
     }
 
     public int size() => Items.Count;
+
+    public void setItemStateListener([JavaType(typeof(ItemStateListener))] Reference l) => StateListener = l;
 }

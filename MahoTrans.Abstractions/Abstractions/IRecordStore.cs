@@ -47,7 +47,6 @@ public interface IRecordStore : IToolkit
     /// <returns>Index of added slot.</returns>
     int AddRecord(string name, ReadOnlySpan<byte> data);
 
-
     /// <summary>
     ///     Deletes a slot from store.
     /// </summary>
@@ -90,4 +89,6 @@ public interface IRecordStore : IToolkit
     int GetNextId(string name);
 
     int GetCount(string name);
+
+    int[] GetAllRecordIds(string name);
 }

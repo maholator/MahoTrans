@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Text;
@@ -15,7 +15,7 @@ public class TimeZone : Object
     [ClassInit]
     public static void ClInit()
     {
-        var gmt = Jvm.AllocateObject<SimpleTimeZone>();
+        var gmt = Jvm.Allocate<SimpleTimeZone>();
         gmt.Init(0, Jvm.InternalizeString("GMT"));
         NativeStatics.GmtTimeZone = gmt.This;
     }
@@ -23,7 +23,7 @@ public class TimeZone : Object
     private static void initializeAvailable()
     {
         //TODO THIS MUST NOT BE A THING
-        var cls = Jvm.Classes[typeof(TimeZone).ToJavaName()];
+        var cls = Jvm.GetClass(typeof(TimeZone).ToJavaName());
         if (cls.PendingInitializer)
         {
             ClInit();
@@ -60,9 +60,9 @@ public class TimeZone : Object
     public virtual Reference getID() => Reference.Null;
 
     public virtual int getOffset(int era, int year, int month, int day, int dayOfWeek, int time) =>
-        throw new AbstractJavaMethodCallError();
+        throw new AbstractCall();
 
-    public virtual int getRawOffset() => throw new AbstractJavaMethodCallError();
+    public virtual int getRawOffset() => throw new AbstractCall();
 
     [return: JavaType(typeof(TimeZone))]
     public static Reference getTimeZone([String] Reference nameString)
@@ -108,7 +108,7 @@ public class TimeZone : Object
                     }
 
                     if (sign == '-') raw = -raw;
-                    var stz = Jvm.AllocateObject<SimpleTimeZone>();
+                    var stz = Jvm.Allocate<SimpleTimeZone>();
                     stz.Init(raw, Jvm.InternalizeString(formattedName));
                     return stz.This;
                 }
@@ -198,5 +198,5 @@ public class TimeZone : Object
         NativeStatics.DefaultTimeZone = getTimeZone(Jvm.InternalizeString(systemZone));
     }
 
-    public virtual bool useDaylightTime() => throw new AbstractJavaMethodCallError();
+    public virtual bool useDaylightTime() => throw new AbstractCall();
 }

@@ -18,7 +18,7 @@ public class DirectUtils : Object
     [return: JavaType(typeof(Image))]
     public static Reference createImage(int width, int height, int color)
     {
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateBuffer(width, height, color);
         return image.This;
     }
@@ -28,7 +28,7 @@ public class DirectUtils : Object
     {
         var blob = Jvm.ResolveArray<sbyte>(data).ToUnsigned();
 
-        var image = Jvm.AllocateObject<Image>();
+        var image = Jvm.Allocate<Image>();
         image.Handle = Toolkit.Images.CreateBufferFromFile(new ReadOnlySpan<byte>(blob, from, len));
         return image.This;
     }
@@ -37,7 +37,7 @@ public class DirectUtils : Object
     public static Reference getFont(int face, int style, int height)
     {
         //TODO checks
-        var font = Jvm.AllocateObject<Font>();
+        var font = Jvm.Allocate<Font>();
         font.Face = (FontFace)face;
         font.Style = (FontStyle)style;
         font.Size = default;

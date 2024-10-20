@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Native;
@@ -18,28 +18,29 @@ public class AlertType : Object
         Type = (AlertTypeEnum)type;
     }
 
-    [JavaIgnore] public AlertTypeEnum Type;
+    [JavaIgnore]
+    public AlertTypeEnum Type;
 
     [ClassInit]
     public static void ClInit()
     {
-        var alarm = Jvm.AllocateObject<AlertType>();
+        var alarm = Jvm.Allocate<AlertType>();
         alarm.Init(1);
         NativeStatics.AlarmAlertType = alarm.This;
 
-        var confirmation = Jvm.AllocateObject<AlertType>();
+        var confirmation = Jvm.Allocate<AlertType>();
         confirmation.Init(2);
         NativeStatics.ConfirmationAlertType = confirmation.This;
 
-        var error = Jvm.AllocateObject<AlertType>();
+        var error = Jvm.Allocate<AlertType>();
         error.Init(3);
         NativeStatics.ErrorAlertType = error.This;
 
-        var info = Jvm.AllocateObject<AlertType>();
+        var info = Jvm.Allocate<AlertType>();
         info.Init(4);
         NativeStatics.InfoAlertType = info.This;
 
-        var warning = Jvm.AllocateObject<AlertType>();
+        var warning = Jvm.Allocate<AlertType>();
         warning.Init(5);
         NativeStatics.WarningAlertType = warning.This;
     }

@@ -14,18 +14,38 @@ namespace javax.microedition.lcdui;
 
 public class Graphics : Object, DirectGraphics
 {
-    [JavaIgnore] public GraphicsHandle Handle;
+    [JavaIgnore]
+    public GraphicsHandle Handle;
 
+    [JsonIgnore]
     private IGraphics Implementation => Toolkit.Images.ResolveGraphics(Handle);
 
-    [JavaIgnore] [JsonProperty] private uint _color;
-    [JavaIgnore] [JsonProperty] private FontStyle _style;
-    [JavaIgnore] [JsonProperty] private FontFace _face;
-    [JavaIgnore] [JsonProperty] private int _size;
-    [JavaIgnore] [JsonProperty] private int _tx;
-    [JavaIgnore] [JsonProperty] private int _ty;
+    [JavaIgnore]
+    [JsonProperty]
+    private uint _color;
 
-    [JavaType(typeof(Font))] public Reference Font;
+    [JavaIgnore]
+    [JsonProperty]
+    private FontStyle _style;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private FontFace _face;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _size;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _tx;
+
+    [JavaIgnore]
+    [JsonProperty]
+    private int _ty;
+
+    [JavaType(typeof(Font))]
+    public Reference Font;
 
     [InitMethod]
     public override void Init()
@@ -102,6 +122,7 @@ public class Graphics : Object, DirectGraphics
     }
 
     public int getTranslateX() => _tx;
+
     public int getTranslateY() => _ty;
 
     #endregion
@@ -119,8 +140,11 @@ public class Graphics : Object, DirectGraphics
     }
 
     public int getClipX() => Implementation.Clip.X - _tx;
+
     public int getClipY() => Implementation.Clip.Y - _ty;
+
     public int getClipWidth() => Implementation.Clip.Width;
+
     public int getClipHeight() => Implementation.Clip.Height;
 
     #endregion
@@ -170,83 +194,75 @@ public class Graphics : Object, DirectGraphics
 
     #region Text
 
-    public void drawString([String] Reference str, int x, int y, int a)
+    public void drawString(string text, int x, int y, GraphicsAnchor a)
     {
-        var text = Jvm.ResolveString(str);
-        Implementation.DrawString(text, x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Implementation.DrawString(text, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawSubstring([String] Reference str, int offset, int len, int x, int y, int a)
+    public void drawSubstring(string text, int offset, int len, int x, int y, GraphicsAnchor a)
     {
-        var text = Jvm.ResolveString(str);
-        Implementation.DrawString(text.Substring(offset, len), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face,
-            _style, _size);
+        var sub = text.AsSpan(offset, len);
+        Implementation.DrawString(sub, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawChar(char c, int x, int y, int a)
+    public void drawChar(char c, int x, int y, GraphicsAnchor a)
     {
-        Implementation.DrawString(new string(c, 1), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face, _style, _size);
+        Span<char> s = stackalloc char[1];
+        s[0] = c;
+        Implementation.DrawString(s, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
-    public void drawChars([JavaType("[C")] Reference data, int offset, int length, int x, int y, int a)
+    public void drawChars(char[] data, int offset, int length, int x, int y, GraphicsAnchor a)
     {
-        char[] arr = Jvm.ResolveArray<char>(data);
-        Implementation.DrawString(new string(arr, offset, length), x + _tx, y + _ty, (GraphicsAnchor)a, _color, _face,
-            _style, _size);
+        var sub = data.AsSpan(offset, length);
+        Implementation.DrawString(sub, x + _tx, y + _ty, a, _color, _face, _style, _size);
     }
 
     #endregion
 
-    public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a)
+    public void drawImage(Image image, int x, int y, GraphicsAnchor a)
     {
-        var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, a);
     }
 
-    public void drawImage([JavaType(typeof(Image))] Reference image, int x, int y, int a, int tr)
+    public void drawImage(Image image, int x, int y, GraphicsAnchor a, ImageManipulation tr)
     {
-        var res = Jvm.Resolve<Image>(image);
-        Implementation.DrawImage(res.Handle, x + _tx, y + _ty, (ImageManipulation)tr, (GraphicsAnchor)a);
+        Implementation.DrawImage(image.Handle, x + _tx, y + _ty, tr, a);
     }
 
-    public void drawRegion([JavaType(typeof(Image))] Reference image, int x_src, int y_src, int width, int height,
-        int transform, int x_dest, int y_dest, int anchor)
+    public void drawRegion(Image image, int x_src, int y_src, int width, int height,
+        SpriteTransform transform, int x_dest, int y_dest, GraphicsAnchor anchor)
     {
-        var res = Jvm.Resolve<Image>(image);
-        var t = (SpriteTransform)transform;
-        var a = (GraphicsAnchor)anchor;
-        Implementation.DrawImage(res.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
+        var t = transform;
+        var a = anchor;
+        Implementation.DrawImage(image.Handle, x_src, y_src, x_dest + _tx, y_dest + _ty, width, height, t, a);
     }
 
-    public void drawRGB([JavaType("[I")] Reference rgbData, int offset, int scanlength, int x, int y, int width,
+    public void drawRGB(int[] rgbData, int offset, int scanlength, int x, int y, int width,
         int height, bool processAlpha)
     {
-        var buf = Jvm.ResolveArray<int>(rgbData);
-        Implementation.DrawARGB32(buf, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height);
+        Implementation.DrawARGB32(rgbData, processAlpha, offset, scanlength, x + _tx, y + _ty, width, height, default);
     }
 
-    public void fillPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
-        int argb)
+    public void fillPolygon(int[] x, int xFrom, int[] y, int yFrom, int count, int argb)
     {
-        var xm = Jvm.ResolveArray<int>(x).AsSpan(xFrom, count);
-        var ym = Jvm.ResolveArray<int>(y).AsSpan(yFrom, count);
+        var xm = x.AsSpan(xFrom, count);
+        var ym = y.AsSpan(yFrom, count);
         Implementation.FillPolygon(xm, ym, (uint)argb);
     }
 
-    public void drawPolygon([JavaType("[I")] Reference x, int xFrom, [JavaType("[I")] Reference y, int yFrom, int count,
-        int argb)
+    public void drawPolygon(int[] x, int xFrom, int[] y, int yFrom, int count, int argb)
     {
-        var xm = Jvm.ResolveArray<int>(x).AsSpan(xFrom, count);
-        var ym = Jvm.ResolveArray<int>(y).AsSpan(yFrom, count);
+        var xm = x.AsSpan(xFrom, count);
+        var ym = y.AsSpan(yFrom, count);
         Implementation.DrawPolygon(xm, ym, (uint)argb);
     }
 
     public int getNativePixelFormat() => DirectGraphics.TYPE_INT_8888_ARGB;
 
-    public void drawPixels([JavaType("[S")] Reference pixels, bool transparency, int offset, int scanlength,
+    public void drawPixels(short[] pixels, bool transparency, int offset, int scanlength,
         int x, int y, int width, int height, int manipulation, int format)
     {
-        var buf = Jvm.ResolveArray<short>(pixels);
         UShortPixelType f = format switch
         {
             DirectGraphics.TYPE_USHORT_565_RGB => UShortPixelType.Argb0565,
@@ -255,8 +271,15 @@ public class Graphics : Object, DirectGraphics
             _ => throwUShortFormat()
         };
 
-        Implementation.DrawARGB16(buf, f, transparency, offset, scanlength, x, y, width, height,
+        Implementation.DrawARGB16(pixels, f, transparency, offset, scanlength, x, y, width, height,
             (ImageManipulation)manipulation);
+    }
+
+    public void drawPixels(int[] pixels, bool transparency, int offset, int scanlength, int x, int y, int width, int height,
+        ImageManipulation manipulation, int format)
+    {
+        transparency = transparency && format != DirectGraphics.TYPE_INT_888_RGB;
+        Implementation.DrawARGB32(pixels, transparency, offset, scanlength, x, y, width, height, manipulation);
     }
 
     private static UShortPixelType throwUShortFormat()

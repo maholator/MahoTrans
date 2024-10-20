@@ -1,14 +1,13 @@
 // Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using MahoTrans.Native;
+using MahoTrans;
 
 namespace javax.microedition.lcdui;
 
-[JavaInterface]
-public interface Choice
+public interface Choice : IJavaObject
 {
-    int SelectedIndex { get; set; }
-    bool[] SelectedIndixes { get; set; }
-    int ItemsCount { get; }
+    public const int TEXT_WRAP_DEFAULT = 0;
+    public const int TEXT_WRAP_OFF = 2;
+    public const int TEXT_WRAP_ON = 1;
 }

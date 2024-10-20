@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using java.lang;
@@ -13,7 +13,8 @@ namespace java.util;
 
 public class Vector : Object
 {
-    [JavaIgnore] public List<Reference> List = null!;
+    [JavaIgnore]
+    public List<Reference> List = null!;
 
     public override void AnnounceHiddenReferences(Queue<Reference> queue)
     {
@@ -57,7 +58,7 @@ public class Vector : Object
     [return: JavaType(typeof(Enumeration))]
     public Reference elements()
     {
-        var e = Jvm.AllocateObject<ArrayEnumerator>();
+        var e = Jvm.Allocate<ArrayEnumerator>();
         e.Value = List.ToArray();
         return e.This;
     }

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
@@ -23,11 +23,16 @@ public class Float : Object
     [InitMethod]
     public void Init(double v) => Value = (float)v;
 
-    public sbyte byteValue() => (sbyte) Value;
-    public short shortValue() => (short) Value;
-    public long intValue() => (int) Value;
-    public long longValue() => (long) Value;
+    public sbyte byteValue() => (sbyte)Value;
+
+    public short shortValue() => (short)Value;
+
+    public long intValue() => (int)Value;
+
+    public long longValue() => (long)Value;
+
     public double doubleValue() => Value;
+
     public float floatValue() => Value;
 
     public static int floatToIntBits(float v) => BitConverter.SingleToInt32Bits(v);
@@ -77,7 +82,7 @@ public class Float : Object
     [return: JavaType(typeof(Float))]
     public Reference valueOf([String] Reference str)
     {
-        var i = Jvm.AllocateObject<Float>();
+        var i = Jvm.Allocate<Float>();
         i.Init(parseFloat(str));
         return i.This;
     }

@@ -1,4 +1,4 @@
-// Copyright (c) Fyodor Ryzhov. Licensed under the MIT Licence.
+// Copyright (c) Fyodor Ryzhov / Arman Jussupgaliyev. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using MahoTrans.Runtime.Types;
@@ -15,7 +15,8 @@ public class JarPackage
     public readonly Dictionary<string, byte[]> Resources;
     public readonly Dictionary<string, string> Manifest;
 
-    public JarPackage(JavaClass[] classes, Dictionary<string, byte[]> resources, Dictionary<string, string> manifest, string packageSHA1)
+    public JarPackage(JavaClass[] classes, Dictionary<string, byte[]> resources, Dictionary<string, string> manifest,
+        string packageSHA1)
     {
         Classes = classes;
         Resources = resources;
