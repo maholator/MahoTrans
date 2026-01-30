@@ -53,7 +53,7 @@ public class Layer : Object
 
     public bool isVisible() => Visible;
 
-    public void paint(Reference g)
+    public virtual void paint([JavaType(typeof(Graphics))] Reference r)
     {
         throw new AbstractCall();
     }

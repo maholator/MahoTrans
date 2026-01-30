@@ -37,6 +37,7 @@ public class TiledLayer : Layer
     [InitMethod]
     public void Init(int columns, int rows, [JavaType(typeof(Image))] Reference r, int tileWidth, int tileHeight)
     {
+        Visible = true;
         Image image = Jvm.Resolve<Image>(r);
         if (image.getWidth() % tileWidth != 0 || image.getHeight() % tileHeight != 0)
             Jvm.Throw<IllegalArgumentException>();
