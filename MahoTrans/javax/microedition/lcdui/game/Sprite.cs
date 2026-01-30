@@ -70,7 +70,7 @@ public class Sprite : Layer
         Init(w, h);
         if (w < 1 || h < 1 || image.getWidth() % w != 0 || image.getHeight() % h != 0)
             Jvm.Throw<IllegalArgumentException>();
-        SetImage(image, image.getWidth(), image.getHeight(), false);
+        SetImage(image, w, h, false);
         InitCollision();
         setTransformInternal(0);
     }
